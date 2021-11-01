@@ -8,10 +8,4 @@ export default {
     getRecentItems: function (token, limit = 50) {
         return fetch('/api/user/' + token + '/recent_items/' + limit);
     },
-    getReviewHeatMap: function (token) {
-        return fetch('/user/review_heatmap');
-    },
-    test: function (token) {
-        return fetch('/api/todos/1');
-    }
 };

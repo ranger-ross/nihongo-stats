@@ -2,7 +2,7 @@
 function AppHeader() {
     return (
         <div>
-            Header
+            Nihongo Stats
         </div>
     );
 }

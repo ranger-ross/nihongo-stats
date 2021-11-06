@@ -1,10 +1,14 @@
+import { Grid, IconButton, Menu, MenuItem } from "@material-ui/core";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import { useEffect } from "react";
+import MoreIcon from '@mui/icons-material/MoreVert';
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router";
+import { bunproAppName, wanikaniAppName } from '../Constants.js';
 import { useGlobalState } from "../GlobalState";
 import { RoutePaths } from '../Routes';
+import { useWanikaniApiKey } from "../wanikani/stores/WanikaniApiKeyStore.js";
 import AppSelector from "./AppSelector";
-import { wanikaniAppName, bunproAppName } from '../Constants.js'
+
 
 const useStyles = makeStyles({
     container: {
@@ -14,14 +18,46 @@ const useStyles = makeStyles({
     selectorContainer: {
         width: '120px',
         marginLeft: '5px',
+    },
+    menuContainer: {
+        textAlign: 'right'
     }
 });
+
+
+function WanikaniOptionMenu() {
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+    const { setApiKey } = useWanikaniApiKey();
+
+    const handleLogout = () => {
+        setApiKey(null);
+    };
+    return (
+        <>
+            <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
+                <MoreIcon />
+            </IconButton>
+
+            <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={() => setAnchorEl(null)}
+            >
+                <MenuItem onClick={handleLogout}>
+                    Logout
+                </MenuItem>
+            </Menu>
+        </>
+    );
+}
 
 
 function AppNav() {
     const { selectedApp, setSelectedApp } = useGlobalState();
     const navigate = useNavigate();
     const classes = useStyles();
+    const { apiKey } = useWanikaniApiKey();
 
     useEffect(() => {
         switch (selectedApp) {
@@ -35,11 +71,16 @@ function AppNav() {
     }, [selectedApp])
 
     return (
-        <div className={classes.container}>
-            <div className={classes.selectorContainer}>
+        <Grid container className={classes.container} alignItems={'center'}>
+            <Grid item className={classes.selectorContainer}>
                 <AppSelector selectedApp={selectedApp} setSelectedApp={setSelectedApp} />
-            </div>
-        </div>
+            </Grid>
+            <Grid item xs={10} />
+            <Grid item xs={1} className={classes.menuContainer}>
+                {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniOptionMenu />) : null}
+            </Grid>
+        </Grid>
+
     );
 }
 

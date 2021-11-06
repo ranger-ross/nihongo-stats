@@ -2,19 +2,20 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 
 const useStyles = makeStyles({
     container: {
-
+        textAlign: 'center',
+        marginTop: '15vh'
     }
 });
 
 
-function BunPro() {
+function BunProDashboard() {
     const classes = useStyles();
 
     return (
         <div className={classes.container}>
-           BunPro coming soon
+           BunPro coming soon(ish)
         </div>
     );
 }
 
-export default BunPro;
+export default BunProDashboard;

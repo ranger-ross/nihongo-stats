@@ -1,5 +1,8 @@
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { Chart, LineSeries, SplineSeries } from '@devexpress/dx-react-chart-material-ui';
+import { useWanikaniApiKey } from "./stores/WanikaniApiKeyStore";
+import { Navigate } from "react-router";
+import { RoutePaths } from "../Routes";
 
 const useStyles = makeStyles({
     container: {}
@@ -16,9 +19,13 @@ const generateData = (start, end, step) => {
 
 function WanikaniDashboard() {
     const classes = useStyles();
+    const { apiKey } = useWanikaniApiKey();
 
     return (
         <div className={classes.container}>
+
+            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : null}
+
             wanikani dashboard
 
             <Chart

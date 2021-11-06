@@ -3,6 +3,9 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import { useState } from "react";
 import { useWanikaniApiKey } from "./stores/WanikaniApiKeyStore";
 import WanikaniApiService from "./service/WanikaniApiService";
+import { useNavigate } from "react-router";
+import { RoutePaths } from "../Routes";
+
 
 const useStyles = makeStyles({
     container: {
@@ -19,6 +22,7 @@ const useStyles = makeStyles({
 
 function EnterWanikaniApiKeyPage() {
     const classes = useStyles();
+    const navigate = useNavigate();
     const { setApiKey } = useWanikaniApiKey();
     const [textfieldValue, setTextfieldValue] = useState('');
 
@@ -35,6 +39,7 @@ function EnterWanikaniApiKeyPage() {
             .then(user => {
                 console.log(user)
                 setApiKey(key);
+                navigate(RoutePaths.wanikaniDashboard);
                 // TODO: Cache user
             })
             .catch(console.error);

@@ -1,17 +1,21 @@
 import React from "react";
 import { StylesProvider } from "@material-ui/styles";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
-import {ThemeProvider as MuiThemeProvider} from "@material-ui/core/styles";
+import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import { CssBaseline } from "@material-ui/core";
 import { ThemeProvider } from "styled-components";
+import Wanikani from './wanikani/Wanikani'
+import BunPro from './bunpro/BunPro'
 import AppNav from './nav/AppNav'
 import AppHeader from './header/AppHeader'
-import { Button, Typography } from "@material-ui/core";
-import {createAppTheme} from './Theme'
+import { wanikaniAppName, bunproAppName } from './Constants.js'
+import { createAppTheme } from './Theme'
+import { useGlobalState } from "./GlobalState";
 
 function App() {
-  var darkMode = true,
-    theme = React.useMemo(() => createAppTheme({ darkMode }), [darkMode]);
+  const darkMode = true;
+  const theme = React.useMemo(() => createAppTheme({ darkMode }), [darkMode]);
+
+  const { selectedApp, setSelectedApp } = useGlobalState();
 
   return (
     <StylesProvider injectFirst>
@@ -22,6 +26,11 @@ function App() {
             <AppHeader />
             <AppNav />
 
+            {selectedApp == wanikaniAppName ? (
+              <Wanikani />
+            ) : selectedApp == bunproAppName ? (
+              <BunPro />
+            ) : null}
 
           </div>
         </ThemeProvider>

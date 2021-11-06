@@ -9,7 +9,8 @@ const useStyles = makeStyles({
         boxShadow: '0 2px 4px rgb(0 0 0 / 50%)',
     },
     selectorContainer: {
-        width: '120px'
+        width: '120px',
+        marginLeft: '5px',
     }
 });
 

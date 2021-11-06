@@ -7,7 +7,7 @@ function AppSelector({ selectedApp, setSelectedApp }) {
             <Select
                 value={selectedApp}
                 label="Selected App"
-                onChange={setSelectedApp}
+                onChange={e => setSelectedApp(e.target.value)}
             >
                 <MenuItem value={'wanikani'}>Wanikani</MenuItem>
                 <MenuItem value={'bunpro'}>BunPro</MenuItem>

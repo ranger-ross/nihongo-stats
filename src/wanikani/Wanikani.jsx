@@ -1,4 +1,6 @@
 import makeStyles from "@material-ui/core/styles/makeStyles";
+import EnterWanikaniApiKeyPage from "./EnterWanikaniApiKeyPage";
+import { useWanikaniApiKey } from "./service/WanikaniApiKeyService";
 
 const useStyles = makeStyles({
     container: {}
@@ -8,10 +10,20 @@ const useStyles = makeStyles({
 function Wanikani() {
     const classes = useStyles();
 
+    const { apiKey } = useWanikaniApiKey();
+
     return (
         <div className={classes.container}>
-           wanikani
-           
+
+            {!apiKey ? (
+                <EnterWanikaniApiKeyPage />
+            ) : (
+                <div>
+                   wanikani {apiKey}
+                </div>
+            )}
+
+
         </div>
     );
 }

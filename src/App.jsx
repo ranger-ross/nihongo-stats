@@ -15,7 +15,7 @@ function App() {
   const darkMode = true;
   const theme = React.useMemo(() => createAppTheme({ darkMode }), [darkMode]);
 
-  const { selectedApp, setSelectedApp } = useGlobalState();
+  const { selectedApp } = useGlobalState();
 
   return (
     <StylesProvider injectFirst>

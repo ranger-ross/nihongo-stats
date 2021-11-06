@@ -56,6 +56,7 @@ function EnterWanikaniApiKeyPage() {
             <Grid item xs={12} container alignItems="center" justifyContent="center" spacing={2}>
                 <Grid item>
                     <TextField label="Api Key"
+                        variant={'outlined'}
                         value={textfieldValue}
                         onChange={e => setTextfieldValue(e.target.value)}
                     />

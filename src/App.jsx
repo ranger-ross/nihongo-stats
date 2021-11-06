@@ -22,11 +22,7 @@ function App() {
             <AppHeader />
             <AppNav />
 
-            <Typography variant={'body1'}>
-              Test meout
-            </Typography>
 
-            <Button variant="contained" color={'primary'}>Hello World</Button>
           </div>
         </ThemeProvider>
       </MuiThemeProvider>

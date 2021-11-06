@@ -1,6 +1,6 @@
 import create from 'zustand'
 
 export const useGlobalState = create(set => ({
-  selectedApp: null,
+  selectedApp: 'wanikani',
   setSelectedApp: (app) => set(() => ({ selectedApp: app})),
 }));

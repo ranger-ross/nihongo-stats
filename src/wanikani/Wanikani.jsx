@@ -1,6 +1,6 @@
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import EnterWanikaniApiKeyPage from "./EnterWanikaniApiKeyPage";
-import { useWanikaniApiKey } from "./service/WanikaniApiKeyService";
+import { useWanikaniApiKey } from "./stores/WanikaniApiKeyStore";
 
 const useStyles = makeStyles({
     container: {}

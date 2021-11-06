@@ -1,10 +1,14 @@
 import create from 'zustand'
-import LocalStorageService from './service/LocalStorageService'
+
+const cacheService = {
+  saveSelectedApp: app => localStorage.setItem('selectedApp', app),
+  loadSelectedApp: () => localStorage.getItem('selectedApp'),
+};
 
 export const useGlobalState = create(set => ({
-  selectedApp: LocalStorageService.loadSelectedApp() || 'wanikani',
+  selectedApp: cacheService.loadSelectedApp() || 'wanikani',
   setSelectedApp: (app) => set(() => {
-    LocalStorageService.saveSelectedApp(app);
+    cacheService.saveSelectedApp(app);
     return { selectedApp: app };
   }),
 }));

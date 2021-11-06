@@ -1,8 +1,8 @@
 import { Button, Grid, Link, TextField, Typography } from "@material-ui/core";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { useState } from "react";
-import { useWanikaniApiKey } from "./service/WanikaniApiKeyService";
-import WanikaniApiService from "../service/WanikaniApiService";
+import { useWanikaniApiKey } from "./stores/WanikaniApiKeyStore";
+import WanikaniApiService from "./service/WanikaniApiService";
 
 const useStyles = makeStyles({
     container: {

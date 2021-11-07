@@ -9,7 +9,7 @@ const useStyles = makeStyles({
     container: {}
 });
 
-function WanikaniDashboard() {
+function WanikaniHistory() {
     const classes = useStyles();
     const { apiKey } = useWanikaniApiKey();
 
@@ -18,9 +18,12 @@ function WanikaniDashboard() {
 
             {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : null}
 
-            dashboard
+            <Card variant={'outlined'} style={{margin: '15px'}}>
+                <WanikaniLevelProgessChart />
+            </Card>
+
         </div>
     );
 }
 
-export default WanikaniDashboard;
+export default WanikaniHistory;

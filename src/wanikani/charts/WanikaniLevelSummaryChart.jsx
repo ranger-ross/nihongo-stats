@@ -1,8 +1,8 @@
 import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { Box, Card, CardContent, Typography, Grid } from "@material-ui/core";
-import { millisToDays } from '../../util/DateUtils';
+import { Box, Card, CardContent, Typography, Grid, Tooltip } from "@material-ui/core";
+import { millisToDays, millisToHours } from '../../util/DateUtils';
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { Stack } from '@mui/material';
 
@@ -52,6 +52,50 @@ function FractionText({ top, bottom }) {
     );
 }
 
+function calculateHoursUntilLevelUp(radicals, kanji) {
+    const radicalsLeft = radicals.filter(s => !s.data['passed_at']);
+    const kanjiLeft = kanji.filter(s => !s.data['passed_at']);
+
+    let lowestRadicalSrsStage = 999;
+    for (const radical of radicalsLeft) {
+        if (lowestRadicalSrsStage > radical.data['srs_stage']) {
+            lowestRadicalSrsStage = radical.data['srs_stage'];
+        }
+    }
+
+    switch (lowestRadicalSrsStage) {
+        case 0:
+        case 1:
+            return 7 * 24;
+        case 2:
+            return (7 * 24) - 4;
+        case 3:
+            return (7 * 24) - 12;
+        case 4:
+            return (7 * 24) - 36;
+    }
+
+    let lowestKanjiSrsStage = 999;
+    for (const kanji of kanjiLeft) {
+        if (lowestKanjiSrsStage > kanji.data['srs_stage']) {
+            lowestKanjiSrsStage = kanji.data['srs_stage'];
+        }
+    }
+
+    switch (lowestKanjiSrsStage) {
+        case 0:
+        case 1:
+            return 84.0;
+        case 2:
+            return 84 - 4;
+        case 3:
+            return 84 - 12;
+        case 4:
+            return 84 - 36;
+    }
+    return 0;
+}
+
 async function getCurrentLevelProgressData(apiKey) {
     const userData = await WanikaniApiService.getUser(apiKey)
 
@@ -79,9 +123,14 @@ async function getCurrentLevelProgressData(apiKey) {
     const kanji = kanjiTotal.filter(s => !!s.data['passed_at']);
     const vocabularyTotal = assignments.data.filter(s => s.data['subject_type'] === 'vocabulary');
     const vocabulary = vocabularyTotal.filter(s => !!s.data['passed_at']);
+    const hoursLeft = calculateHoursUntilLevelUp(radicalsTotal, kanjiTotal);
+
     return {
         timeOnLevel: timeOnLevel,
-        timeLeft: 0, // TODO: calculate this
+        timeLeft: {
+            days: Math.floor(hoursLeft / 24),
+            hours: hoursLeft % 24,
+        },
         radicals: {
             passed: radicals.length,
             total: radicalsTotal.length,
@@ -112,24 +161,38 @@ function WanikaniLevelSummaryChart() {
         <Card className={classes.container}>
             <CardContent style={{ height: '100%' }}>
 
-                <Stack height={'100%'} >
+                <Stack height={'100%'}>
 
                     <Box sx={{ flexGrow: 1 }} className={classes.daysUntilLevelContainer} >
-                        <Typography variant={'h2'} style={{ textAlign: 'center' }}>
-                            {/* TODO: Calculator and format Time Left */}
-                            {progressData.timeLeft}
-                        </Typography>
-                        <Typography variant={'caption'} style={{ textAlign: 'center' }}>
-                            Days until level
-                        </Typography>
+                        <Tooltip title={
+                            <span>
+                                <p>Days: {progressData.timeLeft.days}</p>
+                                <p>Hours: {progressData.timeLeft.hours}</p>
+                                <p>This is estimated assuming you do all reviews as soon as they are avaiable with no wrong answers.</p>
+                            </span>
+                        } placement={'top'}>
+                            <Typography variant={'h2'} style={{ textAlign: 'center' }}>
+                                {progressData.timeLeft.days > 0 ? progressData.timeLeft.days : progressData.timeLeft.hours}
+                            </Typography>
+                        </Tooltip>
 
+                        <Typography variant={'caption'} style={{ textAlign: 'center' }}>
+                            {progressData.timeLeft.days > 0 ? 'Days until level' : 'Hours until level'}
+                        </Typography>
                     </Box>
 
                     <Grid item container alignItems={'center'}>
                         <Box style={{ textAlign: 'center' }}>
-                            <Typography variant={'body1'} style={{ fontWeight: 'bold' }}>
-                                {millisToDays(progressData.timeOnLevel)}
-                            </Typography>
+                            <Tooltip title={
+                                <span>
+                                    <p>Days: {millisToDays(progressData.timeOnLevel)}</p>
+                                    <p>Hours: {millisToHours(progressData.timeOnLevel) % 24}</p>
+                                </span>
+                            } placement={'top'}>
+                                <Typography variant={'body1'} style={{ fontWeight: 'bold' }}>
+                                    {millisToDays(progressData.timeOnLevel)}
+                                </Typography>
+                            </Tooltip>
                             <Typography variant={'caption'}>
                                 Days on level
                             </Typography>

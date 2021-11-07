@@ -3,6 +3,7 @@ import { useWanikaniApiKey } from "./stores/WanikaniApiKeyStore";
 import { Navigate } from "react-router";
 import { RoutePaths } from "../Routes";
 import WanikaniLevelProgessChart from "./charts/WanikaniLevelProgressChart";
+import { Card } from "@material-ui/core";
 
 const useStyles = makeStyles({
     container: {}
@@ -17,7 +18,9 @@ function WanikaniDashboard() {
 
             {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : null}
 
-            <WanikaniLevelProgessChart />
+            <Card variant={'outlined'} style={{margin: '15px'}}>
+                <WanikaniLevelProgessChart />
+            </Card>
 
         </div>
     );

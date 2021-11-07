@@ -8,7 +8,8 @@ import { useGlobalState } from "../GlobalState";
 import { RoutePaths } from '../Routes';
 import { useWanikaniApiKey } from "../wanikani/stores/WanikaniApiKeyStore.js";
 import AppSelector from "./AppSelector";
-
+import WanikaniNav from "./WanikaniNav.jsx";
+import WanikaniOptionMenu from "./WanikaniOptionMenu.jsx";
 
 const useStyles = makeStyles({
     container: {
@@ -23,35 +24,6 @@ const useStyles = makeStyles({
         textAlign: 'right'
     }
 });
-
-
-function WanikaniOptionMenu() {
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const open = Boolean(anchorEl);
-    const { setApiKey } = useWanikaniApiKey();
-
-    const handleLogout = () => {
-        setApiKey(null);
-    };
-    return (
-        <>
-            <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
-                <MoreIcon />
-            </IconButton>
-
-            <Menu
-                anchorEl={anchorEl}
-                open={open}
-                onClose={() => setAnchorEl(null)}
-            >
-                <MenuItem onClick={handleLogout}>
-                    Logout
-                </MenuItem>
-            </Menu>
-        </>
-    );
-}
-
 
 function AppNav() {
     const { selectedApp, setSelectedApp } = useGlobalState();
@@ -71,13 +43,15 @@ function AppNav() {
     }, [selectedApp])
 
     return (
-        <Grid container className={classes.container} alignItems={'center'}>
-            <Grid item className={classes.selectorContainer}>
+        <Grid container className={classes.container} alignItems={'flex-end'}>
+            <Grid item xs={1} className={classes.selectorContainer}>
                 <AppSelector selectedApp={selectedApp} setSelectedApp={setSelectedApp} />
             </Grid>
-            <Grid item xs={10} />
-            <Grid item xs={1} className={classes.menuContainer}>
-                {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniOptionMenu />) : null}
+            <Grid item style={{marginLeft: '10px'}}>
+                {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniNav />) : null}
+                {/* <div style={{textAlign: 'right'}}>
+                    {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniOptionMenu />) : null}
+                </div> */}
             </Grid>
         </Grid>
 

@@ -24,7 +24,6 @@ function WanikaniLevelProgessChart() {
 
     useEffect(() => {
         WanikaniApiService.getLevelProgress(apiKey)
-            .then(response => response.json())
             .then(data => {
                 const levelData = data.data
                     .map(level => level.data)

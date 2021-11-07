@@ -1,4 +1,7 @@
 import create from 'zustand'
+import InMemoryCache from './util/InMemoryCache'
+
+export const memoryCache = new InMemoryCache();
 
 const cacheService = {
   saveSelectedApp: app => localStorage.setItem('selectedApp', app),

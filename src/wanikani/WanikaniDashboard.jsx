@@ -2,23 +2,43 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import { useWanikaniApiKey } from "./stores/WanikaniApiKeyStore";
 import { Navigate } from "react-router";
 import { RoutePaths } from "../Routes";
-import { Card } from "@material-ui/core";
+import { Card, Grid } from "@material-ui/core";
 import WanikaniApiService from "./service/WanikaniApiService";
+import WanikaniLevelSummaryChart from "./charts/WanikaniLevelSummaryChart";
 
 const useStyles = makeStyles({
-    container: {}
+    container: {
+        margin: '10px'
+    }
 });
 
 function WanikaniDashboard() {
     const classes = useStyles();
     const { apiKey } = useWanikaniApiKey();
 
+    WanikaniApiService.getUser(apiKey)
+        .then(console.log);
+
     return (
         <div className={classes.container}>
 
             {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : null}
 
-            dashboard
+
+
+            <Grid container  >
+
+                <Grid item xs={12} sm={7} md={8} lg={9} xl={10}>
+                    dashboard
+                </Grid>
+
+
+                <Grid item xs={12} sm={5} md={4} lg={3} xl={2}>
+                    <WanikaniLevelSummaryChart />
+                </Grid>
+
+            </Grid>
+
         </div>
     );
 }

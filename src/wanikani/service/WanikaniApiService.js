@@ -26,6 +26,25 @@ export default {
     getReviews: (apiKey) => getFromMemoryCacheOrFetch('/v2/reviews', apiKey),
     getLevelProgress: (apiKey) => getFromMemoryCacheOrFetch('/v2/level_progressions', apiKey),
     getAssignmentsForLevel: (apiKey, level) => getFromMemoryCacheOrFetch('/v2/assignments?levels=' + level, apiKey),
+
+
+    getAllAssignments: async (apiKey) => {
+        if (memoryCache.includes('wanikani-all-assignments')) {
+            return memoryCache.get('wanikani-all-assignments');
+        }
+        const firstPage = await (await fetch(`${wanikaniApiUrl}/v2/assignments`, { headers: { ...authHeader(apiKey) }, })).json()
+        let data = firstPage.data;
+        let nextPage = firstPage.pages['next_url']
+
+        while (!!nextPage) {
+            const page = await (await fetch(nextPage, { headers: authHeader(apiKey) })).json();
+            data = data.concat(page.data);
+            nextPage = page.pages['next_url'];
+        }
+        memoryCache.put('wanikani-all-assignments', data);
+        return data;
+    },
+
     getSubjects: async (apiKey) => {
         if (memoryCache.includes('wanikani-all-subjects')) {
             return memoryCache.get('wanikani-all-subjects');

@@ -1,6 +1,5 @@
-import { Grid, IconButton, Menu, MenuItem } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import MoreIcon from '@mui/icons-material/MoreVert';
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { bunproAppName, wanikaniAppName } from '../Constants.js';
@@ -44,17 +43,18 @@ function AppNav() {
 
     return (
         <Grid container className={classes.container} alignItems={'flex-end'}>
-            <Grid item xs={1} className={classes.selectorContainer}>
+            <Box className={classes.selectorContainer}>
                 <AppSelector selectedApp={selectedApp} setSelectedApp={setSelectedApp} />
-            </Grid>
-            <Grid item style={{marginLeft: '10px'}}>
-                {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniNav />) : null}
-                {/* <div style={{textAlign: 'right'}}>
-                    {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniOptionMenu />) : null}
-                </div> */}
-            </Grid>
-        </Grid>
+            </Box>
 
+            <Box sx={{ flexGrow: 1 }}>
+                {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniNav />) : null}
+            </Box>
+
+            <Box className={classes.menuContainer}>
+                {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniOptionMenu />) : null}
+            </Box>
+        </Grid>
     );
 }
 

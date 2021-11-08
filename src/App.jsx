@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter } from "react-router-dom";
 import { StylesProvider } from "@material-ui/styles";
 import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
-import { CssBaseline } from "@material-ui/core";
+import { CssBaseline, Button } from "@material-ui/core";
 import { ThemeProvider } from "styled-components";
 import AppNav from './nav/AppNav'
 import AppHeader from './header/AppHeader'
@@ -25,8 +25,8 @@ function App() {
 
   return (
     <StylesProvider injectFirst>
-      <MuiThemeProvider {...{ theme }}>
-        <ThemeProvider {...{ theme }}>
+      <MuiThemeProvider theme={theme}>
+        <ThemeProvider theme={theme}>
           <CssBaseline />
           <BrowserRouter>
             <div className={classes.container}>

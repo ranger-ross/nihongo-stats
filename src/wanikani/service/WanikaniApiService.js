@@ -23,6 +23,7 @@ async function getFromMemoryCacheOrFetch(path, apiKey) {
 
 export default {
     getUser: async (apiKey) => getFromMemoryCacheOrFetch('/v2/user', apiKey),
+    getSummary: (apiKey) => getFromMemoryCacheOrFetch('/v2/summary', apiKey),
     getReviews: (apiKey) => getFromMemoryCacheOrFetch('/v2/reviews', apiKey),
     getLevelProgress: (apiKey) => getFromMemoryCacheOrFetch('/v2/level_progressions', apiKey),
     getAssignmentsForLevel: (apiKey, level) => getFromMemoryCacheOrFetch('/v2/assignments?levels=' + level, apiKey),

@@ -12,7 +12,7 @@ const vocabularyColor = '#a100f1';
 
 const useStyles = makeStyles({
     container: {
-        width: 'clamp(300px, 100%, 350px)',
+        width: '100%',
         aspectRatio: 1 / 1
     },
     daysUntilLevelContainer: {

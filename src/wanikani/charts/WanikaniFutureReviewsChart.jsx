@@ -2,17 +2,17 @@ import { Chart, ValueAxis, BarSeries, ArgumentAxis, Title, Tooltip } from '@deve
 import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { EventTracker } from "@devexpress/dx-react-chart";
-import { Card, CardContent } from "@material-ui/core";
+import { Animation, EventTracker } from "@devexpress/dx-react-chart";
+import { Card, CardContent, ButtonGroup, Button, Typography, Box } from "@material-ui/core";
 import { addDays, areDatesSameDay } from '../../util/DateUtils';
 
 
 function WanikaniFutureReviewsChart() {
-    const days = 14;
     const { apiKey } = useWanikaniApiKey();
     const [rawData, setRawData] = useState([]);
     const [chartData, setChartData] = useState([]);
     const [targetItem, setTargetItem] = useState();
+    const [days, setDays] = useState(14);
 
     useEffect(() => {
         WanikaniApiService.getAllAssignments(apiKey)
@@ -47,7 +47,7 @@ function WanikaniFutureReviewsChart() {
         }
 
         setChartData(daysData);
-    }, [rawData]);
+    }, [rawData, days]);
 
     function ReviewsToolTip({ targetItem }) {
         const { radicals, kanji, vocabulary } = chartData[targetItem.point];
@@ -65,20 +65,32 @@ function WanikaniFutureReviewsChart() {
     return (
         <Card>
             <CardContent>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Box />
+                    <Typography variant={'h5'}>
+                        Future Reviews
+                    </Typography>
+
+                    <ButtonGroup variant="outlined" color={'primary'} >
+                        <Button variant={days === 7 ? 'contained' : null} onClick={() => setDays(7)}>7</Button>
+                        <Button variant={days === 14 ? 'contained' : null} onClick={() => setDays(14)}>14</Button>
+                        <Button variant={days === 30 ? 'contained' : null} onClick={() => setDays(30)}>30</Button>
+                    </ButtonGroup>
+                </div>
+
                 <Chart data={chartData}>
                     <ValueAxis />
                     <ArgumentAxis />
-                    <Title text="Future Reviews" />
                     <BarSeries
                         valueField="reviews"
                         argumentField="label"
                     />
                     <EventTracker />
                     <Tooltip targetItem={targetItem}
-
                         onTargetItemChange={setTargetItem}
                         contentComponent={ReviewsToolTip}
                     />
+                    <Animation />
                 </Chart>
             </CardContent>
         </Card>

@@ -5,10 +5,11 @@ import { Box, Card, CardContent, Typography, Grid, Tooltip } from "@material-ui/
 import { millisToDays, millisToHours } from '../../util/DateUtils';
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { Stack } from '@mui/material';
+import { wanikaniColors } from "../../Constants";
 
-const racialColor = '#00a1f1';
-const kanjiColor = '#f100a1';
-const vocabularyColor = '#a100f1';
+const racialColor = wanikaniColors.blue;
+const kanjiColor = wanikaniColors.pink;
+const vocabularyColor = wanikaniColors.purple;
 
 const useStyles = makeStyles({
     container: {

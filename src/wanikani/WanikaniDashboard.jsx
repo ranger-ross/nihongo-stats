@@ -6,6 +6,7 @@ import { Grid } from "@material-ui/core";
 import WanikaniLevelSummaryChart from "./charts/WanikaniLevelSummaryChart";
 import WanikaniFutureReviewsChart from "./charts/WanikaniFutureReviewsChart";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
+import WanikaniActiveItemsChart from "./charts/WanikaniActiveItemsChart";
 
 const useStyles = makeStyles({
     container: {
@@ -37,6 +38,14 @@ function WanikaniDashboard() {
 
                 <Grid item xs={12} sm={7} md={8} lg={10} xl={10}>
                     <WanikaniFutureReviewsChart />
+                </Grid>
+
+                <Grid item xs={12} sm={5} md={4} lg={2} xl={2}>
+                    placeholder
+                </Grid>
+
+                <Grid item xs={12} sm={7} md={8} lg={10} xl={10}>
+                    <WanikaniActiveItemsChart />
                 </Grid>
 
             </Grid>

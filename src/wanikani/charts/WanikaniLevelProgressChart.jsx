@@ -28,14 +28,14 @@ function WanikaniLevelProgessChart() {
                 const levelData = data.data
                     .map(level => level.data)
                     .map(level => {
-                        const passedAt = new Date(level['passed_at']).getTime();
-                        const startedAt = new Date(level['started_at']).getTime();
+                        const passedAt = !!level['passed_at'] ? new Date(level['passed_at']).getTime() : Date.now();
+                        const startedAt = new Date(level['created_at']).getTime();
                         return {
                             level: level.level.toString(),
                             days: (passedAt - startedAt) / (86400000)
                         }
                     });
-                setLevelProgress(levelData.slice(0, levelData.length - 1))
+                setLevelProgress(levelData)
             })
     }, []);
 

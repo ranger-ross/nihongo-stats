@@ -1,7 +1,7 @@
 import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { Card, CardContent } from "@material-ui/core";
+import { Card, CardContent, Link, Tooltip, Typography } from "@material-ui/core";
 import { wanikaniColors } from "../../Constants";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 
@@ -45,7 +45,7 @@ const useStyles = makeStyles({
     }
 });
 
-function ItemTile({ text, type, isStarted, isAvailable }) {
+function ItemTile({ text, type, link, meaning, srsLevel, isStarted, isAvailable }) {
     const classes = useStyles();
     let cls = classes.lockedTile;
     if (isStarted) {
@@ -65,9 +65,22 @@ function ItemTile({ text, type, isStarted, isAvailable }) {
     }
 
     return (
-        <div className={cls}>
-            {text}
-        </div>
+        <Tooltip title={
+            <div>
+                <p>Meaning: {meaning}</p>
+                {!!srsLevel ? (<p>SRS Level: {srsLevel}</p>) : null}
+            </div>
+        } placement={'top'}>
+            <Link href={link}
+                underline="none"
+                target="_blank"
+                rel="noreferrer"
+            >
+                <div className={cls}>
+                    {text}
+                </div>
+            </Link>
+        </Tooltip>
     );
 }
 
@@ -129,41 +142,66 @@ function WanikaniActiveItemsChart() {
             .catch(console.error);
     }, []);
 
+    console.log(data);
     return (
         <Card>
             <CardContent>
-                Radicals
+                <Typography variant={'h5'}
+                    color={'textPrimary'}
+                    style={{ paddingBottom: '10px' }}
+                >
+                    Radicals
+                </Typography>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    {data.radicals.map(radical => (
-                        <ItemTile key={radical.subjectId}
-                            text={radical.characters}
-                            isStarted={radical['started_at']}
-                            isAvailable={radical.hasAssignment}
+                    {data.radicals.map(subject => (
+                        <ItemTile key={subject.subjectId}
+                            text={subject.characters}
+                            isStarted={subject['started_at']}
+                            isAvailable={subject.hasAssignment}
+                            link={subject['document_url']}
+                            meaning={subject.meanings.map(m => m.meaning).join(', ')}
+                            srsLevel={subject['srs_stage']}
                             type={'radical'}
                         />
                     ))}
                 </div>
 
-                Kanji
+                <Typography variant={'h5'}
+                    color={'textPrimary'}
+                    style={{ paddingBottom: '10px', paddingTop: '15px' }}
+                >
+                    Kanji
+                </Typography>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    {data.kanji.map(kanji => (
-                        <ItemTile key={kanji.subjectId}
-                            text={kanji.characters}
-                            isStarted={kanji['started_at']}
-                            isAvailable={kanji.hasAssignment}
+                    {data.kanji.map(subject => (
+                        <ItemTile key={subject.subjectId}
+                            text={subject.characters}
+                            isStarted={subject['started_at']}
+                            isAvailable={subject.hasAssignment}
+                            link={subject['document_url']}
+                            meaning={subject.meanings.map(m => m.meaning).join(', ')}
+                            srsLevel={subject['srs_stage']}
                             type={'kanji'}
                         />
                     ))}
 
                 </div>
 
-                Vocabulary
+                <Typography variant={'h5'}
+                    color={'textPrimary'}
+                    style={{ paddingBottom: '10px', paddingTop: '15px' }}
+                >
+                    Vocabulary
+                </Typography>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    {data.vocabulary.map(vocabulary => (
-                        <ItemTile key={vocabulary.subjectId}
-                            text={vocabulary.characters}
-                            isStarted={vocabulary['started_at']}
-                            isAvailable={vocabulary.hasAssignment}
+                    {data.vocabulary.map(subject => (
+                        <ItemTile key={subject.subjectId}
+                            text={subject.characters}
+                            isStarted={subject['started_at']}
+                            isAvailable={subject.hasAssignment}
+                            link={subject['document_url']}
+                            meaning={subject.meanings.map(m => m.meaning).join(', ')}
+                            srsLevel={subject['srs_stage']}
                             type={'vocabulary'}
                         />
                     ))}

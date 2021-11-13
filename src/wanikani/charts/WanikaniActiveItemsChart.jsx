@@ -1,29 +1,31 @@
-import { Chart, ValueAxis, BarSeries, ArgumentAxis, Title, Tooltip } from '@devexpress/dx-react-chart-material-ui';
 import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { Animation, EventTracker } from "@devexpress/dx-react-chart";
-import { Card, CardContent, ButtonGroup, Button, Typography, Box } from "@material-ui/core";
-import { addDays, areDatesSameDay } from '../../util/DateUtils';
+import { Card, CardContent } from "@material-ui/core";
 import { wanikaniColors } from "../../Constants";
 
 const racialColor = wanikaniColors.blue;
 const kanjiColor = wanikaniColors.pink;
 const vocabularyColor = wanikaniColors.purple;
 
-function ItemTile({ text, type }) {
-    let color;
-    switch (type) {
-        case 'radical':
-            color = racialColor;
-            break;
-        case 'kanji':
-            color = kanjiColor;
-            break;
-        case 'vocabulary':
-            color = vocabularyColor;
-            break;
+function ItemTile({ text, type, isStarted, isAvailable }) {
+    let color = 'darkgray';
+    if (isStarted) {
+        switch (type) {
+            case 'radical':
+                color = racialColor;
+                break;
+            case 'kanji':
+                color = kanjiColor;
+                break;
+            case 'vocabulary':
+                color = vocabularyColor;
+                break;
+        }
+    } else if (isAvailable) {
+        color = 'gray';
     }
+
     return (
         <div style={{ color: color, width: 'fit-content' }}>
             {text}
@@ -31,6 +33,49 @@ function ItemTile({ text, type }) {
     );
 }
 
+function createAssignmentMap(subjects) {
+    let map = {};
+
+    for (const subject of subjects) {
+        map[subject.data['subject_id']] = subject;
+    }
+
+    return map;
+}
+
+function combineAssignmentAndSubject(assignment, subject) {
+    return {
+        ...subject.data,
+        ...assignment?.data,
+        hasAssignment: !!assignment,
+        subjectId: subject.id,
+    };
+}
+
+async function fetchData(apiKey) {
+    const user = await WanikaniApiService.getUser(apiKey);
+    const currentLevel = user.data.level;
+    const subjects = (await WanikaniApiService.getSubjects(apiKey))
+        .filter(subject => subject.data.level === currentLevel);
+
+    let assignments = (await WanikaniApiService.getAssignmentsForLevel(apiKey, currentLevel)).data;
+    assignments = createAssignmentMap(assignments);
+
+    const radicals = subjects
+        .filter(subject => subject.object === 'radical')
+        .map(s => combineAssignmentAndSubject(assignments[s.id], s));
+    const kanji = subjects
+        .filter(subject => subject.object === 'kanji')
+        .map(s => combineAssignmentAndSubject(assignments[s.id], s));
+    const vocabulary = subjects
+        .filter(subject => subject.object === 'vocabulary')
+        .map(s => combineAssignmentAndSubject(assignments[s.id], s));
+    return {
+        radicals,
+        kanji,
+        vocabulary
+    };
+}
 
 function WanikaniActiveItemsChart() {
     const { apiKey } = useWanikaniApiKey();
@@ -41,23 +86,10 @@ function WanikaniActiveItemsChart() {
     })
 
     useEffect(() => {
-        WanikaniApiService.getUser(apiKey)
-            .then(async (user) => {
-                const currentLevel = user.data.level;
-                const data = await WanikaniApiService.getSubjects(apiKey);
-                const items = data.filter(subject => subject.data.level === currentLevel)
-
-                const radicals = items.filter(subject => subject.object === 'radical')
-                const kanji = items.filter(subject => subject.object === 'kanji')
-                const vocabulary = items.filter(subject => subject.object === 'vocabulary')
-                setData({
-                    radicals,
-                    kanji,
-                    vocabulary
-                });
-            })
+        fetchData(apiKey)
+            .then(setData)
+            .catch(console.error);
     }, []);
-
 
     return (
         <Card>
@@ -65,8 +97,10 @@ function WanikaniActiveItemsChart() {
                 Radicals
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     {data.radicals.map(radical => (
-                        <ItemTile key={radical.id}
-                            text={radical.data.characters}
+                        <ItemTile key={radical.subjectId}
+                            text={radical.characters}
+                            isStarted={radical['started_at']}
+                            isAvailable={radical.hasAssignment}
                             type={'radical'}
                         />
                     ))}
@@ -75,8 +109,10 @@ function WanikaniActiveItemsChart() {
                 Kanji
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     {data.kanji.map(kanji => (
-                        <ItemTile key={kanji.id}
-                            text={kanji.data.characters}
+                        <ItemTile key={kanji.subjectId}
+                            text={kanji.characters}
+                            isStarted={kanji['started_at']}
+                            isAvailable={kanji.hasAssignment}
                             type={'kanji'}
                         />
                     ))}
@@ -86,8 +122,10 @@ function WanikaniActiveItemsChart() {
                 Vocabulary
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     {data.vocabulary.map(vocabulary => (
-                        <ItemTile key={vocabulary.id}
-                            text={vocabulary.data.characters}
+                        <ItemTile key={vocabulary.subjectId}
+                            text={vocabulary.characters}
+                            isStarted={vocabulary['started_at']}
+                            isAvailable={vocabulary.hasAssignment}
                             type={'vocabulary'}
                         />
                     ))}

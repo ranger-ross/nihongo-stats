@@ -97,6 +97,7 @@ function calculateHoursUntilLevelUp(radicals, kanji) {
     return 0;
 }
 
+// TODO: Fix query to get current total radicals, kanji, vocab. only getting unlocked 
 async function getCurrentLevelProgressData(apiKey) {
     const userData = await WanikaniApiService.getUser(apiKey)
 

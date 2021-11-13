@@ -3,31 +3,69 @@ import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { Card, CardContent } from "@material-ui/core";
 import { wanikaniColors } from "../../Constants";
+import makeStyles from "@material-ui/core/styles/makeStyles";
 
 const racialColor = wanikaniColors.blue;
 const kanjiColor = wanikaniColors.pink;
 const vocabularyColor = wanikaniColors.purple;
 
+const baseTile = {
+    width: 'fit-content',
+    textAlign: 'center',
+    padding: '5px',
+    paddingLeft: '10px',
+    paddingRight: '10px',
+    borderRadius: '5px',
+    boxShadow: 'rgba(0, 0, 0, 0.3) 5px 4px 10px',
+    border: 'solid #303030 1px',
+    color: 'white',
+
+}
+
+const useStyles = makeStyles({
+    lockedTile: {
+        ...baseTile,
+        background: '#464646',
+    },
+    unstartedTile: {
+        ...baseTile,
+        background: '#686868',
+    },
+    radicalTile: {
+        ...baseTile,
+        background: racialColor,
+    },
+    kanjiTile: {
+        ...baseTile,
+        background: kanjiColor,
+    },
+    vocabularyTile: {
+        ...baseTile,
+        background: vocabularyColor,
+    }
+});
+
 function ItemTile({ text, type, isStarted, isAvailable }) {
-    let color = 'darkgray';
+    const classes = useStyles();
+    let cls = classes.lockedTile;
     if (isStarted) {
         switch (type) {
             case 'radical':
-                color = racialColor;
+                cls = classes.radicalTile;
                 break;
             case 'kanji':
-                color = kanjiColor;
+                cls = classes.kanjiTile;
                 break;
             case 'vocabulary':
-                color = vocabularyColor;
+                cls = classes.vocabularyTile;
                 break;
         }
     } else if (isAvailable) {
-        color = 'gray';
+        cls = classes.unstartedTile;
     }
 
     return (
-        <div style={{ color: color, width: 'fit-content' }}>
+        <div className={cls}>
             {text}
         </div>
     );

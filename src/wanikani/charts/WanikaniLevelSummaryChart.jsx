@@ -129,6 +129,7 @@ async function getCurrentLevelProgressData(apiKey) {
     const hoursLeft = calculateHoursUntilLevelUp(radicalsTotal, kanjiTotal);
 
     return {
+        level: currentLevel,
         timeOnLevel: timeOnLevel,
         timeLeft: {
             days: Math.floor(hoursLeft / 24),
@@ -167,7 +168,7 @@ function WanikaniLevelSummaryChart() {
                 <Stack height={'100%'}>
 
                     <Box sx={{ flexGrow: 1 }} className={classes.daysUntilLevelContainer} >
-                        <Tooltip title={
+                        {/* <Tooltip title={
                             <span>
                                 <p>Days: {progressData.timeLeft.days}</p>
                                 <p>Hours: {progressData.timeLeft.hours}</p>
@@ -181,6 +182,13 @@ function WanikaniLevelSummaryChart() {
 
                         <Typography variant={'caption'} style={{ textAlign: 'center' }}>
                             {progressData.timeLeft.days > 0 ? 'Days until level' : 'Hours until level'}
+                        </Typography> */}
+
+                        <Typography variant={'h2'} style={{ textAlign: 'center' }}>
+                            {progressData.level}
+                        </Typography>
+                        <Typography variant={'caption'} style={{ textAlign: 'center' }}>
+                            Level
                         </Typography>
                     </Box>
 

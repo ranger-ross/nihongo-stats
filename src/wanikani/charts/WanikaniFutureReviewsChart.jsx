@@ -81,7 +81,7 @@ function WanikaniFutureReviewsChart() {
                         </ButtonGroup>
                     </div>
 
-                    <div style={{ height: '100%' }} ref={chartContainer}>
+                    <div style={{ flexGrow: '1' }} ref={chartContainer}>
                         <Chart data={chartData} height={chartContainer?.current?.clientHeight}>
                             <ValueAxis />
                             <ArgumentAxis />

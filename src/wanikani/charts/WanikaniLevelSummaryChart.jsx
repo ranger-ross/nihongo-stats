@@ -97,7 +97,6 @@ function calculateHoursUntilLevelUp(radicals, kanji) {
     return 0;
 }
 
-// TODO: Fix query to get current total radicals, kanji, vocab. only getting unlocked 
 async function getCurrentLevelProgressData(apiKey) {
     const userData = await WanikaniApiService.getUser(apiKey)
 
@@ -118,13 +117,15 @@ async function getCurrentLevelProgressData(apiKey) {
     const timeOnLevel = end.getTime() - start.getTime()
 
     const assignments = await WanikaniApiService.getAssignmentsForLevel(apiKey, currentLevel);
+    let subjects = await WanikaniApiService.getSubjects(apiKey, currentLevel);
+    subjects = subjects.filter(subject => subject.data.level === currentLevel);
 
-    const radicalsTotal = assignments.data.filter(s => s.data['subject_type'] === 'radical');
-    const radicals = radicalsTotal.filter(s => !!s.data['passed_at']);
-    const kanjiTotal = assignments.data.filter(s => s.data['subject_type'] === 'kanji');
-    const kanji = kanjiTotal.filter(s => !!s.data['passed_at']);
-    const vocabularyTotal = assignments.data.filter(s => s.data['subject_type'] === 'vocabulary');
-    const vocabulary = vocabularyTotal.filter(s => !!s.data['passed_at']);
+    const radicalsTotal = subjects.filter(s => s.object === 'radical');
+    const radicals = assignments.data.filter(s => s.data['subject_type'] === 'radical' && !!s.data['passed_at']);
+    const kanjiTotal = subjects.filter(s => s.object === 'kanji');
+    const kanji = assignments.data.filter(s => s.data['subject_type'] === 'kanji' && !!s.data['passed_at']);
+    const vocabularyTotal = subjects.filter(s => s.object === 'vocabulary');
+    const vocabulary = assignments.data.filter(s => s.data['subject_type'] === 'vocabulary' && !!s.data['passed_at']);
     const hoursLeft = calculateHoursUntilLevelUp(radicalsTotal, kanjiTotal);
 
     return {

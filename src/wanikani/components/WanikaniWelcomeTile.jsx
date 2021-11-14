@@ -41,7 +41,7 @@ function WanikaniWelcomeTile() {
                     Welcome {username}
                 </Typography>
 
-                <div style={{ display: 'flex', gap: '10px', marginTop: '10px', width: '250px' }}>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '10px', width: '260px' }}>
                     <WanikaniPinkButton variant={'contained'}
                         onClick={() => window.open("https://www.wanikani.com/lesson", "_blank")}>
                         Lessons: {lessons}

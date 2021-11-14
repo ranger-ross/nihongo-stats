@@ -4,6 +4,7 @@ import { Navigate } from "react-router";
 import { RoutePaths } from "../Routes";
 import WanikaniLevelProgessChart from "./charts/WanikaniLevelProgressChart";
 import { Card } from "@material-ui/core";
+import WanikaniTotalItemsHistoryChart from "./charts/WanikaniTotalItemsHistoryChart";
 
 const useStyles = makeStyles({
     container: {}
@@ -21,6 +22,11 @@ function WanikaniHistory() {
             <Card variant={'outlined'} style={{margin: '15px'}}>
                 <WanikaniLevelProgessChart />
             </Card>
+
+            <Card variant={'outlined'} style={{margin: '15px'}}>
+                <WanikaniTotalItemsHistoryChart />
+            </Card>
+
 
         </div>
     );

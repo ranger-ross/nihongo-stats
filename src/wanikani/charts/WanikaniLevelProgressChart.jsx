@@ -2,7 +2,7 @@ import { Chart, ValueAxis, BarSeries, ArgumentAxis, Title, Tooltip } from '@deve
 import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { EventTracker } from "@devexpress/dx-react-chart";
+import { EventTracker, Animation } from "@devexpress/dx-react-chart";
 
 function LevelToolTip({ text }) {
     const millis = parseFloat(text) * 86400000;
@@ -49,6 +49,7 @@ function WanikaniLevelProgessChart() {
                 argumentField="level"
             />
             <EventTracker />
+            <Animation />
             <Tooltip targetItem={targetItem}
                 onTargetItemChange={setTargetItem}
                 contentComponent={LevelToolTip}

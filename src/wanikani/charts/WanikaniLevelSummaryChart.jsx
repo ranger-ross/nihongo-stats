@@ -6,6 +6,8 @@ import { millisToDays, millisToHours } from '../../util/DateUtils';
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { Stack } from '@mui/material';
 import { wanikaniColors } from "../../Constants";
+import { Skeleton, CircularProgress } from '@mui/material'
+
 
 const racialColor = wanikaniColors.blue;
 const kanjiColor = wanikaniColors.pink;
@@ -25,6 +27,11 @@ const useStyles = makeStyles({
         marginLeft: '5px',
         marginRight: '5px',
         textAlign: 'center'
+    },
+    spinnerContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
     }
 });
 
@@ -126,15 +133,15 @@ async function getCurrentLevelProgressData(apiKey) {
     const kanji = assignments.data.filter(s => s.data['subject_type'] === 'kanji' && !!s.data['passed_at']);
     const vocabularyTotal = subjects.filter(s => s.object === 'vocabulary');
     const vocabulary = assignments.data.filter(s => s.data['subject_type'] === 'vocabulary' && !!s.data['passed_at']);
-    const hoursLeft = calculateHoursUntilLevelUp(radicalsTotal, kanjiTotal);
+    // const hoursLeft = calculateHoursUntilLevelUp(radicalsTotal, kanjiTotal);
 
     return {
         level: currentLevel,
         timeOnLevel: timeOnLevel,
-        timeLeft: {
-            days: Math.floor(hoursLeft / 24),
-            hours: hoursLeft % 24,
-        },
+        // timeLeft: {
+        //     days: Math.floor(hoursLeft / 24),
+        //     hours: hoursLeft % 24,
+        // },
         radicals: {
             passed: radicals.length,
             total: radicalsTotal.length,
@@ -155,10 +162,15 @@ function WanikaniLevelSummaryChart() {
     const classes = useStyles();
     const { apiKey } = useWanikaniApiKey();
     const [progressData, setProgressData] = useState(defaultData);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
+        setIsLoading(true);
+
         getCurrentLevelProgressData(apiKey)
             .then(data => setProgressData(data))
+            .catch(console.error)
+            .finally(() => setIsLoading(false));
     }, []);
 
     return (
@@ -166,96 +178,87 @@ function WanikaniLevelSummaryChart() {
             <CardContent style={{ height: '100%' }}>
 
                 <Stack height={'100%'}>
-
-                    <Box sx={{ flexGrow: 1 }} className={classes.daysUntilLevelContainer} >
-                        {/* <Tooltip title={
-                            <span>
-                                <p>Days: {progressData.timeLeft.days}</p>
-                                <p>Hours: {progressData.timeLeft.hours}</p>
-                                <p>This is estimated assuming you do all reviews as soon as they are avaiable with no wrong answers.</p>
-                            </span>
-                        } placement={'top'}>
-                            <Typography variant={'h2'} style={{ textAlign: 'center' }}>
-                                {progressData.timeLeft.days > 0 ? progressData.timeLeft.days : progressData.timeLeft.hours}
-                            </Typography>
-                        </Tooltip>
-
-                        <Typography variant={'caption'} style={{ textAlign: 'center' }}>
-                            {progressData.timeLeft.days > 0 ? 'Days until level' : 'Hours until level'}
-                        </Typography> */}
-
-                        <Typography variant={'h2'} style={{ textAlign: 'center' }}>
-                            {progressData.level}
-                        </Typography>
-                        <Typography variant={'caption'} style={{ textAlign: 'center' }}>
-                            Level
-                        </Typography>
-                    </Box>
-
-                    <Grid item container alignItems={'center'}>
-                        <Box style={{ textAlign: 'center' }}>
-                            <Tooltip title={
-                                <span>
-                                    <p>Days: {millisToDays(progressData.timeOnLevel)}</p>
-                                    <p>Hours: {millisToHours(progressData.timeOnLevel) % 24}</p>
-                                </span>
-                            } placement={'top'}>
-                                <Typography variant={'body1'} style={{ fontWeight: 'bold' }}>
-                                    {millisToDays(progressData.timeOnLevel)}
+                    {isLoading ? (
+                        <Box sx={{ flexGrow: 1 }} className={classes.spinnerContainer} >
+                            <CircularProgress />
+                        </Box>
+                    ) : (
+                        <>
+                            <Box sx={{ flexGrow: 1 }} className={classes.daysUntilLevelContainer} >
+                                <Typography variant={'h2'} style={{ textAlign: 'center' }}>
+                                    {progressData.level}
                                 </Typography>
-                            </Tooltip>
-                            <Typography variant={'caption'}>
-                                Days on level
-                            </Typography>
-                        </Box>
+                                <Typography variant={'caption'} style={{ textAlign: 'center' }}>
+                                    Level
+                                </Typography>
+                            </Box>
 
-                        <Box sx={{ flexGrow: 1 }} />
+                            <Grid item container alignItems={'center'}>
+                                <Box style={{ textAlign: 'center' }}>
+                                    <Tooltip title={
+                                        <span>
+                                            <p>Days: {millisToDays(progressData.timeOnLevel)}</p>
+                                            <p>Hours: {millisToHours(progressData.timeOnLevel) % 24}</p>
+                                        </span>
+                                    } placement={'top'}>
+                                        <Typography variant={'body1'} style={{ fontWeight: 'bold' }}>
+                                            {millisToDays(progressData.timeOnLevel)}
+                                        </Typography>
+                                    </Tooltip>
+                                    <Typography variant={'caption'}>
+                                        Days on level
+                                    </Typography>
+                                </Box>
 
-                        <Box className={classes.subjectsLabel}>
-                            <Typography variant={'body1'}>
-                                <FractionText top={progressData.radicals.passed}
-                                    bottom={progressData.radicals.total}
-                                />
-                            </Typography>
-                            <Typography variant={'caption'} style={{
-                                color: racialColor,
-                                textShadow: '2px 2px 5px #000000aa'
-                            }}>
-                                Radicals
-                            </Typography>
-                        </Box>
+                                <Box sx={{ flexGrow: 1 }} />
 
-                        <Box className={classes.subjectsLabel} >
-                            <Typography variant={'body1'}>
-                                <FractionText top={progressData.kanji.passed}
-                                    bottom={progressData.kanji.total}
-                                />
-                            </Typography>
-                            <Typography variant={'caption'} style={{
-                                color: kanjiColor,
-                                textShadow: '2px 2px 5px #000000aa'
-                            }}>
-                                Kanji
-                            </Typography>
-                        </Box>
+                                <Box className={classes.subjectsLabel}>
+                                    <Typography variant={'body1'}>
+                                        <FractionText top={progressData.radicals.passed}
+                                            bottom={progressData.radicals.total}
+                                        />
+                                    </Typography>
+                                    <Typography variant={'caption'} style={{
+                                        color: racialColor,
+                                        textShadow: '2px 2px 5px #000000aa'
+                                    }}>
+                                        Radicals
+                                    </Typography>
+                                </Box>
 
-                        <Box className={classes.subjectsLabel}>
-                            <Typography variant={'body1'}>
-                                <FractionText top={progressData.vocabulary.passed}
-                                    bottom={progressData.vocabulary.total}
-                                />
-                            </Typography>
-                            <Typography variant={'caption'} style={{
-                                color: vocabularyColor,
-                                textShadow: '2px 2px 5px #000000aa'
-                            }}>
-                                Vocabulary
-                            </Typography>
-                        </Box>
-                    </Grid>
+                                <Box className={classes.subjectsLabel} >
+                                    <Typography variant={'body1'}>
+                                        <FractionText top={progressData.kanji.passed}
+                                            bottom={progressData.kanji.total}
+                                        />
+                                    </Typography>
+                                    <Typography variant={'caption'} style={{
+                                        color: kanjiColor,
+                                        textShadow: '2px 2px 5px #000000aa'
+                                    }}>
+                                        Kanji
+                                    </Typography>
+                                </Box>
+
+                                <Box className={classes.subjectsLabel}>
+                                    <Typography variant={'body1'}>
+                                        <FractionText top={progressData.vocabulary.passed}
+                                            bottom={progressData.vocabulary.total}
+                                        />
+                                    </Typography>
+                                    <Typography variant={'caption'} style={{
+                                        color: vocabularyColor,
+                                        textShadow: '2px 2px 5px #000000aa'
+                                    }}>
+                                        Vocabulary
+                                    </Typography>
+                                </Box>
+                            </Grid>
+                        </>
+                    )}
                 </Stack>
-            </CardContent>
-        </Card>
+            </CardContent >
+        </Card >
     );
 }
 

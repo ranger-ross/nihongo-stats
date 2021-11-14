@@ -1,9 +1,10 @@
 import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { Card, CardContent, Link, Tooltip, Typography } from "@material-ui/core";
+import { Badge, Card, CardContent, Link, Tooltip, Typography } from "@material-ui/core";
 import { wanikaniColors } from "../../Constants";
 import makeStyles from "@material-ui/core/styles/makeStyles";
+import { Check } from "@mui/icons-material";
 
 const racialColor = wanikaniColors.blue;
 const kanjiColor = wanikaniColors.pink;
@@ -76,9 +77,18 @@ function ItemTile({ text, type, link, meaning, srsLevel, isStarted, isAvailable 
                 target="_blank"
                 rel="noreferrer"
             >
-                <div className={cls}>
-                    {text}
-                </div>
+                <Badge badgeContent={
+                    <>
+                        {srsLevel > 4 ? (
+                            <Check sx={{ fontSize: 15 }} style={{ color: 'lime' }} />
+                        ) : null}
+                    </>
+                }>
+                    <div className={cls}>
+                        {text}
+                    </div>
+                </Badge>
+
             </Link>
         </Tooltip>
     );

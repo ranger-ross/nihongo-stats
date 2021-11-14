@@ -77,17 +77,16 @@ function ItemTile({ text, type, link, meaning, srsLevel, isStarted, isAvailable 
                 target="_blank"
                 rel="noreferrer"
             >
-                <Badge badgeContent={
-                    <>
-                        {srsLevel > 4 ? (
-                            <Check sx={{ fontSize: 15 }} style={{ color: 'lime' }} />
-                        ) : null}
-                    </>
-                }>
-                    <div className={cls}>
-                        {text}
-                    </div>
-                </Badge>
+
+                {srsLevel > 4 ? (
+                    <Badge badgeContent={
+                        <Check sx={{ fontSize: 15 }} style={{ color: 'lime' }} />
+                    }>
+                        <div className={cls}>{text}</div>
+                    </Badge>
+                ) : (
+                    <div className={cls}>{text}</div>
+                )}
 
             </Link>
         </Tooltip>
@@ -152,6 +151,8 @@ function WanikaniActiveItemsChart() {
             .catch(console.error);
     }, []);
 
+    console.log('rendered!', data)
+
     return (
         <Card>
             <CardContent>
@@ -163,7 +164,7 @@ function WanikaniActiveItemsChart() {
                 </Typography>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     {data.radicals.map(subject => (
-                        <ItemTile key={subject.subjectId}
+                        <ItemTile key={subject.subjectId + '-radical'}
                             text={subject.characters}
                             isStarted={subject['started_at']}
                             isAvailable={subject.hasAssignment}
@@ -183,7 +184,7 @@ function WanikaniActiveItemsChart() {
                 </Typography>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     {data.kanji.map(subject => (
-                        <ItemTile key={subject.subjectId}
+                        <ItemTile key={subject.subjectId + '-kaji'}
                             text={subject.characters}
                             isStarted={subject['started_at']}
                             isAvailable={subject.hasAssignment}
@@ -204,7 +205,7 @@ function WanikaniActiveItemsChart() {
                 </Typography>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     {data.vocabulary.map(subject => (
-                        <ItemTile key={subject.subjectId}
+                        <ItemTile key={subject.subjectId + '-vocabulary'}
                             text={subject.characters}
                             isStarted={subject['started_at']}
                             isAvailable={subject.hasAssignment}

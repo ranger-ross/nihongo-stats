@@ -13,7 +13,6 @@ function WanikaniWelcomeTile() {
     useEffect(() => {
         WanikaniApiService.getUser(apiKey)
             .then(user => {
-                console.log(user);
                 setUsername(user.data.username);
             });
         WanikaniApiService.getSummary(apiKey)

@@ -1,9 +1,8 @@
 import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { Badge, Card, CardContent, Link, Tooltip, Typography } from "@material-ui/core";
+import { Card, CardContent, Tooltip, Typography } from "@material-ui/core";
 import { wanikaniColors } from "../../Constants";
-import makeStyles from "@material-ui/core/styles/makeStyles";
 
 function assignmentsToCounts(assignments) {
     return {
@@ -81,8 +80,6 @@ function WanikaniItemCountsChart() {
             .then(setData)
             .catch(console.error);
     }, []);
-
-    console.log(data);
 
     return (
         <Card>

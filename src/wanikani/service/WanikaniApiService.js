@@ -1,4 +1,4 @@
-import { memoryCache } from "../../GlobalState"
+import { memoryCache } from "../../GlobalState.js"
 
 const wanikaniApiUrl = 'https://api.wanikani.com'
 

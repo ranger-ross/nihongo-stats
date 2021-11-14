@@ -1,5 +1,5 @@
 import create from 'zustand'
-import InMemoryCache from './util/InMemoryCache'
+import InMemoryCache from './util/InMemoryCache.js'
 
 export const memoryCache = new InMemoryCache();
 

@@ -7,6 +7,7 @@ import WanikaniLevelSummaryChart from "./charts/WanikaniLevelSummaryChart";
 import WanikaniFutureReviewsChart from "./charts/WanikaniFutureReviewsChart";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
 import WanikaniActiveItemsChart from "./charts/WanikaniActiveItemsChart";
+import WanikaniItemCountsChart from "./charts/WanikaniItemCountsChart";
 
 const useStyles = makeStyles({
     container: {
@@ -33,6 +34,9 @@ function WanikaniDashboard() {
                         <div>
                             <WanikaniLevelSummaryChart />
                         </div>
+                        <div>
+                            <WanikaniItemCountsChart />
+                        </div>
                     </div>
                 </Grid>
 
@@ -40,11 +44,7 @@ function WanikaniDashboard() {
                     <WanikaniFutureReviewsChart />
                 </Grid>
 
-                <Grid item xs={12} sm={5} md={4} lg={2} xl={2}>
-                    placeholder
-                </Grid>
-
-                <Grid item xs={12} sm={7} md={8} lg={10} xl={10}>
+                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
                     <WanikaniActiveItemsChart />
                 </Grid>
 

@@ -152,7 +152,6 @@ function WanikaniActiveItemsChart() {
             .catch(console.error);
     }, []);
 
-    console.log(data);
     return (
         <Card>
             <CardContent>

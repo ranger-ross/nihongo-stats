@@ -14,8 +14,6 @@ function WanikaniFutureReviewsChart() {
     const [targetItem, setTargetItem] = useState();
     const [days, setDays] = useState(14);
 
-    const chartContainer = useRef();
-
     useEffect(() => {
         WanikaniApiService.getAllAssignments(apiKey)
             .then(data => {
@@ -81,8 +79,8 @@ function WanikaniFutureReviewsChart() {
                         </ButtonGroup>
                     </div>
 
-                    <div style={{ flexGrow: '1' }} ref={chartContainer}>
-                        <Chart data={chartData} height={chartContainer?.current?.clientHeight}>
+                    <div style={{ flexGrow: '1' }}>
+                        <Chart data={chartData}>
                             <ValueAxis />
                             <ArgumentAxis />
                             <BarSeries

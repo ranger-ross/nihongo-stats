@@ -14,7 +14,7 @@ const vocabularyColor = wanikaniColors.purple;
 const useStyles = makeStyles({
     container: {
         width: '100%',
-        aspectRatio: 1 / 1
+        aspectRatio: 1 / 0.9
     },
     daysUntilLevelContainer: {
         display: 'flex',

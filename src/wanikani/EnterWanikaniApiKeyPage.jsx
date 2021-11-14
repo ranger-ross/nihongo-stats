@@ -40,7 +40,6 @@ function EnterWanikaniApiKeyPage() {
                 console.log(user)
                 setApiKey(key);
                 navigate(RoutePaths.wanikaniDashboard);
-                // TODO: Cache user
             })
             .catch(console.error);
     };

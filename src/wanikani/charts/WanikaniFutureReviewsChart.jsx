@@ -63,35 +63,37 @@ function WanikaniFutureReviewsChart() {
     }
 
     return (
-        <Card>
-            <CardContent>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Box />
-                    <Typography variant={'h5'}>
-                        Future Reviews
-                    </Typography>
+        <Card style={{ height: '100%' }}>
+            <CardContent style={{ height: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Box />
+                        <Typography variant={'h5'}>
+                            Future Reviews
+                        </Typography>
 
-                    <ButtonGroup variant="outlined" color={'primary'} >
-                        <Button variant={days === 7 ? 'contained' : null} onClick={() => setDays(7)}>7</Button>
-                        <Button variant={days === 14 ? 'contained' : null} onClick={() => setDays(14)}>14</Button>
-                        <Button variant={days === 30 ? 'contained' : null} onClick={() => setDays(30)}>30</Button>
-                    </ButtonGroup>
+                        <ButtonGroup variant="outlined" color={'primary'} >
+                            <Button variant={days === 7 ? 'contained' : null} onClick={() => setDays(7)}>7</Button>
+                            <Button variant={days === 14 ? 'contained' : null} onClick={() => setDays(14)}>14</Button>
+                            <Button variant={days === 30 ? 'contained' : null} onClick={() => setDays(30)}>30</Button>
+                        </ButtonGroup>
+                    </div>
+
+                    <Chart data={chartData}>
+                        <ValueAxis />
+                        <ArgumentAxis />
+                        <BarSeries
+                            valueField="reviews"
+                            argumentField="label"
+                        />
+                        <EventTracker />
+                        <Tooltip targetItem={targetItem}
+                            onTargetItemChange={setTargetItem}
+                            contentComponent={ReviewsToolTip}
+                        />
+                        <Animation />
+                    </Chart>
                 </div>
-
-                <Chart data={chartData}>
-                    <ValueAxis />
-                    <ArgumentAxis />
-                    <BarSeries
-                        valueField="reviews"
-                        argumentField="label"
-                    />
-                    <EventTracker />
-                    <Tooltip targetItem={targetItem}
-                        onTargetItemChange={setTargetItem}
-                        contentComponent={ReviewsToolTip}
-                    />
-                    <Animation />
-                </Chart>
             </CardContent>
         </Card>
     );

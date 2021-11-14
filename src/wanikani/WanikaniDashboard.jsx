@@ -11,7 +11,10 @@ import WanikaniItemCountsChart from "./charts/WanikaniItemCountsChart";
 
 const useStyles = makeStyles({
     container: {
-        margin: '10px'
+        display: 'flex',
+        flexDirection: 'column',
+        margin: '10px',
+        gap: '10px',
     }
 });
 
@@ -20,36 +23,30 @@ function WanikaniDashboard() {
     const { apiKey } = useWanikaniApiKey();
 
     return (
-        <div className={classes.container}>
-
+        <div>
             {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : null}
 
-            <Grid container spacing={2}>
+            <div className={classes.container}>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'stretch' }}>
 
-                <Grid item xs={12} sm={5} md={4} lg={2} xl={2}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <div>
-                            <WanikaniWelcomeTile />
-                        </div>
-                        <div>
-                            <WanikaniLevelSummaryChart />
-                        </div>
-                        <div>
-                            <WanikaniItemCountsChart />
-                        </div>
+                    <div style={{ display: 'flex', gap: '10px', flexDirection: 'column', flexGrow: '1' }}>
+                        <WanikaniWelcomeTile />
+
+                        <WanikaniLevelSummaryChart />
+
+                        <WanikaniItemCountsChart />
                     </div>
-                </Grid>
 
-                <Grid item xs={12} sm={7} md={8} lg={10} xl={10}>
-                    <WanikaniFutureReviewsChart />
-                </Grid>
+                    <div style={{ flexGrow: '10' }}>
+                        <WanikaniFutureReviewsChart />
+                    </div>
 
-                <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-                    <WanikaniActiveItemsChart />
-                </Grid>
+                </div>
+            </div>
 
-            </Grid>
-
+            <div className={classes.container}>
+                <WanikaniActiveItemsChart />
+            </div>
         </div>
     );
 }

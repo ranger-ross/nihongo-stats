@@ -2,7 +2,6 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import { useWanikaniApiKey } from "./stores/WanikaniApiKeyStore";
 import { Navigate } from "react-router";
 import { RoutePaths } from "../Routes";
-import { Grid } from "@material-ui/core";
 import WanikaniLevelSummaryChart from "./charts/WanikaniLevelSummaryChart";
 import WanikaniFutureReviewsChart from "./charts/WanikaniFutureReviewsChart";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
@@ -15,7 +14,7 @@ const useStyles = makeStyles({
         flexDirection: 'column',
         margin: '10px',
         gap: '10px',
-    }
+    },
 });
 
 function WanikaniDashboard() {
@@ -37,7 +36,7 @@ function WanikaniDashboard() {
                         <WanikaniItemCountsChart />
                     </div>
 
-                    <div style={{ flexGrow: '10' }}>
+                    <div style={{ flexGrow: '25' }}>
                         <WanikaniFutureReviewsChart />
                     </div>
 

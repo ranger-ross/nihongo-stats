@@ -1,6 +1,6 @@
 import { Chart, ValueAxis, BarSeries, ArgumentAxis, Title, Tooltip } from '@devexpress/dx-react-chart-material-ui';
 import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { Animation, EventTracker } from "@devexpress/dx-react-chart";
 import { Card, CardContent, ButtonGroup, Button, Typography, Box } from "@material-ui/core";
@@ -13,6 +13,8 @@ function WanikaniFutureReviewsChart() {
     const [chartData, setChartData] = useState([]);
     const [targetItem, setTargetItem] = useState();
     const [days, setDays] = useState(14);
+
+    const chartContainer = useRef();
 
     useEffect(() => {
         WanikaniApiService.getAllAssignments(apiKey)
@@ -79,20 +81,22 @@ function WanikaniFutureReviewsChart() {
                         </ButtonGroup>
                     </div>
 
-                    <Chart data={chartData}>
-                        <ValueAxis />
-                        <ArgumentAxis />
-                        <BarSeries
-                            valueField="reviews"
-                            argumentField="label"
-                        />
-                        <EventTracker />
-                        <Tooltip targetItem={targetItem}
-                            onTargetItemChange={setTargetItem}
-                            contentComponent={ReviewsToolTip}
-                        />
-                        <Animation />
-                    </Chart>
+                    <div style={{ height: '100%' }} ref={chartContainer}>
+                        <Chart data={chartData} height={chartContainer?.current?.clientHeight}>
+                            <ValueAxis />
+                            <ArgumentAxis />
+                            <BarSeries
+                                valueField="reviews"
+                                argumentField="label"
+                            />
+                            <EventTracker />
+                            <Tooltip targetItem={targetItem}
+                                onTargetItemChange={setTargetItem}
+                                contentComponent={ReviewsToolTip}
+                            />
+                            <Animation />
+                        </Chart>
+                    </div>
                 </div>
             </CardContent>
         </Card>

@@ -26,7 +26,7 @@ const baseTile = {
 const useStyles = makeStyles({
     lockedTile: {
         ...baseTile,
-        background: '#464646',
+        background: '#b5b5b5',
     },
     unstartedTile: {
         ...baseTile,

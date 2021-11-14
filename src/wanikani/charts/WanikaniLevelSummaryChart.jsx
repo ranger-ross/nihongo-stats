@@ -217,7 +217,10 @@ function WanikaniLevelSummaryChart() {
                                     bottom={progressData.radicals.total}
                                 />
                             </Typography>
-                            <Typography variant={'caption'} style={{ color: racialColor }}>
+                            <Typography variant={'caption'} style={{
+                                color: racialColor,
+                                textShadow: '2px 2px 5px #000000aa'
+                            }}>
                                 Radicals
                             </Typography>
                         </Box>
@@ -228,7 +231,10 @@ function WanikaniLevelSummaryChart() {
                                     bottom={progressData.kanji.total}
                                 />
                             </Typography>
-                            <Typography variant={'caption'} style={{ color: kanjiColor }}>
+                            <Typography variant={'caption'} style={{
+                                color: kanjiColor,
+                                textShadow: '2px 2px 5px #000000aa'
+                            }}>
                                 Kanji
                             </Typography>
                         </Box>
@@ -239,7 +245,10 @@ function WanikaniLevelSummaryChart() {
                                     bottom={progressData.vocabulary.total}
                                 />
                             </Typography>
-                            <Typography variant={'caption'} style={{ color: vocabularyColor }}>
+                            <Typography variant={'caption'} style={{
+                                color: vocabularyColor,
+                                textShadow: '2px 2px 5px #000000aa'
+                            }}>
                                 Vocabulary
                             </Typography>
                         </Box>

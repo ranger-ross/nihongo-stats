@@ -38,7 +38,7 @@ function WanikaniWelcomeTile() {
     return (
         <Card>
             <CardContent>
-                <Typography variant={'h5'}>
+                <Typography variant={'h5'} style={{textShadow: '4px 4px 6px #000000bb'}}>
                     Welcome {username}
                 </Typography>
 

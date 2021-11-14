@@ -17,29 +17,37 @@ function assignmentsToCounts(assignments) {
 
 function CountTile({ label, data, color }) {
     return (
-        <div style={{
-            textAlign: 'center',
-            width: 'fit-content',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-        }}>
+        <Tooltip title={
+            <div>
+                <p>Radicals: {data?.radicals}</p>
+                <p>Kanji: {data?.kanji}</p>
+                <p>Vocabulary: {data?.vocabulary}</p>
+            </div>
+        } placement={'top'}>
             <div style={{
-                background: color,
-                padding: '5px',
-                width: '60px',
-                borderRadius: '5px',
-                boxShadow: 'rgba(0, 0, 0, 0.3) 5px 4px 10px',
+                textAlign: 'center',
+                width: 'fit-content',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
             }}>
-                {data?.total}
-            </div>
+                <div style={{
+                    background: color,
+                    padding: '5px',
+                    width: '60px',
+                    borderRadius: '5px',
+                    boxShadow: 'rgba(0, 0, 0, 0.3) 5px 4px 10px',
+                }}>
+                    {data?.total}
+                </div>
 
-            <div style={{ marginTop: '5px' }}>
-                <Typography variant={'caption'} color={'textPrimary'}>
-                    {label}
-                </Typography>
+                <div style={{ marginTop: '5px' }}>
+                    <Typography variant={'caption'} color={'textPrimary'}>
+                        {label}
+                    </Typography>
+                </div>
             </div>
-        </div>
+        </Tooltip>
     );
 }
 
@@ -119,6 +127,7 @@ function WanikaniItemCountsChart() {
                         color={'#474647'}
                     />
                 </div>
+
 
             </CardContent>
         </Card>

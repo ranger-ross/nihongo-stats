@@ -1,7 +1,6 @@
-import { Badge, Link, Tooltip } from "@material-ui/core";
+import { Tooltip } from "@material-ui/core";
 import { wanikaniColors } from "../../Constants";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import { Check } from "@mui/icons-material";
 
 const racialColor = wanikaniColors.blue;
 const kanjiColor = wanikaniColors.pink;
@@ -17,6 +16,7 @@ const baseTile = {
     boxShadow: 'rgba(0, 0, 0, 0.3) 5px 4px 10px',
     border: 'solid #303030 1px',
     color: 'white',
+    textDecoration: 'none',
 }
 
 const useStyles = makeStyles({
@@ -63,27 +63,12 @@ function WanikaniItemTile({ text, type, link, meaning, srsLevel, isStarted, isAv
 
     return (
         <Tooltip title={
-            <div>
+            <>
                 <p>Meaning: {meaning}</p>
                 {!!srsLevel ? (<p>SRS Level: {srsLevel}</p>) : null}
-            </div>
+            </>
         } placement={'top'}>
-            <Link href={link}
-                underline="none"
-                target="_blank"
-                rel="noreferrer"
-            >
-                {srsLevel > 4 ? (
-                    <Badge badgeContent={
-                        <Check sx={{ fontSize: 15 }} style={{ color: 'lime' }} />
-                    }>
-                        <div className={cls}>{text}</div>
-                    </Badge>
-                ) : (
-                    <div className={cls}>{text}</div>
-                )}
-
-            </Link>
+            <a href={link} target="_blank" className={cls}>{text}</a>
         </Tooltip>
     );
 }

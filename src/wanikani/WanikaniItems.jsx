@@ -105,7 +105,7 @@ function WanikaniItems() {
                         {data[type.toLowerCase()].map(subject => (
                             <WanikaniItemTile
                                 key={subject.subjectId}
-                                text={subject.characters}
+                                text={subject.characters ?? '?'}
                                 isStarted={subject['started_at']}
                                 isAvailable={subject.hasAssignment}
                                 link={subject['document_url']}

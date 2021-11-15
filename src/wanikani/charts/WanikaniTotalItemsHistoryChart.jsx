@@ -2,7 +2,7 @@ import { Chart, ValueAxis, ArgumentAxis, Title } from '@devexpress/dx-react-char
 import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { Animation, EventTracker, LineSeries } from "@devexpress/dx-react-chart";
+import { LineSeries } from "@devexpress/dx-react-chart";
 import { wanikaniColors } from '../../Constants';
 
 const LabelWithDate = (props) => {
@@ -15,14 +15,6 @@ const LabelWithDate = (props) => {
         />
     );
 };
-
-function LevelToolTip({ text }) {
-    return (
-        <div>
-            {text}
-        </div>
-    );
-}
 
 function sortByStartedAtDate(a, b) {
     if (a.startedAt.getTime() < b.startedAt.getTime()) {

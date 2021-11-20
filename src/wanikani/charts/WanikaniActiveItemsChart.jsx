@@ -1,4 +1,3 @@
-import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { Card, CardContent, Typography } from "@material-ui/core";
@@ -23,13 +22,13 @@ function combineAssignmentAndSubject(assignment, subject) {
     };
 }
 
-async function fetchData(apiKey) {
-    const user = await WanikaniApiService.getUser(apiKey);
+async function fetchData() {
+    const user = await WanikaniApiService.getUser();
     const currentLevel = user.data.level;
-    const subjects = (await WanikaniApiService.getSubjects(apiKey))
+    const subjects = (await WanikaniApiService.getSubjects())
         .filter(subject => subject.data.level === currentLevel);
 
-    let assignments = (await WanikaniApiService.getAssignmentsForLevel(apiKey, currentLevel)).data;
+    let assignments = (await WanikaniApiService.getAssignmentsForLevel(currentLevel)).data;
     assignments = createAssignmentMap(assignments);
 
     const radicals = subjects
@@ -49,7 +48,6 @@ async function fetchData(apiKey) {
 }
 
 function WanikaniActiveItemsChart() {
-    const { apiKey } = useWanikaniApiKey();
     const [data, setData] = useState({
         radicals: [],
         kanji: [],
@@ -57,7 +55,7 @@ function WanikaniActiveItemsChart() {
     })
 
     useEffect(() => {
-        fetchData(apiKey)
+        fetchData()
             .then(setData)
             .catch(console.error);
     }, []);

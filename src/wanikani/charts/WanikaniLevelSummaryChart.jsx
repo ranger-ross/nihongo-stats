@@ -1,4 +1,3 @@
-import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { Box, Card, CardContent, Typography, Grid, Tooltip } from "@material-ui/core";
@@ -104,12 +103,12 @@ function calculateHoursUntilLevelUp(radicals, kanji) {
     return 0;
 }
 
-async function getCurrentLevelProgressData(apiKey) {
-    const userData = await WanikaniApiService.getUser(apiKey)
+async function getCurrentLevelProgressData() {
+    const userData = await WanikaniApiService.getUser()
 
     const currentLevel = userData.data.level;
 
-    const levelsProgress = await WanikaniApiService.getLevelProgress(apiKey, currentLevel);
+    const levelsProgress = await WanikaniApiService.getLevelProgress(currentLevel);
     const currentLevelProgress = levelsProgress.data[currentLevel - 1].data;
 
     let start;
@@ -123,8 +122,8 @@ async function getCurrentLevelProgressData(apiKey) {
     const end = !!currentLevelProgress['passed_at'] ? new Date(currentLevelProgress['passed_at']) : new Date();
     const timeOnLevel = end.getTime() - start.getTime()
 
-    const assignments = await WanikaniApiService.getAssignmentsForLevel(apiKey, currentLevel);
-    let subjects = await WanikaniApiService.getSubjects(apiKey, currentLevel);
+    const assignments = await WanikaniApiService.getAssignmentsForLevel( currentLevel);
+    let subjects = await WanikaniApiService.getSubjects(currentLevel);
     subjects = subjects.filter(subject => subject.data.level === currentLevel);
 
     const radicalsTotal = subjects.filter(s => s.object === 'radical');
@@ -160,14 +159,13 @@ async function getCurrentLevelProgressData(apiKey) {
 
 function WanikaniLevelSummaryChart() {
     const classes = useStyles();
-    const { apiKey } = useWanikaniApiKey();
     const [progressData, setProgressData] = useState(defaultData);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         setIsLoading(true);
 
-        getCurrentLevelProgressData(apiKey)
+        getCurrentLevelProgressData()
             .then(data => setProgressData(data))
             .catch(console.error)
             .finally(() => setIsLoading(false));

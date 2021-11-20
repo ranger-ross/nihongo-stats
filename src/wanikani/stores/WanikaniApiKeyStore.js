@@ -1,10 +1,10 @@
 import create from 'zustand'
-import WanikaniCacheService from '../service/WanikaniCacheService'
+import WanikaniApiService from '../service/WanikaniApiService';
 
 export const useWanikaniApiKey = create(set => ({
-    apiKey: WanikaniCacheService.loadWanikaniApiKey() || null,
+    apiKey: WanikaniApiService.apiKey() || null,
     setApiKey: (apiKey) => set(() => {
-        WanikaniCacheService.saveWanikaniApiKey(apiKey);
+        WanikaniApiService.saveApiKey(apiKey);
         return { apiKey: apiKey };
     }),
 }));

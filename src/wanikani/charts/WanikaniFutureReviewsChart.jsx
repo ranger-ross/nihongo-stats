@@ -1,5 +1,4 @@
 import { Chart, ValueAxis, BarSeries, ArgumentAxis, Title, Tooltip } from '@devexpress/dx-react-chart-material-ui';
-import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect, useRef } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { Animation, EventTracker } from "@devexpress/dx-react-chart";
@@ -8,14 +7,13 @@ import { addDays, areDatesSameDay } from '../../util/DateUtils';
 
 
 function WanikaniFutureReviewsChart() {
-    const { apiKey } = useWanikaniApiKey();
     const [rawData, setRawData] = useState([]);
     const [chartData, setChartData] = useState([]);
     const [targetItem, setTargetItem] = useState();
     const [days, setDays] = useState(14);
 
     useEffect(() => {
-        WanikaniApiService.getAllAssignments(apiKey)
+        WanikaniApiService.getAllAssignments()
             .then(data => {
                 const _rawData = data.filter(assignment => !assignment.data['burned_at'] || !assignment.data['available_at']);
                 setRawData(_rawData);

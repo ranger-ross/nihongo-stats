@@ -1,5 +1,4 @@
 import { Chart, ValueAxis, BarSeries, ArgumentAxis, Title, Tooltip } from '@devexpress/dx-react-chart-material-ui';
-import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { EventTracker, Animation } from "@devexpress/dx-react-chart";
@@ -18,12 +17,11 @@ function LevelToolTip({ text }) {
 }
 
 function WanikaniLevelProgessChart() {
-    const { apiKey } = useWanikaniApiKey();
     const [levelProgress, setLevelProgress] = useState([]);
     const [targetItem, setTargetItem] = useState();
 
     useEffect(() => {
-        WanikaniApiService.getLevelProgress(apiKey)
+        WanikaniApiService.getLevelProgress()
             .then(data => {
                 const levelData = data.data
                     .map(level => level.data)

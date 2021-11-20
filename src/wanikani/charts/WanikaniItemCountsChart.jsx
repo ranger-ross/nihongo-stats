@@ -1,4 +1,3 @@
-import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { Card, CardContent, Tooltip, Typography } from "@material-ui/core";
@@ -50,8 +49,8 @@ function CountTile({ label, data, color }) {
     );
 }
 
-async function fetchData(apiKey) {
-    const assignments = (await WanikaniApiService.getAllAssignments(apiKey));
+async function fetchData() {
+    const assignments = await WanikaniApiService.getAllAssignments();
 
     const available = assignments.filter(assignment => assignment.data['srs_stage'] == 0);
     const apprentice = assignments.filter(assignment => assignment.data['srs_stage'] > 0 && assignment.data['srs_stage'] < 5);
@@ -72,11 +71,10 @@ async function fetchData(apiKey) {
 }
 
 function WanikaniItemCountsChart() {
-    const { apiKey } = useWanikaniApiKey();
     const [data, setData] = useState();
 
     useEffect(() => {
-        fetchData(apiKey)
+        fetchData()
             .then(setData)
             .catch(console.error);
     }, []);

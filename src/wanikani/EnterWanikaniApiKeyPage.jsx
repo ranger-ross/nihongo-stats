@@ -28,7 +28,7 @@ function EnterWanikaniApiKeyPage() {
 
     const verifyAndSetApiKey = (key) => {
         console.log(key);
-        WanikaniApiService.getUser(key)
+        WanikaniApiService.login(key)
             .then(user => {
                 console.log(user)
                 setApiKey(key);
@@ -46,7 +46,7 @@ function EnterWanikaniApiKeyPage() {
         >
             <Grid item xs={12}>
                 <Typography className={classes.text} >
-                    Please enter your <Link href="https://www.wanikani.com/settings/personal_access_tokens">Wanikani Api Key</Link>
+                    Please enter your <Link href="https://www.wanikani.com/settings/personal_access_tokens" target="_blank">Wanikani Api Key</Link>
                 </Typography>
             </Grid>
 

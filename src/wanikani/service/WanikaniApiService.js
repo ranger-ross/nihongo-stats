@@ -21,24 +21,44 @@ async function getFromMemoryCacheOrFetch(path, apiKey) {
     return data;
 }
 
+function apiKey() {
+    return localStorage.getItem('wanikani-api-key')
+}
+
+function saveApiKey(key) {
+    if (!key) {
+        localStorage.removeItem('wanikani-api-key');
+    } else {
+        localStorage.setItem('wanikani-api-key', key);
+    }
+}
+
 export default {
-    getUser: async (apiKey) => getFromMemoryCacheOrFetch('/v2/user', apiKey),
-    getSummary: (apiKey) => getFromMemoryCacheOrFetch('/v2/summary', apiKey),
-    getReviews: (apiKey) => getFromMemoryCacheOrFetch('/v2/reviews', apiKey),
-    getLevelProgress: (apiKey) => getFromMemoryCacheOrFetch('/v2/level_progressions', apiKey),
-    getAssignmentsForLevel: (apiKey, level) => getFromMemoryCacheOrFetch('/v2/assignments?levels=' + level, apiKey),
+    saveApiKey: saveApiKey,
+    apiKey: apiKey,
+
+    login: async (apiKey) => {
+        const user = await getFromMemoryCacheOrFetch('/v2/user', apiKey);
+        saveApiKey(apiKey);
+        return user;
+    },
+    getUser: async () => getFromMemoryCacheOrFetch('/v2/user', apiKey()),
+    getSummary: () => getFromMemoryCacheOrFetch('/v2/summary', apiKey()),
+    getReviews: () => getFromMemoryCacheOrFetch('/v2/reviews', apiKey()),
+    getLevelProgress: () => getFromMemoryCacheOrFetch('/v2/level_progressions', apiKey()),
+    getAssignmentsForLevel: (level) => getFromMemoryCacheOrFetch('/v2/assignments?levels=' + level, apiKey()),
 
 
-    getAllAssignments: async (apiKey) => {
+    getAllAssignments: async () => {
         if (memoryCache.includes('wanikani-all-assignments')) {
             return memoryCache.get('wanikani-all-assignments');
         }
-        const firstPage = await (await fetch(`${wanikaniApiUrl}/v2/assignments`, { headers: { ...authHeader(apiKey) }, })).json()
+        const firstPage = await (await fetch(`${wanikaniApiUrl}/v2/assignments`, { headers: { ...authHeader(apiKey()) }, })).json()
         let data = firstPage.data;
         let nextPage = firstPage.pages['next_url']
 
         while (!!nextPage) {
-            const page = await (await fetch(nextPage, { headers: authHeader(apiKey) })).json();
+            const page = await (await fetch(nextPage, { headers: authHeader(apiKey()) })).json();
             data = data.concat(page.data);
             nextPage = page.pages['next_url'];
         }
@@ -46,12 +66,12 @@ export default {
         return data;
     },
 
-    getSubjects: async (apiKey) => {
+    getSubjects: async () => {
         if (memoryCache.includes('wanikani-all-subjects')) {
             return memoryCache.get('wanikani-all-subjects');
         }
         const firstPage = await (await fetch(`${wanikaniApiUrl}/v2/subjects`, {
-            headers: { ...authHeader(apiKey) },
+            headers: { ...authHeader(apiKey()) },
             cache: 'force-cache'
         })).json()
         let data = firstPage.data;
@@ -59,7 +79,7 @@ export default {
 
         while (!!nextPage) {
             const page = await (await fetch(nextPage, {
-                headers: authHeader(apiKey),
+                headers: authHeader(apiKey()),
                 cache: 'force-cache'
             })).json();
             data = data.concat(page.data);

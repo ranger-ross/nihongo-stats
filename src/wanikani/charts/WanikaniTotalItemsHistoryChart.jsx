@@ -1,5 +1,4 @@
 import { Chart, ValueAxis, ArgumentAxis, Title } from '@devexpress/dx-react-chart-material-ui';
-import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { LineSeries } from "@devexpress/dx-react-chart";
@@ -49,8 +48,8 @@ function truncDate(date) {
     return new Date(new Date(date).toDateString());
 }
 
-async function fetchData(apiKey) {
-    const assignments = await WanikaniApiService.getAllAssignments(apiKey);
+async function fetchData() {
+    const assignments = await WanikaniApiService.getAllAssignments();
     const orderedAssignments = assignments
         .filter(assignemnt => !!assignemnt.data['started_at'])
         .map(assignemnt => ({
@@ -81,11 +80,10 @@ async function fetchData(apiKey) {
 }
 
 function WanikaniTotalItemsHistoryChart() {
-    const { apiKey } = useWanikaniApiKey();
     const [data, setData] = useState([]);
 
     useEffect(() => {
-        fetchData(apiKey)
+        fetchData()
             .then(setData)
             .catch(console.error);
     }, []);

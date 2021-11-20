@@ -1,21 +1,19 @@
-import { useWanikaniApiKey } from "../stores/WanikaniApiKeyStore";
 import { Card, CardContent, Typography } from "@material-ui/core";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { useState, useEffect } from "react";
 import { WanikaniBlueButton, WanikaniPinkButton } from "../components/WanikaniButtons";
 
 function WanikaniWelcomeTile() {
-    const { apiKey } = useWanikaniApiKey();
     const [username, setUsername] = useState('');
     const [lessons, setLessons] = useState(0);
     const [reviews, setReviews] = useState(0);
 
     useEffect(() => {
-        WanikaniApiService.getUser(apiKey)
+        WanikaniApiService.getUser()
             .then(user => {
                 setUsername(user.data.username);
             });
-        WanikaniApiService.getSummary(apiKey)
+        WanikaniApiService.getSummary()
             .then(summary => {
                 let lsn = 0;
                 for (const group of summary.data.lessons) {

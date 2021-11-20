@@ -3,7 +3,6 @@ import MoreIcon from '@mui/icons-material/MoreVert';
 import React from "react";
 import { useWanikaniApiKey } from "../wanikani/stores/WanikaniApiKeyStore.js";
 
-
 function WanikaniOptionMenu() {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);

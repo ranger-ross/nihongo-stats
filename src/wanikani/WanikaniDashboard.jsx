@@ -7,6 +7,7 @@ import WanikaniFutureReviewsChart from "./charts/WanikaniFutureReviewsChart";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
 import WanikaniActiveItemsChart from "./charts/WanikaniActiveItemsChart";
 import WanikaniItemCountsChart from "./charts/WanikaniItemCountsChart";
+import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 
 const useStyles = makeStyles({
     container: {
@@ -20,33 +21,34 @@ const useStyles = makeStyles({
 function WanikaniDashboard() {
     const classes = useStyles();
     const { apiKey } = useWanikaniApiKey();
-
     return (
-        <div>
-            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : null}
+        <>
+            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : (
+                <WanikaniPreloadedData>
+                    <div className={classes.container}>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'stretch' }}>
 
-            <div className={classes.container}>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'stretch' }}>
+                            <div style={{ display: 'flex', gap: '10px', flexDirection: 'column', flexGrow: '1' }}>
+                                <WanikaniWelcomeTile />
 
-                    <div style={{ display: 'flex', gap: '10px', flexDirection: 'column', flexGrow: '1' }}>
-                        <WanikaniWelcomeTile />
+                                <WanikaniLevelSummaryChart />
 
-                        <WanikaniLevelSummaryChart />
+                                <WanikaniItemCountsChart />
+                            </div>
 
-                        <WanikaniItemCountsChart />
+                            <div style={{ flexGrow: '25' }}>
+                                <WanikaniFutureReviewsChart />
+                            </div>
+
+                        </div>
                     </div>
 
-                    <div style={{ flexGrow: '25' }}>
-                        <WanikaniFutureReviewsChart />
+                    <div className={classes.container}>
+                        <WanikaniActiveItemsChart />
                     </div>
-
-                </div>
-            </div>
-
-            <div className={classes.container}>
-                <WanikaniActiveItemsChart />
-            </div>
-        </div>
+                </WanikaniPreloadedData>
+            )}
+        </>
     );
 }
 

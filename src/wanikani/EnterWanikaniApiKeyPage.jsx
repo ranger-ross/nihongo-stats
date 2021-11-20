@@ -29,13 +29,6 @@ function EnterWanikaniApiKeyPage() {
     const verifyAndSetApiKey = (key) => {
         console.log(key);
         WanikaniApiService.getUser(key)
-            .then(response => {
-                if (response.status == 200) {
-                    return response.json()
-                } else {
-                    throw new Error('Invalid Api Key');
-                }
-            })
             .then(user => {
                 console.log(user)
                 setApiKey(key);

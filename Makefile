@@ -12,3 +12,9 @@ build: ## Builds the React app
 
 clean: # Clean the build directory
 	rm -rf dist
+
+build-image: ## Builds Docker image locally
+	docker build . -t local/nihongo-stats
+
+run-local-image: ## Runs the local Docker image on port 8080
+	docker run -it --rm -p 8080:80 local/nihongo-stats

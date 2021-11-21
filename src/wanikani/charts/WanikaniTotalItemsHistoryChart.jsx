@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { LineSeries } from "@devexpress/dx-react-chart";
 import { wanikaniColors } from '../../Constants';
+import { Checkbox, Card, CardContent, Box, Typography, Grid, FormControlLabel } from "@material-ui/core";
 
 const LabelWithDate = (props) => {
     const { text } = props;
@@ -80,38 +81,100 @@ async function fetchData() {
 }
 
 function WanikaniTotalItemsHistoryChart() {
-    const [data, setData] = useState([]);
+    const [rawData, setRawData] = useState([]);
+    const [showRadicals, setShowRadicals] = useState(true);
+    const [showKanji, setShowKanji] = useState(true);
+    const [showVocabulary, setShowVocabulary] = useState(true);
 
     useEffect(() => {
         fetchData()
-            .then(setData)
+            .then(setRawData)
             .catch(console.error);
     }, []);
 
-    return (
-        <Chart data={data}>
-            <ValueAxis />
-            <ArgumentAxis
-                labelComponent={LabelWithDate}
-            />
-            <Title text="Total Items" />
-            <LineSeries
-                valueField="radicals"
-                argumentField="date"
-                color={wanikaniColors.blue}
-            />
-            <LineSeries
-                valueField="kanji"
-                argumentField="date"
-                color={wanikaniColors.pink}
-            />
+    const data = rawData.map(dp => {
+        return {
+            ...dp,
+            radicals: showRadicals ? dp.radicals : null,
+            kanji: showKanji ? dp.kanji : null,
+            vocabulary: showVocabulary ? dp.vocabulary : null,
+        };
+    })
 
-            <LineSeries
-                valueField="vocabulary"
-                argumentField="date"
-                color={wanikaniColors.purple}
-            />
-        </Chart>
+    return (
+        <Card style={{ height: '100%' }}>
+            <CardContent style={{ height: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <Grid container>
+                        <Grid item xs={4} />
+                        <Grid item xs={4}>
+                            <Typography variant={'h5'} style={{ textAlign: 'center' }}>
+                                Total Items
+                            </Typography>
+                        </Grid>
+
+                        <Grid item xs={4} style={{ textAlign: 'end' }}>
+                            <FormControlLabel label="Radicals"
+                                control={
+                                    <Checkbox checked={showRadicals}
+                                        color={'primary'}
+                                        disabled={!showKanji && !showVocabulary}
+                                        onChange={e => setShowRadicals(e.target.checked)}
+                                    />
+                                }
+                            />
+
+                            <FormControlLabel label="Kanji"
+                                control={
+                                    <Checkbox checked={showKanji}
+                                        color={'primary'}
+                                        disabled={!showRadicals && !showVocabulary}
+                                        onChange={e => setShowKanji(e.target.checked)}
+                                    />
+                                }
+                            />
+
+                            <FormControlLabel label="Vocabulary"
+                                control={
+                                    <Checkbox checked={showVocabulary}
+                                        color={'primary'}
+                                        disabled={!showRadicals && !showKanji}
+                                        onChange={e => setShowVocabulary(e.target.checked)}
+                                    />
+                                }
+                            />
+                        </Grid>
+
+                    </Grid>
+
+                    <div style={{ flexGrow: '1' }}>
+                        <Chart data={data}>
+                            <ValueAxis />
+                            <ArgumentAxis
+                                labelComponent={LabelWithDate}
+                            />
+                            <LineSeries
+                                valueField="radicals"
+                                argumentField="date"
+                                color={wanikaniColors.blue}
+                            />
+
+                            <LineSeries
+                                valueField="kanji"
+                                argumentField="date"
+                                color={wanikaniColors.pink}
+                            />
+
+                            <LineSeries
+                                valueField="vocabulary"
+                                argumentField="date"
+                                color={wanikaniColors.purple}
+                            />
+                        </Chart>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
     );
 }
 

@@ -1,6 +1,6 @@
-import WanikaniLoadingScreen from "./WanikaniLoadingScreen";
 import { useEffect, useState } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
+import { CircularProgress } from "@material-ui/core";
 
 function WanikaniPreloadedData({ children }) {
     const [isLoaded, setIsLoaded] = useState(window.isWanikaniPreloaded);
@@ -27,7 +27,9 @@ function WanikaniPreloadedData({ children }) {
             {isLoaded ? (
                 children
             ) : (
-                <WanikaniLoadingScreen />
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20%'}}>
+                    <CircularProgress />
+                </div>
             )}
         </>
     );

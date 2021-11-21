@@ -13,7 +13,8 @@ function WanikaniPreloadedData({ children }) {
         Promise.all([
             WanikaniApiService.getSubjects(),
             WanikaniApiService.getUser(),
-            WanikaniApiService.getAllAssignments()
+            WanikaniApiService.getAllAssignments(),
+            WanikaniApiService.getSummary()
         ])
             .then(() => {
                 console.log('Wanikani Data preloaded');

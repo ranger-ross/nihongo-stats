@@ -1,6 +1,11 @@
 import { memoryCache } from "../../GlobalState"
 
-const wanikaniApiUrl = 'https://api.wanikani.com'
+const wanikaniApiUrl = 'https://api.wanikani.com';
+const cacheKeys = {
+    apiKey: 'wanikani-api-key',
+    assignments: 'wanikani-all-assignments',
+    subjects: 'wanikani-all-subjects',
+}
 
 const authHeader = (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` })
 
@@ -22,14 +27,14 @@ async function getFromMemoryCacheOrFetch(path, apiKey) {
 }
 
 function apiKey() {
-    return localStorage.getItem('wanikani-api-key')
+    return localStorage.getItem(cacheKeys.apiKey)
 }
 
 function saveApiKey(key) {
     if (!key) {
-        localStorage.removeItem('wanikani-api-key');
+        localStorage.removeItem(cacheKeys.apiKey);
     } else {
-        localStorage.setItem('wanikani-api-key', key);
+        localStorage.setItem(cacheKeys.apiKey, key);
     }
 }
 
@@ -50,8 +55,8 @@ export default {
 
 
     getAllAssignments: async () => {
-        if (memoryCache.includes('wanikani-all-assignments')) {
-            return memoryCache.get('wanikani-all-assignments');
+        if (memoryCache.includes(cacheKeys.assignments)) {
+            return memoryCache.get(cacheKeys.assignments);
         }
         const firstPage = await (await fetch(`${wanikaniApiUrl}/v2/assignments`, { headers: { ...authHeader(apiKey()) }, })).json()
         let data = firstPage.data;
@@ -62,13 +67,13 @@ export default {
             data = data.concat(page.data);
             nextPage = page.pages['next_url'];
         }
-        memoryCache.put('wanikani-all-assignments', data);
+        memoryCache.put(cacheKeys.assignments, data);
         return data;
     },
 
     getSubjects: async () => {
-        if (memoryCache.includes('wanikani-all-subjects')) {
-            return memoryCache.get('wanikani-all-subjects');
+        if (memoryCache.includes(cacheKeys.subjects)) {
+            return memoryCache.get(cacheKeys.subjects);
         }
         const firstPage = await (await fetch(`${wanikaniApiUrl}/v2/subjects`, {
             headers: { ...authHeader(apiKey()) },
@@ -85,7 +90,7 @@ export default {
             data = data.concat(page.data);
             nextPage = page.pages['next_url'];
         }
-        memoryCache.put('wanikani-all-subjects', data);
+        memoryCache.put(cacheKeys.subjects, data);
         return data;
     },
 }

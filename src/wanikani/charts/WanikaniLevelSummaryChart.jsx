@@ -122,7 +122,7 @@ async function getCurrentLevelProgressData() {
     const end = !!currentLevelProgress['passed_at'] ? new Date(currentLevelProgress['passed_at']) : new Date();
     const timeOnLevel = end.getTime() - start.getTime()
 
-    const assignments = await WanikaniApiService.getAssignmentsForLevel( currentLevel);
+    const assignments = await WanikaniApiService.getAssignmentsForLevel(currentLevel);
     let subjects = await WanikaniApiService.getSubjects(currentLevel);
     subjects = subjects.filter(subject => subject.data.level === currentLevel);
 
@@ -164,11 +164,20 @@ function WanikaniLevelSummaryChart() {
 
     useEffect(() => {
         setIsLoading(true);
-
+        let isSubscribed = true;
         getCurrentLevelProgressData()
-            .then(data => setProgressData(data))
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setProgressData(data);
+            })
             .catch(console.error)
-            .finally(() => setIsLoading(false));
+            .finally(() => {
+                if (!isSubscribed)
+                    return;
+                setIsLoading(false)
+            });
+        return () => isSubscribed = false;
     }, []);
 
     return (

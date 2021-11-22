@@ -74,9 +74,15 @@ function WanikaniItemCountsChart() {
     const [data, setData] = useState();
 
     useEffect(() => {
+        let isSubscribed = true;
         fetchData()
-            .then(setData)
+            .then(d => {
+                if (!isSubscribed)
+                    return;
+                setData(d);
+            })
             .catch(console.error);
+        return () => isSubscribed = false;
     }, []);
 
     return (

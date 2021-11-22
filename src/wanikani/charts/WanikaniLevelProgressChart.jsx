@@ -21,8 +21,11 @@ function WanikaniLevelProgessChart() {
     const [targetItem, setTargetItem] = useState();
 
     useEffect(() => {
+        let isSubscribed = true;
         WanikaniApiService.getLevelProgress()
             .then(data => {
+                if (!isSubscribed)
+                    return;
                 const levelData = data.data
                     .map(level => level.data)
                     .map(level => {
@@ -35,6 +38,7 @@ function WanikaniLevelProgessChart() {
                     });
                 setLevelProgress(levelData)
             })
+        return () => isSubscribed = false;
     }, []);
 
     return (

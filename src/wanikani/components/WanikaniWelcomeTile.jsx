@@ -9,12 +9,17 @@ function WanikaniWelcomeTile() {
     const [reviews, setReviews] = useState(0);
 
     useEffect(() => {
+        let isSubscribed = true;
         WanikaniApiService.getUser()
             .then(user => {
+                if (!isSubscribed)
+                    return;
                 setUsername(user.data.username);
             });
         WanikaniApiService.getSummary()
             .then(summary => {
+                if (!isSubscribed)
+                    return;
                 let lsn = 0;
                 for (const group of summary.data.lessons) {
                     if (new Date(group['available_at']).getTime() < Date.now()) {
@@ -30,12 +35,13 @@ function WanikaniWelcomeTile() {
                 }
                 setLessons(lsn);
                 setReviews(rvws);
-            })
+            });
+        return () => isSubscribed = false;
     }, []);
     return (
         <Card>
             <CardContent>
-                <Typography variant={'h5'} style={{textShadow: '4px 4px 6px #000000bb'}}>
+                <Typography variant={'h5'} style={{ textShadow: '4px 4px 6px #000000bb' }}>
                     Welcome {username}
                 </Typography>
 
@@ -50,8 +56,6 @@ function WanikaniWelcomeTile() {
                         Reviews: {reviews}
                     </WanikaniBlueButton>
                 </div>
-
-
             </CardContent>
         </Card>
     );

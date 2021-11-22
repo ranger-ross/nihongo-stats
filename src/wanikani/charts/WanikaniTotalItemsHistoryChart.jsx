@@ -88,9 +88,15 @@ function WanikaniTotalItemsHistoryChart() {
     const [showVocabulary, setShowVocabulary] = useState(true);
 
     useEffect(() => {
+        let isSubscribed = true;
         fetchData()
-            .then(setRawData)
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setRawData(data);
+            })
             .catch(console.error);
+        return () => isSubscribed = false;
     }, []);
 
     const data = rawData.map(dp => {

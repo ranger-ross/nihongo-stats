@@ -93,12 +93,16 @@ function WanikaniReviewsHistoryChart() {
     const [totalDays, setTotalDays] = useState(5000);
 
     useEffect(() => {
+        let isSubscribed = true;
         fetchData()
             .then(data => {
+                if (!isSubscribed)
+                    return;
                 setTotalDays(aggregateDate(data, -1).length);
                 setRawData(data);
             })
             .catch(console.error);
+        return () => isSubscribed = false;
     }, []);
 
     useEffect(() => {

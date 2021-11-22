@@ -13,11 +13,15 @@ function WanikaniFutureReviewsChart() {
     const [days, setDays] = useState(14);
 
     useEffect(() => {
+        let isSubscribed = true;
         WanikaniApiService.getAllAssignments()
             .then(data => {
+                if (!isSubscribed)
+                    return;
                 const _rawData = data.filter(assignment => !assignment.data['burned_at'] || !assignment.data['available_at']);
                 setRawData(_rawData);
             })
+        return () => isSubscribed = false;
     }, []);
 
 

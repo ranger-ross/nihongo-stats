@@ -1,31 +1,12 @@
 import { Chart, ValueAxis, ArgumentAxis, Tooltip } from '@devexpress/dx-react-chart-material-ui';
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { BarSeries, Stack } from "@devexpress/dx-react-chart";
+import { ArgumentScale, BarSeries, Stack } from "@devexpress/dx-react-chart";
 import { wanikaniColors } from '../../Constants';
 import { Card, CardContent, Typography, Grid, ButtonGroup, Button } from "@material-ui/core";
 import { EventTracker } from "@devexpress/dx-react-chart";
-
-const LabelWithDate = (props) => {
-    const { text } = props;
-    const rawTimestamp = parseInt(text.split(',').join(''));
-    return (
-        <ValueAxis.Label
-            {...props}
-            text={new Date(rawTimestamp).toLocaleDateString()}
-        />
-    );
-};
-
-function sortByStartedAtDate(a, b) {
-    if (a.startedAt.getTime() < b.startedAt.getTime()) {
-        return -1;
-    }
-    if (a.startedAt.getTime() > b.startedAt.getTime()) {
-        return 1;
-    }
-    return 0;
-}
+import { scaleBand } from 'd3-scale';
+import React from 'react';
 
 function DataPoint(date) {
     let data = {
@@ -91,6 +72,9 @@ function WanikaniReviewsHistoryChart() {
     const [rawData, setRawData] = useState([]);
     const [chartData, setChartData] = useState([]);
     const [daysToLookBack, setDaysToLookBack] = useState(30);
+    const [targetItem, setTargetItem] = useState();
+
+    const startDate = Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1));
 
     useEffect(() => {
         fetchData()
@@ -102,8 +86,6 @@ function WanikaniReviewsHistoryChart() {
         if (rawData.length == 0) {
             return;
         }
-
-        const startDate = Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1));
 
         const dataForTimeRange = rawData
             .filter(data => new Date(data.review['data_updated_at']).getTime() > startDate)
@@ -120,6 +102,42 @@ function WanikaniReviewsHistoryChart() {
         setChartData(aggregatedDate);
         console.log(aggregatedDate);
     }, [rawData, daysToLookBack])
+
+
+    function ReviewsToolTip({ targetItem }) {
+        const data = chartData[targetItem.point];
+        return (
+            <>
+                <p>Date: {data.date.toLocaleDateString()}</p>
+                <p>Total: {data.total}</p>
+                <p>Radicals: {data.radicals}</p>
+                <p>Kanji: {data.kanji}</p>
+                <p>Vocabulary: {data.vocabulary}</p>
+            </>
+        );
+    }
+
+    const LabelWithDate = (props) => {
+        const date = props.text;
+        if (!date) {
+            return (<></>)
+        }
+
+        const totalLabels = 7;
+        const labelTickSize = Math.floor(daysToLookBack / totalLabels); // TODO: replace daysToLookBack with min(data.date)
+        const diff = Date.now() - date.getTime();
+        const days = Math.floor(diff / 86400000);
+        return (
+            <>
+                {days % labelTickSize == 0 ? (
+                    <ArgumentAxis.Label
+                        {...props}
+                        text={new Date(date).toLocaleDateString()}
+                    />
+                ) : null}
+            </>
+        );
+    };
 
     return (
         <Card style={{ height: '100%' }}>
@@ -149,10 +167,9 @@ function WanikaniReviewsHistoryChart() {
 
                     <div style={{ flexGrow: '1' }}>
                         <Chart data={chartData}>
+                            <ArgumentScale factory={scaleBand} />
+                            <ArgumentAxis labelComponent={LabelWithDate} />
                             <ValueAxis />
-                            <ArgumentAxis
-                                labelComponent={LabelWithDate}
-                            />
 
                             <BarSeries
                                 name="radicals"
@@ -160,7 +177,6 @@ function WanikaniReviewsHistoryChart() {
                                 argumentField="date"
                                 color={wanikaniColors.blue}
                             />
-
 
                             <BarSeries
                                 name="kanji"
@@ -183,7 +199,7 @@ function WanikaniReviewsHistoryChart() {
                             />
 
                             <EventTracker />
-                            {/* <Tooltip contentComponent={ItemToolTip} /> */}
+                            <Tooltip contentComponent={ReviewsToolTip} />
                         </Chart>
                     </div>
                 </div>

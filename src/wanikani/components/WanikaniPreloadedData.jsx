@@ -14,7 +14,8 @@ function WanikaniPreloadedData({ children }) {
             WanikaniApiService.getSubjects(),
             WanikaniApiService.getUser(),
             WanikaniApiService.getAllAssignments(),
-            WanikaniApiService.getSummary()
+            WanikaniApiService.getSummary(),
+            WanikaniApiService.getReviews(),
         ])
             .then(() => {
                 console.log('Wanikani Data preloaded');

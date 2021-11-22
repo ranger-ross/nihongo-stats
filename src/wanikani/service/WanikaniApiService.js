@@ -3,6 +3,7 @@ import { memoryCache } from "../../GlobalState"
 const wanikaniApiUrl = 'https://api.wanikani.com';
 const cacheKeys = {
     apiKey: 'wanikani-api-key',
+    reviews: 'wanikani-all-reviews',
 }
 
 const authHeader = (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` })
@@ -36,29 +37,78 @@ function saveApiKey(key) {
     }
 }
 
-async function getFromMemoryCacheOrFetchMultiPageRequest(path, isForce) {
-    if (memoryCache.includes(path)) {
-        return memoryCache.get(path);
-    }
+const cacheModes = {
+    none: 'none',
+    all: 'cache-all',
+    allButLastPage: 'cache-all-but-last',
+};
 
+async function fetchMultiPageRequest(path, cacheMode = cacheModes.none) {
     const headers = {
         headers: { ...authHeader(apiKey()) },
-        cache: isForce ? 'force-cache' : undefined
+        cache: [cacheModes.all, cacheModes.allButLastPage].includes(cacheMode) ? 'force-cache' : undefined
     };
 
-
-    const firstPage = await (await fetch(`${wanikaniApiUrl}${path}`, headers)).json()
+    const firstPageResponse = await fetch(`${wanikaniApiUrl}${path}`, headers);
+    const firstPage = await firstPageResponse.json();
     let data = firstPage.data;
     let nextPage = firstPage.pages['next_url']
 
     while (!!nextPage) {
-        const page = await (await fetch(nextPage, headers)).json();
+        let pageResponse = await fetch(nextPage, headers);
+        let page = await pageResponse.json();
+
+        if (cacheMode == cacheModes.allButLastPage && !page.pages['next_url']) {
+            pageResponse = await fetch(nextPage, {
+                ...headers,
+                cache: undefined
+            });
+            page = await pageResponse.json();
+        }
+
         data = data.concat(page.data);
         nextPage = page.pages['next_url'];
     }
+    return data;
+}
+
+
+async function getFromMemoryCacheOrFetchMultiPageRequest(path, cacheMode = cacheModes.none) {
+    if (memoryCache.includes(path)) {
+        return memoryCache.get(path);
+    }
+    const data = await fetchMultiPageRequest(path, cacheMode);
     memoryCache.put(path, data);
     return data;
 }
+
+
+async function getReviews() {
+    if (memoryCache.includes(cacheKeys.reviews)) {
+        return memoryCache.get(cacheKeys.reviews);
+    }
+
+    let data = [];
+    if (!!localStorage.getItem(cacheKeys.reviews)) {
+        data = JSON.parse(localStorage.getItem(cacheKeys.reviews));
+        console.log('using cached reviews', data);
+    }
+
+    if (data.length == 0) {
+        const newData = await fetchMultiPageRequest('/v2/reviews');
+        data.push(...newData);
+    } else {
+        const lastId = data[data.length - 1].id;
+        const newData = await fetchMultiPageRequest('/v2/reviews?page_after_id=' + lastId);
+        data.push(...newData);
+    }
+
+    localStorage.setItem(cacheKeys.reviews, JSON.stringify(data));
+    memoryCache.put(cacheKeys.reviews, data);
+    return data;
+}
+
+
 
 export default {
     saveApiKey: saveApiKey,
@@ -76,7 +126,8 @@ export default {
 
     getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
     getAllAssignments: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments'),
-    getReviews: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/reviews'),
-    getSubjects: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/subjects', true),
+    getSubjects: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/subjects', cacheModes.all),
+    getReviews: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/reviews', cacheModes.allButLastPage),
+
 
 }

@@ -28,6 +28,10 @@ function WanikaniHistory() {
                 <WanikaniTotalItemsHistoryChart />
             </Card>
 
+            <Card variant={'outlined'} style={{margin: '15px'}}>
+                <WanikaniReviewsHistoryChart />
+            </Card>
+
 
         </div>
     );

@@ -5,6 +5,7 @@ import { RoutePaths } from "../Routes";
 import WanikaniLevelProgessChart from "./charts/WanikaniLevelProgressChart";
 import { Card } from "@material-ui/core";
 import WanikaniTotalItemsHistoryChart from "./charts/WanikaniTotalItemsHistoryChart";
+import WanikaniReviewsHistoryChart from "./charts/WanikaniReviewsHistoryChart";
 
 const useStyles = makeStyles({
     container: {}

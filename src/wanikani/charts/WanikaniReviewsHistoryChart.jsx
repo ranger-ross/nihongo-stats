@@ -53,10 +53,8 @@ function createSubjectMap(subjects) {
 }
 
 async function fetchData() {
-
     const reviews = await WanikaniApiService.getReviews();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-
     let data = [];
     for (const review of reviews) {
         data.push({
@@ -68,17 +66,38 @@ async function fetchData() {
     return data;
 }
 
+function aggregateDate(rawData, daysToLookBack) {
+    const startDate = Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1));
+
+    let dataForTimeRange = rawData;
+    if (daysToLookBack != -1) {
+        dataForTimeRange = rawData.filter(data => new Date(data.review['data_updated_at']).getTime() > startDate);
+    }
+
+    let aggregatedDate = [new DataPoint(truncDate(dataForTimeRange[0].review['data_updated_at']))];
+    for (const data of dataForTimeRange) {
+        if (aggregatedDate[aggregatedDate.length - 1].date.getTime() != truncDate(data.review['data_updated_at']).getTime()) {
+            aggregatedDate.push(new DataPoint(truncDate(data.review['data_updated_at'])));
+        }
+
+        aggregatedDate[aggregatedDate.length - 1].push(data);
+    }
+
+    return aggregatedDate;
+}
+
 function WanikaniReviewsHistoryChart() {
     const [rawData, setRawData] = useState([]);
     const [chartData, setChartData] = useState([]);
     const [daysToLookBack, setDaysToLookBack] = useState(30);
-    const [targetItem, setTargetItem] = useState();
-
-    const startDate = Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1));
+    const [totalDays, setTotalDays] = useState(5000);
 
     useEffect(() => {
         fetchData()
-            .then(setRawData)
+            .then(data => {
+                setTotalDays(aggregateDate(data, -1).length);
+                setRawData(data);
+            })
             .catch(console.error);
     }, []);
 
@@ -86,21 +105,7 @@ function WanikaniReviewsHistoryChart() {
         if (rawData.length == 0) {
             return;
         }
-
-        const dataForTimeRange = rawData
-            .filter(data => new Date(data.review['data_updated_at']).getTime() > startDate)
-
-        let aggregatedDate = [new DataPoint(truncDate(dataForTimeRange[0].review['data_updated_at']))];
-        for (const data of dataForTimeRange) {
-            if (aggregatedDate[aggregatedDate.length - 1].date.getTime() != truncDate(data.review['data_updated_at']).getTime()) {
-                aggregatedDate.push(new DataPoint(truncDate(data.review['data_updated_at'])));
-            }
-
-            aggregatedDate[aggregatedDate.length - 1].push(data);
-        }
-
-        setChartData(aggregatedDate);
-        console.log(aggregatedDate);
+        setChartData(aggregateDate(rawData, daysToLookBack));
     }, [rawData, daysToLookBack])
 
 
@@ -123,10 +128,9 @@ function WanikaniReviewsHistoryChart() {
             return (<></>)
         }
 
-        const totalLabels = 7;
-        const labelTickSize = Math.floor(daysToLookBack / totalLabels); // TODO: replace daysToLookBack with min(data.date)
-        const diff = Date.now() - date.getTime();
-        const days = Math.floor(diff / 86400000);
+        const totalLabels = 6;
+        const labelTickSize = Math.floor(daysToLookBack / totalLabels);
+        const days = Math.floor(Date.now() - date.getTime() / 86400000);
         return (
             <>
                 {days % labelTickSize == 0 ? (
@@ -159,7 +163,7 @@ function WanikaniReviewsHistoryChart() {
                                 <Button variant={daysToLookBack === 90 ? 'contained' : null} onClick={() => setDaysToLookBack(90)}>3 Mon</Button>
                                 <Button variant={daysToLookBack === 180 ? 'contained' : null} onClick={() => setDaysToLookBack(180)}>6 Mon</Button>
                                 <Button variant={daysToLookBack === 365 ? 'contained' : null} onClick={() => setDaysToLookBack(365)}>1 Yr</Button>
-                                <Button variant={daysToLookBack === 5000 ? 'contained' : null} onClick={() => setDaysToLookBack(5000)}>All</Button>
+                                <Button variant={daysToLookBack === totalDays ? 'contained' : null} onClick={() => setDaysToLookBack(totalDays)}>All</Button>
                             </ButtonGroup>
                         </Grid>
 
@@ -193,9 +197,7 @@ function WanikaniReviewsHistoryChart() {
                             />
 
                             <Stack
-                                stacks={[
-                                    { series: ['radicals', 'kanji', 'vocabulary'] }
-                                ]}
+                                stacks={[{ series: ['radicals', 'kanji', 'vocabulary'] }]}
                             />
 
                             <EventTracker />

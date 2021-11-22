@@ -1,5 +1,5 @@
-import { Chart, ValueAxis, BarSeries, ArgumentAxis, Title, Tooltip } from '@devexpress/dx-react-chart-material-ui';
-import { useState, useEffect, useRef } from "react";
+import { Chart, ValueAxis, BarSeries, ArgumentAxis, Tooltip } from '@devexpress/dx-react-chart-material-ui';
+import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { Animation, EventTracker } from "@devexpress/dx-react-chart";
 import { Card, CardContent, ButtonGroup, Button, Typography, Box } from "@material-ui/core";

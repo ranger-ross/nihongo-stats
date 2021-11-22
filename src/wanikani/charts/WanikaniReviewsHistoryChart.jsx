@@ -1,10 +1,10 @@
 import { Chart, ValueAxis, ArgumentAxis, Tooltip } from '@devexpress/dx-react-chart-material-ui';
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { LineSeries } from "@devexpress/dx-react-chart";
+import { BarSeries, Stack } from "@devexpress/dx-react-chart";
 import { wanikaniColors } from '../../Constants';
-import { Checkbox, Card, CardContent, Typography, Grid, FormControlLabel } from "@material-ui/core";
-import { EventTracker, Animation } from "@devexpress/dx-react-chart";
+import { Card, CardContent, Typography, Grid, ButtonGroup, Button } from "@material-ui/core";
+import { EventTracker } from "@devexpress/dx-react-chart";
 
 const LabelWithDate = (props) => {
     const { text } = props;
@@ -27,21 +27,32 @@ function sortByStartedAtDate(a, b) {
     return 0;
 }
 
-function DataPoint(date, previousDataPoint) {
+function DataPoint(date) {
     let data = {
         date: date,
+        data: [],
+        total: 0,
         radicals: 0,
         kanji: 0,
         vocabulary: 0,
     };
 
-    if (!!previousDataPoint) {
-        data.radicals = previousDataPoint.radicals;
-        data.kanji = previousDataPoint.kanji;
-        data.vocabulary = previousDataPoint.vocabulary;
-    }
+    data.push = (d) => {
+        data.data.push(d);
+        data.total = data.data.length;
 
-    data.total = () => data.radicals + data.kanji + data.vocabulary;
+        switch (d.subject.object) {
+            case 'radical':
+                data.radicals += 1;
+                break;
+            case 'kanji':
+                data.kanji += 1;
+                break;
+            case 'vocabulary':
+                data.vocabulary += 1;
+                break;
+        }
+    };
 
     return data;
 };
@@ -50,49 +61,36 @@ function truncDate(date) {
     return new Date(new Date(date).toDateString());
 }
 
+function createSubjectMap(subjects) {
+    let map = {};
+
+    for (const subject of subjects) {
+        map[subject.id] = subject;
+    }
+
+    return map;
+}
+
 async function fetchData() {
 
-    WanikaniApiService.getReviews()
-        .then(reviews => {
-            console.log(reviews);
-        })
+    const reviews = await WanikaniApiService.getReviews();
+    const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
 
-
-    const assignments = await WanikaniApiService.getAllAssignments();
-    const orderedAssignments = assignments
-        .filter(assignemnt => !!assignemnt.data['started_at'])
-        .map(assignemnt => ({
-            subjectId: assignemnt.data['subject_id'],
-            type: assignemnt.data['subject_type'],
-            startedAt: new Date(assignemnt.data['started_at']),
-        }))
-        .sort(sortByStartedAtDate)
-
-
-    let data = [new DataPoint(truncDate(orderedAssignments[0].startedAt))];
-    for (const assignment of orderedAssignments) {
-        if (data[data.length - 1].date.getTime() != truncDate(assignment.startedAt).getTime()) {
-            data.push(new DataPoint(truncDate(assignment.startedAt), data[data.length - 1]));
-        }
-        const dataPoint = data[data.length - 1];
-        if (assignment.type === 'radical') {
-            dataPoint.radicals += 1;
-        }
-        if (assignment.type === 'kanji') {
-            dataPoint.kanji += 1;
-        }
-        if (assignment.type === 'vocabulary') {
-            dataPoint.vocabulary += 1;
-        }
+    let data = [];
+    for (const review of reviews) {
+        data.push({
+            review: review,
+            subject: subjects[review.data['subject_id']]
+        });
     }
+
     return data;
 }
 
 function WanikaniReviewsHistoryChart() {
     const [rawData, setRawData] = useState([]);
-    const [showRadicals, setShowRadicals] = useState(true);
-    const [showKanji, setShowKanji] = useState(true);
-    const [showVocabulary, setShowVocabulary] = useState(true);
+    const [chartData, setChartData] = useState([]);
+    const [daysToLookBack, setDaysToLookBack] = useState(30);
 
     useEffect(() => {
         fetchData()
@@ -100,25 +98,28 @@ function WanikaniReviewsHistoryChart() {
             .catch(console.error);
     }, []);
 
-    const data = rawData.map(dp => {
-        return {
-            ...dp,
-            radicals: showRadicals ? dp.radicals : null,
-            kanji: showKanji ? dp.kanji : null,
-            vocabulary: showVocabulary ? dp.vocabulary : null,
-        };
-    })
+    useEffect(() => {
+        if (rawData.length == 0) {
+            return;
+        }
 
+        const startDate = Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1));
 
-    function ItemToolTip(props) {
-        const dataPoint = data[props.targetItem.point];
-        return (
-            <>
-                <p>{new Date(dataPoint.date).toLocaleDateString()}</p>
-                <p>Count: {dataPoint[props.targetItem.series]}</p>
-            </>
-        );
-    }
+        const dataForTimeRange = rawData
+            .filter(data => new Date(data.review['data_updated_at']).getTime() > startDate)
+
+        let aggregatedDate = [new DataPoint(truncDate(dataForTimeRange[0].review['data_updated_at']))];
+        for (const data of dataForTimeRange) {
+            if (aggregatedDate[aggregatedDate.length - 1].date.getTime() != truncDate(data.review['data_updated_at']).getTime()) {
+                aggregatedDate.push(new DataPoint(truncDate(data.review['data_updated_at'])));
+            }
+
+            aggregatedDate[aggregatedDate.length - 1].push(data);
+        }
+
+        setChartData(aggregatedDate);
+        console.log(aggregatedDate);
+    }, [rawData, daysToLookBack])
 
     return (
         <Card style={{ height: '100%' }}>
@@ -133,68 +134,56 @@ function WanikaniReviewsHistoryChart() {
                         </Grid>
 
                         <Grid item xs={4} style={{ textAlign: 'end' }}>
-                            <FormControlLabel label="Radicals"
-                                control={
-                                    <Checkbox checked={showRadicals}
-                                        color={'primary'}
-                                        disabled={!showKanji && !showVocabulary}
-                                        onChange={e => setShowRadicals(e.target.checked)}
-                                    />
-                                }
-                            />
-
-                            <FormControlLabel label="Kanji"
-                                control={
-                                    <Checkbox checked={showKanji}
-                                        color={'primary'}
-                                        disabled={!showRadicals && !showVocabulary}
-                                        onChange={e => setShowKanji(e.target.checked)}
-                                    />
-                                }
-                            />
-
-                            <FormControlLabel label="Vocabulary"
-                                control={
-                                    <Checkbox checked={showVocabulary}
-                                        color={'primary'}
-                                        disabled={!showRadicals && !showKanji}
-                                        onChange={e => setShowVocabulary(e.target.checked)}
-                                    />
-                                }
-                            />
+                            <ButtonGroup variant="outlined" color={'primary'} >
+                                <Button variant={daysToLookBack === 7 ? 'contained' : null} onClick={() => setDaysToLookBack(7)}>7</Button>
+                                <Button variant={daysToLookBack === 14 ? 'contained' : null} onClick={() => setDaysToLookBack(14)}>14</Button>
+                                <Button variant={daysToLookBack === 30 ? 'contained' : null} onClick={() => setDaysToLookBack(30)}>30</Button>
+                                <Button variant={daysToLookBack === 90 ? 'contained' : null} onClick={() => setDaysToLookBack(90)}>3 Mon</Button>
+                                <Button variant={daysToLookBack === 180 ? 'contained' : null} onClick={() => setDaysToLookBack(180)}>6 Mon</Button>
+                                <Button variant={daysToLookBack === 365 ? 'contained' : null} onClick={() => setDaysToLookBack(365)}>1 Yr</Button>
+                                <Button variant={daysToLookBack === 5000 ? 'contained' : null} onClick={() => setDaysToLookBack(5000)}>All</Button>
+                            </ButtonGroup>
                         </Grid>
 
                     </Grid>
 
                     <div style={{ flexGrow: '1' }}>
-                        <Chart data={data}>
+                        <Chart data={chartData}>
                             <ValueAxis />
                             <ArgumentAxis
                                 labelComponent={LabelWithDate}
                             />
-                            <LineSeries
+
+                            <BarSeries
                                 name="radicals"
                                 valueField="radicals"
                                 argumentField="date"
                                 color={wanikaniColors.blue}
                             />
 
-                            <LineSeries
+
+                            <BarSeries
                                 name="kanji"
                                 valueField="kanji"
                                 argumentField="date"
                                 color={wanikaniColors.pink}
                             />
 
-                            <LineSeries
+                            <BarSeries
                                 name="vocabulary"
                                 valueField="vocabulary"
                                 argumentField="date"
                                 color={wanikaniColors.purple}
                             />
 
+                            <Stack
+                                stacks={[
+                                    { series: ['radicals', 'kanji', 'vocabulary'] }
+                                ]}
+                            />
+
                             <EventTracker />
-                            <Tooltip contentComponent={ItemToolTip} />
+                            {/* <Tooltip contentComponent={ItemToolTip} /> */}
                         </Chart>
                     </div>
                 </div>

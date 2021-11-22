@@ -72,7 +72,6 @@ async function fetchMultiPageRequest(path, cacheMode = cacheModes.none) {
     return data;
 }
 
-
 async function getFromMemoryCacheOrFetchMultiPageRequest(path, cacheMode = cacheModes.none) {
     if (memoryCache.includes(path)) {
         return memoryCache.get(path);
@@ -81,34 +80,6 @@ async function getFromMemoryCacheOrFetchMultiPageRequest(path, cacheMode = cache
     memoryCache.put(path, data);
     return data;
 }
-
-
-async function getReviews() {
-    if (memoryCache.includes(cacheKeys.reviews)) {
-        return memoryCache.get(cacheKeys.reviews);
-    }
-
-    let data = [];
-    if (!!localStorage.getItem(cacheKeys.reviews)) {
-        data = JSON.parse(localStorage.getItem(cacheKeys.reviews));
-        console.log('using cached reviews', data);
-    }
-
-    if (data.length == 0) {
-        const newData = await fetchMultiPageRequest('/v2/reviews');
-        data.push(...newData);
-    } else {
-        const lastId = data[data.length - 1].id;
-        const newData = await fetchMultiPageRequest('/v2/reviews?page_after_id=' + lastId);
-        data.push(...newData);
-    }
-
-    localStorage.setItem(cacheKeys.reviews, JSON.stringify(data));
-    memoryCache.put(cacheKeys.reviews, data);
-    return data;
-}
-
-
 
 export default {
     saveApiKey: saveApiKey,

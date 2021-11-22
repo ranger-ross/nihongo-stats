@@ -21,7 +21,7 @@ function WanikaniHistory() {
             {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : null}
 
             <Card variant={'outlined'} style={{margin: '15px'}}>
-                <WanikaniLevelProgessChart />
+                <WanikaniReviewsHistoryChart />
             </Card>
 
             <Card variant={'outlined'} style={{margin: '15px'}}>
@@ -29,7 +29,7 @@ function WanikaniHistory() {
             </Card>
 
             <Card variant={'outlined'} style={{margin: '15px'}}>
-                <WanikaniReviewsHistoryChart />
+                <WanikaniLevelProgessChart />
             </Card>
 
 

@@ -1,9 +1,10 @@
-import { Chart, ValueAxis, ArgumentAxis, Title } from '@devexpress/dx-react-chart-material-ui';
+import { Chart, ValueAxis, ArgumentAxis, Tooltip } from '@devexpress/dx-react-chart-material-ui';
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { LineSeries } from "@devexpress/dx-react-chart";
 import { wanikaniColors } from '../../Constants';
-import { Checkbox, Card, CardContent, Box, Typography, Grid, FormControlLabel } from "@material-ui/core";
+import { Checkbox, Card, CardContent, Typography, Grid, FormControlLabel } from "@material-ui/core";
+import { EventTracker, Animation } from "@devexpress/dx-react-chart";
 
 const LabelWithDate = (props) => {
     const { text } = props;
@@ -101,6 +102,17 @@ function WanikaniTotalItemsHistoryChart() {
         };
     })
 
+
+    function ItemToolTip(props) {
+        const dataPoint = data[props.targetItem.point];
+        return (
+            <>
+                <p>{new Date(dataPoint.date).toLocaleDateString()}</p>
+                <p>Count: {dataPoint[props.targetItem.series]}</p>
+            </>
+        );
+    }
+
     return (
         <Card style={{ height: '100%' }}>
             <CardContent style={{ height: '100%' }}>
@@ -154,22 +166,28 @@ function WanikaniTotalItemsHistoryChart() {
                                 labelComponent={LabelWithDate}
                             />
                             <LineSeries
+                                name="radicals"
                                 valueField="radicals"
                                 argumentField="date"
                                 color={wanikaniColors.blue}
                             />
 
                             <LineSeries
+                                name="kanji"
                                 valueField="kanji"
                                 argumentField="date"
                                 color={wanikaniColors.pink}
                             />
 
                             <LineSeries
+                                name="vocabulary"
                                 valueField="vocabulary"
                                 argumentField="date"
                                 color={wanikaniColors.purple}
                             />
+
+                            <EventTracker />
+                            <Tooltip contentComponent={ItemToolTip} />
                         </Chart>
                     </div>
                 </div>

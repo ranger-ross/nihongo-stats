@@ -1,5 +1,12 @@
 import { memoryCache } from "../../GlobalState"
 
+const cacheModes = {
+    default: 'default',
+    none: 'none',
+    all: 'cache-all',
+    allButLastPage: 'cache-all-but-last',
+};
+
 const wanikaniApiUrl = 'https://api.wanikani.com';
 const cacheKeys = {
     apiKey: 'wanikani-api-key',
@@ -8,17 +15,22 @@ const cacheKeys = {
 
 const authHeader = (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` })
 
-function fetchWanikaniApi(path, apiKey) {
-    return fetch(`${wanikaniApiUrl}${path}`, {
+function fetchWanikaniApi(path, apiKey, cacheMode) {
+    let options = {
         headers: { ...authHeader(apiKey) }
-    })
+    };
+    if (cacheModes.none == cacheMode) {
+        options.cache = "no-cache";
+    }
+    return fetch(`${wanikaniApiUrl}${path}`, options);
 }
 
-async function getFromMemoryCacheOrFetch(path, apiKey) {
+async function getFromMemoryCacheOrFetch(path, _apiKey, cacheMode) {
     if (memoryCache.includes(path)) {
         return memoryCache.get(path);
     }
-    const response = await fetchWanikaniApi(path, apiKey);
+    const key = !!_apiKey ? _apiKey : apiKey();
+    const response = await fetchWanikaniApi(path, key, cacheMode);
     const data = await response.json();
 
     memoryCache.put(path, data);
@@ -36,12 +48,6 @@ function saveApiKey(key) {
         localStorage.setItem(cacheKeys.apiKey, key);
     }
 }
-
-const cacheModes = {
-    none: 'none',
-    all: 'cache-all',
-    allButLastPage: 'cache-all-but-last',
-};
 
 async function fetchMultiPageRequest(path, cacheMode = cacheModes.none) {
     const headers = {
@@ -90,10 +96,10 @@ export default {
         saveApiKey(apiKey);
         return user;
     },
-    getUser: async () => getFromMemoryCacheOrFetch('/v2/user', apiKey()),
-    getSummary: () => getFromMemoryCacheOrFetch('/v2/summary', apiKey()),
-    getLevelProgress: () => getFromMemoryCacheOrFetch('/v2/level_progressions', apiKey()),
-    getAssignmentsForLevel: (level) => getFromMemoryCacheOrFetch('/v2/assignments?levels=' + level, apiKey()),
+    getUser: async () => getFromMemoryCacheOrFetch('/v2/user'),
+    getSummary: () => getFromMemoryCacheOrFetch('/v2/summary', null, cacheModes.none),
+    getLevelProgress: () => getFromMemoryCacheOrFetch('/v2/level_progressions'),
+    getAssignmentsForLevel: (level) => getFromMemoryCacheOrFetch('/v2/assignments?levels=' + level),
 
     getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
     getAllAssignments: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments'),

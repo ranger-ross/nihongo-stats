@@ -15,10 +15,6 @@ const useStyles = makeStyles({
         padding: '5px',
         boxShadow: '0 2px 4px rgb(0 0 0 / 50%)',
     },
-    selectorContainer: {
-        width: '120px',
-        marginLeft: '5px',
-    },
     menuContainer: {
         textAlign: 'right'
     }
@@ -42,10 +38,10 @@ function AppNav() {
     }, [selectedApp])
 
     return (
-        <Grid container className={classes.container} alignItems={'flex-end'}>
-            <Box className={classes.selectorContainer}>
+        <Grid container className={classes.container} alignItems={'flex-end'} spacing={1}>
+            <Grid item xs={12} sm={3} md={2} lg={1} className={classes.selectorContainer}>
                 <AppSelector selectedApp={selectedApp} setSelectedApp={setSelectedApp} />
-            </Box>
+            </Grid>
 
             <Box sx={{ flexGrow: 1 }}>
                 {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniNav />) : null}

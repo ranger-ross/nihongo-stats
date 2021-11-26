@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router";
 
 const useStyles = makeStyles({
     button: {
-        marginLeft: '15px'
+        marginLeft: '13px'
     }
 });
 

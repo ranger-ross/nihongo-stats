@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { ArgumentScale, BarSeries, Stack } from "@devexpress/dx-react-chart";
 import { wanikaniColors } from '../../Constants';
-import { Card, CardContent, Typography, Grid, ButtonGroup, Button } from "@material-ui/core";
+import { Card, CardContent, Typography, Grid, ButtonGroup, Button, CircularProgress } from "@material-ui/core";
 import { EventTracker } from "@devexpress/dx-react-chart";
 import { scaleBand } from 'd3-scale';
 import React from 'react';
@@ -91,8 +91,10 @@ function WanikaniReviewsHistoryChart() {
     const [chartData, setChartData] = useState([]);
     const [daysToLookBack, setDaysToLookBack] = useState(30);
     const [totalDays, setTotalDays] = useState(5000);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
+        setIsLoading(true);
         let isSubscribed = true;
         fetchData()
             .then(data => {
@@ -100,6 +102,7 @@ function WanikaniReviewsHistoryChart() {
                     return;
                 setTotalDays(aggregateDate(data, -1).length);
                 setRawData(data);
+                setIsLoading(false);
             })
             .catch(console.error);
         return () => isSubscribed = false;
@@ -152,62 +155,70 @@ function WanikaniReviewsHistoryChart() {
             <CardContent style={{ height: '100%' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <Grid container>
-                        <Grid item xs={4} />
-                        <Grid item xs={4}>
+                        <Grid item xs={12} md={4} />
+                        <Grid item xs={12} md={4} >
                             <Typography variant={'h5'} style={{ textAlign: 'center' }}>
                                 Review History
                             </Typography>
                         </Grid>
 
-                        <Grid item xs={4} style={{ textAlign: 'end' }}>
-                            <ButtonGroup variant="outlined" color={'primary'} >
-                                <Button variant={daysToLookBack === 7 ? 'contained' : null} onClick={() => setDaysToLookBack(7)}>7</Button>
-                                <Button variant={daysToLookBack === 14 ? 'contained' : null} onClick={() => setDaysToLookBack(14)}>14</Button>
-                                <Button variant={daysToLookBack === 30 ? 'contained' : null} onClick={() => setDaysToLookBack(30)}>30</Button>
-                                <Button variant={daysToLookBack === 90 ? 'contained' : null} onClick={() => setDaysToLookBack(90)}>3 Mon</Button>
-                                <Button variant={daysToLookBack === 180 ? 'contained' : null} onClick={() => setDaysToLookBack(180)}>6 Mon</Button>
-                                <Button variant={daysToLookBack === 365 ? 'contained' : null} onClick={() => setDaysToLookBack(365)}>1 Yr</Button>
-                                <Button variant={daysToLookBack === totalDays ? 'contained' : null} onClick={() => setDaysToLookBack(totalDays)}>All</Button>
-                            </ButtonGroup>
-                        </Grid>
 
+                        {isLoading ? (
+                            <Grid item container xs={12} justifyContent={'center'} style={{ padding: '10px' }}>
+                                <CircularProgress />
+                            </Grid>
+                        ) : (
+                            <Grid item xs={12} md={4} style={{ textAlign: 'end' }}>
+                                <ButtonGroup variant="outlined" color={'primary'} >
+                                    <Button variant={daysToLookBack === 7 ? 'contained' : null} onClick={() => setDaysToLookBack(7)}>7</Button>
+                                    <Button variant={daysToLookBack === 14 ? 'contained' : null} onClick={() => setDaysToLookBack(14)}>14</Button>
+                                    <Button variant={daysToLookBack === 30 ? 'contained' : null} onClick={() => setDaysToLookBack(30)}>30</Button>
+                                    <Button variant={daysToLookBack === 90 ? 'contained' : null} onClick={() => setDaysToLookBack(90)}>3 Mon</Button>
+                                    <Button variant={daysToLookBack === 180 ? 'contained' : null} onClick={() => setDaysToLookBack(180)}>6 Mon</Button>
+                                    <Button variant={daysToLookBack === 365 ? 'contained' : null} onClick={() => setDaysToLookBack(365)}>1 Yr</Button>
+                                    <Button variant={daysToLookBack === totalDays ? 'contained' : null} onClick={() => setDaysToLookBack(totalDays)}>All</Button>
+                                </ButtonGroup>
+                            </Grid>
+                        )}
                     </Grid>
 
-                    <div style={{ flexGrow: '1' }}>
-                        <Chart data={chartData}>
-                            <ArgumentScale factory={scaleBand} />
-                            <ArgumentAxis labelComponent={LabelWithDate} />
-                            <ValueAxis />
+                    {!isLoading ? (
+                        <div style={{ flexGrow: '1' }}>
+                            <Chart data={chartData}>
+                                <ArgumentScale factory={scaleBand} />
+                                <ArgumentAxis labelComponent={LabelWithDate} />
+                                <ValueAxis />
 
-                            <BarSeries
-                                name="radicals"
-                                valueField="radicals"
-                                argumentField="date"
-                                color={wanikaniColors.blue}
-                            />
+                                <BarSeries
+                                    name="radicals"
+                                    valueField="radicals"
+                                    argumentField="date"
+                                    color={wanikaniColors.blue}
+                                />
 
-                            <BarSeries
-                                name="kanji"
-                                valueField="kanji"
-                                argumentField="date"
-                                color={wanikaniColors.pink}
-                            />
+                                <BarSeries
+                                    name="kanji"
+                                    valueField="kanji"
+                                    argumentField="date"
+                                    color={wanikaniColors.pink}
+                                />
 
-                            <BarSeries
-                                name="vocabulary"
-                                valueField="vocabulary"
-                                argumentField="date"
-                                color={wanikaniColors.purple}
-                            />
+                                <BarSeries
+                                    name="vocabulary"
+                                    valueField="vocabulary"
+                                    argumentField="date"
+                                    color={wanikaniColors.purple}
+                                />
 
-                            <Stack
-                                stacks={[{ series: ['radicals', 'kanji', 'vocabulary'] }]}
-                            />
+                                <Stack
+                                    stacks={[{ series: ['radicals', 'kanji', 'vocabulary'] }]}
+                                />
 
-                            <EventTracker />
-                            <Tooltip contentComponent={ReviewsToolTip} />
-                        </Chart>
-                    </div>
+                                <EventTracker />
+                                <Tooltip contentComponent={ReviewsToolTip} />
+                            </Chart>
+                        </div>
+                    ) : null}
                 </div>
             </CardContent>
         </Card>

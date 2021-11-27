@@ -38,7 +38,7 @@ function AppNav() {
     }, [selectedApp])
 
     return (
-        <Grid container className={classes.container} alignItems={'flex-end'} spacing={1}>
+        <Grid container className={classes.container} alignItems={'flex-end'} style={{gap: '5px'}}>  
             <Grid item xs={12} sm={3} md={2} lg={1} className={classes.selectorContainer}>
                 <AppSelector selectedApp={selectedApp} setSelectedApp={setSelectedApp} />
             </Grid>

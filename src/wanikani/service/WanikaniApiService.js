@@ -49,13 +49,14 @@ function saveApiKey(key) {
     }
 }
 
-async function fetchMultiPageRequest(path, cacheMode = cacheModes.none) {
+async function fetchMultiPageRequest(path, cacheMode = cacheModes.none, startingId) {
     const headers = {
         headers: { ...authHeader(apiKey()) },
         cache: [cacheModes.all, cacheModes.allButLastPage].includes(cacheMode) ? 'force-cache' : undefined
     };
 
-    const firstPageResponse = await fetch(`${wanikaniApiUrl}${path}`, headers);
+    const startingPageParam = !!startingId ? `?page_after_id=${startingId}` : '';
+    const firstPageResponse = await fetch(`${wanikaniApiUrl}${path}${startingPageParam}`, headers);
     const firstPage = await firstPageResponse.json();
     let data = firstPage.data;
     let nextPage = firstPage.pages['next_url']
@@ -87,6 +88,22 @@ async function getFromMemoryCacheOrFetchMultiPageRequest(path, cacheMode = cache
     return data;
 }
 
+async function getAllAssignments() {
+    const cachedValue = await localForage.getItem('wanikani-assignments');
+    if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 10)) {
+        return cachedValue.data;
+    }
+
+    const assignments = await getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments');
+
+    localForage.setItem('wanikani-assignments', {
+        data: assignments,
+        lastUpdated: new Date().getTime(),
+    });
+
+    return subjects;
+}
+
 export default {
     saveApiKey: saveApiKey,
     apiKey: apiKey,
@@ -100,11 +117,40 @@ export default {
     getSummary: () => getFromMemoryCacheOrFetch('/v2/summary', null, cacheModes.none),
     getLevelProgress: () => getFromMemoryCacheOrFetch('/v2/level_progressions'),
     getAssignmentsForLevel: (level) => getFromMemoryCacheOrFetch('/v2/assignments?levels=' + level),
-
     getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
-    getAllAssignments: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments'),
-    getSubjects: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/subjects', cacheModes.all),
-    getReviews: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/reviews', cacheModes.allButLastPage),
+    getAllAssignments: getAllAssignments,
+    getSubjects: async () => {
+        const cachedValue = await localForage.getItem('wanikani-subjects');
+        if (!!cachedValue) {
+            return cachedValue.data;
+        }
 
+        const subjects = await fetchMultiPageRequest('/v2/subjects');
 
+        localForage.setItem('wanikani-subjects', {
+            data: subjects,
+            lastUpdated: new Date().getTime(),
+        });
+
+        return subjects;
+    },
+    getReviews: async () => {
+        const cachedValue = await localForage.getItem('wanikani-reviews');
+        let reviews;
+        if (!!cachedValue) {
+            reviews = cachedValue.data;
+            const lastId = reviews[reviews.length - 1].id;
+            const newData = await fetchMultiPageRequest('/v2/reviews', cacheModes.none, lastId);
+            reviews.push(...newData);
+        } else {
+            reviews = await fetchMultiPageRequest('/v2/reviews');
+        }
+
+        localForage.setItem('wanikani-reviews', {
+            data: reviews,
+            lastUpdated: new Date().getTime(),
+        });
+
+        return reviews;
+    },
 }

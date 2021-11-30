@@ -8,7 +8,6 @@ import { RoutePaths } from '../Routes';
 import { useWanikaniApiKey } from "../wanikani/stores/WanikaniApiKeyStore.js";
 import AppSelector from "./AppSelector";
 import WanikaniNav from "./WanikaniNav.jsx";
-import WanikaniOptionMenu from "./WanikaniOptionMenu.jsx";
 
 const useStyles = makeStyles({
     container: {
@@ -45,10 +44,6 @@ function AppNav() {
 
             <Box sx={{ flexGrow: 1 }}>
                 {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniNav />) : null}
-            </Box>
-
-            <Box className={classes.menuContainer}>
-                {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniOptionMenu />) : null}
             </Box>
         </Grid>
     );

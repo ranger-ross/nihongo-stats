@@ -1,10 +1,10 @@
 import { Chart, ValueAxis, BarSeries, ArgumentAxis, Tooltip } from '@devexpress/dx-react-chart-material-ui';
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { Animation, EventTracker } from "@devexpress/dx-react-chart";
+import { Animation, EventTracker, Stack } from "@devexpress/dx-react-chart";
 import { Card, CardContent, ButtonGroup, Button, Typography, Box } from "@material-ui/core";
 import { addDays, areDatesSameDay } from '../../util/DateUtils';
-
+import { wanikaniColors } from '../../Constants';
 
 function WanikaniFutureReviewsChart() {
     const [rawData, setRawData] = useState([]);
@@ -52,9 +52,11 @@ function WanikaniFutureReviewsChart() {
     }, [rawData, days]);
 
     function ReviewsToolTip({ targetItem }) {
-        const { radicals, kanji, vocabulary } = chartData[targetItem.point];
+        const { reviews, radicals, kanji, vocabulary } = chartData[targetItem.point];
         return (
             <div>
+                Total: {reviews}
+                <br />
                 Radicals: {radicals}
                 <br />
                 Kanji: {kanji}
@@ -85,10 +87,32 @@ function WanikaniFutureReviewsChart() {
                         <Chart data={chartData}>
                             <ValueAxis />
                             <ArgumentAxis />
+
                             <BarSeries
-                                valueField="reviews"
+                                name="radicals"
+                                valueField="radicals"
                                 argumentField="label"
+                                color={wanikaniColors.blue}
                             />
+
+                            <BarSeries
+                                name="kanji"
+                                valueField="kanji"
+                                argumentField="label"
+                                color={wanikaniColors.pink}
+                            />
+
+                            <BarSeries
+                                name="vocabulary"
+                                valueField="vocabulary"
+                                argumentField="label"
+                                color={wanikaniColors.purple}
+                            />
+
+                            <Stack
+                                stacks={[{ series: ['radicals', 'kanji', 'vocabulary'] }]}
+                            />
+
                             <EventTracker />
                             <Tooltip targetItem={targetItem}
                                 onTargetItemChange={setTargetItem}

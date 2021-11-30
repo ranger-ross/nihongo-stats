@@ -6,6 +6,7 @@ import WanikaniLevelProgessChart from "./charts/WanikaniLevelProgressChart";
 import { Card } from "@material-ui/core";
 import WanikaniTotalItemsHistoryChart from "./charts/WanikaniTotalItemsHistoryChart";
 import WanikaniReviewsHistoryChart from "./charts/WanikaniReviewsHistoryChart";
+import WanikaniAccuracyHistoryChart from "./charts/WanikaniAccuracyHistoryChart";
 
 const useStyles = makeStyles({
     container: {}
@@ -20,15 +21,19 @@ function WanikaniHistory() {
 
             {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : null}
 
-            <Card variant={'outlined'} style={{margin: '15px'}}>
+            <Card variant={'outlined'} style={{ margin: '15px' }}>
                 <WanikaniReviewsHistoryChart />
             </Card>
 
-            <Card variant={'outlined'} style={{margin: '15px'}}>
+            <Card variant={'outlined'} style={{ margin: '15px' }}>
                 <WanikaniTotalItemsHistoryChart />
             </Card>
 
-            <Card variant={'outlined'} style={{margin: '15px'}}>
+            <Card variant={'outlined'} style={{ margin: '15px' }}>
+                <WanikaniAccuracyHistoryChart />
+            </Card>
+
+            <Card variant={'outlined'} style={{ margin: '15px' }}>
                 <WanikaniLevelProgessChart />
             </Card>
 

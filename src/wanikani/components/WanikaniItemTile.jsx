@@ -1,6 +1,8 @@
 import { Tooltip } from "@material-ui/core";
 import { wanikaniColors } from "../../Constants";
 import makeStyles from "@material-ui/core/styles/makeStyles";
+import VisibilitySensor from "react-visibility-sensor"
+import { useState, useMemo } from "react";
 
 const racialColor = wanikaniColors.blue;
 const kanjiColor = wanikaniColors.pink;
@@ -39,11 +41,17 @@ const useStyles = makeStyles({
     vocabularyTile: {
         ...baseTile,
         background: vocabularyColor,
+    },
+    placeholderDiv: {
+        height: '35px',
+        width: '35px',
     }
 });
 
 function WanikaniItemTile({ text, type, link, meaning, srsLevel, isStarted, isAvailable }) {
     const classes = useStyles();
+    const [isLoaded, setIsLoaded] = useState(false);
+
     let cls = classes.lockedTile;
     if (isStarted) {
         switch (type) {
@@ -62,14 +70,18 @@ function WanikaniItemTile({ text, type, link, meaning, srsLevel, isStarted, isAv
     }
 
     return (
-        <Tooltip title={
-            <>
-                <p>Meaning: {meaning}</p>
-                {!!srsLevel ? (<p>SRS Level: {srsLevel}</p>) : null}
-            </>
-        } placement={'top'}>
-            <a href={link} target="_blank" className={cls}>{text}</a>
-        </Tooltip>
+        <VisibilitySensor onChange={(isVisible) => isVisible ? setIsLoaded(true) : null}>
+            {isLoaded ? (
+                <Tooltip title={
+                    <>
+                        <p>Meaning: {meaning}</p>
+                        {!!srsLevel ? (<p>SRS Level: {srsLevel}</p>) : null}
+                    </>
+                } placement={'top'}>
+                    <a href={link} target="_blank" className={cls}>{text}</a>
+                </Tooltip>
+            ) : <div className={classes.placeholderDiv}>-</div>}
+        </VisibilitySensor>
     );
 }
 

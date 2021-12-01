@@ -2,7 +2,7 @@ class InMemoryCache {
     cache = {};
 
     includes(key) {
-        return key in this.cache;
+        return key in this.cache && !!this.cache[key];
     }
 
     get(key) {

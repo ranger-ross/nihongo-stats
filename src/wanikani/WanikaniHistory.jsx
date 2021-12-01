@@ -8,6 +8,7 @@ import WanikaniTotalItemsHistoryChart from "./charts/WanikaniTotalItemsHistoryCh
 import WanikaniReviewsHistoryChart from "./charts/WanikaniReviewsHistoryChart";
 import WanikaniAccuracyHistoryChart from "./charts/WanikaniAccuracyHistoryChart";
 import WanikaniHistorySummaryChart from "./charts/WanikaniHistorySummaryChart";
+import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 
 const useStyles = makeStyles({
     container: {}
@@ -18,31 +19,35 @@ function WanikaniHistory() {
     const { apiKey } = useWanikaniApiKey();
 
     return (
-        <div className={classes.container}>
+        <>
+            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : (
+                <WanikaniPreloadedData>
+                    <div className={classes.container}>
 
-            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : null}
+                        <Card variant={'outlined'} style={{ margin: '15px' }}>
+                            <WanikaniHistorySummaryChart />
+                        </Card>
 
-            <Card variant={'outlined'} style={{ margin: '15px' }}>
-                <WanikaniHistorySummaryChart />
-            </Card>
+                        <Card variant={'outlined'} style={{ margin: '15px' }}>
+                            <WanikaniReviewsHistoryChart />
+                        </Card>
 
-            <Card variant={'outlined'} style={{ margin: '15px' }}>
-                <WanikaniReviewsHistoryChart />
-            </Card>
+                        <Card variant={'outlined'} style={{ margin: '15px' }}>
+                            <WanikaniTotalItemsHistoryChart />
+                        </Card>
 
-            <Card variant={'outlined'} style={{ margin: '15px' }}>
-                <WanikaniTotalItemsHistoryChart />
-            </Card>
+                        <Card variant={'outlined'} style={{ margin: '15px' }}>
+                            <WanikaniLevelProgessChart />
+                        </Card>
 
-            <Card variant={'outlined'} style={{ margin: '15px' }}>
-                <WanikaniLevelProgessChart />
-            </Card>
+                        <Card variant={'outlined'} style={{ margin: '15px' }}>
+                            <WanikaniAccuracyHistoryChart />
+                        </Card>
 
-            <Card variant={'outlined'} style={{ margin: '15px' }}>
-                <WanikaniAccuracyHistoryChart />
-            </Card>
-
-        </div>
+                    </div>
+                </WanikaniPreloadedData>
+            )}
+        </>
     );
 }
 

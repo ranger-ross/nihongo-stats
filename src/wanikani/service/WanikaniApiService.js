@@ -80,6 +80,14 @@ async function getFromMemoryCacheOrFetchMultiPageRequest(path) {
 }
 
 async function getAllAssignments() {
+    if (memoryCache.includes('wanikani-assignments')) {
+        const cachedValue = memoryCache.get('wanikani-assignments');
+        // Assignments ttl is 5 mins in Mem Cache
+        if (cachedValue.lastUpdated > (Date.now() - 1000 * 60 * 5)) { 
+            return cachedValue.data;
+        }
+    }
+
     const cachedValue = await localForage.getItem('wanikani-assignments');
     if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 10)) {
         return cachedValue.data;
@@ -87,10 +95,12 @@ async function getAllAssignments() {
 
     const assignments = await getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments');
 
-    localForage.setItem('wanikani-assignments', {
+    const cacheObject = {
         data: assignments,
         lastUpdated: new Date().getTime(),
-    });
+    };
+    localForage.setItem('wanikani-assignments', cacheObject);
+    memoryCache.put('wanikani-assignments', cacheObject);
 
     return assignments;
 }
@@ -141,8 +151,13 @@ export default {
     getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
     getAllAssignments: getAllAssignments,
     getSubjects: async () => {
+        if (memoryCache.includes('wanikani-subjects')) {
+            return memoryCache.get('wanikani-subjects');
+        }
+
         const cachedValue = await localForage.getItem('wanikani-subjects');
         if (!!cachedValue) {
+            memoryCache.put('wanikani-subjects', cachedValue.data);
             return cachedValue.data;
         }
 
@@ -152,10 +167,18 @@ export default {
             data: subjects,
             lastUpdated: new Date().getTime(),
         });
-
+        memoryCache.put('wanikani-subjects', subjects);
         return subjects;
     },
     getReviews: async () => {
+        if (memoryCache.includes('wanikani-reviews')) {
+            const cachedValue = memoryCache.get('wanikani-reviews');
+            // Only check for new reviews every 60 seconds
+            if (cachedValue.lastUpdated > (Date.now() - 1000 * 60)) { 
+                return cachedValue.data;
+            }
+        }
+
         const cachedValue = await localForage.getItem('wanikani-reviews');
         let reviews;
         if (!!cachedValue) {
@@ -167,10 +190,12 @@ export default {
             reviews = await fetchMultiPageRequest('/v2/reviews');
         }
 
-        localForage.setItem('wanikani-reviews', {
+        const cacheObject = {
             data: reviews,
             lastUpdated: new Date().getTime(),
-        });
+        };
+        localForage.setItem('wanikani-reviews', cacheObject);
+        memoryCache.put('wanikani-reviews', cacheObject);
 
         return reviews;
     },

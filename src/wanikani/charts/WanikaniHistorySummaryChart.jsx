@@ -26,11 +26,19 @@ async function fetchData() {
     return data;
 }
 
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+}
+
 function TotalLabel({ label, count, color }) {
     return (
         <>
-            <Grid xs={6}>{label}: </Grid>
-            <Grid xs={6}><strong style={{ color: color, textShadow: '1px 1px 3px #000000aa' }}>{count}</strong></Grid>
+            <Grid item xs={6}>{label}: </Grid>
+            <Grid item xs={6}>
+                <strong style={{ color: color, textShadow: '1px 1px 3px #000000aa' }}>
+                    {numberWithCommas(count)}
+                </strong>
+            </Grid>
         </>
     );
 }

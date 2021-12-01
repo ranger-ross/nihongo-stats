@@ -45,6 +45,7 @@ const useStyles = makeStyles({
     placeholderDiv: {
         height: '35px',
         width: '35px',
+        color: '#00000011'
     }
 });
 
@@ -70,7 +71,7 @@ function WanikaniItemTile({ text, type, link, meaning, srsLevel, isStarted, isAv
     }
 
     return (
-        <VisibilitySensor onChange={(isVisible) => isVisible ? setIsLoaded(true) : null}>
+        <VisibilitySensor partialVisibility={true} onChange={(isVisible) => isVisible ? setIsLoaded(true) : null}>
             {isLoaded ? (
                 <Tooltip title={
                     <>

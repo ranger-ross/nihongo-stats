@@ -40,6 +40,7 @@ function WanikaniPreloadedData({ children }) {
     const [isSubjectsLoaded, setIsSubjectsLoaded] = useState(false);
     const [isUserLoaded, setIsUserLoaded] = useState(false);
     const [isAssignmentsLoaded, setIsAssignmentsLoaded] = useState(false);
+    const [isReviewsLoaded, setIsReviewsLoaded] = useState(false);
     const [isSummaryLoaded, setIsSummaryLoaded] = useState(false);
     const { status, setStatus } = useWanikaniPreloadStatus();
 
@@ -49,23 +50,17 @@ function WanikaniPreloadedData({ children }) {
         }
         console.log('Preloading Wanikani Data');
 
-        const subjectsPromise = WanikaniApiService.getSubjects()
-            .then(() => setIsSubjectsLoaded(true));
-
-        const userPromise = WanikaniApiService.getUser()
-            .then(() => setIsUserLoaded(true));
-
-        const assignmentsPromise = WanikaniApiService.getAllAssignments()
-            .then(() => setIsAssignmentsLoaded(true));
-
-        const summaryPromise = WanikaniApiService.getSummary()
-            .then(() => setIsSummaryLoaded(true));
-
         Promise.all([
-            subjectsPromise,
-            userPromise,
-            assignmentsPromise,
-            summaryPromise,
+            WanikaniApiService.getSubjects()
+                .then(() => setIsSubjectsLoaded(true)),
+            WanikaniApiService.getUser()
+                .then(() => setIsUserLoaded(true)),
+            WanikaniApiService.getAllAssignments()
+                .then(() => setIsAssignmentsLoaded(true)),
+            WanikaniApiService.getSummary()
+                .then(() => setIsSummaryLoaded(true)),
+            WanikaniApiService.getReviews()
+                .then(() => setIsReviewsLoaded(true)),
         ])
             .then(() => {
                 console.log('Wanikani Data preloaded');
@@ -73,7 +68,7 @@ function WanikaniPreloadedData({ children }) {
             });
     }, []);
 
-    const isLoaded = status || (isSubjectsLoaded && isUserLoaded && isAssignmentsLoaded && isSummaryLoaded);
+    const isLoaded = status || (isSubjectsLoaded && isUserLoaded && isAssignmentsLoaded && isSummaryLoaded && isReviewsLoaded);
 
     return (
         <>
@@ -89,6 +84,7 @@ function WanikaniPreloadedData({ children }) {
                             <LoadingItem text={'User Data'} isLoading={!isUserLoaded} />
                             <LoadingItem text={'User Summary'} isLoading={!isSummaryLoaded} />
                             <LoadingItem text={'User Assignments'} isLoading={!isAssignmentsLoaded} />
+                            <LoadingItem text={'User Reviews'} isLoading={!isReviewsLoaded} />
                         </div>
                     </div>
 

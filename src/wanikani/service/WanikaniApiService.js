@@ -8,7 +8,24 @@ const cacheKeys = {
 
 const authHeader = (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` })
 
-function fetchWanikaniApi(path, apiKey, headers) {
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function fetchWithAutoRetry(input, init) {
+    let response = await fetch(input, init);
+
+    // Retry logic if rate limit is hit
+    let attempts = 0;
+    while (response.status == 429 && attempts < 10) {
+        await sleep(10_000);
+        response = await fetch(input, init);
+        attempts += 1;
+    }
+    return response;
+}
+
+async function fetchWanikaniApi(path, apiKey, headers) {
     let options = {
         headers: {
             ...authHeader(apiKey),
@@ -23,7 +40,7 @@ function fetchWanikaniApi(path, apiKey, headers) {
         };
     }
 
-    return fetch(`${wanikaniApiUrl}${path}`, options);
+    return fetchWithAutoRetry(`${wanikaniApiUrl}${path}`, options);
 }
 
 async function getFromMemoryCacheOrFetch(path, _apiKey) {
@@ -56,13 +73,13 @@ async function fetchMultiPageRequest(path, startingId) {
     };
 
     const startingPageParam = !!startingId ? `?page_after_id=${startingId}` : '';
-    const firstPageResponse = await fetch(`${wanikaniApiUrl}${path}${startingPageParam}`, headers);
+    const firstPageResponse = await fetchWithAutoRetry(`${wanikaniApiUrl}${path}${startingPageParam}`, headers);
     const firstPage = await firstPageResponse.json();
     let data = firstPage.data;
     let nextPage = firstPage.pages['next_url']
 
     while (!!nextPage) {
-        let pageResponse = await fetch(nextPage, headers);
+        let pageResponse = await fetchWithAutoRetry(nextPage, headers);
         let page = await pageResponse.json();
         data = data.concat(page.data);
         nextPage = page.pages['next_url'];
@@ -83,7 +100,7 @@ async function getAllAssignments() {
     if (memoryCache.includes('wanikani-assignments')) {
         const cachedValue = memoryCache.get('wanikani-assignments');
         // Assignments ttl is 5 mins in Mem Cache
-        if (cachedValue.lastUpdated > (Date.now() - 1000 * 60 * 5)) { 
+        if (cachedValue.lastUpdated > (Date.now() - 1000 * 60 * 5)) {
             return cachedValue.data;
         }
     }
@@ -174,7 +191,7 @@ export default {
         if (memoryCache.includes('wanikani-reviews')) {
             const cachedValue = memoryCache.get('wanikani-reviews');
             // Only check for new reviews every 60 seconds
-            if (cachedValue.lastUpdated > (Date.now() - 1000 * 60)) { 
+            if (cachedValue.lastUpdated > (Date.now() - 1000 * 60)) {
                 return cachedValue.data;
             }
         }

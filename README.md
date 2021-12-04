@@ -1,5 +1,5 @@
 ## Nihongo Stats
-Stats for BunPro
+Stats for Japanese learning plateforms like Wanikani and BunPro.
 
 
 ## Development

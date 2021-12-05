@@ -12,6 +12,8 @@ jobs:
 
   Build-React-App:
     runs-on: ubuntu-latest
+    outputs:
+      
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
@@ -21,6 +23,10 @@ jobs:
           cache: "npm"
       - run: npm install
       - run: npm run build
+      - uses: actions/download-artifact@v2
+        with:
+          name: react-app
+          path: dist
 
   Build-Docker-Image:
     needs: [Build-React-App]
@@ -29,6 +35,12 @@ jobs:
       contents: read
       packages: write
     steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: react-app
+          path: dist
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:

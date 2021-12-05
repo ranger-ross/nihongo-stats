@@ -10,7 +10,6 @@ env:
 
 jobs:
 
-
   Retag-Image:
     runs-on: ubuntu-latest
     permissions:
@@ -18,8 +17,6 @@ jobs:
       packages: write
     steps:
       
-      - run: echo "$GITHUB_REF - $GITHUB_REF_NAME - $GITHUB_REF_TYPE"
-
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.2.1
         with:
@@ -32,5 +29,6 @@ jobs:
           credentials_json: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 
       - run: gcloud auth configure-docker ${{ env.REGISTRY }}
-      - run: docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - run: docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME
+      - run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME
 

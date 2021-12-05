@@ -2,28 +2,33 @@ name: Build and Push Docker image
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: nihongo-stats
+  IMAGE_NAME: ranger-ross/nihongo-stats
 
 jobs:
-  Build-App:
+
+  Build-React-App:
     runs-on: ubuntu-latest
-    permissions: 
-      contents: read
-      packages: write 
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: '16'
-          cache: 'npm'
+          node-version: "16"
+          cache: "npm"
       - run: npm install
       - run: npm run build
-      
+
+  Build-Docker-Image:
+    needs: [Build-React-App]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:

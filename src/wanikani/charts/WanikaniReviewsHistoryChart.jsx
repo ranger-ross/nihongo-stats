@@ -22,7 +22,7 @@ function DataPoint(date) {
         data.data.push(d);
         data.total = data.data.length;
 
-        switch (d.subject.object) {
+        switch (d.subject?.object) {
             case 'radical':
                 data.radicals += 1;
                 break;

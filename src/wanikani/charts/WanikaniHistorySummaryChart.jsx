@@ -27,7 +27,7 @@ async function fetchData() {
 }
 
 function numberWithCommas(x) {
-    return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+    return parseFloat(x).toLocaleString();
 }
 
 function TotalLabel({ label, count, color }) {
@@ -56,9 +56,9 @@ function WanikaniHistorySummaryChart() {
 
                 setTotalsData({
                     total: data.length,
-                    radicals: data.filter(r => r.subject.object == 'radical').length,
-                    kanji: data.filter(r => r.subject.object == 'kanji').length,
-                    vocabulary: data.filter(r => r.subject.object == 'vocabulary').length,
+                    radicals: data.filter(r => r.subject?.object == 'radical').length,
+                    kanji: data.filter(r => r.subject?.object == 'kanji').length,
+                    vocabulary: data.filter(r => r.subject?.object == 'vocabulary').length,
                 });
 
                 setData(data);

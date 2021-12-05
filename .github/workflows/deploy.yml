@@ -1,0 +1,34 @@
+name: Retag image and Deploy to Google Cloud
+
+on:
+  release:
+    types: [published]
+
+env:
+  REGISTRY: us-central1-docker.pkg.dev
+  IMAGE_NAME: nihongo-stats/containers/nihongo-stats-nginx
+
+jobs:
+
+  Retag-Image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.1
+        with:
+          project_id: nihongo-stats
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v0.4.1
+        with:
+          credentials_json: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
+
+      - run: gcloud auth configure-docker ${{ env.REGISTRY }}
+      - run: docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME
+      - run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME
+

@@ -12,8 +12,6 @@ jobs:
 
   Build-React-App:
     runs-on: ubuntu-latest
-    outputs:
-      
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2

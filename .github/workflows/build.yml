@@ -41,22 +41,24 @@ jobs:
           name: react-app
           path: dist
 
-      - name: Base64 Decode Service Account key
-        run: echo $DEPLOY_SERVICE_ACCOUNT_KEY | base64 -d > key.json
-        env:
-          DEPLOY_SERVICE_ACCOUNT_KEY: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
+      # - name: Base64 Decode Service Account key
+      #   run: echo $DEPLOY_SERVICE_ACCOUNT_KEY | base64 -d > key.json
+      #   env:
+      #     DEPLOY_SERVICE_ACCOUNT_KEY: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.2.1
+        with:
+          project_id: nihongo-stats
 
       - name: Use gcloud CLI
         run: gcloud info
 
       - name: Authenticate to Google Cloud
         id: auth
-        uses: google-github-actions/auth@v0.4.0
+        uses: google-github-actions/auth@v0.4.1
         with:
-          credentials_json: key.json
+          credentials_json: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 
       # - name: Log in to the Container registry
       #   uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9

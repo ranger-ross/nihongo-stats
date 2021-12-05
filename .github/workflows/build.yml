@@ -44,7 +44,7 @@ jobs:
       - name: Base64 Decode Service Account key
         run: echo $DEPLOY_SERVICE_ACCOUNT_KEY | base64 -d > key.json
         env:
-          SECRETS_PROPERTIES: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
+          DEPLOY_SERVICE_ACCOUNT_KEY: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.2.1

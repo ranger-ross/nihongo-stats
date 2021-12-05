@@ -29,6 +29,6 @@ jobs:
           credentials_json: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 
       - run: gcloud auth configure-docker ${{ env.REGISTRY }}
-      - run: docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME
-      - run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME
-
+      
+      - name: Tag image
+        run: gcloud artifacts docker tags add ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME

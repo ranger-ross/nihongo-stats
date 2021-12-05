@@ -21,7 +21,7 @@ jobs:
           cache: "npm"
       - run: npm install
       - run: npm run build
-      - uses: actions/download-artifact@v2
+      - uses: actions/upload-artifact@v2
         with:
           name: react-app
           path: dist

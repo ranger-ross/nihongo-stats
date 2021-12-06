@@ -22,13 +22,11 @@ function combineAssignmentAndSubject(assignment, subject) {
     };
 }
 
-async function fetchData() {
-    const user = await WanikaniApiService.getUser();
-    const currentLevel = user.data.level;
+async function fetchData(level) {
     const subjects = (await WanikaniApiService.getSubjects())
-        .filter(subject => subject.data.level === currentLevel);
+        .filter(subject => subject.data.level === level);
 
-    let assignments = (await WanikaniApiService.getAssignmentsForLevel(currentLevel)).data;
+    let assignments = (await WanikaniApiService.getAssignmentsForLevel(level)).data;
     assignments = createAssignmentMap(assignments);
 
     const radicals = subjects
@@ -47,7 +45,7 @@ async function fetchData() {
     };
 }
 
-function WanikaniActiveItemsChart() {
+function WanikaniLevelItemsChart({ level, showLevel }) {
     const [data, setData] = useState({
         radicals: [],
         kanji: [],
@@ -56,7 +54,7 @@ function WanikaniActiveItemsChart() {
 
     useEffect(() => {
         let isSubscribed = true;
-        fetchData()
+        fetchData(level)
             .then(d => {
                 if (!isSubscribed)
                     return;
@@ -64,11 +62,20 @@ function WanikaniActiveItemsChart() {
             })
             .catch(console.error);
         return () => isSubscribed = false;
-    }, []);
+    }, [level]);
 
     return (
         <Card>
             <CardContent>
+                {showLevel ? (
+                    <Typography variant={'h5'}
+                        color={'textPrimary'}
+                        style={{ paddingBottom: '10px' }}
+                    >
+                        Level {level}
+                    </Typography>
+                ) : null}
+
                 <Typography variant={'h5'}
                     color={'textPrimary'}
                     style={{ paddingBottom: '10px' }}
@@ -79,7 +86,7 @@ function WanikaniActiveItemsChart() {
                     {data.radicals.map(subject => (
                         <WanikaniItemTile
                             key={subject.subjectId + '-radical'}
-                            text={subject.characters}
+                            text={subject.characters || '?'}
                             isStarted={subject['started_at']}
                             isAvailable={subject.hasAssignment}
                             link={subject['document_url']}
@@ -138,4 +145,4 @@ function WanikaniActiveItemsChart() {
     );
 }
 
-export default WanikaniActiveItemsChart;
+export default WanikaniLevelItemsChart;

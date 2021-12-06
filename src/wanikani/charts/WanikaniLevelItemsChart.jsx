@@ -62,9 +62,6 @@ function WanikaniLevelItemsChart({ level, showLevel }) {
             .then(d => {
                 if (!isSubscribed)
                     return;
-                if (level == 3) {
-                    console.log(d);
-                }
                 setData(d);
             })
             .catch(console.error);

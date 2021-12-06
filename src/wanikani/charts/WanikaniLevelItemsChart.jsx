@@ -22,6 +22,10 @@ function combineAssignmentAndSubject(assignment, subject) {
     };
 }
 
+function isHidden(subject) {
+    return !!subject && !!subject.data && subject.data['hidden_at'];
+}
+
 async function fetchData(level) {
     const subjects = (await WanikaniApiService.getSubjects())
         .filter(subject => subject.data.level === level);
@@ -30,13 +34,13 @@ async function fetchData(level) {
     assignments = createAssignmentMap(assignments);
 
     const radicals = subjects
-        .filter(subject => subject.object === 'radical')
+        .filter(subject => subject.object === 'radical' && !isHidden(subject))
         .map(s => combineAssignmentAndSubject(assignments[s.id], s));
     const kanji = subjects
-        .filter(subject => subject.object === 'kanji')
+        .filter(subject => subject.object === 'kanji' && !isHidden(subject))
         .map(s => combineAssignmentAndSubject(assignments[s.id], s));
     const vocabulary = subjects
-        .filter(subject => subject.object === 'vocabulary')
+        .filter(subject => subject.object === 'vocabulary' && !isHidden(subject))
         .map(s => combineAssignmentAndSubject(assignments[s.id], s));
     return {
         radicals,
@@ -58,6 +62,9 @@ function WanikaniLevelItemsChart({ level, showLevel }) {
             .then(d => {
                 if (!isSubscribed)
                     return;
+                if (level == 3) {
+                    console.log(d);
+                }
                 setData(d);
             })
             .catch(console.error);

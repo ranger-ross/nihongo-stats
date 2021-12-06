@@ -4,6 +4,7 @@ import { Navigate } from "react-router";
 import { RoutePaths } from "../Routes";
 import WanikaniLevelItemsChart from "./charts/WanikaniLevelItemsChart";
 import ReactVisibilitySensor from "react-visibility-sensor";
+import { useState } from "react";
 
 const useStyles = makeStyles({
     container: {
@@ -18,6 +19,11 @@ function getWanikaniLevels() {
 function WanikaniItems() {
     const classes = useStyles();
     const { apiKey } = useWanikaniApiKey();
+    const [loadedLevels, setLoadedLevel] = useState({});
+
+    function setLevelAsLoaded(level) {
+        setLoadedLevel(s => ({ ...s, [level]: true }));
+    }
 
     return (
         <div className={classes.container}>
@@ -26,8 +32,11 @@ function WanikaniItems() {
 
             {getWanikaniLevels().map(level => (
                 <div className={classes.container} >
-                    <ReactVisibilitySensor partialVisibility={true} >
-                        <WanikaniLevelItemsChart level={level} showLevel={true} />
+                    <ReactVisibilitySensor partialVisibility={true} onChange={(isVisible) => isVisible ? setLevelAsLoaded(level) : null} >
+                        {loadedLevels[level] ? (
+                            <WanikaniLevelItemsChart level={level} showLevel={true} />
+
+                        ) : <div style={{height: '300px'}}></div>}
                     </ReactVisibilitySensor>
                 </div>
             ))}

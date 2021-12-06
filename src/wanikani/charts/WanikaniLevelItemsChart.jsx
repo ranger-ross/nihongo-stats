@@ -22,23 +22,25 @@ function combineAssignmentAndSubject(assignment, subject) {
     };
 }
 
-async function fetchData() {
-    const user = await WanikaniApiService.getUser();
-    const currentLevel = user.data.level;
-    const subjects = (await WanikaniApiService.getSubjects())
-        .filter(subject => subject.data.level === currentLevel);
+function isHidden(subject) {
+    return !!subject && !!subject.data && subject.data['hidden_at'];
+}
 
-    let assignments = (await WanikaniApiService.getAssignmentsForLevel(currentLevel)).data;
+async function fetchData(level) {
+    const subjects = (await WanikaniApiService.getSubjects())
+        .filter(subject => subject.data.level === level);
+
+    let assignments = (await WanikaniApiService.getAssignmentsForLevel(level)).data;
     assignments = createAssignmentMap(assignments);
 
     const radicals = subjects
-        .filter(subject => subject.object === 'radical')
+        .filter(subject => subject.object === 'radical' && !isHidden(subject))
         .map(s => combineAssignmentAndSubject(assignments[s.id], s));
     const kanji = subjects
-        .filter(subject => subject.object === 'kanji')
+        .filter(subject => subject.object === 'kanji' && !isHidden(subject))
         .map(s => combineAssignmentAndSubject(assignments[s.id], s));
     const vocabulary = subjects
-        .filter(subject => subject.object === 'vocabulary')
+        .filter(subject => subject.object === 'vocabulary' && !isHidden(subject))
         .map(s => combineAssignmentAndSubject(assignments[s.id], s));
     return {
         radicals,
@@ -47,7 +49,7 @@ async function fetchData() {
     };
 }
 
-function WanikaniActiveItemsChart() {
+function WanikaniLevelItemsChart({ level, showLevel }) {
     const [data, setData] = useState({
         radicals: [],
         kanji: [],
@@ -56,7 +58,7 @@ function WanikaniActiveItemsChart() {
 
     useEffect(() => {
         let isSubscribed = true;
-        fetchData()
+        fetchData(level)
             .then(d => {
                 if (!isSubscribed)
                     return;
@@ -64,11 +66,20 @@ function WanikaniActiveItemsChart() {
             })
             .catch(console.error);
         return () => isSubscribed = false;
-    }, []);
+    }, [level]);
 
     return (
         <Card>
             <CardContent>
+                {showLevel ? (
+                    <Typography variant={'h5'}
+                        color={'textPrimary'}
+                        style={{ paddingBottom: '10px' }}
+                    >
+                        Level {level}
+                    </Typography>
+                ) : null}
+
                 <Typography variant={'h5'}
                     color={'textPrimary'}
                     style={{ paddingBottom: '10px' }}
@@ -79,7 +90,7 @@ function WanikaniActiveItemsChart() {
                     {data.radicals.map(subject => (
                         <WanikaniItemTile
                             key={subject.subjectId + '-radical'}
-                            text={subject.characters}
+                            text={subject.characters || '?'}
                             isStarted={subject['started_at']}
                             isAvailable={subject.hasAssignment}
                             link={subject['document_url']}
@@ -138,4 +149,4 @@ function WanikaniActiveItemsChart() {
     );
 }
 
-export default WanikaniActiveItemsChart;
+export default WanikaniLevelItemsChart;

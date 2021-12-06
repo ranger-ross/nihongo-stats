@@ -5,9 +5,9 @@ import { RoutePaths } from "../Routes";
 import WanikaniLevelSummaryChart from "./charts/WanikaniLevelSummaryChart";
 import WanikaniFutureReviewsChart from "./charts/WanikaniFutureReviewsChart";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
-import WanikaniActiveItemsChart from "./charts/WanikaniActiveItemsChart";
 import WanikaniItemCountsChart from "./charts/WanikaniItemCountsChart";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
+import WanikaniActiveItemsChart from "./charts/WanikaniActiveItemChart";
 
 const useStyles = makeStyles({
     container: {

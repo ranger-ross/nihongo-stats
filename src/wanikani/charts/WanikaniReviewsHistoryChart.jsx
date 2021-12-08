@@ -7,6 +7,7 @@ import { Card, CardContent, Typography, Grid, ButtonGroup, Button, CircularProgr
 import { EventTracker } from "@devexpress/dx-react-chart";
 import { scaleBand } from 'd3-scale';
 import React from 'react';
+import useWindowDimensions from '../../hooks/WindowDimensions';
 
 function DataPoint(date) {
     let data = {
@@ -130,14 +131,16 @@ function WanikaniReviewsHistoryChart() {
     }
 
     const LabelWithDate = (props) => {
+        const { width } = useWindowDimensions();
         const date = props.text;
         if (!date) {
             return (<></>)
         }
 
-        const totalLabels = 6;
+        const isSmallScreen = width < 550;
+        const totalLabels = isSmallScreen ? 3 : 6;
         const labelTickSize = Math.floor(daysToLookBack / totalLabels);
-        const days = Math.floor(Date.now() - date.getTime() / 86400000);
+        const days = Math.floor((Date.now() - date.getTime()) / 86400000);
         return (
             <>
                 {days % labelTickSize == 0 ? (

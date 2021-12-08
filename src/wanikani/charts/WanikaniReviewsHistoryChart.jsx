@@ -157,7 +157,7 @@ function WanikaniReviewsHistoryChart() {
                     <Grid container>
                         <Grid item xs={12} md={4} />
                         <Grid item xs={12} md={4} >
-                            <Typography variant={'h5'} style={{ textAlign: 'center' }}>
+                            <Typography variant={'h5'} style={{ textAlign: 'center', paddingBottom: '5px' }}>
                                 Review History
                             </Typography>
                         </Grid>
@@ -169,7 +169,7 @@ function WanikaniReviewsHistoryChart() {
                             </Grid>
                         ) : (
                             <Grid item xs={12} md={4} style={{ textAlign: 'end' }}>
-                                <ButtonGroup variant="outlined" color={'primary'} >
+                                <ButtonGroup variant="outlined" color={'primary'} size="small" >
                                     <Button variant={daysToLookBack === 7 ? 'contained' : null} onClick={() => setDaysToLookBack(7)}>7</Button>
                                     <Button variant={daysToLookBack === 14 ? 'contained' : null} onClick={() => setDaysToLookBack(14)}>14</Button>
                                     <Button variant={daysToLookBack === 30 ? 'contained' : null} onClick={() => setDaysToLookBack(30)}>30</Button>

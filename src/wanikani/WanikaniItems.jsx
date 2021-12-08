@@ -31,7 +31,7 @@ function WanikaniItems() {
             {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : null}
 
             {getWanikaniLevels().map(level => (
-                <div className={classes.container} >
+                <div key={level} className={classes.container} >
                     <ReactVisibilitySensor partialVisibility={true} onChange={(isVisible) => isVisible ? setLevelAsLoaded(level) : null} >
                         {loadedLevels[level] ? (
                             <WanikaniLevelItemsChart level={level} showLevel={true} />

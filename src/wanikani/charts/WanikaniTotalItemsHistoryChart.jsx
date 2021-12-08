@@ -124,14 +124,14 @@ function WanikaniTotalItemsHistoryChart() {
             <CardContent style={{ height: '100%' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <Grid container>
-                        <Grid item xs={4} />
-                        <Grid item xs={4}>
+                        <Grid item xs={12} md={4}/>
+                        <Grid item xs={12} md={4}>
                             <Typography variant={'h5'} style={{ textAlign: 'center' }}>
                                 Total Items
                             </Typography>
                         </Grid>
 
-                        <Grid item xs={4} style={{ textAlign: 'end' }}>
+                        <Grid item xs={12} md={4} style={{ textAlign: 'end' }}>
                             <FormControlLabel label="Radicals"
                                 control={
                                     <Checkbox checked={showRadicals}

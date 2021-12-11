@@ -7,6 +7,7 @@ import { Card, CardContent, Typography, Grid, ButtonGroup, Button, CircularProgr
 import { EventTracker } from "@devexpress/dx-react-chart";
 import { scaleBand } from 'd3-scale';
 import React from 'react';
+import useWindowDimensions from '../../hooks/WindowDimensions';
 
 function DataPoint(date) {
     let data = {
@@ -130,14 +131,16 @@ function WanikaniReviewsHistoryChart() {
     }
 
     const LabelWithDate = (props) => {
+        const { width } = useWindowDimensions();
         const date = props.text;
         if (!date) {
             return (<></>)
         }
 
-        const totalLabels = 6;
+        const isSmallScreen = width < 550;
+        const totalLabels = isSmallScreen ? 3 : 6;
         const labelTickSize = Math.floor(daysToLookBack / totalLabels);
-        const days = Math.floor(Date.now() - date.getTime() / 86400000);
+        const days = Math.floor((Date.now() - date.getTime()) / 86400000);
         return (
             <>
                 {days % labelTickSize == 0 ? (
@@ -157,7 +160,7 @@ function WanikaniReviewsHistoryChart() {
                     <Grid container>
                         <Grid item xs={12} md={4} />
                         <Grid item xs={12} md={4} >
-                            <Typography variant={'h5'} style={{ textAlign: 'center' }}>
+                            <Typography variant={'h5'} style={{ textAlign: 'center', paddingBottom: '5px' }}>
                                 Review History
                             </Typography>
                         </Grid>
@@ -169,7 +172,7 @@ function WanikaniReviewsHistoryChart() {
                             </Grid>
                         ) : (
                             <Grid item xs={12} md={4} style={{ textAlign: 'end' }}>
-                                <ButtonGroup variant="outlined" color={'primary'} >
+                                <ButtonGroup variant="outlined" color={'primary'} size="small" >
                                     <Button variant={daysToLookBack === 7 ? 'contained' : null} onClick={() => setDaysToLookBack(7)}>7</Button>
                                     <Button variant={daysToLookBack === 14 ? 'contained' : null} onClick={() => setDaysToLookBack(14)}>14</Button>
                                     <Button variant={daysToLookBack === 30 ? 'contained' : null} onClick={() => setDaysToLookBack(30)}>30</Button>

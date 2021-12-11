@@ -121,15 +121,15 @@ function WanikaniAccuracyHistoryChart() {
             <CardContent style={{ height: '100%' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                     <Grid container>
-                        <Grid item xs={4} />
-                        <Grid item xs={4}>
+                        <Grid item xs={12} md={4} />
+                        <Grid item xs={12} md={4}>
                             <Typography variant={'h5'} style={{ textAlign: 'center' }}>
                                 Review Accuracy
                             </Typography>
                         </Grid>
 
-                        <Grid item xs={4} style={{ textAlign: 'end' }}>
-                            <ButtonGroup variant="outlined" color={'primary'} >
+                        <Grid item xs={12} md={4} style={{ textAlign: 'end' }}>
+                            <ButtonGroup variant="outlined" color={'primary'} size="small" >
                                 <Button variant={daysToLookBack === 7 ? 'contained' : null} onClick={() => setDaysToLookBack(7)}>7</Button>
                                 <Button variant={daysToLookBack === 14 ? 'contained' : null} onClick={() => setDaysToLookBack(14)}>14</Button>
                                 <Button variant={daysToLookBack === 30 ? 'contained' : null} onClick={() => setDaysToLookBack(30)}>30</Button>

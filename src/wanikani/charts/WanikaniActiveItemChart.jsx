@@ -17,7 +17,7 @@ function WanikaniActiveItemsChart() {
     }, [])
     return (
         <>
-            {!!user ? <WanikaniLevelItemsChart level={user.data.level} /> : null}
+            {!!user ? <WanikaniLevelItemsChart level={user.data.level} showPreviousLevelSelector={true} /> : null}
         </>
     )
 }

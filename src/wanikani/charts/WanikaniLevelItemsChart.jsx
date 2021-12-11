@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { Card, CardContent, Typography } from "@material-ui/core";
+import { Card, CardContent, Typography, Switch, FormGroup, FormControlLabel } from "@material-ui/core";
 import WanikaniItemTile from "../components/WanikaniItemTile";
 
 function createAssignmentMap(subjects) {
@@ -26,7 +26,14 @@ function isHidden(subject) {
     return !!subject && !!subject.data && subject.data['hidden_at'];
 }
 
+
+let memCache = {};
+
 async function fetchData(level) {
+    if (memCache[level]) {
+        return memCache[level];
+    }
+
     const subjects = (await WanikaniApiService.getSubjects())
         .filter(subject => subject.data.level === level);
 
@@ -42,14 +49,32 @@ async function fetchData(level) {
     const vocabulary = subjects
         .filter(subject => subject.object === 'vocabulary' && !isHidden(subject))
         .map(s => combineAssignmentAndSubject(assignments[s.id], s));
-    return {
+
+    const data = {
         radicals,
         kanji,
         vocabulary
-    };
+    }
+    memCache[level] = data;
+    return data;
 }
 
-function WanikaniLevelItemsChart({ level, showLevel }) {
+function PreviousLevelSelector({ selected, setSelected }) {
+    return (
+        <FormGroup>
+            <FormControlLabel
+                label="Show Previous Level"
+                control={
+                    <Switch checked={selected}
+                        onChange={e => setSelected(e.target.checked)} />
+                }
+            />
+        </FormGroup>
+    )
+}
+
+function WanikaniLevelItemsChart({ level, showLevel, showPreviousLevelSelector }) {
+    const [isPreviousLevel, setIsPreviousLevel] = useState(false);
     const [data, setData] = useState({
         radicals: [],
         kanji: [],
@@ -58,7 +83,7 @@ function WanikaniLevelItemsChart({ level, showLevel }) {
 
     useEffect(() => {
         let isSubscribed = true;
-        fetchData(level)
+        fetchData(isPreviousLevel ? level - 1 : level)
             .then(d => {
                 if (!isSubscribed)
                     return;
@@ -66,7 +91,7 @@ function WanikaniLevelItemsChart({ level, showLevel }) {
             })
             .catch(console.error);
         return () => isSubscribed = false;
-    }, [level]);
+    }, [level, isPreviousLevel]);
 
     return (
         <Card>
@@ -80,12 +105,21 @@ function WanikaniLevelItemsChart({ level, showLevel }) {
                     </Typography>
                 ) : null}
 
-                <Typography variant={'h5'}
-                    color={'textPrimary'}
-                    style={{ paddingBottom: '10px' }}
-                >
-                    Radicals
-                </Typography>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <Typography variant={'h5'}
+                        color={'textPrimary'}
+                        style={{ paddingBottom: '10px' }}
+                    >
+                        Radicals
+                    </Typography>
+                    {showPreviousLevelSelector ? (
+                        <>
+                            <div style={{ flexGrow: 1 }}></div>
+                            <PreviousLevelSelector selected={isPreviousLevel} setSelected={setIsPreviousLevel} />
+                        </>
+                    ) : null}
+                </div>
+
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     {data.radicals.map(subject => (
                         <WanikaniItemTile

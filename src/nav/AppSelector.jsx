@@ -1,4 +1,5 @@
 import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
+import { bunproAppName, wanikaniAppName, ankiAppName } from '../Constants.js';
 
 function AppSelector({ selectedApp, setSelectedApp }) {
     return (
@@ -9,8 +10,9 @@ function AppSelector({ selectedApp, setSelectedApp }) {
                 label="Selected App"
                 onChange={e => setSelectedApp(e.target.value)}
             >
-                <MenuItem value={'wanikani'}>Wanikani</MenuItem>
-                <MenuItem value={'bunpro'}>BunPro</MenuItem>
+                <MenuItem value={wanikaniAppName}>Wanikani</MenuItem>
+                <MenuItem value={ankiAppName}>Anki</MenuItem>
+                <MenuItem value={bunproAppName}>BunPro</MenuItem>
             </Select>
         </FormControl>
     );

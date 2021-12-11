@@ -6,6 +6,7 @@ import BunProDashboard from "./bunpro/BunProDashboard";
 import WanikaniHistory from "./wanikani/WanikaniHistory";
 import WanikaniItems from "./wanikani/WanikaniItems";
 import AboutPage from "./about/AboutPage";
+import AnkiDashboard from "./anki/AnkiDashboard";
 
 export const RoutePaths = {
 
@@ -14,6 +15,9 @@ export const RoutePaths = {
   wanikaniLogin: '/wanikani-login',
   wanikaniHistory: '/wanikani-history',
   wanikaniItems: '/wanikani-items',
+
+  // Anki
+  ankiDashboard: '/anki-dashboard',
 
   // BunPro
   bunproDashboard: '/bunpro-dashboard',
@@ -32,6 +36,7 @@ export function AppRoutes() {
       <Route path={RoutePaths.wanikaniItems} element={<WanikaniItems />} />
       <Route path={RoutePaths.bunproDashboard} element={<BunProDashboard />} />
       <Route path={RoutePaths.aboutPage} element={<AboutPage />} />
+      <Route path={RoutePaths.ankiDashboard} element={<AnkiDashboard />} />
     </Routes>
   );
 }

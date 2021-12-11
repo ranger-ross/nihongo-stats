@@ -2,7 +2,7 @@ import { Box, Grid } from "@material-ui/core";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router";
-import { bunproAppName, wanikaniAppName } from '../Constants.js';
+import { bunproAppName, wanikaniAppName, ankiAppName } from '../Constants.js';
 import { useGlobalState } from "../GlobalState";
 import { RoutePaths } from '../Routes';
 import { useWanikaniApiKey } from "../wanikani/stores/WanikaniApiKeyStore.js";
@@ -29,6 +29,9 @@ function AppNav() {
         switch (selectedApp) {
             case wanikaniAppName:
                 navigate(RoutePaths.wanikaniDashboard);
+                break;
+            case ankiAppName:
+                navigate(RoutePaths.ankiDashboard);
                 break;
             case bunproAppName:
                 navigate(RoutePaths.bunproDashboard);

@@ -35,7 +35,27 @@ function invoke(action, version, params = {}) {
 }
 
 
+function convertDeckMapToArray(decks) {
+    let arr = [];
+    for (const name of Object.keys(decks)) {
+        const id = decks[name];
+        arr.push({
+            id,
+            name
+        });
+    }
+    return arr;
+}
+
 export default {
-    getDecks: () => invoke("deckNames", 6)
+    getDecks: () => invoke("deckNames", 6),
+    getDeckNamesAndIds: () => invoke("deckNamesAndIds", 6).then(convertDeckMapToArray),
+    getNumCardsReviewedByDay: () => invoke("getNumCardsReviewedByDay", 6),
+    getCollectionStatsHtml: () => invoke("getCollectionStatsHTML", 6),
+    getCardReviews: () => invoke("cardReviews", 6, {
+        "deck": "default",
+        "startID": 1594194095740
+    }),
+
 
 }

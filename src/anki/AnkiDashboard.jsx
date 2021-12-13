@@ -1,11 +1,11 @@
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { useEffect, useState } from "react";
+import AnkiTotalReviewsChart from "./charts/AnkiTotalReviewsChart";
 import AnkiApiService from "./service/AnkiApiService";
 
 const useStyles = makeStyles({
     container: {
-        textAlign: 'center',
-        marginTop: '15vh'
+        margin: '5px'
     }
 });
 
@@ -25,14 +25,9 @@ function AnkiDashboard() {
 
     return (
         <div className={classes.container}>
-            Anki Decks
 
-            {decks?.map(deck => (
-                <div key={deck.id}>
-                    {deck.name}
-                </div>
-            ))}
-            
+            <AnkiTotalReviewsChart deckNames={["Core 2k/6k Optimized Japanese Vocabulary"]} />
+
         </div>
     );
 }

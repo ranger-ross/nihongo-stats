@@ -47,15 +47,29 @@ function convertDeckMapToArray(decks) {
     return arr;
 }
 
+function createCardReviewFromTuple(tuple) {
+    return {
+        reviewTime: tuple[0],
+        cardId: tuple[1],
+        usn: tuple[2],
+        buttonPressed: tuple[3],
+        newInterval: tuple[4],
+        previousInterval: tuple[5],
+        newFactor: tuple[6],
+        reviewDuration: tuple[7],
+        reviewType: tuple[8]
+    };
+}
+
 export default {
     getDecks: () => invoke("deckNames", 6),
     getDeckNamesAndIds: () => invoke("deckNamesAndIds", 6).then(convertDeckMapToArray),
     getNumCardsReviewedByDay: () => invoke("getNumCardsReviewedByDay", 6),
     getCollectionStatsHtml: () => invoke("getCollectionStatsHTML", 6),
-    getCardReviews: () => invoke("cardReviews", 6, {
-        "deck": "default",
-        "startID": 1594194095740
-    }),
+    getCardReviews: (deckName = "default", startTimestamp = new Date(2000, 0, 1).getTime()) => invoke("cardReviews", 6, {
+        "deck": deckName,
+        "startID": startTimestamp
+    }).then(data => data.map(createCardReviewFromTuple)),
 
 
 }

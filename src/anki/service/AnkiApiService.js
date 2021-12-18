@@ -1,4 +1,4 @@
-import { memoryCache } from "../../GlobalState"
+import {memoryCache} from "../../GlobalState"
 import * as localForage from "localforage/dist/localforage"
 
 const ankiConnectApiUrl = 'http://localhost:8765';
@@ -30,7 +30,7 @@ function invoke(action, version, params = {}) {
         });
 
         xhr.open('POST', ankiConnectApiUrl);
-        xhr.send(JSON.stringify({ action, version, params }));
+        xhr.send(JSON.stringify({action, version, params}));
     });
 }
 
@@ -61,7 +61,19 @@ function createCardReviewFromTuple(tuple) {
     };
 }
 
+function health() {
+    return fetch(ankiConnectApiUrl)
+        .then(response => {
+            if (response.status === 200) {
+                return true;
+            } else {
+                throw new Error("Anki Connect NonSuccess: " + response.status);
+            }
+        });
+}
+
 export default {
+    connect: () => health(),
     getDecks: () => invoke("deckNames", 6),
     getDeckNamesAndIds: () => invoke("deckNamesAndIds", 6).then(convertDeckMapToArray),
     getNumCardsReviewedByDay: () => invoke("getNumCardsReviewedByDay", 6),

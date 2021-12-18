@@ -1,15 +1,14 @@
-import { Card, CardContent, Typography, Grid } from "@material-ui/core";
+import {Card, CardContent, Typography, Grid} from "@material-ui/core";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import { useEffect, useState } from "react";
-import { truncDate } from "../../util/DateUtils";
+import {useEffect, useState} from "react";
+import {truncDate} from "../../util/DateUtils";
 import AnkiApiService from "../service/AnkiApiService";
-import { Chart, ValueAxis, ArgumentAxis, Tooltip } from '@devexpress/dx-react-chart-material-ui';
-import { LineSeries } from "@devexpress/dx-react-chart";
-import { EventTracker } from "@devexpress/dx-react-chart";
+import {Chart, ValueAxis, ArgumentAxis, Tooltip} from '@devexpress/dx-react-chart-material-ui';
+import {BarSeries, LineSeries} from "@devexpress/dx-react-chart";
+import {EventTracker} from "@devexpress/dx-react-chart";
 
 const useStyles = makeStyles({
-    container: {
-    }
+    container: {}
 });
 
 
@@ -45,7 +44,7 @@ function formatReviewData(reviews) {
     return days;
 }
 
-function AnkiTotalReviewsChart({ deckNames }) {
+function AnkiReviewsChart({deckNames, showTotals}) {
     const classes = useStyles();
 
     const [reviews, setReviews] = useState([]);
@@ -56,7 +55,6 @@ function AnkiTotalReviewsChart({ deckNames }) {
                 setReviews(formatReviewData(reviews))
             });
     }, []);
-
 
 
     function ReviewToolTip(props) {
@@ -74,24 +72,31 @@ function AnkiTotalReviewsChart({ deckNames }) {
             <CardContent>
 
                 <Grid item xs={12}>
-                    <Typography variant={'h5'} style={{ textAlign: 'center' }}>
-                        Total Reviews
+                    <Typography variant={'h5'} style={{textAlign: 'center'}}>
+                        {showTotals ? 'Total' : null} Reviews
                     </Typography>
                 </Grid>
 
                 <Chart data={reviews}>
-                    <ValueAxis />
+                    <ValueAxis/>
                     <ArgumentAxis
                         tickFormat={scale => text => new Date(text).toLocaleDateString()}
                     />
-                    <LineSeries
-                        name="total"
-                        valueField="totalCount"
-                        argumentField="date"
-                    />
 
-                    <EventTracker />
-                    <Tooltip contentComponent={ReviewToolTip} />
+                    {showTotals ? (
+                        <LineSeries
+                            name="total"
+                            valueField="totalCount"
+                            argumentField="date"
+                        />
+                    ) : (
+                        <BarSeries name="total"
+                                   valueField="count"
+                                   argumentField="date"/>
+                    )}
+
+                    <EventTracker/>
+                    <Tooltip contentComponent={ReviewToolTip}/>
                 </Chart>
 
             </CardContent>
@@ -99,4 +104,4 @@ function AnkiTotalReviewsChart({ deckNames }) {
     );
 }
 
-export default AnkiTotalReviewsChart;
+export default AnkiReviewsChart;

@@ -1,13 +1,16 @@
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import {useEffect, useState} from "react";
-import AnkiTotalReviewsChart from "./charts/AnkiTotalReviewsChart";
+import AnkiReviewsChart from "./charts/AnkiReviewsChart";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 
 const useStyles = makeStyles({
     container: {
-        margin: '5px'
+        margin: '5px',
+        display: 'flex',
+        gap: '10px',
+        flexDirection: 'column'
     }
 });
 
@@ -34,9 +37,15 @@ function AnkiDashboard() {
 
     return (
         <div className={classes.container}>
+            <AnkiReviewsChart
+                deckNames={["Core 2k/6k Optimized Japanese Vocabulary"]}
+                showTotals={true}
+            />
 
-            <AnkiTotalReviewsChart deckNames={["Core 2k/6k Optimized Japanese Vocabulary"]}/>
-
+            <AnkiReviewsChart
+                deckNames={["Core 2k/6k Optimized Japanese Vocabulary"]}
+                showTotals={false}
+            />
         </div>
     );
 }

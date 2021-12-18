@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 import {truncDate} from "../../util/DateUtils";
 import AnkiApiService from "../service/AnkiApiService";
 import {Chart, ValueAxis, ArgumentAxis, Tooltip} from '@devexpress/dx-react-chart-material-ui';
-import {BarSeries, LineSeries} from "@devexpress/dx-react-chart";
+import {BarSeries, LineSeries, Stack} from "@devexpress/dx-react-chart";
 import {EventTracker} from "@devexpress/dx-react-chart";
 
 const useStyles = makeStyles({
@@ -12,57 +12,86 @@ const useStyles = makeStyles({
 });
 
 
-function DataPoint(date, previousTotalCount) {
+function DataPoint(date, previousDataPoint) {
     let dp = {
         date: truncDate(date),
-        reviews: [],
-        count: 0,
-        totalCount: previousTotalCount
+        reviews: {},
+        totalCount: previousDataPoint?.totalCount ?? 0
     };
 
-    dp.addReview = (review) => {
-        dp.reviews.push(review);
-        dp.count = dp.reviews.length;
-        dp.totalCount = previousTotalCount + dp.count;
-    };
+    if (!!previousDataPoint) {
+        const totalKeys = Object.keys(previousDataPoint).filter(key => key.includes('total_'));
+        for (const key of totalKeys) {
+            dp[key] = previousDataPoint[key] ?? 0;
+        }
+    }
+    dp.addReview = (deck, review) => {
+        if (!dp.reviews[deck]) {
+            dp.reviews[deck] = [review];
+        } else {
+            dp.reviews[deck].push(review);
+        }
 
+        dp[`count_${deck}`] = dp.reviews[deck].length;
+        dp[`total_${deck}`] = (dp[`total_${deck}`] ?? 0) + 1;
+        dp.totalCount = (previousDataPoint?.totalCount ?? 0) + Object.keys(dp)
+            .filter(key => key.includes('count_'))
+            .map(key => key.replace('count_', ''))
+            .map(x => dp.reviews[x])
+            .reduce((a, c) => a + c.length, 0);
+    };
     return dp;
 }
 
-function formatReviewData(reviews) {
+function formatMultiDeckReviewData(decks) {
+    let reviews = [];
+    for (const deck of decks) {
+        reviews.push(...deck.reviews.map(r => ({
+            ...r,
+            deckName: deck.deckName
+        })));
+    }
+
     const orderedReviews = reviews.sort((a, b,) => a.reviewTime - b.reviewTime);
-    let days = [new DataPoint(orderedReviews[0].reviewTime, 0)];
+    let days = [new DataPoint(orderedReviews[0].reviewTime)];
 
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
-        if (lastDay.date.getTime() != truncDate(review.reviewTime).getTime()) {
-            days.push(new DataPoint(review.reviewTime, lastDay.totalCount));
+        if (lastDay.date.getTime() !== truncDate(review.reviewTime).getTime()) {
+            days.push(new DataPoint(review.reviewTime, lastDay));
             lastDay = days[days.length - 1];
         }
-        lastDay.addReview(review);
+        lastDay.addReview(review.deckName, review);
     }
+
     return days;
 }
 
 function AnkiReviewsChart({deckNames, showTotals}) {
     const classes = useStyles();
 
-    const [reviews, setReviews] = useState([]);
+    const [reviewsByDeck, setReviewsByDeck] = useState(null);
 
     useEffect(() => {
-        AnkiApiService.getCardReviews(deckNames[0]) // TODO: All multi deck support
-            .then(reviews => {
-                setReviews(formatReviewData(reviews))
-            });
+        let reviewPromises = [];
+        const _deckNames = deckNames.filter(name => name.toLowerCase() !== 'default');
+        _deckNames.forEach(name => reviewPromises.push(AnkiApiService.getCardReviews(name)));
+
+        Promise.all(reviewPromises)
+            .then(data => {
+                let deckData = data.map(((value, index) => ({
+                    deckName: _deckNames[index],
+                    reviews: value
+                })));
+                setReviewsByDeck(formatMultiDeckReviewData(deckData));
+            })
     }, []);
 
-
-    function ReviewToolTip(props) {
-        const dataPoint = reviews[props.targetItem.point];
+    function ReviewToolTip({text, targetItem}) {
         return (
             <>
-                <p>{new Date(dataPoint.date).toLocaleDateString()}</p>
-                <p>Count: {dataPoint.totalCount.toLocaleString()}</p>
+                <p>Deck: {targetItem.series}</p>
+                <p>Reviews: {text}</p>
             </>
         );
     }
@@ -77,27 +106,45 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                     </Typography>
                 </Grid>
 
-                <Chart data={reviews}>
-                    <ValueAxis/>
-                    <ArgumentAxis
-                        tickFormat={scale => text => new Date(text).toLocaleDateString()}
-                    />
-
-                    {showTotals ? (
-                        <LineSeries
-                            name="total"
-                            valueField="totalCount"
-                            argumentField="date"
+                {!!deckNames && reviewsByDeck ? (
+                    <Chart data={reviewsByDeck}>
+                        <ValueAxis/>
+                        <ArgumentAxis
+                            tickFormat={() => text => new Date(text).toLocaleDateString()}
                         />
-                    ) : (
-                        <BarSeries name="total"
-                                   valueField="count"
-                                   argumentField="date"/>
-                    )}
 
-                    <EventTracker/>
-                    <Tooltip contentComponent={ReviewToolTip}/>
-                </Chart>
+                        {showTotals ? (
+                            <LineSeries name="Total"
+                                        valueField="totalCount"
+                                        argumentField="date"
+                            />
+                        ) : null}
+
+                        {deckNames?.map((name, idx) => (
+                            showTotals ? (
+                                <LineSeries key={idx}
+                                            name={name}
+                                            valueField={`total_${name}`}
+                                            argumentField="date"
+                                />
+                            ) : (
+                                <BarSeries key={idx}
+                                           name={name}
+                                           valueField={`count_${name}`}
+                                           argumentField="date"/>
+                            )
+                        ))}
+
+                        {!showTotals ? (
+                            <Stack
+                                stacks={[{series: deckNames}]}
+                            />
+                        ) : null}
+
+                        <EventTracker/>
+                        <Tooltip contentComponent={ReviewToolTip}/>
+                    </Chart>
+                ) : null}
 
             </CardContent>
         </Card>

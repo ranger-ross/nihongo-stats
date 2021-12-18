@@ -19,7 +19,7 @@ function AnkiDashboard() {
     const classes = useStyles();
     const navigate = useNavigate();
 
-    const [decks, setDecks] = useState();
+    const [decks, setDecks] = useState(null);
 
     useEffect(() => {
         AnkiApiService.connect()
@@ -37,15 +37,19 @@ function AnkiDashboard() {
 
     return (
         <div className={classes.container}>
-            <AnkiReviewsChart
-                deckNames={["Core 2k/6k Optimized Japanese Vocabulary"]}
-                showTotals={true}
-            />
+            {decks ? (
+                <>
+                    <AnkiReviewsChart
+                        deckNames={decks.map(deck => deck.name)}
+                        showTotals={true}
+                    />
 
-            <AnkiReviewsChart
-                deckNames={["Core 2k/6k Optimized Japanese Vocabulary"]}
-                showTotals={false}
-            />
+                    <AnkiReviewsChart
+                        deckNames={decks.map(deck => deck.name)}
+                        showTotals={false}
+                    />
+                </>
+            ) : null}
         </div>
     );
 }

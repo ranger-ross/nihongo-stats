@@ -75,7 +75,7 @@ function AnkiReviewsChart({deckNames, showTotals}) {
     useEffect(() => {
         let reviewPromises = [];
         const _deckNames = deckNames.filter(name => name.toLowerCase() !== 'default');
-        _deckNames.forEach(name => reviewPromises.push(AnkiApiService.getCardReviews(name)));
+        _deckNames.forEach(name => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
 
         Promise.all(reviewPromises)
             .then(data => {

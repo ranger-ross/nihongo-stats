@@ -72,16 +72,56 @@ function health() {
         });
 }
 
+function getCardReviews(deckName, startTimestamp = new Date(2000, 0, 1).getTime()) {
+    return invoke("cardReviews", 6, {
+        "deck": deckName,
+        "startID": startTimestamp
+    }).then(data => data.map(createCardReviewFromTuple));
+}
+
+async function getAllReviewsByDeck(deckName) {
+    let cachedValue = await localForage.getItem(`anki-reviews-${deckName}`);
+    let reviews;
+    if (!!cachedValue && cachedValue.data.length > 0) {
+        reviews = cachedValue.data;
+        if (cachedValue.lastUpdate > Date.now() - 1000 * 60 * 3) {
+            return reviews;
+        }
+        let timestamp = reviews[reviews.length - 1].reviewTime + 1;
+        reviews.push(...await getCardReviews(deckName, timestamp));
+    } else {
+        reviews = await getCardReviews(deckName);
+    }
+    reviews = reviews.sort((a, b) => a.reviewTime - b.reviewTime);
+    localForage.setItem(`anki-reviews-${deckName}`, {
+        data: reviews,
+        lastUpdate: Date.now()
+    });
+    return reviews;
+}
+
+async function getDeckNamesAndIds() {
+    let cachedValue = await localForage.getItem(`anki-deck-names-and-ids`);
+    if (!!cachedValue && cachedValue.lastUpdate > Date.now() - 1000 * 60 * 60) {
+        return cachedValue.data;
+    }
+    let data = await invoke("deckNamesAndIds", 6).then(convertDeckMapToArray);
+    localForage.setItem(`anki-deck-names-and-ids`, {
+        data: data,
+        lastUpdate: Date.now()
+    });
+    return data;
+}
+
+
 export default {
     connect: () => health(),
     getDecks: () => invoke("deckNames", 6),
-    getDeckNamesAndIds: () => invoke("deckNamesAndIds", 6).then(convertDeckMapToArray),
+    getDeckNamesAndIds: getDeckNamesAndIds,
     getNumCardsReviewedByDay: () => invoke("getNumCardsReviewedByDay", 6),
     getCollectionStatsHtml: () => invoke("getCollectionStatsHTML", 6),
-    getCardReviews: (deckName = "default", startTimestamp = new Date(2000, 0, 1).getTime()) => invoke("cardReviews", 6, {
-        "deck": deckName,
-        "startID": startTimestamp
-    }).then(data => data.map(createCardReviewFromTuple)),
+    getCardReviews: getCardReviews,
+    getAllReviewsByDeck: getAllReviewsByDeck,
 
 
 }

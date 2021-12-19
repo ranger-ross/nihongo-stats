@@ -12,8 +12,8 @@
     "@devexpress/dx-react-core": "^2.7.6",
     "@emotion/react": "^11.5.0",
     "@emotion/styled": "^11.3.0",
-    "@mui/icons-material": "^5.0.5",
-    "@mui/material": "^5.0.6",
+    "@mui/icons-material": "^5.2.4",
+    "@mui/material": "^5.2.4",
     "localforage": "^1.10.0",
     "lodash-es": "^4.17.21",
     "react": "^17.0.2",
@@ -21,7 +21,7 @@
     "react-router-dom": "^6.0.1",
     "react-visibility-sensor": "^5.1.1",
     "styled-components": "^5.3.3",
-    "zustand": "^3.6.2"
+    "zustand": "^3.6.7"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^1.1.3",

@@ -90,7 +90,7 @@ function AnkiReviewsChart({deckNames, showTotals}) {
     function ReviewToolTip({text, targetItem}) {
         return (
             <>
-                <p>Deck: {targetItem.series}</p>
+                <p>{targetItem.series !== 'Total' ? 'Deck:' : null} {targetItem.series}</p>
                 <p>Reviews: {text}</p>
             </>
         );

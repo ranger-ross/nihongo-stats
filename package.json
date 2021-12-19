@@ -7,9 +7,9 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@devexpress/dx-react-chart": "^2.7.6",
-    "@devexpress/dx-react-chart-material-ui": "^2.7.6",
-    "@devexpress/dx-react-core": "^2.7.6",
+    "@devexpress/dx-react-chart": "^3.0.0-beta.2",
+    "@devexpress/dx-react-chart-material-ui": "^3.0.0-beta.2",
+    "@devexpress/dx-react-core": "^3.0.0-beta.2",
     "@emotion/react": "^11.5.0",
     "@emotion/styled": "^11.3.0",
     "@mui/icons-material": "^5.2.4",

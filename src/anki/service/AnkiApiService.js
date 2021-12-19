@@ -88,7 +88,7 @@ async function getAllReviewsByDeck(deckName) {
             return reviews;
         }
         let timestamp = reviews[reviews.length - 1].reviewTime + 1;
-        reviews.push(...await getCardReviews(deckName, timestamp));
+        reviews.push(...(await getCardReviews(deckName, timestamp)));
     } else {
         reviews = await getCardReviews(deckName);
     }

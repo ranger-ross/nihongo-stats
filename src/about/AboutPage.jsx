@@ -1,19 +1,15 @@
-import makeStyles from "@material-ui/core/styles/makeStyles";
-
-const useStyles = makeStyles({
+const styles = {
     container: {
         textAlign: 'center',
         marginTop: '15vh'
     }
-});
-
+}
 
 function AboutPage() {
-    const classes = useStyles();
 
     return (
-        <div className={classes.container}>
-           About Page coming soon(ish)
+        <div style={styles.container}>
+            About Page coming soon(ish)
         </div>
     );
 }

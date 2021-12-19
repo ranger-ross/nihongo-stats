@@ -1,6 +1,6 @@
 import React from "react";
-import { RoutePaths } from '../Routes';
-import NavButton from "./components/NavButton";
+import { RoutePaths } from '../../Routes';
+import NavButton from "../components/NavButton";
 
 function WanikaniNav() {
     return (

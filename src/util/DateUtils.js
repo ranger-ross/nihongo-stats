@@ -19,3 +19,7 @@ export function areDatesSameDay(date1, date2) {
         date1.getDate() === date2.getDate()
     );
 }
+
+export function truncDate(date) {
+    return new Date(new Date(date).toDateString());
+}

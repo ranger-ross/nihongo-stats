@@ -1,26 +1,26 @@
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { Box, Card, CardContent, Typography, Grid, Tooltip } from "@material-ui/core";
+import { Box, Card, CardContent, Typography, Grid, Tooltip } from "@mui/material";
 import { millisToDays, millisToHours } from '../../util/DateUtils';
-import makeStyles from "@material-ui/core/styles/makeStyles";
 import { Stack } from '@mui/material';
 import { wanikaniColors } from "../../Constants";
-import { Skeleton, CircularProgress } from '@mui/material'
+import { CircularProgress } from '@mui/material'
 
 
 const racialColor = wanikaniColors.blue;
 const kanjiColor = wanikaniColors.pink;
 const vocabularyColor = wanikaniColors.purple;
 
-const useStyles = makeStyles({
+const styles = {
     container: {
         width: '100%',
         aspectRatio: 1 / 0.9
     },
-    daysUntilLevelContainer: {
+    levelLabelContainer: {
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        margin: '49px'
     },
     subjectsLabel: {
         marginLeft: '5px',
@@ -32,7 +32,7 @@ const useStyles = makeStyles({
         justifyContent: 'center',
         alignItems: 'center'
     }
-});
+};
 
 const defaultData = {
     timeOnLevel: 0,
@@ -57,50 +57,6 @@ function FractionText({ top, bottom }) {
             <sup>{top}</sup>&frasl;<sub>{bottom}</sub>
         </>
     );
-}
-
-function calculateHoursUntilLevelUp(radicals, kanji) {
-    const radicalsLeft = radicals.filter(s => !s.data['passed_at']);
-    const kanjiLeft = kanji.filter(s => !s.data['passed_at']);
-
-    let lowestRadicalSrsStage = 999;
-    for (const radical of radicalsLeft) {
-        if (lowestRadicalSrsStage > radical.data['srs_stage']) {
-            lowestRadicalSrsStage = radical.data['srs_stage'];
-        }
-    }
-
-    switch (lowestRadicalSrsStage) {
-        case 0:
-        case 1:
-            return 7 * 24;
-        case 2:
-            return (7 * 24) - 4;
-        case 3:
-            return (7 * 24) - 12;
-        case 4:
-            return (7 * 24) - 36;
-    }
-
-    let lowestKanjiSrsStage = 999;
-    for (const kanji of kanjiLeft) {
-        if (lowestKanjiSrsStage > kanji.data['srs_stage']) {
-            lowestKanjiSrsStage = kanji.data['srs_stage'];
-        }
-    }
-
-    switch (lowestKanjiSrsStage) {
-        case 0:
-        case 1:
-            return 84.0;
-        case 2:
-            return 84 - 4;
-        case 3:
-            return 84 - 12;
-        case 4:
-            return 84 - 36;
-    }
-    return 0;
 }
 
 async function getCurrentLevelProgressData() {
@@ -132,15 +88,10 @@ async function getCurrentLevelProgressData() {
     const kanji = assignments.data.filter(s => s.data['subject_type'] === 'kanji' && !!s.data['passed_at']);
     const vocabularyTotal = subjects.filter(s => s.object === 'vocabulary');
     const vocabulary = assignments.data.filter(s => s.data['subject_type'] === 'vocabulary' && !!s.data['passed_at']);
-    // const hoursLeft = calculateHoursUntilLevelUp(radicalsTotal, kanjiTotal);
 
     return {
         level: currentLevel,
         timeOnLevel: timeOnLevel,
-        // timeLeft: {
-        //     days: Math.floor(hoursLeft / 24),
-        //     hours: hoursLeft % 24,
-        // },
         radicals: {
             passed: radicals.length,
             total: radicalsTotal.length,
@@ -158,7 +109,6 @@ async function getCurrentLevelProgressData() {
 
 
 function WanikaniLevelSummaryChart() {
-    const classes = useStyles();
     const [progressData, setProgressData] = useState(defaultData);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -181,21 +131,21 @@ function WanikaniLevelSummaryChart() {
     }, []);
 
     return (
-        <Card className={classes.container}>
+        <Card style={styles.container}>
             <CardContent style={{ height: '100%' }}>
 
                 <Stack height={'100%'}>
                     {isLoading ? (
-                        <Box sx={{ flexGrow: 1 }} className={classes.spinnerContainer} >
+                        <Box sx={{ flexGrow: 1 }} style={styles.spinnerContainer} >
                             <CircularProgress />
                         </Box>
                     ) : (
                         <>
-                            <Box sx={{ flexGrow: 1 }} className={classes.daysUntilLevelContainer} >
+                            <Box sx={{ flexGrow: 1 }} style={styles.levelLabelContainer} >
                                 <Typography variant={'h2'} style={{ textAlign: 'center' }}>
                                     {progressData.level}
                                 </Typography>
-                                <Typography variant={'caption'} style={{ textAlign: 'center' }}>
+                                <Typography variant={'caption'} style={{ textAlign: 'center'}}>
                                     Level
                                 </Typography>
                             </Box>
@@ -219,7 +169,7 @@ function WanikaniLevelSummaryChart() {
 
                                 <Box sx={{ flexGrow: 1 }} />
 
-                                <Box className={classes.subjectsLabel}>
+                                <Box style={styles.subjectsLabel}>
                                     <Typography variant={'body1'}>
                                         <FractionText top={progressData.radicals.passed}
                                             bottom={progressData.radicals.total}
@@ -233,7 +183,7 @@ function WanikaniLevelSummaryChart() {
                                     </Typography>
                                 </Box>
 
-                                <Box className={classes.subjectsLabel} >
+                                <Box style={styles.subjectsLabel} >
                                     <Typography variant={'body1'}>
                                         <FractionText top={progressData.kanji.passed}
                                             bottom={progressData.kanji.total}
@@ -247,7 +197,7 @@ function WanikaniLevelSummaryChart() {
                                     </Typography>
                                 </Box>
 
-                                <Box className={classes.subjectsLabel}>
+                                <Box style={styles.subjectsLabel}>
                                     <Typography variant={'body1'}>
                                         <FractionText top={progressData.vocabulary.passed}
                                             bottom={progressData.vocabulary.total}

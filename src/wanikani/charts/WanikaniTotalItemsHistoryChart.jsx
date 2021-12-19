@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { LineSeries } from "@devexpress/dx-react-chart";
 import { wanikaniColors } from '../../Constants';
-import { Checkbox, Card, CardContent, Typography, Grid, FormControlLabel } from "@material-ui/core";
+import { Checkbox, Card, CardContent, Typography, Grid, FormControlLabel } from "@mui/material";
 import { EventTracker, Animation } from "@devexpress/dx-react-chart";
 
 const LabelWithDate = (props) => {

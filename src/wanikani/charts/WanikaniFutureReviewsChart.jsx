@@ -2,7 +2,7 @@ import { Chart, ValueAxis, BarSeries, ArgumentAxis, Tooltip } from '@devexpress/
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { Animation, EventTracker, Stack } from "@devexpress/dx-react-chart";
-import { Card, CardContent, ButtonGroup, Button, Typography, Box } from "@material-ui/core";
+import { Card, CardContent, ButtonGroup, Button, Typography, Box } from "@mui/material";
 import { addDays, areDatesSameDay } from '../../util/DateUtils';
 import { wanikaniColors } from '../../Constants';
 
@@ -76,10 +76,10 @@ function WanikaniFutureReviewsChart() {
                             Future Reviews
                         </Typography>
 
-                        <ButtonGroup variant="outlined" color={'primary'} >
-                            <Button variant={days === 7 ? 'contained' : null} onClick={() => setDays(7)}>7</Button>
-                            <Button variant={days === 14 ? 'contained' : null} onClick={() => setDays(14)}>14</Button>
-                            <Button variant={days === 30 ? 'contained' : null} onClick={() => setDays(30)}>30</Button>
+                        <ButtonGroup variant="outlined" color={'primary'}>
+                            <Button variant={days === 7 ? 'contained' : undefined} onClick={() => setDays(7)}>7</Button>
+                            <Button variant={days === 14 ? 'contained' : undefined} onClick={() => setDays(14)}>14</Button>
+                            <Button variant={days === 30 ? 'contained' : undefined} onClick={() => setDays(30)}>30</Button>
                         </ButtonGroup>
                     </div>
 

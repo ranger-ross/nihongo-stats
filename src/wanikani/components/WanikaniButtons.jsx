@@ -1,5 +1,4 @@
-import { Button, createTheme } from "@material-ui/core";
-import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
+import {Button, createTheme, ThemeProvider} from "@mui/material";
 import { wanikaniColors } from "../../Constants";
 
 const createPinkButtonTheme = ({ darkMode }) =>
@@ -15,11 +14,11 @@ const createPinkButtonTheme = ({ darkMode }) =>
 export function WanikaniPinkButton(props) {
     const theme = createPinkButtonTheme(true);
     return (
-        <MuiThemeProvider theme={theme}>
+        <ThemeProvider theme={theme}>
             <Button {...props} color={'primary'}>
                 {props.children}
             </Button>
-        </MuiThemeProvider>
+        </ThemeProvider>
     );
 }
 
@@ -36,10 +35,10 @@ const createBlueButtonTheme = ({ darkMode }) =>
 export function WanikaniBlueButton(props) {
     const theme = createBlueButtonTheme(true);
     return (
-        <MuiThemeProvider theme={theme}>
+        <ThemeProvider theme={theme}>
             <Button {...props} color={'primary'} style={{color: 'white'}}>
                 {props.children}
             </Button>
-        </MuiThemeProvider>
+        </ThemeProvider>
     );
 }

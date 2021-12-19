@@ -1,30 +1,26 @@
-import makeStyles from "@material-ui/core/styles/makeStyles";
-import { useWanikaniApiKey } from "./stores/WanikaniApiKeyStore";
-import { Navigate } from "react-router";
-import { RoutePaths } from "../Routes";
+import {useWanikaniApiKey} from "./stores/WanikaniApiKeyStore";
+import {Navigate} from "react-router";
+import {RoutePaths} from "../Routes";
 import WanikaniLevelProgessChart from "./charts/WanikaniLevelProgressChart";
-import { Card, CircularProgress, Typography } from "@material-ui/core";
+import {Card, CircularProgress, Typography} from "@mui/material";
 import WanikaniTotalItemsHistoryChart from "./charts/WanikaniTotalItemsHistoryChart";
 import WanikaniReviewsHistoryChart from "./charts/WanikaniReviewsHistoryChart";
 import WanikaniAccuracyHistoryChart from "./charts/WanikaniAccuracyHistoryChart";
 import WanikaniHistorySummaryChart from "./charts/WanikaniHistorySummaryChart";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import ReactVisibilitySensor from "react-visibility-sensor";
-import { useState } from "react";
+import {useState} from "react";
 
-const useStyles = makeStyles({
-    container: {}
-});
 
-function LoadableChart({ placeholderTitle, children }) {
+function LoadableChart({placeholderTitle, children}) {
     const [isLoaded, setIsLoaded] = useState(false)
     return (
         <ReactVisibilitySensor partialVisibility={true} onChange={(isVisible) => isVisible ? setIsLoaded(true) : null}>
-            <Card variant={'outlined'} style={{ margin: '15px' }}>
+            <Card variant={'outlined'} style={{margin: '15px'}}>
                 {isLoaded ? children : (
-                    <div style={{ height: '500px', textAlign: 'center' }}>
+                    <div style={{height: '500px', textAlign: 'center'}}>
                         <Typography variant={'h5'}>{placeholderTitle}</Typography>
-                        <CircularProgress style={{ margin: '100px' }} />
+                        <CircularProgress style={{margin: '100px'}}/>
                     </div>
                 )}
             </Card>
@@ -33,33 +29,32 @@ function LoadableChart({ placeholderTitle, children }) {
 }
 
 function WanikaniHistory() {
-    const classes = useStyles();
-    const { apiKey } = useWanikaniApiKey();
+    const {apiKey} = useWanikaniApiKey();
 
     return (
         <>
-            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : (
+            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true}/>) : (
                 <WanikaniPreloadedData>
-                    <div className={classes.container}>
+                    <div>
 
-                        <Card variant={'outlined'} style={{ margin: '15px' }}>
-                            <WanikaniHistorySummaryChart />
+                        <Card variant={'outlined'} style={{margin: '15px'}}>
+                            <WanikaniHistorySummaryChart/>
                         </Card>
 
-                        <Card variant={'outlined'} style={{ margin: '15px' }}>
-                            <WanikaniReviewsHistoryChart />
+                        <Card variant={'outlined'} style={{margin: '15px'}}>
+                            <WanikaniReviewsHistoryChart/>
                         </Card>
 
                         <LoadableChart placeholderTitle="Total Items">
-                            <WanikaniTotalItemsHistoryChart />
+                            <WanikaniTotalItemsHistoryChart/>
                         </LoadableChart>
 
                         <LoadableChart placeholderTitle="Level Progress">
-                            <WanikaniLevelProgessChart />
+                            <WanikaniLevelProgessChart/>
                         </LoadableChart>
 
                         <LoadableChart placeholderTitle="Review Accuracy">
-                            <WanikaniAccuracyHistoryChart />
+                            <WanikaniAccuracyHistoryChart/>
                         </LoadableChart>
 
                     </div>

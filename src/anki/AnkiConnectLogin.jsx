@@ -1,0 +1,55 @@
+import {Button, Link} from "@mui/material";
+import AnkiApiService from "./service/AnkiApiService";
+import {useNavigate} from "react-router";
+import {RoutePaths} from "../Routes";
+import {useState} from "react";
+
+const styles = {
+    container: {
+        textAlign: 'center',
+        marginTop: '15vh'
+    }
+};
+
+function AnkiConnectLogin() {
+    const navigate = useNavigate();
+    const [showError, setShowError] = useState(false);
+
+
+    function connectToAnki() {
+        AnkiApiService.connect()
+            .then(() => navigate(RoutePaths.ankiDashboard, {replace: true}))
+            .catch(() => setShowError(true))
+    }
+
+    return (
+        <div style={styles.container}>
+            Can't connect to Anki. <br/>
+            Please make sure you have <Link
+            href={'https://ankiweb.net/shared/info/2055492159'}
+            target={'_blank'}>Anki Connect</Link> installed and Anki open.
+
+            <br/>
+            <br/>
+
+            <Button variant={'contained'}
+                    color={'primary'}
+                    onClick={connectToAnki}
+            >
+                Connect
+            </Button>
+
+            <br/>
+            <br/>
+
+            {showError ? (
+                <div style={{color: 'red'}}>
+                    Failed to connect to Anki
+                </div>
+            ) : null}
+
+        </div>
+    );
+}
+
+export default AnkiConnectLogin;

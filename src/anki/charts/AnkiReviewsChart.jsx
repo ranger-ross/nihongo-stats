@@ -1,11 +1,12 @@
-import {Card, CardContent, Typography, Grid} from "@mui/material";
+import * as React from 'react';
+import {
+    Chart, Legend, Tooltip, ValueAxis, ArgumentAxis,
+} from '@devexpress/dx-react-chart-material-ui';
+import {Card, CardContent, Grid, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
+import {BarSeries, EventTracker, LineSeries, Stack} from "@devexpress/dx-react-chart";
 import {truncDate} from "../../util/DateUtils";
 import AnkiApiService from "../service/AnkiApiService";
-import {Chart, ValueAxis, ArgumentAxis, Tooltip} from '@devexpress/dx-react-chart-material-ui';
-import {BarSeries, LineSeries, Stack} from "@devexpress/dx-react-chart";
-import {EventTracker} from "@devexpress/dx-react-chart";
-
 
 function DataPoint(date, previousDataPoint) {
     let dp = {
@@ -67,13 +68,12 @@ function AnkiReviewsChart({deckNames, showTotals}) {
 
     useEffect(() => {
         let reviewPromises = [];
-        const _deckNames = deckNames.filter(name => name.toLowerCase() !== 'default');
-        _deckNames.forEach(name => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
+        deckNames.forEach(name => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
 
         Promise.all(reviewPromises)
             .then(data => {
                 let deckData = data.map(((value, index) => ({
-                    deckName: _deckNames[index],
+                    deckName: deckNames[index],
                     reviews: value
                 })));
                 setReviewsByDeck(formatMultiDeckReviewData(deckData));
@@ -134,6 +134,7 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                             />
                         ) : null}
 
+                        <Legend/>
                         <EventTracker/>
                         <Tooltip contentComponent={ReviewToolTip}/>
                     </Chart>

@@ -25,7 +25,7 @@ function AnkiHistory() {
                 AnkiApiService.getDeckNamesAndIds()
                     .then(data => {
                         console.log(data);
-                        setDecks(data);
+                        setDecks(data.filter(deck => deck.name.toLowerCase() !== 'default'));
                     });
             })
             .catch(() => navigate(RoutePaths.ankiConnect, {replace: true}));

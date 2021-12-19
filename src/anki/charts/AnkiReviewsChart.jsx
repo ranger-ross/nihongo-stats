@@ -1,15 +1,10 @@
 import {Card, CardContent, Typography, Grid} from "@material-ui/core";
-import makeStyles from "@material-ui/core/styles/makeStyles";
 import {useEffect, useState} from "react";
 import {truncDate} from "../../util/DateUtils";
 import AnkiApiService from "../service/AnkiApiService";
 import {Chart, ValueAxis, ArgumentAxis, Tooltip} from '@devexpress/dx-react-chart-material-ui';
 import {BarSeries, LineSeries, Stack} from "@devexpress/dx-react-chart";
 import {EventTracker} from "@devexpress/dx-react-chart";
-
-const useStyles = makeStyles({
-    container: {}
-});
 
 
 function DataPoint(date, previousDataPoint) {
@@ -68,8 +63,6 @@ function formatMultiDeckReviewData(decks) {
 }
 
 function AnkiReviewsChart({deckNames, showTotals}) {
-    const classes = useStyles();
-
     const [reviewsByDeck, setReviewsByDeck] = useState(null);
 
     useEffect(() => {

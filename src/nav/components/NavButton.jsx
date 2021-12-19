@@ -1,25 +1,23 @@
-import { Button } from "@material-ui/core";
-import makeStyles from "@material-ui/core/styles/makeStyles";
+import {Button} from "@material-ui/core";
 import React from "react";
-import { useNavigate, useLocation } from "react-router";
+import {useNavigate, useLocation} from "react-router";
 
-const useStyles = makeStyles({
+const styles = {
     button: {
         marginLeft: '13px'
     }
-});
+};
 
-function NavButton({ text, route }) {
-    const classes = useStyles();
+function NavButton({text, route}) {
     const navigate = useNavigate();
     const location = useLocation();
     const isSelected = route === location.pathname;
 
     return (
         <Button variant={isSelected ? 'contained' : 'outlined'}
-            color="primary"
-            className={classes.button}
-            onClick={() => navigate(route, { replace: true })}
+                color="primary"
+                style={styles.button}
+                onClick={() => navigate(route, {replace: true})}
         >
             {text}
         </Button>

@@ -1,7 +1,6 @@
-import makeStyles from "@material-ui/core/styles/makeStyles";
-import { useWanikaniApiKey } from "./stores/WanikaniApiKeyStore";
-import { Navigate } from "react-router";
-import { RoutePaths } from "../Routes";
+import {useWanikaniApiKey} from "./stores/WanikaniApiKeyStore";
+import {Navigate} from "react-router";
+import {RoutePaths} from "../Routes";
 import WanikaniLevelSummaryChart from "./charts/WanikaniLevelSummaryChart";
 import WanikaniFutureReviewsChart from "./charts/WanikaniFutureReviewsChart";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
@@ -9,42 +8,41 @@ import WanikaniItemCountsChart from "./charts/WanikaniItemCountsChart";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import WanikaniActiveItemsChart from "./charts/WanikaniActiveItemChart";
 
-const useStyles = makeStyles({
+const styles = {
     container: {
         display: 'flex',
         flexDirection: 'column',
         margin: '10px',
         gap: '10px',
-    },
-});
+    }
+};
 
 function WanikaniDashboard() {
-    const classes = useStyles();
-    const { apiKey } = useWanikaniApiKey();
+    const {apiKey} = useWanikaniApiKey();
     return (
         <>
-            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true} />) : (
+            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true}/>) : (
                 <WanikaniPreloadedData>
-                    <div className={classes.container}>
-                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'stretch' }}>
+                    <div style={styles.container}>
+                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'stretch'}}>
 
-                            <div style={{ display: 'flex', gap: '10px', flexDirection: 'column', flexGrow: '1' }}>
-                                <WanikaniWelcomeTile />
+                            <div style={{display: 'flex', gap: '10px', flexDirection: 'column', flexGrow: '1'}}>
+                                <WanikaniWelcomeTile/>
 
-                                <WanikaniLevelSummaryChart />
+                                <WanikaniLevelSummaryChart/>
 
-                                <WanikaniItemCountsChart />
+                                <WanikaniItemCountsChart/>
                             </div>
 
-                            <div style={{ flexGrow: '25' }}>
-                                <WanikaniFutureReviewsChart />
+                            <div style={{flexGrow: '25'}}>
+                                <WanikaniFutureReviewsChart/>
                             </div>
 
                         </div>
                     </div>
 
-                    <div className={classes.container}>
-                        <WanikaniActiveItemsChart />
+                    <div style={styles.container}>
+                        <WanikaniActiveItemsChart/>
                     </div>
                 </WanikaniPreloadedData>
             )}

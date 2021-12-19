@@ -1,22 +1,20 @@
-import makeStyles from "@material-ui/core/styles/makeStyles";
 import {useEffect, useState} from "react";
 import AnkiReviewsChart from "./charts/AnkiReviewsChart";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 
-const useStyles = makeStyles({
+const styles = {
     container: {
         margin: '5px',
         display: 'flex',
         gap: '10px',
         flexDirection: 'column'
     }
-});
+};
 
 
 function AnkiHistory() {
-    const classes = useStyles();
     const navigate = useNavigate();
 
     const [decks, setDecks] = useState(null);
@@ -36,7 +34,7 @@ function AnkiHistory() {
     }, []);
 
     return (
-        <div className={classes.container}>
+        <div style={styles.container}>
             {decks ? (
                 <>
                     <AnkiReviewsChart

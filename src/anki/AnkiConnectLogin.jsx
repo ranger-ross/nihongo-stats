@@ -1,19 +1,17 @@
-import makeStyles from "@material-ui/core/styles/makeStyles";
 import {Button, Link} from "@material-ui/core";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import {useState} from "react";
 
-const useStyles = makeStyles({
+const styles = {
     container: {
         textAlign: 'center',
         marginTop: '15vh'
     }
-});
+};
 
 function AnkiConnectLogin() {
-    const classes = useStyles();
     const navigate = useNavigate();
     const [showError, setShowError] = useState(false);
 
@@ -25,7 +23,7 @@ function AnkiConnectLogin() {
     }
 
     return (
-        <div className={classes.container}>
+        <div style={styles.container}>
             Can't connect to Anki. <br/>
             Please make sure you have <Link
             href={'https://ankiweb.net/shared/info/2055492159'}

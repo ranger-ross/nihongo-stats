@@ -1,5 +1,4 @@
 import { Button, Grid, Link, TextField, Typography } from "@material-ui/core";
-import makeStyles from "@material-ui/core/styles/makeStyles";
 import { useState } from "react";
 import { useWanikaniApiKey } from "./stores/WanikaniApiKeyStore";
 import WanikaniApiService from "./service/WanikaniApiService";
@@ -7,7 +6,7 @@ import { useNavigate } from "react-router";
 import { RoutePaths } from "../Routes";
 
 
-const useStyles = makeStyles({
+const styles =  {
     container: {
         minHeight: '70vh'
     },
@@ -18,10 +17,9 @@ const useStyles = makeStyles({
     buttonContainer: {
         marginTop: '10px'
     }
-});
+};
 
 function EnterWanikaniApiKeyPage() {
-    const classes = useStyles();
     const navigate = useNavigate();
     const { setApiKey } = useWanikaniApiKey();
     const [textfieldValue, setTextfieldValue] = useState('');
@@ -38,14 +36,14 @@ function EnterWanikaniApiKeyPage() {
     };
 
     return (
-        <Grid container className={classes.container}
+        <Grid container style={styles.container}
             direction="column"
             alignItems="center"
             justifyContent="center"
             spacing={0}
         >
             <Grid item xs={12}>
-                <Typography className={classes.text} >
+                <Typography style={styles.text} >
                     Please enter your <Link href="https://www.wanikani.com/settings/personal_access_tokens" target="_blank">Wanikani Api Key</Link>
                 </Typography>
             </Grid>

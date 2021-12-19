@@ -1,22 +1,18 @@
-import makeStyles from "@material-ui/core/styles/makeStyles";
-import {useEffect, useState} from "react";
-import AnkiReviewsChart from "./charts/AnkiReviewsChart";
+import {useEffect} from "react";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 
-const useStyles = makeStyles({
+const styles = {
     container: {
         margin: '5px',
         display: 'flex',
         gap: '10px',
         flexDirection: 'column'
     }
-});
-
+};
 
 function AnkiDashboard() {
-    const classes = useStyles();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,7 +26,7 @@ function AnkiDashboard() {
     }, []);
 
     return (
-        <div className={classes.container}>
+        <div style={styles.container}>
             Anki Dashboard
         </div>
     );

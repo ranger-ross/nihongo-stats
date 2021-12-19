@@ -1,8 +1,7 @@
-import { Tooltip } from "@material-ui/core";
-import { wanikaniColors } from "../../Constants";
-import makeStyles from "@material-ui/core/styles/makeStyles";
+import {Tooltip} from "@material-ui/core";
+import {wanikaniColors} from "../../Constants";
 import VisibilitySensor from "react-visibility-sensor"
-import { useState, useMemo } from "react";
+import {useState, useMemo} from "react";
 
 const racialColor = wanikaniColors.blue;
 const kanjiColor = wanikaniColors.pink;
@@ -21,7 +20,7 @@ const baseTile = {
     textDecoration: 'none',
 }
 
-const useStyles = makeStyles({
+const styles = {
     lockedTile: {
         ...baseTile,
         background: '#b5b5b5',
@@ -47,27 +46,26 @@ const useStyles = makeStyles({
         width: '35px',
         color: '#00000011'
     }
-});
+};
 
-function WanikaniItemTile({ text, type, link, meaning, srsLevel, isStarted, isAvailable }) {
-    const classes = useStyles();
+function WanikaniItemTile({text, type, link, meaning, srsLevel, isStarted, isAvailable}) {
     const [isLoaded, setIsLoaded] = useState(false);
 
-    let cls = classes.lockedTile;
+    let style = styles.lockedTile;
     if (isStarted) {
         switch (type) {
             case 'radical':
-                cls = classes.radicalTile;
+                style = styles.radicalTile;
                 break;
             case 'kanji':
-                cls = classes.kanjiTile;
+                style = styles.kanjiTile;
                 break;
             case 'vocabulary':
-                cls = classes.vocabularyTile;
+                style = styles.vocabularyTile;
                 break;
         }
     } else if (isAvailable) {
-        cls = classes.unstartedTile;
+        style = styles.unstartedTile;
     }
 
     return (
@@ -79,9 +77,9 @@ function WanikaniItemTile({ text, type, link, meaning, srsLevel, isStarted, isAv
                         {!!srsLevel ? (<p>SRS Level: {srsLevel}</p>) : null}
                     </>
                 } placement={'top'}>
-                    <a href={link} target="_blank" className={cls}>{text}</a>
+                    <a href={link} target="_blank" style={style}>{text}</a>
                 </Tooltip>
-            ) : <div className={classes.placeholderDiv}>-</div>}
+            ) : <div style={styles.placeholderDiv}>-</div>}
         </VisibilitySensor>
     );
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { wanikaniColors } from '../../Constants';
 import { Card, CardContent, Typography, Grid } from "@mui/material";
+import {getMedian} from "../../util/MathUtils";
 
 
 function createSubjectMap(subjects) {
@@ -57,16 +58,6 @@ function DaysAndHoursLabel({ label, milliseconds }) {
             </Grid>
         </>
     );
-}
-
-function getMedian(a) {
-    const n = a.length;
-    a = a.sort((a, b) => a - b);
-    if (n % 2 != 0)
-        return a[n / 2];
-    const bottomIndex = (n / 2) - 1;
-    const topIndex = n / 2;
-    return (a[bottomIndex] + a[topIndex]) / 2;
 }
 
 function millisecondsToDays(ms) {
@@ -148,14 +139,14 @@ function WanikaniHistorySummaryChart() {
                 </Typography>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                    <Grid container style={{ maxWidth: '280px', marginTop: '10px' }}>
+                    <Grid container style={{ maxWidth: '325px', marginTop: '10px' }}>
                         <TotalLabel label={'Total Reviews'} count={totalsData.total} />
                         <TotalLabel label={'Radicals Reviews'} count={totalsData.radicals} color={wanikaniColors.blue} />
                         <TotalLabel label={'Kanji Reviews'} count={totalsData.kanji} color={wanikaniColors.pink} />
                         <TotalLabel label={'Vocabulary Reviews'} count={totalsData.vocabulary} color={wanikaniColors.purple} />
                     </Grid>
 
-                    <Grid container style={{ maxWidth: '300px', marginTop: '10px' }}>
+                    <Grid container style={{ maxWidth: '350px', marginTop: '10px' }}>
                         <DaysAndHoursLabel label={'Time since start'} milliseconds={levelData.timeSinceStart} />
                         <DaysAndHoursLabel label={'Average Time per level'} milliseconds={levelData.average} />
                         <DaysAndHoursLabel label={'Median Time per level'} milliseconds={levelData.median} />

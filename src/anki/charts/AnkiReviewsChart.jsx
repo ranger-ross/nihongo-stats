@@ -2,7 +2,7 @@ import * as React from 'react';
 import {
     Chart, Legend, Tooltip, ValueAxis, ArgumentAxis,
 } from '@devexpress/dx-react-chart-material-ui';
-import {Card, CardContent, Grid, Typography} from "@mui/material";
+import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import {BarSeries, EventTracker, LineSeries, Stack} from "@devexpress/dx-react-chart";
 import {truncDate} from "../../util/DateUtils";
@@ -65,19 +65,26 @@ function formatMultiDeckReviewData(decks) {
 
 function AnkiReviewsChart({deckNames, showTotals}) {
     const [reviewsByDeck, setReviewsByDeck] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
+        let isSubscribed = true;
+
         let reviewPromises = [];
         deckNames.forEach(name => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
-
+        setIsLoading(true);
         Promise.all(reviewPromises)
             .then(data => {
+                if (!isSubscribed)
+                    return;
                 let deckData = data.map(((value, index) => ({
                     deckName: deckNames[index],
                     reviews: value
                 })));
                 setReviewsByDeck(formatMultiDeckReviewData(deckData));
             })
+            .finally(() => setIsLoading(false));
+        return () => isSubscribed = false;
     }, []);
 
     function ReviewToolTip({text, targetItem}) {
@@ -99,46 +106,52 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                     </Typography>
                 </Grid>
 
-                {!!deckNames && reviewsByDeck ? (
-                    <Chart data={reviewsByDeck}>
-                        <ValueAxis/>
-                        <ArgumentAxis
-                            tickFormat={() => text => new Date(text).toLocaleDateString()}
-                        />
-
-                        {showTotals ? (
-                            <LineSeries name="Total"
-                                        valueField="totalCount"
-                                        argumentField="date"
+                {isLoading ? (
+                    <div style={{height: '300px', textAlign: 'center'}}>
+                        <CircularProgress style={{margin: '100px'}}/>
+                    </div>
+                ) : (
+                    !!deckNames && reviewsByDeck ? (
+                        <Chart data={reviewsByDeck}>
+                            <ValueAxis/>
+                            <ArgumentAxis
+                                tickFormat={() => text => new Date(text).toLocaleDateString()}
                             />
-                        ) : null}
 
-                        {deckNames?.map((name, idx) => (
-                            showTotals ? (
-                                <LineSeries key={idx}
-                                            name={name}
-                                            valueField={`total_${name}`}
+                            {showTotals ? (
+                                <LineSeries name="Total"
+                                            valueField="totalCount"
                                             argumentField="date"
                                 />
-                            ) : (
-                                <BarSeries key={idx}
-                                           name={name}
-                                           valueField={`count_${name}`}
-                                           argumentField="date"/>
-                            )
-                        ))}
+                            ) : null}
 
-                        {!showTotals ? (
-                            <Stack
-                                stacks={[{series: deckNames}]}
-                            />
-                        ) : null}
+                            {deckNames?.map((name, idx) => (
+                                showTotals ? (
+                                    <LineSeries key={idx}
+                                                name={name}
+                                                valueField={`total_${name}`}
+                                                argumentField="date"
+                                    />
+                                ) : (
+                                    <BarSeries key={idx}
+                                               name={name}
+                                               valueField={`count_${name}`}
+                                               argumentField="date"/>
+                                )
+                            ))}
 
-                        <Legend/>
-                        <EventTracker/>
-                        <Tooltip contentComponent={ReviewToolTip}/>
-                    </Chart>
-                ) : null}
+                            {!showTotals ? (
+                                <Stack
+                                    stacks={[{series: deckNames}]}
+                                />
+                            ) : null}
+
+                            <Legend/>
+                            <EventTracker/>
+                            <Tooltip contentComponent={ReviewToolTip}/>
+                        </Chart>
+                    ) : null
+                )}
 
             </CardContent>
         </Card>

@@ -102,7 +102,7 @@ async function getAllReviewsByDeck(deckName) {
 
 async function getDeckNamesAndIds() {
     let cachedValue = await localForage.getItem(`anki-deck-names-and-ids`);
-    if (!!cachedValue && cachedValue.lastUpdate > Date.now() - 1000 * 60 * 60) {
+    if (!!cachedValue && cachedValue.lastUpdate > Date.now() - 1000 * 60 * 60 * 5) {
         return cachedValue.data;
     }
     let data = await invoke("deckNamesAndIds", 6).then(convertDeckMapToArray);

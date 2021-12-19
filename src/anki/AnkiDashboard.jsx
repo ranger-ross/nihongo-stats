@@ -18,8 +18,6 @@ function AnkiDashboard() {
     useEffect(() => {
         AnkiApiService.connect()
             .catch(() => navigate(RoutePaths.ankiConnect, {replace: true}));
-
-
     }, []);
 
     return (

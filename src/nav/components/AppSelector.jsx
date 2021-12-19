@@ -1,5 +1,5 @@
 import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
-import { bunproAppName, wanikaniAppName, ankiAppName } from '../Constants.js';
+import { bunproAppName, wanikaniAppName, ankiAppName } from '../../Constants.js';
 
 function AppSelector({ selectedApp, setSelectedApp }) {
     return (

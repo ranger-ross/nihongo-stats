@@ -1,13 +1,14 @@
-import { Box, Grid } from "@material-ui/core";
+import {Box, Grid} from "@material-ui/core";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router";
-import { bunproAppName, wanikaniAppName, ankiAppName } from '../Constants.js';
-import { useGlobalState } from "../GlobalState";
-import { RoutePaths } from '../Routes';
-import { useWanikaniApiKey } from "../wanikani/stores/WanikaniApiKeyStore.js";
-import AppSelector from "./AppSelector";
-import WanikaniNav from "./WanikaniNav.jsx";
+import React, {useEffect} from "react";
+import {useNavigate} from "react-router";
+import {bunproAppName, wanikaniAppName, ankiAppName} from '../Constants.js';
+import {useGlobalState} from "../GlobalState";
+import {RoutePaths} from '../Routes';
+import {useWanikaniApiKey} from "../wanikani/stores/WanikaniApiKeyStore.js";
+import AppSelector from "./components/AppSelector";
+import WanikaniNav from "./navbars/WanikaniNav.jsx";
+import AnkiNav from "./navbars/AnkiNav";
 
 const useStyles = makeStyles({
     container: {
@@ -20,10 +21,10 @@ const useStyles = makeStyles({
 });
 
 function AppNav() {
-    const { selectedApp, setSelectedApp } = useGlobalState();
+    const {selectedApp, setSelectedApp} = useGlobalState();
     const navigate = useNavigate();
     const classes = useStyles();
-    const { apiKey } = useWanikaniApiKey();
+    const {apiKey} = useWanikaniApiKey();
 
     useEffect(() => {
         switch (selectedApp) {
@@ -40,13 +41,15 @@ function AppNav() {
     }, [selectedApp])
 
     return (
-        <Grid container className={classes.container} alignItems={'flex-end'} style={{gap: '5px'}}>  
-            <Grid item xs={12} sm={3} md={2} lg={1} className={classes.selectorContainer}>
-                <AppSelector selectedApp={selectedApp} setSelectedApp={setSelectedApp} />
+        <Grid container className={classes.container} alignItems={'flex-end'} style={{gap: '5px'}}>
+            <Grid item xs={12} sm={3} md={2} lg={1}>
+                <AppSelector selectedApp={selectedApp}
+                             setSelectedApp={setSelectedApp}/>
             </Grid>
 
-            <Box sx={{ flexGrow: 1 }}>
-                {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniNav />) : null}
+            <Box sx={{flexGrow: 1}}>
+                {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniNav/>) : null}
+                {selectedApp === ankiAppName && !!apiKey ? (<AnkiNav/>) : null}
             </Box>
         </Grid>
     );

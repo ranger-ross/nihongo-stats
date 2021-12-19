@@ -15,14 +15,20 @@ const useStyles = makeStyles({
 });
 
 
-function AnkiDashboard() {
+function AnkiHistory() {
     const classes = useStyles();
     const navigate = useNavigate();
+
+    const [decks, setDecks] = useState(null);
 
     useEffect(() => {
         AnkiApiService.connect()
             .then(() => {
-
+                AnkiApiService.getDeckNamesAndIds()
+                    .then(data => {
+                        console.log(data);
+                        setDecks(data);
+                    });
             })
             .catch(() => navigate(RoutePaths.ankiConnect, {replace: true}));
 
@@ -31,9 +37,21 @@ function AnkiDashboard() {
 
     return (
         <div className={classes.container}>
-            Anki Dashboard
+            {decks ? (
+                <>
+                    <AnkiReviewsChart
+                        deckNames={decks.map(deck => deck.name)}
+                        showTotals={true}
+                    />
+
+                    <AnkiReviewsChart
+                        deckNames={decks.map(deck => deck.name)}
+                        showTotals={false}
+                    />
+                </>
+            ) : null}
         </div>
     );
 }
 
-export default AnkiDashboard;
+export default AnkiHistory;

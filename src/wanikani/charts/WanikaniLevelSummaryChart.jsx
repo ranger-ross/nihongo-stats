@@ -16,10 +16,11 @@ const styles = {
         width: '100%',
         aspectRatio: 1 / 0.9
     },
-    daysUntilLevelContainer: {
+    levelLabelContainer: {
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        margin: '49px'
     },
     subjectsLabel: {
         marginLeft: '5px',
@@ -140,11 +141,11 @@ function WanikaniLevelSummaryChart() {
                         </Box>
                     ) : (
                         <>
-                            <Box sx={{ flexGrow: 1 }} style={styles.daysUntilLevelContainer} >
+                            <Box sx={{ flexGrow: 1 }} style={styles.levelLabelContainer} >
                                 <Typography variant={'h2'} style={{ textAlign: 'center' }}>
                                     {progressData.level}
                                 </Typography>
-                                <Typography variant={'caption'} style={{ textAlign: 'center' }}>
+                                <Typography variant={'caption'} style={{ textAlign: 'center'}}>
                                     Level
                                 </Typography>
                             </Box>

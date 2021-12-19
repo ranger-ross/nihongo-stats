@@ -1,6 +1,5 @@
-import {Grid, Typography} from "@material-ui/core";
+import {Grid, Typography, useTheme} from "@mui/material";
 import HeaderOptionMenu from './components/HeaderOptionMenu'
-import {useTheme} from "@mui/material";
 
 
 function AppHeader() {

@@ -2,7 +2,7 @@ import {useWanikaniApiKey} from "./stores/WanikaniApiKeyStore";
 import {Navigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import WanikaniLevelProgessChart from "./charts/WanikaniLevelProgressChart";
-import {Card, CircularProgress, Typography} from "@material-ui/core";
+import {Card, CircularProgress, Typography} from "@mui/material";
 import WanikaniTotalItemsHistoryChart from "./charts/WanikaniTotalItemsHistoryChart";
 import WanikaniReviewsHistoryChart from "./charts/WanikaniReviewsHistoryChart";
 import WanikaniAccuracyHistoryChart from "./charts/WanikaniAccuracyHistoryChart";

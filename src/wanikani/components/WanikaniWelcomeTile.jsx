@@ -1,7 +1,7 @@
-import { Card, CardContent, Typography } from "@material-ui/core";
+import { Card, CardContent, Typography } from "@mui/material";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { useState, useEffect } from "react";
-import { WanikaniBlueButton, WanikaniPinkButton } from "../components/WanikaniButtons";
+import { WanikaniBlueButton, WanikaniPinkButton } from "./WanikaniButtons";
 
 function WanikaniWelcomeTile() {
     const [username, setUsername] = useState('');

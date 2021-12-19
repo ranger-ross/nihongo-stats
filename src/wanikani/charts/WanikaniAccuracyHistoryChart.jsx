@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { LineSeries, ValueScale } from "@devexpress/dx-react-chart";
 import { wanikaniColors } from '../../Constants';
-import { Card, CardContent, Typography, Grid, ButtonGroup, Button } from "@material-ui/core";
+import { Card, CardContent, Typography, Grid, ButtonGroup, Button } from "@mui/material";
 import { EventTracker } from "@devexpress/dx-react-chart";
 import _ from 'lodash';
 import { scaleLinear } from 'd3-scale';
@@ -129,7 +129,7 @@ function WanikaniAccuracyHistoryChart() {
                         </Grid>
 
                         <Grid item xs={12} md={4} style={{ textAlign: 'end' }}>
-                            <ButtonGroup variant="outlined" color={'primary'} size="small" >
+                            <ButtonGroup variant="contained" color={'primary'} size="small" >
                                 <Button variant={daysToLookBack === 7 ? 'contained' : null} onClick={() => setDaysToLookBack(7)}>7</Button>
                                 <Button variant={daysToLookBack === 14 ? 'contained' : null} onClick={() => setDaysToLookBack(14)}>14</Button>
                                 <Button variant={daysToLookBack === 30 ? 'contained' : null} onClick={() => setDaysToLookBack(30)}>30</Button>

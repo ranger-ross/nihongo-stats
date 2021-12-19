@@ -1,4 +1,4 @@
-import { IconButton, Menu, MenuItem } from "@material-ui/core";
+import { IconButton, Menu, MenuItem } from "@mui/material";
 import MoreIcon from '@mui/icons-material/MoreVert';
 import React from "react";
 import { useWanikaniApiKey } from "../../wanikani/stores/WanikaniApiKeyStore.js";

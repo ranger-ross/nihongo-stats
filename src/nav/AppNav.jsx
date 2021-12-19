@@ -1,4 +1,4 @@
-import {Box, Grid} from "@material-ui/core";
+import {Box, Grid} from "@mui/material";
 import React, {useEffect} from "react";
 import {useNavigate} from "react-router";
 import {bunproAppName, wanikaniAppName, ankiAppName} from '../Constants.js';

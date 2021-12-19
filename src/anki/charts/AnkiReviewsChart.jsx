@@ -1,4 +1,4 @@
-import {Card, CardContent, Typography, Grid} from "@material-ui/core";
+import {Card, CardContent, Typography, Grid} from "@mui/material";
 import {useEffect, useState} from "react";
 import {truncDate} from "../../util/DateUtils";
 import AnkiApiService from "../service/AnkiApiService";

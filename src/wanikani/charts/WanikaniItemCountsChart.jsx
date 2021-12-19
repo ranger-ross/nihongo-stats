@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { Card, CardContent, Tooltip, Typography } from "@material-ui/core";
+import { Card, CardContent, Tooltip, Typography } from "@mui/material";
 import { wanikaniColors } from "../../Constants";
 
 function assignmentsToCounts(assignments) {

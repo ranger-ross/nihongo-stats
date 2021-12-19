@@ -1,4 +1,4 @@
-import { Button, Grid, Link, TextField, Typography } from "@material-ui/core";
+import { Button, Grid, Link, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useWanikaniApiKey } from "./stores/WanikaniApiKeyStore";
 import WanikaniApiService from "./service/WanikaniApiService";

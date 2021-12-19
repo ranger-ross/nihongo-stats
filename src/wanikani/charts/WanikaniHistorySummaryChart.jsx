@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { wanikaniColors } from '../../Constants';
-import { Card, CardContent, Typography, Grid } from "@material-ui/core";
-import _ from 'lodash';
+import { Card, CardContent, Typography, Grid } from "@mui/material";
 
 
 function createSubjectMap(subjects) {

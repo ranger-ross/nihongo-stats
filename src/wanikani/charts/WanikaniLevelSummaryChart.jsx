@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import { Box, Card, CardContent, Typography, Grid, Tooltip } from "@material-ui/core";
+import { Box, Card, CardContent, Typography, Grid, Tooltip } from "@mui/material";
 import { millisToDays, millisToHours } from '../../util/DateUtils';
 import { Stack } from '@mui/material';
 import { wanikaniColors } from "../../Constants";

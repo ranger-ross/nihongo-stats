@@ -1,4 +1,4 @@
-import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { bunproAppName, wanikaniAppName, ankiAppName } from '../../Constants.js';
 
 function AppSelector({ selectedApp, setSelectedApp }) {
@@ -6,6 +6,7 @@ function AppSelector({ selectedApp, setSelectedApp }) {
         <FormControl fullWidth>
             <InputLabel>Selected App</InputLabel>
             <Select
+                size={'small'}
                 value={selectedApp}
                 label="Selected App"
                 onChange={e => setSelectedApp(e.target.value)}

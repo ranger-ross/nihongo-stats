@@ -4,9 +4,11 @@ import {
 } from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
-import {BarSeries, EventTracker, LineSeries, Stack} from "@devexpress/dx-react-chart";
+import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack} from "@devexpress/dx-react-chart";
 import {truncDate} from "../../util/DateUtils";
 import AnkiApiService from "../service/AnkiApiService";
+import {scaleBand} from 'd3-scale';
+import useWindowDimensions from "../../hooks/WindowDimensions.jsx";
 
 function DataPoint(date, previousDataPoint) {
     let dp = {
@@ -96,6 +98,29 @@ function AnkiReviewsChart({deckNames, showTotals}) {
         );
     }
 
+    const LabelWithDate = (props) => {
+        const {width} = useWindowDimensions();
+        const date = new Date(props.text);
+        if (!date) {
+            return (<></>)
+        }
+
+        const isSmallScreen = width < 550;
+        const totalLabels = isSmallScreen ? 3 : 6;
+        const labelTickSize = Math.floor(365 / totalLabels); // TODO: Replace 365 with range
+        const days = Math.floor((Date.now() - date.getTime()) / 86400000);
+        return (
+            <>
+                {days % labelTickSize == 0 ? (
+                    <ArgumentAxis.Label
+                        {...props}
+                        text={new Date(date).toLocaleDateString()}
+                    />
+                ) : null}
+            </>
+        );
+    };
+
     return (
         <Card>
             <CardContent>
@@ -113,10 +138,9 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                 ) : (
                     !!deckNames && reviewsByDeck ? (
                         <Chart data={reviewsByDeck}>
+                            <ArgumentScale factory={scaleBand}/>
+                            <ArgumentAxis labelComponent={LabelWithDate}/>
                             <ValueAxis/>
-                            <ArgumentAxis
-                                tickFormat={() => text => new Date(text).toLocaleDateString()}
-                            />
 
                             {showTotals ? (
                                 <LineSeries name="Total"

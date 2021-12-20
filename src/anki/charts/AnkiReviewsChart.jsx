@@ -139,7 +139,7 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                     !!deckNames && reviewsByDeck ? (
                         <Chart data={reviewsByDeck}>
                             <ArgumentScale factory={scaleBand}/>
-                            <ArgumentAxis labelComponent={LabelWithDate}/>
+                            <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
                             <ValueAxis/>
 
                             {showTotals ? (

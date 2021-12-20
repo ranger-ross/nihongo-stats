@@ -1,6 +1,5 @@
 import {Checkbox, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select} from "@mui/material";
-import {useEffect, useState} from "react";
-import AnkiApiService from "../../anki/service/AnkiApiService.js";
+import {useAnkiDecks, useSelectedAnkiDecks} from "../../hooks/AnkiDecks.jsx";
 
 const ITEM_HEIGHT = 40;
 const ITEM_PADDING_TOP = 8;
@@ -14,20 +13,8 @@ const MenuProps = {
 };
 
 function AnkiDeckSelector() {
-    const [decks, setDecks] = useState([]);
-    const [selectedDecks, setSelectedDecks] = useState([]);
-
-    useEffect(() => {
-        let isSubscribed = true;
-        AnkiApiService.getDeckNamesAndIds()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setDecks([...data, {name: 'deck1'}, {name: 'deck2'}].filter(deck => deck.name.toLowerCase() !== 'default'));
-            });
-        return () => isSubscribed = false;
-    }, []);
-
+    const [decks] = useAnkiDecks();
+    const [selectedDecks, setSelectedDecks] = useSelectedAnkiDecks();
 
     const handleChange = (event) => {
         const {target: {value}} = event;
@@ -47,9 +34,9 @@ function AnkiDeckSelector() {
                 MenuProps={MenuProps}
             >
                 {decks.map((deck) => (
-                    <MenuItem key={deck.name} value={deck.name}>
-                        <Checkbox checked={selectedDecks.indexOf(deck.name) > -1}/>
-                        <ListItemText primary={deck.name}/>
+                    <MenuItem key={deck} value={deck}>
+                        <Checkbox checked={selectedDecks.indexOf(deck) > -1}/>
+                        <ListItemText primary={deck}/>
                     </MenuItem>
                 ))}
             </Select>

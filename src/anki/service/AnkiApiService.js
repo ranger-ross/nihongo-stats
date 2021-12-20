@@ -106,6 +106,7 @@ async function getDeckNamesAndIds() {
         return cachedValue.data;
     }
     let data = await invoke("deckNamesAndIds", 6).then(convertDeckMapToArray);
+    data = data.filter(deck => deck.name.toLowerCase() !== 'default')
     localForage.setItem(`anki-deck-names-and-ids`, {
         data: data,
         lastUpdate: Date.now()
@@ -113,10 +114,14 @@ async function getDeckNamesAndIds() {
     return data;
 }
 
+async function getDeckNames() {
+    const data = await getDeckNamesAndIds();
+    return data.map(deck => deck.name);
+}
 
 export default {
     connect: () => health(),
-    getDecks: () => invoke("deckNames", 6),
+    getDecks: getDeckNames,
     getDeckNamesAndIds: getDeckNamesAndIds,
     getNumCardsReviewedByDay: () => invoke("getNumCardsReviewedByDay", 6),
     getCollectionStatsHtml: () => invoke("getCollectionStatsHTML", 6),

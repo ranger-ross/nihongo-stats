@@ -3,6 +3,7 @@ import AnkiReviewsChart from "./charts/AnkiReviewsChart";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
+import {useAnkiDecks, useSelectedAnkiDecks} from "../hooks/AnkiDecks.jsx";
 
 const styles = {
     container: {
@@ -16,34 +17,24 @@ const styles = {
 
 function AnkiHistory() {
     const navigate = useNavigate();
-
-    const [decks, setDecks] = useState(null);
+    const [selectedDecks] = useSelectedAnkiDecks();
 
     useEffect(() => {
         AnkiApiService.connect()
-            .then(() => {
-                AnkiApiService.getDeckNamesAndIds()
-                    .then(data => {
-                        console.log(data);
-                        setDecks(data.filter(deck => deck.name.toLowerCase() !== 'default'));
-                    });
-            })
             .catch(() => navigate(RoutePaths.ankiConnect, {replace: true}));
-
-
     }, []);
 
     return (
         <div style={styles.container}>
-            {decks ? (
+            {selectedDecks?.length > 0 ? (
                 <>
                     <AnkiReviewsChart
-                        deckNames={decks.map(deck => deck.name)}
+                        deckNames={selectedDecks}
                         showTotals={true}
                     />
 
                     <AnkiReviewsChart
-                        deckNames={decks.map(deck => deck.name)}
+                        deckNames={selectedDecks}
                         showTotals={false}
                     />
                 </>

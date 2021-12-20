@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import { wanikaniColors } from '../../Constants';
 import { Card, CardContent, Typography, Grid } from "@mui/material";
-import {getMedian} from "../../util/MathUtils";
+import {sortAndGetMedian} from "../../util/MathUtils";
 
 
 function createSubjectMap(subjects) {
@@ -118,7 +118,7 @@ function WanikaniHistorySummaryChart() {
                 }
 
                 const averageInMillis = levelTimes.reduce((sum, value) => sum + value) / levelTimes.length;
-                const medianInMillis = getMedian(levelTimes);
+                const medianInMillis = sortAndGetMedian(levelTimes);
 
                 setLevelData(lvlData => ({
                     ...lvlData,

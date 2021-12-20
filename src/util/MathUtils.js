@@ -1,4 +1,4 @@
-export function getMedian(a) {
+export function sortAndGetMedian(a) {
     const n = a.length;
     a = a.sort((a, b) => a - b);
     if (n % 2 != 0)

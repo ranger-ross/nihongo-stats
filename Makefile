@@ -7,6 +7,9 @@ install: ## Installs dependencies
 start: ## Start the application
 	npm run dev
 
+test: ## Runs tests
+	npm run test
+
 build: ## Builds the React app
 	npm run build
 

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "vite-jest --no-cache",
+    "test": "TZ=UTC vite-jest --no-cache",
     "build": "vite build",
     "serve": "vite preview"
   },

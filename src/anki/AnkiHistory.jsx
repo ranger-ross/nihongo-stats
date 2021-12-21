@@ -1,5 +1,5 @@
 import {useEffect} from "react";
-import AnkiReviewsChart from "./charts/AnkiReviewsChart";
+import AnkiReviewsChart from "./components/AnkiReviewsChart.jsx";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";

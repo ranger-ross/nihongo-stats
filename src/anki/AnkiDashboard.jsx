@@ -3,6 +3,7 @@ import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import AnkiDeckSummaries from "./components/AnkiDeckSummaries.jsx";
+import AnkiCardBreakDownChart from "./components/AnkiCardBreakDownChart.jsx";
 
 const styles = {
     container: {
@@ -13,11 +14,13 @@ const styles = {
     },
     leftContainer: {
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        gap: '10px',
     },
     rightContainer: {
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        gap: '10px',
     },
 };
 
@@ -33,6 +36,7 @@ function AnkiDashboard() {
         <div style={styles.container}>
             <div style={styles.leftContainer}>
                 <AnkiDeckSummaries/>
+                <AnkiCardBreakDownChart/>
             </div>
             <div style={styles.rightContainer}>
                 placeholder right

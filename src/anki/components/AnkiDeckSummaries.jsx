@@ -60,7 +60,7 @@ function AnkiDeckSummaries() {
                         <strong>{data.deckName}</strong>
                         <p>
                             <strong>
-                                <span>Reviews: <span style={{color: ankiColors.green}}>{data.dueCards}</span></span>
+                                <span>Reviews: <span style={{color: ankiColors.lightGreen}}>{data.dueCards}</span></span>
                                 <span style={{marginLeft: '15px'}}>New: <span style={{color: ankiColors.blue}}>{data.newCards}</span></span>
                             </strong>
                         </p>

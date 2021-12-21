@@ -10,5 +10,6 @@ export const wanikaniColors = {
 
 export const ankiColors = {
     blue: '#77ccff',
-    green: '#7df100', // TODO: Match Anki
+    lightGreen: '#74c464',
+    darkGreen: '#31a354',
 }

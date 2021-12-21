@@ -2,14 +2,23 @@ import {useEffect} from "react";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
+import AnkiDeckSummaries from "./components/AnkiDeckSummaries.jsx";
 
 const styles = {
     container: {
         margin: '5px',
         display: 'flex',
         gap: '10px',
+        flexWrap: 'wrap'
+    },
+    leftContainer: {
+        display: 'flex',
         flexDirection: 'column'
-    }
+    },
+    rightContainer: {
+        display: 'flex',
+        flexDirection: 'column'
+    },
 };
 
 function AnkiDashboard() {
@@ -22,7 +31,13 @@ function AnkiDashboard() {
 
     return (
         <div style={styles.container}>
-            Anki Dashboard
+            <div style={styles.leftContainer}>
+                <AnkiDeckSummaries/>
+            </div>
+            <div style={styles.rightContainer}>
+                placeholder right
+            </div>
+
         </div>
     );
 }

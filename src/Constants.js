@@ -7,3 +7,8 @@ export const wanikaniColors = {
     pink: '#f100a1',
     purple: '#a100f1',
 }
+
+export const ankiColors = {
+    blue: '#77ccff',
+    green: '#7df100', // TODO: Match Anki
+}

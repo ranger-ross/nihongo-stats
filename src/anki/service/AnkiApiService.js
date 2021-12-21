@@ -119,6 +119,11 @@ async function getDeckNames() {
     return data.map(deck => deck.name);
 }
 
+// See Docs: https://docs.ankiweb.net/searching.html
+function findCards(query) {
+    return invoke("findCards", 6, {"query": query})
+}
+
 export default {
     connect: () => health(),
     getDecks: getDeckNames,
@@ -127,6 +132,7 @@ export default {
     getCollectionStatsHtml: () => invoke("getCollectionStatsHTML", 6),
     getCardReviews: getCardReviews,
     getAllReviewsByDeck: getAllReviewsByDeck,
-
+    findCards: findCards,
+    getDeckConfig: (deck) => invoke("getDeckConfig", 6, {"deck": deck}),
 
 }

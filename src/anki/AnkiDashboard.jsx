@@ -16,6 +16,7 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         gap: '10px',
+        minWidth: '425px',
     },
     rightContainer: {
         display: 'flex',

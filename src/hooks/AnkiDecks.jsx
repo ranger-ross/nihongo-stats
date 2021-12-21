@@ -25,7 +25,10 @@ export const useAnkiDecks = () => {
 export const useSelectedAnkiDecks = create(persist(
     (set) => ({
         selectedDecks: [],
-        setSelectedDecks: (decks) => set(() => ({selectedDecks: decks})),
+        setSelectedDecks: (decks) => set(() => {
+            const sorted = !!decks ? decks.sort() : [];
+            return {selectedDecks: sorted};
+        }),
     }),
     {
         name: 'anki-selected-decks'

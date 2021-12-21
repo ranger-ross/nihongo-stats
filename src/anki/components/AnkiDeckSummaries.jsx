@@ -49,7 +49,7 @@ function AnkiDeckSummaries() {
                 setDeckData(data);
             });
         return () => isSubscribed = false;
-    }, []);
+    }, [selectedDecks]);
 
 
     return (

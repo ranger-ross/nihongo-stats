@@ -11,7 +11,11 @@ function AppSelector({options, selectedApp, setSelectedApp}) {
                 onChange={e => setSelectedApp(e.target.value)}
             >
                 {options.map(({appName, displayName}) => (
-                    <MenuItem value={appName}>{displayName}</MenuItem>
+                    <MenuItem key={appName}
+                              value={appName}
+                    >
+                        {displayName}
+                    </MenuItem>
                 ))}
             </Select>
         </FormControl>

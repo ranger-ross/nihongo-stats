@@ -8,7 +8,7 @@ import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack} from "@devexp
 import {truncDate} from "../../util/DateUtils.js";
 import AnkiApiService from "../service/AnkiApiService.js";
 import {scaleBand} from 'd3-scale';
-import useWindowDimensions from "../../hooks/WindowDimensions.jsx";
+import useWindowDimensions from "../../hooks/useWindowDimensions.jsx";
 
 function DataPoint(date, previousDataPoint) {
     let dp = {

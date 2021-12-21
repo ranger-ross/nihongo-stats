@@ -1,6 +1,6 @@
 import { Chart, ValueAxis, BarSeries, ArgumentAxis, Title, Tooltip } from '@devexpress/dx-react-chart-material-ui';
 import { useState, useEffect } from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
+import WanikaniApiService from "../service/WanikaniApiService.js";
 import { EventTracker, Animation } from "@devexpress/dx-react-chart";
 
 function LevelToolTip({ text }) {

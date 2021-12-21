@@ -1,7 +1,7 @@
 import {Card, CardContent} from "@mui/material";
 import {useEffect, useState} from "react";
 import AnkiApiService from "../service/AnkiApiService.js";
-import {useSelectedAnkiDecks} from "../../hooks/AnkiDecks.jsx";
+import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import {Chart, PieSeries, Legend, Title} from '@devexpress/dx-react-chart-material-ui';
 import {ankiColors} from "../../Constants.js";
 

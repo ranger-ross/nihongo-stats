@@ -3,7 +3,7 @@ import AnkiReviewsChart from "./components/AnkiReviewsChart.jsx";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
-import {useSelectedAnkiDecks} from "../hooks/AnkiDecks.jsx";
+import {useSelectedAnkiDecks} from "../hooks/useSelectedAnkiDecks.jsx";
 
 const styles = {
     container: {

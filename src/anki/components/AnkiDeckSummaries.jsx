@@ -1,5 +1,5 @@
 import {Card, CardContent} from "@mui/material";
-import {useSelectedAnkiDecks} from "../../hooks/AnkiDecks.jsx";
+import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import {useEffect, useState} from "react";
 import AnkiApiService from "../service/AnkiApiService.js";
 import {ankiColors} from "../../Constants.js";

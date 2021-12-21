@@ -1,6 +1,7 @@
 import {Checkbox, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select} from "@mui/material";
-import {useAnkiDecks, useSelectedAnkiDecks} from "../../hooks/AnkiDecks.jsx";
+import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import {useEffect} from "react";
+import {useAnkiDecks} from "../../hooks/useAnkiDecks.jsx";
 
 const ITEM_HEIGHT = 40;
 const ITEM_PADDING_TOP = 8;

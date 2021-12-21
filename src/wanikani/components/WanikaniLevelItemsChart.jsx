@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
+import WanikaniApiService from "../service/WanikaniApiService.js";
 import { Card, CardContent, Typography, Switch, FormGroup, FormControlLabel } from "@mui/material";
-import WanikaniItemTile from "../components/WanikaniItemTile";
+import WanikaniItemTile from "./WanikaniItemTile.jsx";
 
 function createAssignmentMap(subjects) {
     let map = {};

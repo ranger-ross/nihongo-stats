@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
-import { wanikaniColors } from '../../Constants';
+import WanikaniApiService from "../service/WanikaniApiService.js";
+import { wanikaniColors } from '../../Constants.js';
 import { Card, CardContent, Typography, Grid } from "@mui/material";
-import {sortAndGetMedian} from "../../util/MathUtils";
+import {sortAndGetMedian} from "../../util/MathUtils.js";
 
 
 function createSubjectMap(subjects) {

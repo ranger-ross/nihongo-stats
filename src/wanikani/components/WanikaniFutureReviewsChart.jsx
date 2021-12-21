@@ -1,10 +1,10 @@
 import { Chart, ValueAxis, BarSeries, ArgumentAxis, Tooltip } from '@devexpress/dx-react-chart-material-ui';
 import { useState, useEffect } from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
+import WanikaniApiService from "../service/WanikaniApiService.js";
 import { Animation, EventTracker, Stack } from "@devexpress/dx-react-chart";
 import { Card, CardContent, ButtonGroup, Button, Typography, Box } from "@mui/material";
-import { addDays, areDatesSameDay } from '../../util/DateUtils';
-import { wanikaniColors } from '../../Constants';
+import { addDays, areDatesSameDay } from '../../util/DateUtils.js';
+import { wanikaniColors } from '../../Constants.js';
 
 function WanikaniFutureReviewsChart() {
     const [rawData, setRawData] = useState([]);

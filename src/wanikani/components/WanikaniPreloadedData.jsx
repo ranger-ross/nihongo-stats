@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import {CircularProgress} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
-import {useWanikaniPreloadStatus} from "../stores/WanikaniPreloadStatusStore";
+import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.jsx";
 
 const styles = {
     loadingItem: {

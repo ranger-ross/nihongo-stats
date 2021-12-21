@@ -4,7 +4,7 @@ import {useNavigate} from "react-router";
 import {bunproAppName, wanikaniAppName, ankiAppName} from '../Constants.js';
 import {useGlobalState} from "../GlobalState";
 import {RoutePaths} from '../Routes';
-import {useWanikaniApiKey} from "../wanikani/stores/WanikaniApiKeyStore.js";
+import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import AppSelector from "./components/AppSelector";
 import WanikaniNav from "./navbars/WanikaniNav.jsx";
 import AnkiNav from "./navbars/AnkiNav";

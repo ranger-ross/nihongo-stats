@@ -1,7 +1,7 @@
-import {useWanikaniApiKey} from "./stores/WanikaniApiKeyStore";
+import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import {Navigate} from "react-router";
 import {RoutePaths} from "../Routes";
-import WanikaniLevelItemsChart from "./charts/WanikaniLevelItemsChart";
+import WanikaniLevelItemsChart from "./components/WanikaniLevelItemsChart.jsx";
 import ReactVisibilitySensor from "react-visibility-sensor";
 import {useState} from "react";
 

@@ -67,6 +67,7 @@ function formatMultiDeckReviewData(decks) {
 
 function AnkiReviewsChart({deckNames, showTotals}) {
     const [reviewsByDeck, setReviewsByDeck] = useState(null);
+    const [decksToDisplay, setDecksToDisplay] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -84,10 +85,11 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                     reviews: value
                 })));
                 setReviewsByDeck(formatMultiDeckReviewData(deckData));
+                setDecksToDisplay(deckNames);
             })
             .finally(() => setIsLoading(false));
         return () => isSubscribed = false;
-    }, []);
+    }, [deckNames]);
 
     function ReviewToolTip({text, targetItem}) {
         return (
@@ -136,7 +138,7 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                         <CircularProgress style={{margin: '100px'}}/>
                     </div>
                 ) : (
-                    !!deckNames && reviewsByDeck ? (
+                    !!decksToDisplay && reviewsByDeck ? (
                         <Chart data={reviewsByDeck}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
@@ -149,7 +151,7 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                                 />
                             ) : null}
 
-                            {deckNames?.map((name, idx) => (
+                            {decksToDisplay?.map((name, idx) => (
                                 showTotals ? (
                                     <LineSeries key={idx}
                                                 name={name}
@@ -166,7 +168,7 @@ function AnkiReviewsChart({deckNames, showTotals}) {
 
                             {!showTotals ? (
                                 <Stack
-                                    stacks={[{series: deckNames}]}
+                                    stacks={[{series: decksToDisplay}]}
                                 />
                             ) : null}
 

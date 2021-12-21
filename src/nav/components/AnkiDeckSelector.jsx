@@ -1,5 +1,6 @@
 import {Checkbox, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select} from "@mui/material";
 import {useAnkiDecks, useSelectedAnkiDecks} from "../../hooks/AnkiDecks.jsx";
+import {useEffect} from "react";
 
 const ITEM_HEIGHT = 40;
 const ITEM_PADDING_TOP = 8;
@@ -14,7 +15,13 @@ const MenuProps = {
 
 function AnkiDeckSelector() {
     const [decks] = useAnkiDecks();
-    const [selectedDecks, setSelectedDecks] = useSelectedAnkiDecks();
+    const {selectedDecks, setSelectedDecks} = useSelectedAnkiDecks();
+
+    useEffect(() => {
+        if (!selectedDecks || selectedDecks.length === 0) {
+            setSelectedDecks(decks);
+        }
+    }, [decks]);
 
     const handleChange = (event) => {
         const {target: {value}} = event;
@@ -34,7 +41,9 @@ function AnkiDeckSelector() {
                 MenuProps={MenuProps}
             >
                 {decks.map((deck) => (
-                    <MenuItem key={deck} value={deck}>
+                    <MenuItem key={deck} value={deck}
+                              disabled={selectedDecks.length < 2 && selectedDecks.indexOf(deck) > -1}
+                    >
                         <Checkbox checked={selectedDecks.indexOf(deck) > -1}/>
                         <ListItemText primary={deck}/>
                     </MenuItem>

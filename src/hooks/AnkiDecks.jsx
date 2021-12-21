@@ -1,16 +1,13 @@
 import {useState, useEffect} from 'react';
 import AnkiApiService from "../anki/service/AnkiApiService.js";
-
-function loadSelectedDecks() {
-    const data = localStorage.getItem('anki-selected-decks');
-    return !!data ? JSON.parse(data) : [];
-}
+import create from "zustand";
+import {persist} from "zustand/middleware"
 
 export const useAnkiDecks = () => {
     const [decks, setDecks] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(async () => {
+    useEffect(() => {
         let isSubscribed = true;
         AnkiApiService.getDecks()
             .then(data => {
@@ -25,28 +22,11 @@ export const useAnkiDecks = () => {
     return [decks, isLoading];
 };
 
-
-export const useSelectedAnkiDecks = () => {
-    const [selectedDecks, setSelectedDecks] = useState(loadSelectedDecks());
-
-    useEffect(async () => {
-        let isSubscribed = true;
-        if (!selectedDecks || selectedDecks.length === 0) {
-            AnkiApiService.getDecks()
-                .then(data => {
-                    if (!isSubscribed)
-                        return;
-                    setSelectedDecks(data);
-                });
-        }
-        return () => isSubscribed = false;
-    }, []);
-
-    const set = (value) => {
-        localStorage.setItem('anki-selected-decks', JSON.stringify(value));
-        setSelectedDecks(value);
-    }
-
-    return [selectedDecks, set];
-};
-
+export const useSelectedAnkiDecks = create(persist(
+    (set) => ({
+        selectedDecks: [],
+        setSelectedDecks: (decks) => set(() => ({selectedDecks: decks})),
+    }),
+    {
+        name: 'anki-selected-decks'
+    }));

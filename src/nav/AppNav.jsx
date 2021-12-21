@@ -20,6 +20,12 @@ const styles = {
     }
 };
 
+const appOptions = [
+    {appName: ankiAppName, displayName: 'Anki'},
+    {appName: bunproAppName, displayName: 'BunPro'},
+    {appName: wanikaniAppName, displayName: 'Wanikani'},
+]
+
 function AppNav() {
     const {selectedApp, setSelectedApp} = useGlobalState();
     const navigate = useNavigate();
@@ -42,7 +48,8 @@ function AppNav() {
     return (
         <Grid container style={styles.container} alignItems={'flex-end'}>
             <Grid item xs={12} sm={3} md={2} lg={1}>
-                <AppSelector selectedApp={selectedApp}
+                <AppSelector options={appOptions}
+                             selectedApp={selectedApp}
                              setSelectedApp={setSelectedApp}/>
             </Grid>
 

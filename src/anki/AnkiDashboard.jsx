@@ -1,9 +1,10 @@
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import AnkiDeckSummaries from "./components/AnkiDeckSummaries.jsx";
 import AnkiCardBreakDownChart from "./components/AnkiCardBreakDownChart.jsx";
+import AnkiApiProvider from "./components/AnkiApiProvider.jsx";
 
 const styles = {
     container: {
@@ -26,24 +27,18 @@ const styles = {
 };
 
 function AnkiDashboard() {
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        AnkiApiService.connect()
-            .catch(() => navigate(RoutePaths.ankiConnect, {replace: true}));
-    }, []);
-
     return (
-        <div style={styles.container}>
-            <div style={styles.leftContainer}>
-                <AnkiDeckSummaries/>
-                <AnkiCardBreakDownChart/>
+        <AnkiApiProvider>
+            <div style={styles.container}>
+                <div style={styles.leftContainer}>
+                    <AnkiDeckSummaries/>
+                    <AnkiCardBreakDownChart/>
+                </div>
+                <div style={styles.rightContainer}>
+                    placeholder right
+                </div>
             </div>
-            <div style={styles.rightContainer}>
-                placeholder right
-            </div>
-
-        </div>
+        </AnkiApiProvider>
     );
 }
 

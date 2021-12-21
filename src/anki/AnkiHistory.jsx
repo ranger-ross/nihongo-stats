@@ -1,9 +1,6 @@
-import {useEffect} from "react";
 import AnkiReviewsChart from "./components/AnkiReviewsChart.jsx";
-import AnkiApiService from "./service/AnkiApiService";
-import {useNavigate} from "react-router";
-import {RoutePaths} from "../Routes";
 import {useSelectedAnkiDecks} from "../hooks/useSelectedAnkiDecks.jsx";
+import AnkiApiProvider from "./components/AnkiApiProvider.jsx";
 
 const styles = {
     container: {
@@ -16,30 +13,26 @@ const styles = {
 
 
 function AnkiHistory() {
-    const navigate = useNavigate();
     const {selectedDecks} = useSelectedAnkiDecks();
 
-    useEffect(() => {
-        AnkiApiService.connect()
-            .catch(() => navigate(RoutePaths.ankiConnect, {replace: true}));
-    }, []);
-
     return (
-        <div style={styles.container}>
-            {selectedDecks?.length > 0 ? (
-                <>
-                    <AnkiReviewsChart
-                        deckNames={selectedDecks}
-                        showTotals={true}
-                    />
+        <AnkiApiProvider>
+            <div style={styles.container}>
+                {selectedDecks?.length > 0 ? (
+                    <>
+                        <AnkiReviewsChart
+                            deckNames={selectedDecks}
+                            showTotals={true}
+                        />
 
-                    <AnkiReviewsChart
-                        deckNames={selectedDecks}
-                        showTotals={false}
-                    />
-                </>
-            ) : null}
-        </div>
+                        <AnkiReviewsChart
+                            deckNames={selectedDecks}
+                            showTotals={false}
+                        />
+                    </>
+                ) : null}
+            </div>
+        </AnkiApiProvider>
     );
 }
 

@@ -61,7 +61,7 @@ function createCardReviewFromTuple(tuple) {
     };
 }
 
-function health() {
+function connect() {
     return fetch(ankiConnectApiUrl)
         .then(response => {
             if (response.status === 200) {
@@ -124,8 +124,12 @@ function findCards(query) {
     return invoke("findCards", 6, {"query": query})
 }
 
+function requestPermission() {
+    return invoke("requestPermission", 6);
+}
+
 export default {
-    connect: () => health(),
+    connect: () => connect(),
     getDecks: getDeckNames,
     getDeckNamesAndIds: getDeckNamesAndIds,
     getNumCardsReviewedByDay: () => invoke("getNumCardsReviewedByDay", 6),
@@ -134,5 +138,6 @@ export default {
     getAllReviewsByDeck: getAllReviewsByDeck,
     findCards: findCards,
     getDeckConfig: (deck) => invoke("getDeckConfig", 6, {"deck": deck}),
+    requestPermission: requestPermission
 
 }

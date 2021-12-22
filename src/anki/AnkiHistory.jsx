@@ -1,8 +1,6 @@
-import {useEffect, useState} from "react";
-import AnkiReviewsChart from "./charts/AnkiReviewsChart";
-import AnkiApiService from "./service/AnkiApiService";
-import {useNavigate} from "react-router";
-import {RoutePaths} from "../Routes";
+import AnkiReviewsChart from "./components/AnkiReviewsChart.jsx";
+import {useSelectedAnkiDecks} from "../hooks/useSelectedAnkiDecks.jsx";
+import AnkiApiProvider from "./components/AnkiApiProvider.jsx";
 
 const styles = {
     container: {
@@ -15,40 +13,26 @@ const styles = {
 
 
 function AnkiHistory() {
-    const navigate = useNavigate();
-
-    const [decks, setDecks] = useState(null);
-
-    useEffect(() => {
-        AnkiApiService.connect()
-            .then(() => {
-                AnkiApiService.getDeckNamesAndIds()
-                    .then(data => {
-                        console.log(data);
-                        setDecks(data.filter(deck => deck.name.toLowerCase() !== 'default'));
-                    });
-            })
-            .catch(() => navigate(RoutePaths.ankiConnect, {replace: true}));
-
-
-    }, []);
+    const {selectedDecks} = useSelectedAnkiDecks();
 
     return (
-        <div style={styles.container}>
-            {decks ? (
-                <>
-                    <AnkiReviewsChart
-                        deckNames={decks.map(deck => deck.name)}
-                        showTotals={true}
-                    />
+        <AnkiApiProvider>
+            <div style={styles.container}>
+                {selectedDecks?.length > 0 ? (
+                    <>
+                        <AnkiReviewsChart
+                            deckNames={selectedDecks}
+                            showTotals={true}
+                        />
 
-                    <AnkiReviewsChart
-                        deckNames={decks.map(deck => deck.name)}
-                        showTotals={false}
-                    />
-                </>
-            ) : null}
-        </div>
+                        <AnkiReviewsChart
+                            deckNames={selectedDecks}
+                            showTotals={false}
+                        />
+                    </>
+                ) : null}
+            </div>
+        </AnkiApiProvider>
     );
 }
 

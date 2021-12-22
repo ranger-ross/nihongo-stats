@@ -61,7 +61,7 @@ function createCardReviewFromTuple(tuple) {
     };
 }
 
-function health() {
+function connect() {
     return fetch(ankiConnectApiUrl)
         .then(response => {
             if (response.status === 200) {
@@ -106,6 +106,7 @@ async function getDeckNamesAndIds() {
         return cachedValue.data;
     }
     let data = await invoke("deckNamesAndIds", 6).then(convertDeckMapToArray);
+    data = data.filter(deck => deck.name.toLowerCase() !== 'default')
     localForage.setItem(`anki-deck-names-and-ids`, {
         data: data,
         lastUpdate: Date.now()
@@ -113,15 +114,31 @@ async function getDeckNamesAndIds() {
     return data;
 }
 
+async function getDeckNames() {
+    const data = await getDeckNamesAndIds();
+    return data.map(deck => deck.name);
+}
+
+// See Docs: https://docs.ankiweb.net/searching.html
+function findCards(query) {
+    return invoke("findCards", 6, {"query": query})
+}
+
+function requestPermission() {
+    return invoke("requestPermission", 6);
+}
 
 export default {
-    connect: () => health(),
-    getDecks: () => invoke("deckNames", 6),
+    connect: () => connect(),
+    getDecks: getDeckNames,
     getDeckNamesAndIds: getDeckNamesAndIds,
     getNumCardsReviewedByDay: () => invoke("getNumCardsReviewedByDay", 6),
     getCollectionStatsHtml: () => invoke("getCollectionStatsHTML", 6),
     getCardReviews: getCardReviews,
     getAllReviewsByDeck: getAllReviewsByDeck,
-
+    findCards: findCards,
+    getDeckConfig: (deck) => invoke("getDeckConfig", 6, {"deck": deck}),
+    requestPermission: requestPermission,
+    sendMultiRequest: (requests) => invoke("multi", 6, {"actions": requests}),
 
 }

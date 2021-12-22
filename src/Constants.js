@@ -7,3 +7,11 @@ export const wanikaniColors = {
     pink: '#f100a1',
     purple: '#a100f1',
 }
+
+export const ankiColors = {
+    blue: '#77ccff',
+    lightGreen: '#74c464',
+    darkGreen: '#31a354',
+    lightOrange: '#fd8d3c',
+    redOrange: '#fb6a4a',
+}

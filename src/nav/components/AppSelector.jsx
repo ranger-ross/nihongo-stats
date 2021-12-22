@@ -1,7 +1,6 @@
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { bunproAppName, wanikaniAppName, ankiAppName } from '../../Constants.js';
+import {FormControl, InputLabel, MenuItem, Select} from "@mui/material";
 
-function AppSelector({ selectedApp, setSelectedApp }) {
+function AppSelector({options, selectedApp, setSelectedApp}) {
     return (
         <FormControl fullWidth>
             <InputLabel>Selected App</InputLabel>
@@ -11,9 +10,13 @@ function AppSelector({ selectedApp, setSelectedApp }) {
                 label="Selected App"
                 onChange={e => setSelectedApp(e.target.value)}
             >
-                <MenuItem value={wanikaniAppName}>Wanikani</MenuItem>
-                <MenuItem value={ankiAppName}>Anki</MenuItem>
-                <MenuItem value={bunproAppName}>BunPro</MenuItem>
+                {options.map(({appName, displayName}) => (
+                    <MenuItem key={appName}
+                              value={appName}
+                    >
+                        {displayName}
+                    </MenuItem>
+                ))}
             </Select>
         </FormControl>
     );

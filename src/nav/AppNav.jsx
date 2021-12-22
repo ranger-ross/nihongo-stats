@@ -4,7 +4,7 @@ import {useNavigate} from "react-router";
 import {bunproAppName, wanikaniAppName, ankiAppName} from '../Constants.js';
 import {useGlobalState} from "../GlobalState";
 import {RoutePaths} from '../Routes';
-import {useWanikaniApiKey} from "../wanikani/stores/WanikaniApiKeyStore.js";
+import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import AppSelector from "./components/AppSelector";
 import WanikaniNav from "./navbars/WanikaniNav.jsx";
 import AnkiNav from "./navbars/AnkiNav";
@@ -19,6 +19,12 @@ const styles = {
         textAlign: 'right'
     }
 };
+
+const appOptions = [
+    {appName: ankiAppName, displayName: 'Anki'},
+    {appName: bunproAppName, displayName: 'BunPro'},
+    {appName: wanikaniAppName, displayName: 'Wanikani'},
+]
 
 function AppNav() {
     const {selectedApp, setSelectedApp} = useGlobalState();
@@ -42,7 +48,8 @@ function AppNav() {
     return (
         <Grid container style={styles.container} alignItems={'flex-end'}>
             <Grid item xs={12} sm={3} md={2} lg={1}>
-                <AppSelector selectedApp={selectedApp}
+                <AppSelector options={appOptions}
+                             selectedApp={selectedApp}
                              setSelectedApp={setSelectedApp}/>
             </Grid>
 

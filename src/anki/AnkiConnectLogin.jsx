@@ -1,8 +1,9 @@
-import {Button, Link} from "@mui/material";
+import {Box, Button, Container, Link} from "@mui/material";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import {useState} from "react";
+import AnkiHowToInstall from "./components/AnkiHowToInstall.jsx";
 
 const styles = {
     container: {
@@ -13,13 +14,19 @@ const styles = {
 
 function AnkiConnectLogin() {
     const navigate = useNavigate();
-    const [showError, setShowError] = useState(false);
-
+    const [error, setError] = useState(null);
 
     function connectToAnki() {
-        AnkiApiService.connect()
-            .then(() => navigate(RoutePaths.ankiDashboard, {replace: true}))
-            .catch(() => setShowError(true))
+        AnkiApiService.requestPermission()
+            .then((data) => {
+                console.log(data);
+                if (data?.permission === 'granted') {
+                    navigate(RoutePaths.ankiDashboard, {replace: true});
+                } else {
+                    setError('Permission to Anki was Denied');
+                }
+            })
+            .catch(() => setError('Failed to connect to Anki'));
     }
 
     return (
@@ -42,11 +49,16 @@ function AnkiConnectLogin() {
             <br/>
             <br/>
 
-            {showError ? (
+            {!!error ? (
                 <div style={{color: 'red'}}>
-                    Failed to connect to Anki
+                    {error}
                 </div>
             ) : null}
+
+            <Container>
+                <AnkiHowToInstall/>
+            </Container>
+
 
         </div>
     );

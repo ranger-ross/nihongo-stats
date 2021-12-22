@@ -1,12 +1,12 @@
-import {useWanikaniApiKey} from "./stores/WanikaniApiKeyStore";
+import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import {Navigate} from "react-router";
 import {RoutePaths} from "../Routes";
-import WanikaniLevelSummaryChart from "./charts/WanikaniLevelSummaryChart";
-import WanikaniFutureReviewsChart from "./charts/WanikaniFutureReviewsChart";
+import WanikaniLevelSummaryChart from "./components/WanikaniLevelSummaryChart.jsx";
+import WanikaniFutureReviewsChart from "./components/WanikaniFutureReviewsChart.jsx";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
-import WanikaniItemCountsChart from "./charts/WanikaniItemCountsChart";
+import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart.jsx";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
-import WanikaniActiveItemsChart from "./charts/WanikaniActiveItemChart";
+import WanikaniActiveItemsChart from "./components/WanikaniActiveItemChart.jsx";
 
 const styles = {
     container: {

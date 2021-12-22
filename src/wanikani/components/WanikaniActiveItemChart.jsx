@@ -1,5 +1,5 @@
-import WanikaniLevelItemsChart from "./WanikaniLevelItemsChart";
-import WanikaniApiService from "../service/WanikaniApiService";
+import WanikaniLevelItemsChart from "./WanikaniLevelItemsChart.jsx";
+import WanikaniApiService from "../service/WanikaniApiService.js";
 import { useState, useEffect } from "react";
 
 function WanikaniActiveItemsChart() {

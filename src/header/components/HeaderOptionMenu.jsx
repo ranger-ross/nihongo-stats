@@ -1,7 +1,7 @@
 import { IconButton, Menu, MenuItem } from "@mui/material";
 import MoreIcon from '@mui/icons-material/MoreVert';
 import React from "react";
-import { useWanikaniApiKey } from "../../wanikani/stores/WanikaniApiKeyStore.js";
+import { useWanikaniApiKey } from "../../hooks/useWanikaniApiKey.jsx";
 import LogoutIcon from '@mui/icons-material/Logout';
 import InfoIcon from '@mui/icons-material/Info';
 import { RoutePaths } from "../../Routes.jsx";

@@ -1,6 +1,6 @@
 import { Button, Grid, Link, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import { useWanikaniApiKey } from "./stores/WanikaniApiKeyStore";
+import { useWanikaniApiKey } from "../hooks/useWanikaniApiKey.jsx";
 import WanikaniApiService from "./service/WanikaniApiService";
 import { useNavigate } from "react-router";
 import { RoutePaths } from "../Routes";

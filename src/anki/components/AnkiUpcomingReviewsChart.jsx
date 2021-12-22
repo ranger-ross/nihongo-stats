@@ -2,9 +2,9 @@ import * as React from 'react';
 import {
     Chart, Legend, Tooltip, ValueAxis, ArgumentAxis,
 } from '@devexpress/dx-react-chart-material-ui';
-import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
+import {Card, CardContent, CircularProgress, Grid, ToggleButton, ToggleButtonGroup, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
-import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack} from "@devexpress/dx-react-chart";
+import {Animation, ArgumentScale, BarSeries, EventTracker, LineSeries, Stack} from "@devexpress/dx-react-chart";
 import AnkiApiService from "../service/AnkiApiService.js";
 import {scaleBand} from 'd3-scale';
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
@@ -54,9 +54,24 @@ async function fetchData(decks, numberOfDays) {
     return data;
 }
 
+function DaysSelector({options, days, setDays}) {
+    return (
+        <ToggleButtonGroup
+            value={days}
+            size={'small'}
+            exclusive
+            onChange={e => setDays(parseInt(e.target.value))}
+        >
+            {options.map(option => (
+                <ToggleButton value={option}>{option}</ToggleButton>
+            ))}
+        </ToggleButtonGroup>
+    );
+}
 
 function AnkiUpcomingReviewsChart() {
     const {selectedDecks} = useSelectedAnkiDecks();
+    const [days, setDays] = useState(14);
     const [chartData, setChartData] = useState();
 
     useEffect(() => {
@@ -65,33 +80,73 @@ function AnkiUpcomingReviewsChart() {
         if (!selectedDecks || selectedDecks.length === 0)
             return;
 
-        fetchData(selectedDecks, 10)
+        fetchData(selectedDecks, days)
             .then(data => {
                 if (!isSubscribed)
                     return;
                 setChartData(data);
             });
         return () => isSubscribed = false;
-    }, [selectedDecks]);
+    }, [selectedDecks, days]);
 
-    console.log(chartData);
+    const LabelWithDate = (props) => {
+        const dateAsString = props.text;
+        if (!dateAsString) {
+            return (<></>)
+        }
+
+        const date = new Date(dateAsString)
+        return (
+            <ArgumentAxis.Label
+                {...props}
+                text={(date.getMonth() + 1) + '/' + (date.getDate())}
+            />
+        );
+    };
+
+    function ReviewsToolTip({targetItem}) {
+        const data = chartData[targetItem.point];
+        return (
+            <>
+                <p>Date: {data.date.toLocaleDateString()}</p>
+                {selectedDecks.map(deck => (
+                    <p>{deck}: {data[deck]}</p>
+                ))}
+            </>
+        );
+    }
 
     return (
         <Card>
             <CardContent>
+                <Grid container>
+                    <Grid item xs={12} md={4}/>
+                    <Grid item xs={12} md={4}>
+                        <Typography variant={'h5'} style={{textAlign: 'center', paddingBottom: '5px'}}>
+                            Upcoming Reviews
+                        </Typography>
+                    </Grid>
 
-                <Grid item xs={12}>
-                    <Typography variant={'h5'} style={{textAlign: 'center'}}>
-                        Upcoming Reviews
-                    </Typography>
+                    <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
+                        <DaysSelector options={[7, 14, 30]}
+                                      days={days}
+                                      setDays={setDays}
+                        />
+                    </Grid>
+
                 </Grid>
+
 
                 {!chartData || !selectedDecks || selectedDecks.length === 0 ? (
                     <div style={{height: '300px', textAlign: 'center'}}>
                         <CircularProgress style={{margin: '100px'}}/>
                     </div>
                 ) : (
-                    <Chart data={chartData}>
+                    <Chart data={chartData} height={800}>
+                        <ArgumentScale factory={scaleBand}/>
+                        <ArgumentAxis labelComponent={LabelWithDate}/>
+                        <ValueAxis/>
+
                         {selectedDecks?.map(deck => (
                             <BarSeries
                                 key={deck}
@@ -101,6 +156,14 @@ function AnkiUpcomingReviewsChart() {
                             />
                         ))}
 
+                        <Stack
+                            stacks={[{series: selectedDecks}]}
+                        />
+
+                        <Animation/>
+                        <Legend position="bottom"/>
+                        <EventTracker/>
+                        <Tooltip contentComponent={ReviewsToolTip}/>
                     </Chart>
                 )}
 

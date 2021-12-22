@@ -5,6 +5,7 @@ import {RoutePaths} from "../Routes";
 import AnkiDeckSummaries from "./components/AnkiDeckSummaries.jsx";
 import AnkiCardBreakDownChart from "./components/AnkiCardBreakDownChart.jsx";
 import AnkiApiProvider from "./components/AnkiApiProvider.jsx";
+import AnkiUpcomingReviewsChart from "./components/AnkiUpcomingReviewsChart.jsx";
 
 const styles = {
     container: {
@@ -23,6 +24,7 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         gap: '10px',
+        flexGrow: '1',
     },
 };
 
@@ -35,7 +37,7 @@ function AnkiDashboard() {
                     <AnkiCardBreakDownChart/>
                 </div>
                 <div style={styles.rightContainer}>
-                    placeholder right
+                    <AnkiUpcomingReviewsChart/>
                 </div>
             </div>
         </AnkiApiProvider>

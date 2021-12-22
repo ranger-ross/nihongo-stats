@@ -138,6 +138,7 @@ export default {
     getAllReviewsByDeck: getAllReviewsByDeck,
     findCards: findCards,
     getDeckConfig: (deck) => invoke("getDeckConfig", 6, {"deck": deck}),
-    requestPermission: requestPermission
+    requestPermission: requestPermission,
+    sendMultiRequest: (requests) => invoke("multi", 6, {"actions": requests}),
 
 }

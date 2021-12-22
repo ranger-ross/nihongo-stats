@@ -56,7 +56,7 @@ function AnkiConnectLogin() {
             ) : null}
 
             <Container>
-                <AnkiHowToInstall/>
+                <AnkiHowToInstall onConnect={connectToAnki}/>
             </Container>
 
 

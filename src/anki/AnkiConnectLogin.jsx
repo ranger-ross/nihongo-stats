@@ -1,8 +1,9 @@
-import {Button, Link} from "@mui/material";
+import {Box, Button, Container, Link} from "@mui/material";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import {useState} from "react";
+import AnkiHowToInstall from "./components/AnkiHowToInstall.jsx";
 
 const styles = {
     container: {
@@ -14,7 +15,6 @@ const styles = {
 function AnkiConnectLogin() {
     const navigate = useNavigate();
     const [error, setError] = useState(null);
-
 
     function connectToAnki() {
         AnkiApiService.requestPermission()
@@ -54,6 +54,11 @@ function AnkiConnectLogin() {
                     {error}
                 </div>
             ) : null}
+
+            <Container>
+                <AnkiHowToInstall/>
+            </Container>
+
 
         </div>
     );

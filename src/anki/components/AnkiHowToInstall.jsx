@@ -1,8 +1,6 @@
 import {
     Accordion,
-    AccordionSummary,
-    Card,
-    CardContent,
+    AccordionSummary, Button,
     Link,
     ToggleButton,
     ToggleButtonGroup,
@@ -13,6 +11,7 @@ import * as React from "react";
 import ankiAddOns from '../../../assets/anki/macos/anki-add-ons.png'
 import ankiGetAddOns from '../../../assets/anki/macos/anki-get-add-ons.png'
 import ankiInstallAddOns from '../../../assets/anki/macos/anki-install-add-ons.png'
+import ankiRequestPermission from '../../../assets/anki/macos/anki-request-permission.png'
 
 
 const windows = 'Windows';
@@ -34,10 +33,11 @@ function OsSelector({options, os, setOs}) {
 }
 
 
-function AnkiHowToInstall() {
+function AnkiHowToInstall({onConnect}) {
     const [os, setOs] = useState(windows);
 
     const isWindows = os === windows;
+    const isMacOs = os === macos;
 
     return (
         <Accordion style={{textAlign: 'left'}}>
@@ -105,8 +105,51 @@ function AnkiHowToInstall() {
                 </Typography>
 
                 <Typography variant={'body1'} textAlign={'left'} marginTop={2} marginBottom={2}>
-                    Click Connect and Allow permission to Nihongo Stats
+                    Click
+                    <Button variant={'contained'}
+                            color={'primary'}
+                            onClick={onConnect}
+                            size={'small'}
+                            style={{marginLeft: '5px', marginRight: '5px'}}
+                    >
+                        Connect
+                    </Button>and allow permission to Nihongo Stats
                 </Typography>
+
+                {isWindows ? (
+                    <>
+                    </>
+                ) : (
+                    <>
+                        <img style={{margin: '10px'}} height={200} src={ankiRequestPermission}/>
+                    </>
+                )}
+
+                {isMacOs ? (
+                    <>
+                        <Typography variant={'h5'} textAlign={'left'} marginTop={3}>
+                            Step 5 (Optional)
+                        </Typography>
+
+                        <Typography variant={'body1'} textAlign={'left'} marginTop={2} marginBottom={2}>
+                            MacOS has a feature called AppNap that is meant to save battery life. But this can sometimes
+                            lead to long loading times for Anki data. <br/>
+                            You can disable AppNap for Anki by running the
+                            following commands in a terminal. Read more <Link
+                            href={'https://github.com/FooSoft/anki-connect#notes-for-macos-users'}
+                            target={'_blank'}>here</Link>
+                        </Typography>
+
+                        <code>
+                            defaults write net.ankiweb.dtop NSAppSleepDisabled -bool true <br/>
+                            defaults write net.ichi2.anki NSAppSleepDisabled -bool true <br/>
+                            defaults write org.qt-project.Qt.QtWebEngineCore NSAppSleepDisabled -bool true
+                        </code>
+                        <div style={{marginBottom: '25px'}}/>
+                    </>
+                ) : null}
+
+
             </div>
 
 

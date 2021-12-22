@@ -13,9 +13,13 @@ async function fetchCardBreakDownData(decks) {
     const newCards = await AnkiApiService.findCards(`(${query}) is:new`);
     const matureCards = await AnkiApiService.findCards(`(${query}) ("is:review" -"is:learn") AND "prop:ivl>=21"`);
     const youngCards = await AnkiApiService.findCards(`(${query}) ("is:review" AND -"is:learn") AND "prop:ivl<21"`);
+    const learningCards = await AnkiApiService.findCards(`(${query}) (-"is:review" AND "is:learn")`);
+    const relearningCards = await AnkiApiService.findCards(`(${query}) ("is:review" AND "is:learn")`);
 
     return [
         {type: 'New', color: ankiColors.blue, count: newCards.length},
+        {type: 'Learning', color: ankiColors.lightOrange, count: learningCards.length},
+        {type: 'Relearning', color: ankiColors.redOrange, count: relearningCards.length},
         {type: 'Young', color: ankiColors.lightGreen, count: youngCards.length},
         {type: 'Mature', color: ankiColors.darkGreen, count: matureCards.length},
     ];
@@ -42,7 +46,7 @@ function AnkiCardBreakDownChart() {
     return (
         <Card>
             <CardContent>
-                <Chart data={data}>
+                <Chart data={data} height={600}>
                     <Title text={'Card Breakdown'}/>
                     <PieSeries
                         argumentField="type"

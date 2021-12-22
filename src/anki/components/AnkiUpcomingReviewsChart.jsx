@@ -63,7 +63,7 @@ function DaysSelector({options, days, setDays}) {
             onChange={e => setDays(parseInt(e.target.value))}
         >
             {options.map(option => (
-                <ToggleButton value={option}>{option}</ToggleButton>
+                <ToggleButton key={option} value={option}>{option}</ToggleButton>
             ))}
         </ToggleButtonGroup>
     );
@@ -80,11 +80,18 @@ function AnkiUpcomingReviewsChart() {
         if (!selectedDecks || selectedDecks.length === 0)
             return;
 
+        if (selectedDecks?.length != chartData?.decks?.length) {
+            setChartData(null);
+        }
+
         fetchData(selectedDecks, days)
             .then(data => {
                 if (!isSubscribed)
                     return;
-                setChartData(data);
+                setChartData({
+                    data: data,
+                    decks: selectedDecks
+                });
             });
         return () => isSubscribed = false;
     }, [selectedDecks, days]);
@@ -105,11 +112,11 @@ function AnkiUpcomingReviewsChart() {
     };
 
     function ReviewsToolTip({targetItem}) {
-        const data = chartData[targetItem.point];
+        const data = chartData.data[targetItem.point];
         return (
             <>
                 <p>Date: {data.date.toLocaleDateString()}</p>
-                {selectedDecks.map(deck => (
+                {chartData.decks.map(deck => (
                     <p>{deck}: {data[deck]}</p>
                 ))}
             </>
@@ -137,17 +144,17 @@ function AnkiUpcomingReviewsChart() {
                 </Grid>
 
 
-                {!chartData || !selectedDecks || selectedDecks.length === 0 ? (
+                {!chartData ? (
                     <div style={{height: '300px', textAlign: 'center'}}>
                         <CircularProgress style={{margin: '100px'}}/>
                     </div>
                 ) : (
-                    <Chart data={chartData} height={800}>
+                    <Chart data={chartData.data} height={800}>
                         <ArgumentScale factory={scaleBand}/>
                         <ArgumentAxis labelComponent={LabelWithDate}/>
                         <ValueAxis/>
 
-                        {selectedDecks?.map(deck => (
+                        {chartData.decks?.map(deck => (
                             <BarSeries
                                 key={deck}
                                 name={deck}
@@ -157,7 +164,7 @@ function AnkiUpcomingReviewsChart() {
                         ))}
 
                         <Stack
-                            stacks={[{series: selectedDecks}]}
+                            stacks={[{series: chartData.decks}]}
                         />
 
                         <Animation/>

@@ -128,7 +128,7 @@ function AnkiUpcomingReviewsChart() {
                     </Grid>
 
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
-                        <DaysSelector options={[7, 14, 30]}
+                        <DaysSelector options={[7, 14, 30, 60, 90]}
                                       days={days}
                                       setDays={setDays}
                         />

@@ -9,6 +9,7 @@ import AnkiApiService from "../service/AnkiApiService.js";
 import {scaleBand} from 'd3-scale';
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import {truncDate} from "../../util/DateUtils.js";
+import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 
 function createParams(deck, day) {
     return {
@@ -96,13 +97,19 @@ function AnkiUpcomingReviewsChart() {
         return () => isSubscribed = false;
     }, [selectedDecks, days]);
 
+    const visibleLabelIndices = getVisibleLabelIndices(chartData.data, 20);
+
     const LabelWithDate = (props) => {
         const dateAsString = props.text;
         if (!dateAsString) {
-            return (<></>)
+            return (<></>);
+        }
+        const date = new Date(dateAsString)
+        const index = chartData.data.findIndex(d => d.date.getTime() === date.getTime());
+        if (!visibleLabelIndices.includes(index)) {
+            return (<></>);
         }
 
-        const date = new Date(dateAsString)
         return (
             <ArgumentAxis.Label
                 {...props}

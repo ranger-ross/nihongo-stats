@@ -1,13 +1,14 @@
-import { Chart, ValueAxis, ArgumentAxis, Tooltip } from '@devexpress/dx-react-chart-material-ui';
-import { useState, useEffect } from "react";
+import {Chart, ValueAxis, ArgumentAxis, Tooltip} from '@devexpress/dx-react-chart-material-ui';
+import {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import { ArgumentScale, BarSeries, Stack } from "@devexpress/dx-react-chart";
-import { wanikaniColors } from '../../Constants.js';
-import { Card, CardContent, Typography, Grid, ButtonGroup, Button, CircularProgress } from "@mui/material";
-import { EventTracker } from "@devexpress/dx-react-chart";
-import { scaleBand } from 'd3-scale';
+import {ArgumentScale, BarSeries, Stack} from "@devexpress/dx-react-chart";
+import {wanikaniColors} from '../../Constants.js';
+import {Card, CardContent, Typography, Grid, ButtonGroup, Button, CircularProgress} from "@mui/material";
+import {EventTracker} from "@devexpress/dx-react-chart";
+import {scaleBand} from 'd3-scale';
 import React from 'react';
 import useWindowDimensions from '../../hooks/useWindowDimensions.jsx';
+import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 
 function DataPoint(date) {
     let data = {
@@ -117,7 +118,7 @@ function WanikaniReviewsHistoryChart() {
     }, [rawData, daysToLookBack])
 
 
-    function ReviewsToolTip({ targetItem }) {
+    function ReviewsToolTip({targetItem}) {
         const data = chartData[targetItem.point];
         return (
             <>
@@ -130,67 +131,75 @@ function WanikaniReviewsHistoryChart() {
         );
     }
 
+    const visibleLabelIndices = getVisibleLabelIndices(chartData, 6);
+
     const LabelWithDate = (props) => {
-        const { width } = useWindowDimensions();
         const date = props.text;
         if (!date) {
             return (<></>)
         }
 
-        const isSmallScreen = width < 550;
-        const totalLabels = isSmallScreen ? 3 : 6;
-        const labelTickSize = Math.floor(daysToLookBack / totalLabels);
-        const days = Math.floor((Date.now() - date.getTime()) / 86400000);
+        const index = chartData.findIndex(d => d.date === date);
+
+        if (!visibleLabelIndices.includes(index)) {
+            return (<></>);
+        }
+
         return (
             <>
-                {days % labelTickSize == 0 ? (
-                    <ArgumentAxis.Label
-                        {...props}
-                        text={new Date(date).toLocaleDateString()}
-                    />
-                ) : null}
+                <ArgumentAxis.Label
+                    {...props}
+                    text={new Date(date).toLocaleDateString()}
+                />
             </>
         );
     };
 
     return (
-        <Card style={{ height: '100%' }}>
-            <CardContent style={{ height: '100%' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Card style={{height: '100%'}}>
+            <CardContent style={{height: '100%'}}>
+                <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
                     <Grid container>
-                        <Grid item xs={12} md={4} />
-                        <Grid item xs={12} md={4} >
-                            <Typography variant={'h5'} style={{ textAlign: 'center', paddingBottom: '5px' }}>
+                        <Grid item xs={12} md={4}/>
+                        <Grid item xs={12} md={4}>
+                            <Typography variant={'h5'} style={{textAlign: 'center', paddingBottom: '5px'}}>
                                 Review History
                             </Typography>
                         </Grid>
 
 
                         {isLoading ? (
-                            <Grid item container xs={12} justifyContent={'center'} style={{ padding: '10px' }}>
-                                <CircularProgress />
+                            <Grid item container xs={12} justifyContent={'center'} style={{padding: '10px'}}>
+                                <CircularProgress/>
                             </Grid>
                         ) : (
-                            <Grid item xs={12} md={4} style={{ textAlign: 'end' }}>
-                                <ButtonGroup variant="outlined" color={'primary'} size="small" >
-                                    <Button variant={daysToLookBack === 7 ? 'contained' : undefined} onClick={() => setDaysToLookBack(7)}>7</Button>
-                                    <Button variant={daysToLookBack === 14 ? 'contained' : undefined} onClick={() => setDaysToLookBack(14)}>14</Button>
-                                    <Button variant={daysToLookBack === 30 ? 'contained' : undefined} onClick={() => setDaysToLookBack(30)}>30</Button>
-                                    <Button variant={daysToLookBack === 90 ? 'contained' : undefined} onClick={() => setDaysToLookBack(90)}>3 Mon</Button>
-                                    <Button variant={daysToLookBack === 180 ? 'contained' : undefined} onClick={() => setDaysToLookBack(180)}>6 Mon</Button>
-                                    <Button variant={daysToLookBack === 365 ? 'contained' : undefined} onClick={() => setDaysToLookBack(365)}>1 Yr</Button>
-                                    <Button variant={daysToLookBack === totalDays ? 'contained' : undefined} onClick={() => setDaysToLookBack(totalDays)}>All</Button>
+                            <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
+                                <ButtonGroup variant="outlined" color={'primary'} size="small">
+                                    <Button variant={daysToLookBack === 7 ? 'contained' : undefined}
+                                            onClick={() => setDaysToLookBack(7)}>7</Button>
+                                    <Button variant={daysToLookBack === 14 ? 'contained' : undefined}
+                                            onClick={() => setDaysToLookBack(14)}>14</Button>
+                                    <Button variant={daysToLookBack === 30 ? 'contained' : undefined}
+                                            onClick={() => setDaysToLookBack(30)}>30</Button>
+                                    <Button variant={daysToLookBack === 90 ? 'contained' : undefined}
+                                            onClick={() => setDaysToLookBack(90)}>3 Mon</Button>
+                                    <Button variant={daysToLookBack === 180 ? 'contained' : undefined}
+                                            onClick={() => setDaysToLookBack(180)}>6 Mon</Button>
+                                    <Button variant={daysToLookBack === 365 ? 'contained' : undefined}
+                                            onClick={() => setDaysToLookBack(365)}>1 Yr</Button>
+                                    <Button variant={daysToLookBack === totalDays ? 'contained' : undefined}
+                                            onClick={() => setDaysToLookBack(totalDays)}>All</Button>
                                 </ButtonGroup>
                             </Grid>
                         )}
                     </Grid>
 
                     {!isLoading ? (
-                        <div style={{ flexGrow: '1' }}>
+                        <div style={{flexGrow: '1'}}>
                             <Chart data={chartData}>
-                                <ArgumentScale factory={scaleBand} />
-                                <ArgumentAxis labelComponent={LabelWithDate} />
-                                <ValueAxis />
+                                <ArgumentScale factory={scaleBand}/>
+                                <ArgumentAxis labelComponent={LabelWithDate}/>
+                                <ValueAxis/>
 
                                 <BarSeries
                                     name="radicals"
@@ -214,11 +223,11 @@ function WanikaniReviewsHistoryChart() {
                                 />
 
                                 <Stack
-                                    stacks={[{ series: ['radicals', 'kanji', 'vocabulary'] }]}
+                                    stacks={[{series: ['radicals', 'kanji', 'vocabulary']}]}
                                 />
 
-                                <EventTracker />
-                                <Tooltip contentComponent={ReviewsToolTip} />
+                                <EventTracker/>
+                                <Tooltip contentComponent={ReviewsToolTip}/>
                             </Chart>
                         </div>
                     ) : null}

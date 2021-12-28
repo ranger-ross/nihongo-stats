@@ -5,7 +5,7 @@ install: ## Installs dependencies
 	npm install
 
 start: ## Start the application
-	npm run dev
+	docker-compose up
 
 test: ## Runs tests
 	npm run test

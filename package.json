@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "test": "TZ=UTC vite-jest --no-cache",
     "build": "vite build",
     "serve": "vite preview"

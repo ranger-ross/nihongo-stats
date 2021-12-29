@@ -88,6 +88,11 @@ function aggregateDate(rawData, daysToLookBack) {
     return aggregatedDate;
 }
 
+function calculateLabelPositions(data) {
+    const numberOfLabels = data.length == 7 ? 7 : 6
+    return getVisibleLabelIndices(data, numberOfLabels);
+}
+
 function WanikaniReviewsHistoryChart() {
     const [rawData, setRawData] = useState([]);
     const [chartData, setChartData] = useState([]);
@@ -131,7 +136,7 @@ function WanikaniReviewsHistoryChart() {
         );
     }
 
-    const visibleLabelIndices = getVisibleLabelIndices(chartData, 6);
+    const visibleLabelIndices = calculateLabelPositions(chartData);
 
     const LabelWithDate = (props) => {
         const date = props.text;

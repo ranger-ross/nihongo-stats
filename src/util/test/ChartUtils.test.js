@@ -33,18 +33,6 @@ describe('ChartUtils', function () {
             expect(data[2]).toBe(6);
         });
 
-        // [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        //  *     *     *     *     *
-        it('should return correct indices for 5 labels with data.length = 7', function () {
-            const data = getVisibleLabelIndices(dummyData(7), 5);
-            expect(data.length).toBe(5);
-            expect(data[0]).toBe(0);
-            expect(data[1]).toBe(2);
-            expect(data[2]).toBe(4);
-            expect(data[3]).toBe(6);
-            expect(data[4]).toBe(8);
-        });
-
         it('should return correct indices for 5 labels with data.length = 365', function () {
             const data = getVisibleLabelIndices(dummyData(365), 5);
             expect(data.length).toBe(5);

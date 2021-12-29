@@ -3,6 +3,14 @@ export function getVisibleLabelIndices(data, maxNumberOfLabels) {
         return data.map((_, i) => i);
     }
 
+    if (data.length === 7 && [3, 4].includes(maxNumberOfLabels)) {
+        return specialCase3Or4Labels7Length();
+    }
+
+    if (data.length === 5 && [3, 4].includes(maxNumberOfLabels)) {
+        return specialCase3Or4Labels5Length();
+    }
+
     const isOdd = data.length % 2 != 0;
 
     if (isOdd) {
@@ -12,8 +20,12 @@ export function getVisibleLabelIndices(data, maxNumberOfLabels) {
     }
 }
 
-function distinct(array) {
-    return array.filter((val, i, a) => i === a.findIndex(v => v === val));
+function specialCase3Or4Labels7Length() {
+    return [0, 3, 6];
+}
+
+function specialCase3Or4Labels5Length() {
+    return [0, 2, 4];
 }
 
 function getVisibleLabelIndicesOdd(min, max, count) {
@@ -24,7 +36,7 @@ function getVisibleLabelIndicesOdd(min, max, count) {
 
     while (indices.length < count) {
         index += spacing;
-        indices.push(Math.floor(index) - 1);
+        indices.push(Math.floor(index - 1));
     }
 
     return indices;

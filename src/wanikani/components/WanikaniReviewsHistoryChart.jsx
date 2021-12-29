@@ -3,12 +3,12 @@ import {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {ArgumentScale, BarSeries, Stack} from "@devexpress/dx-react-chart";
 import {wanikaniColors} from '../../Constants.js';
-import {Card, CardContent, Typography, Grid, ButtonGroup, Button, CircularProgress} from "@mui/material";
+import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/material";
 import {EventTracker} from "@devexpress/dx-react-chart";
 import {scaleBand} from 'd3-scale';
 import React from 'react';
-import useWindowDimensions from '../../hooks/useWindowDimensions.jsx';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
+import DaysSelector from "../../shared/DaysSelector.jsx";
 
 function DataPoint(date) {
     let data = {
@@ -136,7 +136,7 @@ function WanikaniReviewsHistoryChart() {
     const LabelWithDate = (props) => {
         const date = props.text;
         if (!date) {
-            return (<></>)
+            return (<></>);
         }
 
         const index = chartData.findIndex(d => d.date === date);
@@ -174,22 +174,18 @@ function WanikaniReviewsHistoryChart() {
                             </Grid>
                         ) : (
                             <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
-                                <ButtonGroup variant="outlined" color={'primary'} size="small">
-                                    <Button variant={daysToLookBack === 7 ? 'contained' : undefined}
-                                            onClick={() => setDaysToLookBack(7)}>7</Button>
-                                    <Button variant={daysToLookBack === 14 ? 'contained' : undefined}
-                                            onClick={() => setDaysToLookBack(14)}>14</Button>
-                                    <Button variant={daysToLookBack === 30 ? 'contained' : undefined}
-                                            onClick={() => setDaysToLookBack(30)}>30</Button>
-                                    <Button variant={daysToLookBack === 90 ? 'contained' : undefined}
-                                            onClick={() => setDaysToLookBack(90)}>3 Mon</Button>
-                                    <Button variant={daysToLookBack === 180 ? 'contained' : undefined}
-                                            onClick={() => setDaysToLookBack(180)}>6 Mon</Button>
-                                    <Button variant={daysToLookBack === 365 ? 'contained' : undefined}
-                                            onClick={() => setDaysToLookBack(365)}>1 Yr</Button>
-                                    <Button variant={daysToLookBack === totalDays ? 'contained' : undefined}
-                                            onClick={() => setDaysToLookBack(totalDays)}>All</Button>
-                                </ButtonGroup>
+                                <DaysSelector days={daysToLookBack}
+                                              setDays={setDaysToLookBack}
+                                              options={[
+                                                  {value: 7, text: '7'},
+                                                  {value: 14, text: '14'},
+                                                  {value: 30, text: '30'},
+                                                  {value: 90, text: '3 Mon'},
+                                                  {value: 180, text: '6 Mon'},
+                                                  {value: 365, text: '1 Yr'},
+                                                  {value: totalDays, text: 'All'},
+                                              ]}
+                                />
                             </Grid>
                         )}
                     </Grid>

@@ -5,10 +5,11 @@ import {
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack} from "@devexpress/dx-react-chart";
-import {truncDate} from "../../util/DateUtils.js";
+import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.js";
 import AnkiApiService from "../service/AnkiApiService.js";
 import {scaleBand} from 'd3-scale';
-import useWindowDimensions from "../../hooks/useWindowDimensions.jsx";
+import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
+import DaysSelector from "../../shared/DaysSelector.jsx";
 
 function DataPoint(date, previousDataPoint) {
     let dp = {
@@ -67,8 +68,10 @@ function formatMultiDeckReviewData(decks) {
 
 function AnkiReviewsChart({deckNames, showTotals}) {
     const [reviewsByDeck, setReviewsByDeck] = useState(null);
+    const [chartData, setChartData] = useState(null);
     const [decksToDisplay, setDecksToDisplay] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [daysToLookBack, setDaysToLookBack] = useState(10_000);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -84,36 +87,44 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                     deckName: deckNames[index],
                     reviews: value
                 })));
-                setReviewsByDeck(formatMultiDeckReviewData(deckData));
+                const formattedData = formatMultiDeckReviewData(deckData)
+                setReviewsByDeck(formattedData);
+                setDaysToLookBack(millisToDays(Date.now() - formattedData[0].date))
                 setDecksToDisplay(deckNames);
             })
             .finally(() => setIsLoading(false));
         return () => isSubscribed = false;
     }, [deckNames]);
 
+    useEffect(() => {
+        if (!!reviewsByDeck) {
+            setChartData(reviewsByDeck.filter(dp => dp.date.getTime() >= Date.now() - daysToMillis(daysToLookBack)))
+        }
+    }, [reviewsByDeck, daysToLookBack])
+
     function ReviewToolTip({text, targetItem}) {
         return (
             <>
                 <p>{targetItem.series !== 'Total' ? 'Deck:' : null} {targetItem.series}</p>
-                <p>Reviews: {text}</p>
+                <p>Reviews: {(parseInt(text)).toLocaleString()}</p>
             </>
         );
     }
 
+    const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], 6);
+
     const LabelWithDate = (props) => {
-        const {width} = useWindowDimensions();
         const date = new Date(props.text);
         if (!date) {
             return (<></>)
         }
 
-        const isSmallScreen = width < 550;
-        const totalLabels = isSmallScreen ? 3 : 6;
-        const labelTickSize = Math.floor(365 / totalLabels); // TODO: Replace 365 with range
-        const days = Math.floor((Date.now() - date.getTime()) / 86400000);
+        const index = chartData.findIndex(dp => dp.date.getTime() === date.getTime());
+        const isVisible = visibleLabelIndices.includes(index);
+
         return (
             <>
-                {days % labelTickSize == 0 ? (
+                {isVisible ? (
                     <ArgumentAxis.Label
                         {...props}
                         text={new Date(date).toLocaleDateString()}
@@ -127,10 +138,29 @@ function AnkiReviewsChart({deckNames, showTotals}) {
         <Card>
             <CardContent>
 
-                <Grid item xs={12}>
-                    <Typography variant={'h5'} style={{textAlign: 'center'}}>
-                        {showTotals ? 'Total' : null} Reviews
-                    </Typography>
+                <Grid container>
+                    <Grid item xs={12} md={4}/>
+                    <Grid item xs={12} md={4}>
+                        <Typography variant={'h5'} style={{textAlign: 'center'}}>
+                            {showTotals ? 'Total' : null} Reviews
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
+                        <DaysSelector days={daysToLookBack}
+                                      setDays={setDaysToLookBack}
+                                      options={[
+                                          {value: 30, text: '1 Mon'},
+                                          {value: 60, text: '2 Mon'},
+                                          {value: 90, text: '3 Mon'},
+                                          {value: 180, text: '6 Mon'},
+                                          {value: 365, text: '1 Yr'},
+                                          !!reviewsByDeck ? {
+                                              value: millisToDays(Date.now() - reviewsByDeck[0].date),
+                                              text: 'All'
+                                          } : null
+                                      ]}
+                        />
+                    </Grid>
                 </Grid>
 
                 {isLoading ? (
@@ -138,8 +168,8 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                         <CircularProgress style={{margin: '100px'}}/>
                     </div>
                 ) : (
-                    !!decksToDisplay && reviewsByDeck ? (
-                        <Chart data={reviewsByDeck}>
+                    !!decksToDisplay && chartData ? (
+                        <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
                             <ValueAxis/>

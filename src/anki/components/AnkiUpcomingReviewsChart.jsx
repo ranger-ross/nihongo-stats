@@ -2,14 +2,15 @@ import * as React from 'react';
 import {
     Chart, Legend, Tooltip, ValueAxis, ArgumentAxis,
 } from '@devexpress/dx-react-chart-material-ui';
-import {Card, CardContent, CircularProgress, Grid, ToggleButton, ToggleButtonGroup, Typography} from "@mui/material";
+import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
-import {Animation, ArgumentScale, BarSeries, EventTracker, LineSeries, Stack} from "@devexpress/dx-react-chart";
+import {Animation, ArgumentScale, BarSeries, EventTracker, Stack} from "@devexpress/dx-react-chart";
 import AnkiApiService from "../service/AnkiApiService.js";
 import {scaleBand} from 'd3-scale';
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import {truncDate} from "../../util/DateUtils.js";
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
+import DaysSelector from "../../shared/DaysSelector.jsx";
 
 function createParams(deck, day) {
     return {
@@ -55,21 +56,6 @@ async function fetchData(decks, numberOfDays) {
     return data;
 }
 
-function DaysSelector({options, days, setDays}) {
-    return (
-        <ToggleButtonGroup
-            value={days}
-            size={'small'}
-            exclusive
-            onChange={e => setDays(parseInt(e.target.value))}
-        >
-            {options.map(option => (
-                <ToggleButton key={option} value={option}>{option}</ToggleButton>
-            ))}
-        </ToggleButtonGroup>
-    );
-}
-
 function AnkiUpcomingReviewsChart() {
     const {selectedDecks} = useSelectedAnkiDecks();
     const [days, setDays] = useState(14);
@@ -97,7 +83,7 @@ function AnkiUpcomingReviewsChart() {
         return () => isSubscribed = false;
     }, [selectedDecks, days]);
 
-    const visibleLabelIndices = getVisibleLabelIndices(chartData.data, 20);
+    const visibleLabelIndices = getVisibleLabelIndices(chartData?.data ?? [], 20);
 
     const LabelWithDate = (props) => {
         const dateAsString = props.text;
@@ -124,7 +110,7 @@ function AnkiUpcomingReviewsChart() {
             <>
                 <p>Date: {data.date.toLocaleDateString()}</p>
                 {chartData.decks.map(deck => (
-                    <p>{deck}: {data[deck]}</p>
+                    <p key={deck}>{deck}: {data[deck]}</p>
                 ))}
             </>
         );
@@ -142,9 +128,16 @@ function AnkiUpcomingReviewsChart() {
                     </Grid>
 
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
-                        <DaysSelector options={[7, 14, 30, 60, 90]}
-                                      days={days}
-                                      setDays={setDays}
+                        <DaysSelector
+                            options={[
+                                {value: 7, text: '7' },
+                                {value: 14, text: '14' },
+                                {value: 30, text: '30' },
+                                {value: 60, text: '60' },
+                                {value: 90, text: '90' },
+                            ]}
+                            days={days}
+                            setDays={setDays}
                         />
                     </Grid>
 

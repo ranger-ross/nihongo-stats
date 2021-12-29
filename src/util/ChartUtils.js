@@ -1,20 +1,35 @@
-export function getVisibleLabelIndices(data, numberOfLabels) {
-    if (data.length <= numberOfLabels) {
+export function getVisibleLabelIndices(data, maxNumberOfLabels) {
+    if (data.length <= maxNumberOfLabels) {
         return data.map((_, i) => i);
     }
 
     const isOdd = data.length % 2 != 0;
 
     if (isOdd) {
-        return [
-            0,
-            ...getVisibleLabelIndicesOdd(0, data.length - 1, numberOfLabels - 2),
-            data.length - 1
-        ];
+        return getVisibleLabelIndicesOdd(0, data.length - 1, maxNumberOfLabels);
     } else {
-        return getVisibleLabelIndicesEven(0, data.length - 1, numberOfLabels);
+        return getVisibleLabelIndicesEven(0, data.length - 1, maxNumberOfLabels);
     }
 }
+
+function distinct(array) {
+    return array.filter((val, i, a) => i === a.findIndex(v => v === val));
+}
+
+function getVisibleLabelIndicesOdd(min, max, count) {
+    const spacing = (max + 1) / (count - 1);
+
+    let index = min;
+    let indices = [index];
+
+    while (indices.length < count) {
+        index += spacing;
+        indices.push(Math.floor(index) - 1);
+    }
+
+    return indices;
+}
+
 
 function getVisibleLabelIndicesEven(min, max, count) {
     const spacing = Math.ceil(max / count);
@@ -31,21 +46,6 @@ function getVisibleLabelIndicesEven(min, max, count) {
     }
 
     return data;
-}
-
-function getVisibleLabelIndicesOdd(min, max, count) {
-    const range = max - min;
-    const half = range / 2;
-    const value = max - half;
-
-    if (count > 1 && value - 1 > min && value + 1 < max) {
-        return [
-            ...getVisibleLabelIndicesOdd(min, value, count - 1),
-            value,
-            ...getVisibleLabelIndicesOdd(value, max, count - 1),
-        ];
-    }
-    return [value];
 }
 
 

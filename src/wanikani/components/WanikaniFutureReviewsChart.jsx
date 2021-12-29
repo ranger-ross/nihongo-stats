@@ -1,10 +1,11 @@
-import { Chart, ValueAxis, BarSeries, ArgumentAxis, Tooltip } from '@devexpress/dx-react-chart-material-ui';
-import { useState, useEffect } from "react";
+import {Chart, ValueAxis, BarSeries, ArgumentAxis, Tooltip} from '@devexpress/dx-react-chart-material-ui';
+import React, {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import { Animation, EventTracker, Stack } from "@devexpress/dx-react-chart";
-import { Card, CardContent, ButtonGroup, Button, Typography, Box } from "@mui/material";
-import { addDays, areDatesSameDay } from '../../util/DateUtils.js';
-import { wanikaniColors } from '../../Constants.js';
+import {Animation, EventTracker, Stack} from "@devexpress/dx-react-chart";
+import {Card, CardContent, Typography, Box} from "@mui/material";
+import {addDays, areDatesSameDay} from '../../util/DateUtils.js';
+import {wanikaniColors} from '../../Constants.js';
+import DaysSelector from "../../shared/DaysSelector.jsx";
 
 function WanikaniFutureReviewsChart() {
     const [rawData, setRawData] = useState([]);
@@ -51,42 +52,45 @@ function WanikaniFutureReviewsChart() {
         setChartData(daysData);
     }, [rawData, days]);
 
-    function ReviewsToolTip({ targetItem }) {
-        const { reviews, radicals, kanji, vocabulary } = chartData[targetItem.point];
+    function ReviewsToolTip({targetItem}) {
+        const {reviews, radicals, kanji, vocabulary} = chartData[targetItem.point];
         return (
             <div>
                 Total: {reviews}
-                <br />
+                <br/>
                 Radicals: {radicals}
-                <br />
+                <br/>
                 Kanji: {kanji}
-                <br />
+                <br/>
                 Vocabulary: {vocabulary}
             </div>
         );
     }
 
     return (
-        <Card style={{ height: '100%' }}>
-            <CardContent style={{ height: '100%' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Box />
+        <Card style={{height: '100%'}}>
+            <CardContent style={{height: '100%'}}>
+                <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                        <Box/>
                         <Typography variant={'h5'}>
                             Future Reviews
                         </Typography>
 
-                        <ButtonGroup variant="outlined" color={'primary'}>
-                            <Button variant={days === 7 ? 'contained' : undefined} onClick={() => setDays(7)}>7</Button>
-                            <Button variant={days === 14 ? 'contained' : undefined} onClick={() => setDays(14)}>14</Button>
-                            <Button variant={days === 30 ? 'contained' : undefined} onClick={() => setDays(30)}>30</Button>
-                        </ButtonGroup>
+                        <DaysSelector days={days}
+                                      setDays={setDays}
+                                      options={[
+                                          {value: 7, text: '7'},
+                                          {value: 14, text: '14'},
+                                          {value: 30, text: '30'},
+                                      ]}
+                        />
                     </div>
 
-                    <div style={{ flexGrow: '1' }}>
+                    <div style={{flexGrow: '1'}}>
                         <Chart data={chartData}>
-                            <ValueAxis />
-                            <ArgumentAxis />
+                            <ValueAxis/>
+                            <ArgumentAxis/>
 
                             <BarSeries
                                 name="radicals"
@@ -110,15 +114,15 @@ function WanikaniFutureReviewsChart() {
                             />
 
                             <Stack
-                                stacks={[{ series: ['radicals', 'kanji', 'vocabulary'] }]}
+                                stacks={[{series: ['radicals', 'kanji', 'vocabulary']}]}
                             />
 
-                            <EventTracker />
+                            <EventTracker/>
                             <Tooltip targetItem={targetItem}
-                                onTargetItemChange={setTargetItem}
-                                contentComponent={ReviewsToolTip}
+                                     onTargetItemChange={setTargetItem}
+                                     contentComponent={ReviewsToolTip}
                             />
-                            <Animation />
+                            <Animation/>
                         </Chart>
                     </div>
                 </div>

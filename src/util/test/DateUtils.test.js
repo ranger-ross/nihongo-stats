@@ -1,4 +1,4 @@
-import {areDatesSameDay, millisToDays, millisToHours, truncDate} from "../DateUtils.js";
+import {areDatesSameDay, daysToMillis, millisToDays, millisToHours, truncDate} from "../DateUtils.js";
 
 describe('Timezones', () => {
     it('should always be UTC', () => {
@@ -51,6 +51,23 @@ describe('DateUtils', function () {
 
         it('should trunc date properly', function () {
             expect(truncDate(1640020316111).getTime()).toBe(1639958400000);
+        });
+
+    });
+
+
+    describe('daysToMillis()', function () {
+
+        it('should return 0 for 0 days', function () {
+            expect(daysToMillis(0)).toBe(0);
+        });
+
+        it('should return 86400000 for 1 day', function () {
+            expect(daysToMillis(1)).toBe(86400000);
+        });
+
+        it('should return 432000000 for 5 days', function () {
+            expect(daysToMillis(5)).toBe(432000000);
         });
 
     });

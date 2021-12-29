@@ -1,5 +1,5 @@
 export function daysToMillis(days) {
-    return days * 86400000;
+    return days * 86_400_000;
 }
 
 export function millisToDays(millis) {

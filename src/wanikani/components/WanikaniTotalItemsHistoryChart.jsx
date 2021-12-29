@@ -91,7 +91,6 @@ function WanikaniTotalItemsHistoryChart() {
     const [showKanji, setShowKanji] = useState(true);
     const [showVocabulary, setShowVocabulary] = useState(true);
 
-    console.log(daysToLookBack);
     useEffect(() => {
         let isSubscribed = true;
         fetchData()
@@ -178,7 +177,7 @@ function WanikaniTotalItemsHistoryChart() {
                                               {value: 60, text: '2 Mon'},
                                               {value: 90, text: '3 Mon'},
                                               {value: 180, text: '6 Mon'},
-                                              !!rawData ? {
+                                              !!rawData && rawData.length > 0 ? {
                                                   value: millisToDays(Date.now() - rawData[0].date),
                                                   text: 'All'
                                               } : null

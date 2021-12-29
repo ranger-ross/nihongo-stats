@@ -1,3 +1,7 @@
+export function daysToMillis(days) {
+    return days * 86400000;
+}
+
 export function millisToDays(millis) {
     return Math.floor(millis / (86400000));
 }

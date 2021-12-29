@@ -9,13 +9,15 @@ function DaysSelector({options, days, setDays}) {
             exclusive
             onChange={e => setDays(parseInt(e.target.value))}
         >
-            {options.map(option => (
-                <ToggleButton key={option.value}
-                              value={option.value}
-                >
-                    {option.text}
-                </ToggleButton>
-            ))}
+            {options
+                .filter(option => !!option)
+                .map(option => (
+                    <ToggleButton key={option.value}
+                                  value={option.value}
+                    >
+                        {option.text}
+                    </ToggleButton>
+                ))}
         </ToggleButtonGroup>
     );
 }

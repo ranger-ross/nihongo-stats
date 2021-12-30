@@ -2,9 +2,7 @@ export const wanikaniAppName = 'wanikani';
 export const bunproAppName = 'bunpro';
 export const ankiAppName = 'anki';
 
-// TODO: use real URL once setup
-// export const apiProxyUrl = 'https://api-proxy.nihongostats.com';
-export const apiProxyUrl = 'http://localhost:6003';
+export const apiProxyUrl = 'https://api-proxy.nihongostats.com';
 export const bunproApiUrl = 'https://bunpro.jp/api';
 
 export const wanikaniColors = {

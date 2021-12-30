@@ -25,12 +25,9 @@ function EnterBunProApiKeyPage() {
     const [textfieldValue, setTextfieldValue] = useState('');
 
     const verifyAndSetApiKey = (key) => {
-        console.log('calling verifyAndSetApiKey');
-
-
         BunProApiService.login(key)
             .then(user => {
-                console.log(user)
+                console.log('Logged in to BunPro', user);
                 setApiKey(key);
                 navigate(RoutePaths.bunproDashboard);
             })

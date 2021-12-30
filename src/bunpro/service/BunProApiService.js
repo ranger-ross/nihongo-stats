@@ -15,24 +15,62 @@ import {apiProxyUrl, bunproApiUrl} from "../../Constants.js";
 
 const baseBunProUrl = `${apiProxyUrl}/${bunproApiUrl}`;
 
+const cacheKeys = {
+    apiKey: 'bunpro-api-key',
+}
+
+function apiKey() {
+    return localStorage.getItem(cacheKeys.apiKey)
+}
+
+function saveApiKey(key) {
+    if (!key) {
+        localStorage.removeItem(cacheKeys.apiKey);
+    } else {
+        localStorage.setItem(cacheKeys.apiKey, key);
+    }
+}
+
 function bunproHeaders(token) {
+    const apiKey = !token ? apiKey() : token;
     return {
-        "Authorization": `Token token=${token}`,
+        "Authorization": `Token token=${apiKey}`,
         "X-Requested-With": "nihongostats"
     };
 }
 
+function getBunProUser(token) {
+    const apiKey = !token ? apiKey() : token;
+    return fetch(`${baseBunProUrl}/v3/user`, {headers: bunproHeaders(apiKey)});
+}
+
 export default {
-    getAllReviews: (token) => {
-        return fetch(`${baseBunProUrl}/v3/reviews/all_reviews_total`, {headers: bunproHeaders(token)})
+    saveApiKey: saveApiKey,
+    apiKey: apiKey,
+
+    login: async (apiKey) => {
+        const response = await getBunProUser(apiKey);
+
+        if (response.status === 200) {
+            const user = await response.json();
+            saveApiKey(apiKey);
+            return user;
+        }
+        console.error('Error logging to BunPro API', response);
+        throw new Error('Error logging to BunPro API, [Status]: ' + response.status)
+    },
+
+    getAllReviews: () => {
+        return fetch(`${baseBunProUrl}/v3/reviews/all_reviews_total`, {headers: bunproHeaders()})
             .then(response => response.json());
     },
-    getPendingReviews: (token) => {
-        return fetch(`${baseBunProUrl}/v3/reviews/current_reviews`, {headers: bunproHeaders(token)})
+    getPendingReviews: () => {
+        return fetch(`${baseBunProUrl}/v3/reviews/current_reviews`, {headers: bunproHeaders()})
             .then(response => response.json());
     },
-    getUser: function (token) {
-        return fetch('/api/user/' + token);
+    getUser: () => {
+        return getBunProUser()
+            .then(response => response.json());
     },
     getStudyQueue: function (token) {
         return fetch('/api/user/' + token + '/study_queue');

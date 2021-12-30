@@ -1,5 +1,8 @@
 import BunProApiService from "./service/BunProApiService.js";
 import {useEffect} from "react";
+import {Navigate} from "react-router";
+import {RoutePaths} from "../Routes.jsx";
+import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 
 const styles = {
     container: {
@@ -10,16 +13,22 @@ const styles = {
 
 function BunProDashboard() {
 
+    const {apiKey} = useBunProApiKey();
+
     useEffect(() => {
-        const apiKey = '';
-        BunProApiService.getAllReviews(apiKey)
-            .then(console.log)
-            .catch(console.error);
+        // BunProApiService.login(apiKey)
+        //     .then(console.log)
+        //     .catch(console.error);
     }, []);
 
     return (
         <div style={styles.container}>
-            BunPro coming soon(ish)
+            {!apiKey ? (<Navigate to={RoutePaths.bunproLogin} replace={true}/>) : (
+                <div>
+                    BunPro coming soon(ish)
+                </div>
+            )}
+
         </div>
     );
 }

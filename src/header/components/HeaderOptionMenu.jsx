@@ -1,20 +1,34 @@
-import { IconButton, Menu, MenuItem } from "@mui/material";
+import {IconButton, Menu, MenuItem} from "@mui/material";
 import MoreIcon from '@mui/icons-material/MoreVert';
 import React from "react";
-import { useWanikaniApiKey } from "../../hooks/useWanikaniApiKey.jsx";
+import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
 import LogoutIcon from '@mui/icons-material/Logout';
 import InfoIcon from '@mui/icons-material/Info';
-import { RoutePaths } from "../../Routes.jsx";
-import { useNavigate } from "react-router";
+import {RoutePaths} from "../../Routes.jsx";
+import {useNavigate} from "react-router";
+import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
+
+const styles = {
+    logoutOption: {
+        color: 'red',
+        marginRight: '3px'
+    }
+};
 
 function HeaderOptionMenu() {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
-    const { apiKey, setApiKey } = useWanikaniApiKey();
+    const wanikaniApiKeyStore = useWanikaniApiKey();
+    const bunProApiKeyStore = useBunProApiKey();
     const navigate = useNavigate();
 
     const handleWanikaniLogout = () => {
-        setApiKey(null);
+        wanikaniApiKeyStore.setApiKey(null);
+        setAnchorEl(null);
+    }
+
+    const handleBunProLogout = () => {
+        bunProApiKeyStore.setApiKey(null);
         setAnchorEl(null);
     }
 
@@ -26,7 +40,7 @@ function HeaderOptionMenu() {
     return (
         <>
             <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
-                <MoreIcon />
+                <MoreIcon/>
             </IconButton>
 
             <Menu
@@ -35,12 +49,19 @@ function HeaderOptionMenu() {
                 onClose={() => setAnchorEl(null)}
             >
                 <MenuItem onClick={goToAboutPage}>
-                    <InfoIcon style={{ marginRight: '3px' }} /> About
+                    <InfoIcon style={{marginRight: '3px'}}/> About
                 </MenuItem>
 
-                {apiKey ? (
+                {bunProApiKeyStore.apiKey ? (
+                    <MenuItem onClick={handleBunProLogout}>
+                        <LogoutIcon style={styles.logoutOption}/>
+                        Logout of BunPro
+                    </MenuItem>
+                ) : null}
+
+                {wanikaniApiKeyStore.apiKey ? (
                     <MenuItem onClick={handleWanikaniLogout}>
-                        <LogoutIcon style={{ color: 'red', marginRight: '3px' }} />
+                        <LogoutIcon style={styles.logoutOption}/>
                         Logout of Wanikani
                     </MenuItem>
                 ) : null}

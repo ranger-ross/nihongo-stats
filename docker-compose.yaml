@@ -10,3 +10,11 @@ services:
     ports:
       - "3000:3000"
 
+  api-proxy:
+    container_name: nihongo-stats-proxy
+    image: redocly/cors-anywhere
+    environment:
+      PORT: 6003
+    ports:
+      - "6003:6003"
+

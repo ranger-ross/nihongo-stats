@@ -2,6 +2,9 @@ export const wanikaniAppName = 'wanikani';
 export const bunproAppName = 'bunpro';
 export const ankiAppName = 'anki';
 
+export const apiProxyUrl = 'https://api-proxy.nihongostats.com';
+export const bunproApiUrl = 'https://bunpro.jp/api';
+
 export const wanikaniColors = {
     blue: '#00a1f1',
     pink: '#f100a1',

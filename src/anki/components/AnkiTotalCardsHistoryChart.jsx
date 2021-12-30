@@ -54,7 +54,8 @@ function formatMultiDeckReviewData(decks) {
     }
 
     const orderedReviews = reviews.sort((a, b,) => a.reviewTime - b.reviewTime);
-    let days = [new DataPoint(orderedReviews[0].reviewTime)];
+    const dayBeforeStartPoint = new DataPoint(orderedReviews[0].reviewTime - daysToMillis(1))
+    let days = [dayBeforeStartPoint, new DataPoint(orderedReviews[0].reviewTime, dayBeforeStartPoint)];
 
     let cards = {};
     for (const review of orderedReviews) {

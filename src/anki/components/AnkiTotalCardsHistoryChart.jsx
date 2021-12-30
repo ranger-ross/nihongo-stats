@@ -30,6 +30,7 @@ function DataPoint(date, previousDataPoint) {
         }
 
         if (!!previousDataPoint && !previousDataPoint[`total_${deck}`]) {
+            previousDataPoint[`count_${deck}`] = 0;
             previousDataPoint[`total_${deck}`] = 0;
         }
 
@@ -104,7 +105,7 @@ function AnkiTotalCardsHistoryChart({deckNames}) {
             })
             .finally(() => setIsLoading(false));
         return () => isSubscribed = false;
-    }, []);
+    }, [deckNames]);
 
     const chartData = useMemo(() => (cardData ?? [])
             .filter(dp => dp.date.getTime() >= Date.now() - daysToMillis(daysToLookBack)),

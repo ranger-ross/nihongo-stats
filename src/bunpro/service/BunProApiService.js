@@ -32,16 +32,16 @@ function saveApiKey(key) {
 }
 
 function bunproHeaders(token) {
-    const apiKey = !token ? apiKey() : token;
+    const _apiKey = !token ? apiKey() : token;
     return {
-        "Authorization": `Token token=${apiKey}`,
+        "Authorization": `Token token=${_apiKey}`,
         "X-Requested-With": "nihongostats"
     };
 }
 
 function getBunProUser(token) {
-    const apiKey = !token ? apiKey() : token;
-    return fetch(`${baseBunProUrl}/v3/user`, {headers: bunproHeaders(apiKey)});
+    const _apiKey = !token ? apiKey() : token;
+    return fetch(`${baseBunProUrl}/v3/user`, {headers: bunproHeaders(_apiKey)});
 }
 
 export default {

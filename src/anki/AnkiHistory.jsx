@@ -1,6 +1,7 @@
 import AnkiReviewsChart from "./components/AnkiReviewsChart.jsx";
 import {useSelectedAnkiDecks} from "../hooks/useSelectedAnkiDecks.jsx";
 import AnkiApiProvider from "./components/AnkiApiProvider.jsx";
+import AnkiTotalCardsHistoryChart from "./components/AnkiTotalCardsHistoryChart.jsx";
 
 const styles = {
     container: {
@@ -28,6 +29,10 @@ function AnkiHistory() {
                         <AnkiReviewsChart
                             deckNames={selectedDecks}
                             showTotals={false}
+                        />
+
+                        <AnkiTotalCardsHistoryChart
+                            deckNames={selectedDecks}
                         />
                     </>
                 ) : null}

@@ -98,7 +98,6 @@ function AnkiTotalCardsHistoryChart({deckNames}) {
                     reviews: value
                 })));
                 const formattedData = formatMultiDeckReviewData(deckData);
-                console.log(formattedData);
                 setCardData(formattedData);
                 setDaysToLookBack(millisToDays(Date.now() - formattedData[0].date))
                 setDecksToDisplay(deckNames);

@@ -1,3 +1,6 @@
+import BunProApiService from "./service/BunProApiService.js";
+import {useEffect} from "react";
+
 const styles = {
     container: {
         textAlign: 'center',
@@ -6,6 +9,13 @@ const styles = {
 };
 
 function BunProDashboard() {
+
+    useEffect(() => {
+        const apiKey = '';
+        BunProApiService.getAllReviews(apiKey)
+            .then(console.log)
+            .catch(console.error);
+    }, []);
 
     return (
         <div style={styles.container}>

@@ -12,6 +12,7 @@ const styles = {
 export function BunProWelcomeTile() {
 
     const [user, setUser] = useState();
+    const [pendingReviews, setPendingReviews] = useState(0);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -20,10 +21,16 @@ export function BunProWelcomeTile() {
             .then(user => {
                 if (!isSubscribed)
                     return;
-
                 setUser(user);
-
             });
+
+        BunProApiService.getPendingReviews()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setPendingReviews(data.length);
+            });
+
         return () => isSubscribed = false;
     }, []);
 
@@ -34,11 +41,13 @@ export function BunProWelcomeTile() {
                     Welcome {user?.username}
                 </Typography>
 
-                {/*<div style={{display: 'flex', gap: '10px', marginTop: '10px', width: '260px'}}>*/}
-                {/*    <Button variant="contained">*/}
-                {/*        Lessons: {!!user ? user['new_reviews'].length : null}*/}
-                {/*    </Button>*/}
-                {/*</div>*/}
+                <div style={{display: 'flex', gap: '10px', marginTop: '10px', width: '260px'}}>
+                    <Button variant="contained"
+                            onClick={() => window.open("https://www.bunpro.jp/study", "_blank")}
+                    >
+                        Reviews: {pendingReviews}
+                    </Button>
+                </div>
             </CardContent>
         </Card>
     );

@@ -4,6 +4,7 @@ import {Card, CardContent} from "@mui/material";
 import BunProPreloadedData from "./components/BunProPreloadedData.jsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 import BunProReviewsHistoryChart from "./components/BunProReviewsHistoryChart.jsx";
+import BunProTotalReviewsChart from "./components/BunProTotalReviewsChart.jsx";
 
 
 function BunProHistory() {
@@ -20,6 +21,13 @@ function BunProHistory() {
                                 <BunProReviewsHistoryChart/>
                             </CardContent>
                         </Card>
+
+                        <Card variant={'outlined'} style={{margin: '15px'}}>
+                            <CardContent>
+                                <BunProTotalReviewsChart/>
+                            </CardContent>
+                        </Card>
+
 
                     </div>
                 </BunProPreloadedData>

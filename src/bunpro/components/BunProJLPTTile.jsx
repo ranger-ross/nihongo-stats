@@ -1,19 +1,12 @@
-import {Button, Card, CardContent, CircularProgress, LinearProgress, Typography} from "@mui/material";
+import {Card, CardContent, CircularProgress, LinearProgress, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import BunProApiService from "../service/BunProApiService.js";
+import {createGrammarPointsLookupMap} from "../service/BunProDataUtil.js";
 
-
-async function getGrammarPointsDatabase(grammarPoints) {
-    let map = {};
-    for (const grammarPoint of grammarPoints) {
-        map[grammarPoint.id] = grammarPoint;
-    }
-    return map;
-}
 
 async function fetchCurrentReviewProgress(grammarPoints) {
 
-    const grammarPointsDB = await getGrammarPointsDatabase(grammarPoints);
+    const grammarPointsMap = createGrammarPointsLookupMap(grammarPoints);
     const reviewData = await BunProApiService.getAllReviews();
 
     let data = {
@@ -25,7 +18,7 @@ async function fetchCurrentReviewProgress(grammarPoints) {
     };
 
     for (const review of reviewData.reviews) {
-        const grammarPoint = grammarPointsDB[review['grammar_point_id']];
+        const grammarPoint = grammarPointsMap[review['grammar_point_id']];
         data[grammarPoint.level] += 1;
     }
 

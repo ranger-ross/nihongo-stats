@@ -55,13 +55,26 @@ async function fetchData() {
         }
     }
 
-    return {
+    let data = {
         N5: formatData('JLPT5'),
         N4: formatData('JLPT4'),
         N3: formatData('JLPT3'),
         N2: formatData('JLPT2'),
         N1: formatData('JLPT1'),
-    }
+    };
+
+    data.all = Object.keys(data)
+        .map(key => data[key])
+        .reduce((previousValue, currentValue) => {
+            previousValue.progress += currentValue.progress;
+            previousValue.total += currentValue.total;
+            return previousValue;
+        }, {
+            progress: 0,
+            total: 0,
+        })
+
+    return data;
 }
 
 function LevelProgress({level, current, total}) {
@@ -138,20 +151,18 @@ export function BunProJLPTTile() {
                             total={data['N1'].total}
                         />
 
+                        <div style={{marginTop: '15px'}}>
+                            <LevelProgress
+                                level={'All'}
+                                current={data['all'].progress}
+                                total={data['all'].total}
+                            />
+                        </div>
+
+
                     </>
                 )}
 
-                {/*{data}*/}
-
-                {/*<Typography variant={'h5'} style={styles.welcomeText}>*/}
-                {/*    Welcome {user?.username}*/}
-                {/*</Typography>*/}
-
-                {/*<div style={{display: 'flex', gap: '10px', marginTop: '10px', width: '260px'}}>*/}
-                {/*    <Button variant="contained">*/}
-                {/*        Lessons: {!!user ? user['new_reviews'].length : null}*/}
-                {/*    </Button>*/}
-                {/*</div>*/}
             </CardContent>
         </Card>
     );

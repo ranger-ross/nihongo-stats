@@ -6,10 +6,7 @@ import {BunProWelcomeTile} from "./components/BunProWelcomeTile.jsx";
 import BunProApiService from "./service/BunProApiService.js";
 import BunProPreloadedData from "./components/BunProPreloadedData.jsx";
 import {BunProJLPTTile} from "./components/BunProJLPTTile";
-import WanikaniWelcomeTile from "../wanikani/components/WanikaniWelcomeTile.jsx";
-import WanikaniLevelSummaryChart from "../wanikani/components/WanikaniLevelSummaryChart.jsx";
-import WanikaniItemCountsChart from "../wanikani/components/WanikaniItemCountsChart.jsx";
-import WanikaniFutureReviewsChart from "../wanikani/components/WanikaniFutureReviewsChart.jsx";
+import BunProUpcomingReviewsChart from "./components/BunProUpcomingReviewsChart.jsx";
 
 const styles = {
     container: {
@@ -17,7 +14,23 @@ const styles = {
         flexDirection: 'column',
         margin: '10px',
         gap: '10px',
-    }
+    },
+    innerContainer: {
+        display: 'flex',
+        gap: '10px',
+        flexWrap: 'wrap',
+        alignItems: 'stretch'
+    },
+    leftPanel: {
+        display: 'flex',
+        gap: '10px',
+        flexDirection: 'column',
+        flexGrow: '1',
+        minWidth: '500px'
+    },
+    rightPanel: {
+        flexGrow: '25'
+    },
 };
 
 function BunProDashboard() {
@@ -37,16 +50,16 @@ function BunProDashboard() {
                 <BunProPreloadedData>
                     <div style={styles.container}>
 
-                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'stretch'}}>
+                        <div style={styles.innerContainer}>
 
-                            <div style={{display: 'flex', gap: '10px', flexDirection: 'column', flexGrow: '1', minWidth: '500px'}}>
+                            <div style={styles.leftPanel}>
                                 <BunProWelcomeTile/>
 
                                 <BunProJLPTTile/>
                             </div>
 
-                            <div style={{flexGrow: '25'}}>
-                                placeholder
+                            <div style={styles.rightPanel}>
+                                <BunProUpcomingReviewsChart/>
                             </div>
 
                         </div>

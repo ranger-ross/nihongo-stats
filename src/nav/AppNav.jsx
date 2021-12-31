@@ -8,6 +8,8 @@ import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import AppSelector from "./components/AppSelector";
 import WanikaniNav from "./navbars/WanikaniNav.jsx";
 import AnkiNav from "./navbars/AnkiNav";
+import BunProNav from "./navbars/BunProNav.jsx";
+import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 
 const styles = {
     container: {
@@ -29,7 +31,8 @@ const appOptions = [
 function AppNav() {
     const {selectedApp, setSelectedApp} = useGlobalState();
     const navigate = useNavigate();
-    const {apiKey} = useWanikaniApiKey();
+    const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
+    const {apiKey: bunProApiKey} = useBunProApiKey();
 
     useEffect(() => {
         switch (selectedApp) {
@@ -54,8 +57,9 @@ function AppNav() {
             </Grid>
 
             <Box sx={{flexGrow: 1}}>
-                {selectedApp === wanikaniAppName && !!apiKey ? (<WanikaniNav/>) : null}
-                {selectedApp === ankiAppName && !!apiKey ? (<AnkiNav/>) : null}
+                {selectedApp === ankiAppName ? (<AnkiNav/>) : null}
+                {selectedApp === bunproAppName && !!bunProApiKey ? (<BunProNav/>) : null}
+                {selectedApp === wanikaniAppName && !!wanikaniApiKey ? (<WanikaniNav/>) : null}
             </Box>
         </Grid>
     );

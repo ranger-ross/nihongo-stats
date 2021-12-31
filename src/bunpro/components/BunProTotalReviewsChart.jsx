@@ -2,38 +2,43 @@ import * as React from 'react';
 import {useEffect, useMemo, useState} from 'react';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import {ArgumentScale, BarSeries, EventTracker, Stack} from "@devexpress/dx-react-chart";
+import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack} from "@devexpress/dx-react-chart";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.js";
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import BunProApiService from "../service/BunProApiService.js";
 import {createGrammarPointsLookupMap, fetchAllBunProReviews} from "../service/BunProDataUtil.js";
-import useWindowDimensions from "../../hooks/useWindowDimensions.jsx";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
-function DataPoint(date) {
-    let dp = {
-        date: truncDate(date),
+
+function DataPoint(date, previousDataPoint) {
+    const createEmptyDataPoint = () => ({
         total: 0,
-        reviews: [],
-        N5: 0,
-        N4: 0,
-        N3: 0,
-        N2: 0,
-        N1: 0,
-    };
+    });
+
+    let dp = createEmptyDataPoint();
+
+    if (!!previousDataPoint) {
+        dp = {...previousDataPoint};
+    }
+
+    dp.date = truncDate(date);
 
     dp.addReview = (review) => {
-        dp.reviews.push(review);
-        dp.total = dp.reviews.length;
+        dp.total += 1;
 
         const level = review.level;
-        dp[level] += 1;
+        if (!dp[level]) {
+            dp[level] = 1;
+        } else {
+            dp[level] += 1;
+        }
     };
     return dp;
 }
+
 
 function aggregateReviewByDay(reviews) {
     const orderedReviews = reviews.sort((a, b,) => a.current.time.getTime() - b.current.time.getTime());
@@ -43,7 +48,7 @@ function aggregateReviewByDay(reviews) {
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
         if (lastDay.date.getTime() !== truncDate(review.current.time).getTime()) {
-            days.push(new DataPoint(review.current.time));
+            days.push(new DataPoint(review.current.time, lastDay));
             lastDay = days[days.length - 1];
         }
         lastDay.addReview(review);
@@ -56,13 +61,10 @@ async function fetchData() {
     return aggregateReviewByDay(reviews)
 }
 
-function BunProReviewsHistoryChart() {
+function BunProTotalReviewsChart() {
     const [rawData, setRawData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [daysToLookBack, setDaysToLookBack] = useState(60);
-    const {width} = useWindowDimensions();
-    const isMobile = width < 400;
-
+    const [daysToLookBack, setDaysToLookBack] = useState(10_000);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -72,6 +74,7 @@ function BunProReviewsHistoryChart() {
             .then(data => {
                 if (!isSubscribed)
                     return;
+                setDaysToLookBack(data.length)
                 setRawData(data);
             })
             .finally(() => {
@@ -90,15 +93,16 @@ function BunProReviewsHistoryChart() {
         return (
             <>
                 <p>{dp.date.toLocaleDateString()}</p>
-                <p>Total: {(dp.total).toLocaleString()}</p>
-                {JLPTLevels.map(level => (
-                    dp[level] ? <p key={level}>{level}: {dp[level]}</p> : null
-                ))}
+                {targetItem.series == 'Total' ? (
+                    <p>Total: {(dp.total).toLocaleString()}</p>
+                ) : (
+                    <p>{targetItem.series}: {dp[targetItem.series]}</p>
+                )}
             </>
         );
     }
 
-    const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], isMobile ? 3 : 6);
+    const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], 6);
 
     const LabelWithDate = (props) => {
         const date = new Date(props.text);
@@ -129,7 +133,7 @@ function BunProReviewsHistoryChart() {
                     <Grid item xs={12} md={4}/>
                     <Grid item xs={12} md={4}>
                         <Typography variant={'h5'} style={{textAlign: 'center'}}>
-                            Reviews
+                            Total Reviews
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
@@ -162,18 +166,19 @@ function BunProReviewsHistoryChart() {
                             <ValueAxis/>
 
                             {JLPTLevels.map(level => (
-                                <BarSeries
+                                <LineSeries
                                     key={level}
                                     name={level}
                                     valueField={level}
                                     argumentField="date"/>
                             ))}
 
-                            <Stack
-                                stacks={[{series: JLPTLevels}]}
-                            />
+                            <LineSeries
+                                name="Total"
+                                valueField="total"
+                                argumentField="date"/>
 
-                            <Legend position={isMobile ? 'bottom' : 'right'}/>
+                            <Legend/>
                             <EventTracker/>
                             <Tooltip contentComponent={ReviewToolTip}/>
                         </Chart>
@@ -185,4 +190,4 @@ function BunProReviewsHistoryChart() {
     );
 }
 
-export default BunProReviewsHistoryChart;
+export default BunProTotalReviewsChart;

@@ -65,7 +65,7 @@ async function getGrammarPoints() {
     return await sendCacheableRequest(
         fetch(`${baseBunProUrl}/v3/grammar_points`, {headers: bunproHeaders()}),
         cacheKeys.grammarPoints,
-        1000 * 60 * 10
+        1000 * 60 * 60 * 24
     );
 }
 

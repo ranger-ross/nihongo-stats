@@ -1,8 +1,9 @@
 import {Navigate} from "react-router";
 import {RoutePaths} from "../Routes";
-import {Card} from "@mui/material";
+import {Card, CardContent} from "@mui/material";
 import BunProPreloadedData from "./components/BunProPreloadedData.jsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
+import BunProReviewsHistoryChart from "./components/BunProReviewsHistoryChart.jsx";
 
 
 function BunProHistory() {
@@ -15,7 +16,9 @@ function BunProHistory() {
                     <div>
 
                         <Card variant={'outlined'} style={{margin: '15px'}}>
-                            placeholder
+                            <CardContent>
+                                <BunProReviewsHistoryChart/>
+                            </CardContent>
                         </Card>
 
                     </div>

@@ -77,8 +77,6 @@ function BunProUpcomingReviewsChart() {
         [rawData, days]
     );
 
-    console.log(chartData);
-
     const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], 14);
 
     const LabelWithDate = (props) => {

@@ -16,11 +16,6 @@ const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 function DataPoint(date, previousDataPoint) {
     const createEmptyDataPoint = () => ({
         total: 0,
-        N5: 0,
-        N4: 0,
-        N3: 0,
-        N2: 0,
-        N1: 0,
     });
 
     let dp = createEmptyDataPoint();
@@ -35,7 +30,11 @@ function DataPoint(date, previousDataPoint) {
         dp.total += 1;
 
         const level = review.level;
-        dp[level] += 1;
+        if (!dp[level]) {
+            dp[level] = 1;
+        } else {
+            dp[level] += 1;
+        }
     };
     return dp;
 }

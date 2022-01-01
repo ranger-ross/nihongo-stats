@@ -1,5 +1,5 @@
 import {Box, Grid} from "@mui/material";
-import React, {useEffect} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {useNavigate} from "react-router";
 import {bunproAppName, wanikaniAppName, ankiAppName, overviewAppName} from '../Constants.js';
 import {useGlobalState} from "../GlobalState";
@@ -34,8 +34,16 @@ function AppNav() {
     const navigate = useNavigate();
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
     const {apiKey: bunProApiKey} = useBunProApiKey();
+    const [isFirstLoad, setIsFirstLoad] = useState(true);
 
     useEffect(() => {
+        // Don't navigate to dashboard on page load.
+        // (If user refreshes page on history they should not be rerouted)
+        if (isFirstLoad) {
+            setIsFirstLoad(false);
+            return;
+        }
+
         switch (selectedApp) {
             case overviewAppName:
                 navigate(RoutePaths.overviewDashboard);

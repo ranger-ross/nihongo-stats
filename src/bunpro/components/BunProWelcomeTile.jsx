@@ -1,6 +1,7 @@
 import {Button, Card, CardContent, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import BunProApiService from "../service/BunProApiService.js";
+import BunProPendingReviews from "../../shared/BunProPendingReviews.jsx";
 
 const styles = {
     welcomeText: {
@@ -42,11 +43,7 @@ export function BunProWelcomeTile() {
                 </Typography>
 
                 <div style={{display: 'flex', gap: '10px', marginTop: '10px', width: '260px'}}>
-                    <Button variant="contained"
-                            onClick={() => window.open("https://www.bunpro.jp/study", "_blank")}
-                    >
-                        Reviews: {pendingReviews}
-                    </Button>
+                    <BunProPendingReviews count={pendingReviews} />
                 </div>
             </CardContent>
         </Card>

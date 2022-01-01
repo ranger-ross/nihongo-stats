@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
-import AnkiDeckSummaries from "./components/AnkiDeckSummaries.jsx";
+import AnkiDeckSummariesTile from "./components/AnkiDeckSummariesTile.jsx";
 import AnkiCardBreakDownChart from "./components/AnkiCardBreakDownChart.jsx";
 import AnkiApiProvider from "./components/AnkiApiProvider.jsx";
 import AnkiUpcomingReviewsChart from "./components/AnkiUpcomingReviewsChart.jsx";
@@ -33,7 +33,7 @@ function AnkiDashboard() {
         <AnkiApiProvider>
             <div style={styles.container}>
                 <div style={styles.leftContainer}>
-                    <AnkiDeckSummaries/>
+                    <AnkiDeckSummariesTile/>
                     <AnkiCardBreakDownChart/>
                 </div>
                 <div style={styles.rightContainer}>

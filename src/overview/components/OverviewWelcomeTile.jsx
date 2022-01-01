@@ -1,9 +1,7 @@
-import {Button, Card, CardContent, Typography} from "@mui/material";
-import {WanikaniBlueButton, WanikaniPinkButton} from "../../wanikani/components/WanikaniButtons.jsx";
+import {Card, CardContent, IconButton, Menu, MenuItem, Typography} from "@mui/material";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
-import {useEffect, useState} from "react";
-import {ankiColors} from "../../Constants.js";
-import {fetchAnkiDeckSummaries} from "../../shared/AnkiDeckSummaries.jsx";
+import React, {useEffect, useState} from "react";
+import AnkiDeckSummaries, {fetchAnkiDeckSummaries} from "../../shared/AnkiDeckSummaries.jsx";
 import WanikaniPendingLessonsAndReviews, {
     fetchWanikaniPendingLessonsAndReviews
 } from "../../shared/WanikaniPendingLessonAndReviews";
@@ -12,6 +10,9 @@ import BunProApiService from "../../bunpro/service/BunProApiService.js";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import AnkiApiService from "../../anki/service/AnkiApiService.js";
+import {Add} from "@mui/icons-material";
+import {useGlobalState} from "../../GlobalState.js";
+import {ankiAppName, bunproAppName, wanikaniAppName} from "../../Constants.js";
 
 const styles = {
     titleText: {
@@ -23,24 +24,13 @@ const styles = {
         marginTop: '10px',
         width: '260px',
         marginBottom: '15px'
-    }
-
+    },
+    titleContainer: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'start',
+    },
 };
-
-function AnkiDeckSummaries({deckData}) {
-    return deckData.map(data => (
-        <div key={data.deckName}>
-            <strong>{data.deckName}</strong>
-            <p>
-                <strong>
-                    <span>Reviews: <span style={{color: ankiColors.lightGreen}}>{data.dueCards}</span></span>
-                    <span style={{marginLeft: '15px'}}>New: <span
-                        style={{color: ankiColors.blue}}>{data.newCards}</span></span>
-                </strong>
-            </p>
-        </div>
-    ));
-}
 
 function AnkiSection() {
     const {selectedDecks} = useSelectedAnkiDecks();
@@ -117,7 +107,7 @@ function BunProSection() {
     return (
         <>
             <Typography variant={'h6'} style={styles.titleText}>
-                BunPro (username)
+                BunPro
             </Typography>
 
             <div style={styles.buttonContainer}>
@@ -127,6 +117,43 @@ function BunProSection() {
     );
 }
 
+function AddAppDropdown({showAnki, showBunPro, showWanikani}) {
+    const {setSelectedApp} = useGlobalState();
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+    return (
+        <>
+            <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
+                <Add/>
+            </IconButton>
+
+            <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={() => setAnchorEl(null)}
+            >
+                {showAnki ? (
+                    <MenuItem onClick={() => setSelectedApp(ankiAppName)}>
+                        Add Anki
+                    </MenuItem>
+                ) : null}
+
+
+                {showBunPro ? (
+                    <MenuItem onClick={() => setSelectedApp(bunproAppName)}>
+                        Add BunPro
+                    </MenuItem>
+                ) : null}
+
+                {showWanikani ? (
+                    <MenuItem onClick={() => setSelectedApp(wanikaniAppName)}>
+                        Add Wanikani
+                    </MenuItem>
+                ) : null}
+            </Menu>
+        </>
+    );
+}
 
 function OverviewWelcomeTile() {
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
@@ -145,12 +172,26 @@ function OverviewWelcomeTile() {
         return () => isSubscribed = false;
     }, []);
 
+    const showAddAppDropdown = !isAnkiConnected || !bunProApiKey || !wanikaniApiKey;
+
     return (
         <Card>
             <CardContent>
-                <Typography variant={'h5'} style={{...styles.titleText, marginBottom: '15px'}}>
-                    Pending Reviews
-                </Typography>
+
+                <div style={styles.titleContainer}>
+                    <Typography variant={'h5'} style={{...styles.titleText, marginBottom: '15px'}}>
+                        Pending Reviews
+                    </Typography>
+
+                    {showAddAppDropdown ? (
+                        <AddAppDropdown
+                            showAnki={!isAnkiConnected}
+                            showBunPro={!bunProApiKey}
+                            showWanikani={!wanikaniApiKey}
+                        />
+                    ) : null}
+
+                </div>
 
                 {isAnkiConnected ? (<AnkiSection/>) : null}
                 {bunProApiKey ? (<BunProSection/>) : null}

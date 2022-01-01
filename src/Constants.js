@@ -1,3 +1,4 @@
+export const overviewAppName = 'overview';
 export const wanikaniAppName = 'wanikani';
 export const bunproAppName = 'bunpro';
 export const ankiAppName = 'anki';

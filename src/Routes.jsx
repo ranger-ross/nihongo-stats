@@ -11,8 +11,12 @@ import AnkiConnectLogin from "./anki/AnkiConnectLogin";
 import AnkiHistory from "./anki/AnkiHistory";
 import EnterBunProApiKeyPage from "./bunpro/EnterBunProApiKeyPage.jsx";
 import BunProHistory from "./bunpro/BunProHistory.jsx";
+import OverviewDashboard from "./overview/OverviewDashboard.jsx";
 
 export const RoutePaths = {
+
+    // Overview
+    overviewDashboard: '/dashboard',
 
     // Wanikani
     wanikaniDashboard: '/wanikani-dashboard',
@@ -38,6 +42,7 @@ export const RoutePaths = {
 export function AppRoutes() {
     return (
         <Routes>
+            <Route path={RoutePaths.overviewDashboard} element={<OverviewDashboard/>}/>
             <Route path={RoutePaths.wanikaniDashboard} element={<WanikaniDashboard/>}/>
             <Route path={RoutePaths.wanikaniLogin} element={<EnterWanikaniApiKeyPage/>}/>
             <Route path={RoutePaths.wanikaniHistory} element={<WanikaniHistory/>}/>

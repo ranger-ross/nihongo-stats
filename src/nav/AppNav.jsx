@@ -1,7 +1,7 @@
 import {Box, Grid} from "@mui/material";
 import React, {useEffect} from "react";
 import {useNavigate} from "react-router";
-import {bunproAppName, wanikaniAppName, ankiAppName} from '../Constants.js';
+import {bunproAppName, wanikaniAppName, ankiAppName, overviewAppName} from '../Constants.js';
 import {useGlobalState} from "../GlobalState";
 import {RoutePaths} from '../Routes';
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
@@ -23,6 +23,7 @@ const styles = {
 };
 
 const appOptions = [
+    {appName: overviewAppName, displayName: 'Overview'},
     {appName: ankiAppName, displayName: 'Anki'},
     {appName: bunproAppName, displayName: 'BunPro'},
     {appName: wanikaniAppName, displayName: 'Wanikani'},
@@ -36,6 +37,9 @@ function AppNav() {
 
     useEffect(() => {
         switch (selectedApp) {
+            case overviewAppName:
+                navigate(RoutePaths.overviewDashboard);
+                break;
             case wanikaniAppName:
                 navigate(RoutePaths.wanikaniDashboard);
                 break;

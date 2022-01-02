@@ -11,15 +11,7 @@ import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import {truncDate} from "../../util/DateUtils.js";
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import DaysSelector from "../../shared/DaysSelector.jsx";
-
-function createParams(deck, day) {
-    return {
-        "action": "findCards",
-        "params": {
-            "query": `deck:"${deck}" prop:due=${day}`
-        }
-    };
-}
+import {createAnkiCardsDueQuery} from "../service/AnkiDataUtil.js";
 
 function DataPoint(day) {
     let data = {
@@ -38,7 +30,7 @@ async function fetchData(decks, numberOfDays) {
     let actions = [];
     for (let i = 0; i < numberOfDays; i++) {
         for (const deck of decks) {
-            actions.push(createParams(deck, i));
+            actions.push(createAnkiCardsDueQuery(deck, i));
         }
     }
 

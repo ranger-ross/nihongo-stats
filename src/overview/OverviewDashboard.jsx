@@ -2,6 +2,7 @@ import {useEffect} from "react";
 import {Navigate} from "react-router";
 import {RoutePaths} from "../Routes.jsx";
 import OverviewWelcomeTile from "./components/OverviewWelcomeTile.jsx";
+import OverviewUpcomingReviewsChart from "./components/OverviewUpcomingReviewsChart.jsx";
 
 const styles = {
     container: {
@@ -48,7 +49,7 @@ function OverviewDashboard() {
                 </div>
 
                 <div style={styles.rightPanel}>
-                    placeholder
+                    <OverviewUpcomingReviewsChart/>
                 </div>
 
             </div>

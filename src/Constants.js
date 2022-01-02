@@ -12,6 +12,10 @@ export const wanikaniColors = {
     purple: '#a100f1',
 }
 
+export const bunProColors = {
+    blue: '#5babf2',
+}
+
 export const ankiColors = {
     blue: '#77ccff',
     lightGreen: '#74c464',

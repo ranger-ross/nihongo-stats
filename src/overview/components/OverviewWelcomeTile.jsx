@@ -13,6 +13,7 @@ import AnkiApiService from "../../anki/service/AnkiApiService.js";
 import {Add} from "@mui/icons-material";
 import {useGlobalState} from "../../GlobalState.js";
 import {ankiAppName, bunproAppName, wanikaniAppName} from "../../Constants.js";
+import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
 
 const styles = {
     titleText: {
@@ -138,7 +139,6 @@ function AddAppDropdown({showAnki, showBunPro, showWanikani}) {
                     </MenuItem>
                 ) : null}
 
-
                 {showBunPro ? (
                     <MenuItem onClick={() => setSelectedApp(bunproAppName)}>
                         Add BunPro
@@ -158,21 +158,10 @@ function AddAppDropdown({showAnki, showBunPro, showWanikani}) {
 function OverviewWelcomeTile() {
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
     const {apiKey: bunProApiKey} = useBunProApiKey();
-    const [isAnkiConnected, setIsAnkiConnected] = useState(false);
-
-    useEffect(() => {
-        let isSubscribed = true;
-
-        AnkiApiService.connect()
-            .then(isConnected => {
-                if (!isSubscribed)
-                    return;
-                setIsAnkiConnected(isConnected);
-            });
-        return () => isSubscribed = false;
-    }, []);
+    const isAnkiConnected = useAnkiConnection();
 
     const showAddAppDropdown = !isAnkiConnected || !bunProApiKey || !wanikaniApiKey;
+    const showNotSignedIn = !isAnkiConnected && !bunProApiKey && !wanikaniApiKey;
 
     return (
         <Card>
@@ -196,6 +185,12 @@ function OverviewWelcomeTile() {
                 {isAnkiConnected ? (<AnkiSection/>) : null}
                 {bunProApiKey ? (<BunProSection/>) : null}
                 {wanikaniApiKey ? (<WanikaniSection/>) : null}
+
+                {showNotSignedIn ? (
+                    <div>
+                        Connect an app using the + icon above
+                    </div>
+                ) : null}
             </CardContent>
         </Card>
     );

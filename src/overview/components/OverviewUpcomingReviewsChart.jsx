@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {Box, Card, CardContent, Typography} from "@mui/material";
+import {Box, Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addDays, daysToMillis, truncDate} from '../../util/DateUtils.js';
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import {scaleBand} from 'd3-scale';
@@ -12,8 +12,16 @@ import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {createAnkiCardsDueQuery} from "../../anki/service/AnkiDataUtil.js";
-import {ankiAppName, bunproAppName, wanikaniAppName} from "../../Constants.js";
+import {
+    ankiAppName,
+    ankiColors,
+    bunproAppName,
+    bunProColors,
+    wanikaniAppName,
+    wanikaniColors
+} from "../../Constants.js";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
+import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
 
 function filterDeadGhostReviews(review) {
     const fiveYearsFromNow = Date.now() + (1000 * 60 * 60 * 24 * 365 * 5)
@@ -114,6 +122,7 @@ function OverviewUpcomingReviewsChart() {
     const [targetItem, setTargetItem] = useState();
     const [days, setDays] = useState(14);
 
+    const isAnkiConnected = useAnkiConnection();
     const {selectedDecks: ankiSelectedDecks} = useSelectedAnkiDecks();
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
     const {apiKey: bunProApiKey} = useBunProApiKey();
@@ -123,9 +132,18 @@ function OverviewUpcomingReviewsChart() {
     const [bunProReviews, setBunProReviews] = useState(null);
     const [wanikaniReviews, setWanikaniReviews] = useState(null);
 
+    const [isAnkiLoading, setIsAnkiLoading] = useState(false);
+    const [isBunProLoading, setIsBunProLoading] = useState(false);
+    const [isWanikaniLoading, setIsWanikaniLoading] = useState(false);
+
+    const isLoading = isAnkiLoading || isWanikaniLoading || isBunProLoading;
+    const noAppsConnected = !ankiReviews && !bunProReviews && !wanikaniReviews;
+
+
     useEffect(() => {
         if (!wanikaniApiKey)
             return;
+        setIsWanikaniLoading(true);
         let isSubscribed = true;
         fetchWanikaniReviews()
             .then(reviews => {
@@ -133,12 +151,18 @@ function OverviewUpcomingReviewsChart() {
                     return;
                 setWanikaniReviews(reviews);
             })
+            .finally(() => {
+                if (!isSubscribed)
+                    return;
+                setIsWanikaniLoading(false);
+            });
         return () => isSubscribed = false;
     }, [wanikaniApiKey]);
 
     useEffect(() => {
         if (!bunProApiKey)
             return;
+        setIsBunProLoading(true);
         let isSubscribed = true;
         getBunProReviews()
             .then(reviews => {
@@ -146,12 +170,20 @@ function OverviewUpcomingReviewsChart() {
                     return;
                 setBunProReviews(reviews);
             })
+            .finally(() => {
+                if (!isSubscribed)
+                    return;
+                setIsBunProLoading(false);
+            });
         return () => isSubscribed = false;
     }, [bunProApiKey]);
 
     useEffect(() => {
-        if (!ankiSelectedDecks || ankiSelectedDecks.length === 0)
+        if (!isAnkiConnected || !ankiSelectedDecks || ankiSelectedDecks.length === 0) {
+            setAnkiReviews(null);
             return;
+        }
+        setIsAnkiLoading(true);
         let isSubscribed = true;
         getAnkiReviews(ankiSelectedDecks, days)
             .then(reviews => {
@@ -159,15 +191,19 @@ function OverviewUpcomingReviewsChart() {
                     return;
                 setAnkiReviews(reviews);
             })
+            .finally(() => {
+                if (!isSubscribed)
+                    return;
+                setIsAnkiLoading(false);
+            });
         return () => isSubscribed = false;
-    }, [ankiSelectedDecks, days]);
+    }, [isAnkiConnected, ankiSelectedDecks, days]);
 
     const chartData = useMemo(
         () => aggregateData(ankiReviews, bunProReviews, wanikaniReviews, days),
         [ankiReviews, bunProReviews, wanikaniReviews, days]
     );
 
-    console.log(chartData);
 
     const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], 14);
 
@@ -192,12 +228,13 @@ function OverviewUpcomingReviewsChart() {
 
     function ReviewsToolTip({targetItem}) {
         const dp = chartData[targetItem.point];
-
-        // TODO: Add tool tip content
-
         return (
             <>
                 <p>Date: {dp.date.toLocaleDateString()}</p>
+                {dp.ankiCount > 0 ? (<p>Anki: {dp.ankiCount}</p>) : null}
+                {dp.bunProCount > 0 ? (<p>BunPro: {dp.bunProCount}</p>) : null}
+                {dp.wanikaniCount > 0 ? (<p>Wanikani: {dp.wanikaniCount}</p>) : null}
+
             </>
         );
     }
@@ -212,54 +249,75 @@ function OverviewUpcomingReviewsChart() {
                             Upcoming Reviews
                         </Typography>
 
-                        <DaysSelector days={days}
-                                      setDays={setDays}
-                                      options={[
-                                          {value: 7, text: '7'},
-                                          {value: 14, text: '14'},
-                                          {value: 30, text: '30'},
-                                      ]}
-                        />
+                        {!noAppsConnected && !isLoading ? (
+                            <DaysSelector days={days}
+                                          setDays={setDays}
+                                          options={[
+                                              {value: 7, text: '7'},
+                                              {value: 14, text: '14'},
+                                              {value: 30, text: '30'},
+                                          ]}
+                            />
+                        ) : (<div/>)}
+
                     </div>
+                    {isLoading ? (
+                        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90%'}}>
+                            <CircularProgress/>
+                        </div>
+                    ) : noAppsConnected ? (
+                        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px'}}>
+                            No Apps connected
+                        </div>
+                    ) : (
+                        <div style={{flexGrow: '1'}}>
+                            <Chart data={chartData}>
+                                <ValueAxis/>
+                                <ArgumentScale factory={scaleBand}/>
+                                <ArgumentAxis labelComponent={LabelWithDate}/>
 
-                    <div style={{flexGrow: '1'}}>
-                        <Chart data={chartData}>
-                            <ValueAxis/>
-                            <ArgumentScale factory={scaleBand}/>
-                            <ArgumentAxis labelComponent={LabelWithDate}/>
+                                {isAnkiConnected && !!ankiReviews && ankiReviews.length > 0 ? (
+                                    <BarSeries
+                                        name="Anki"
+                                        valueField="ankiCount"
+                                        argumentField="date"
+                                        color={ankiColors.lightGreen}
+                                    />
+                                ) : null}
 
-                            <BarSeries
-                                name="Anki"
-                                valueField="ankiCount"
-                                argumentField="date"
-                            />
+                                {!!bunProReviews && bunProReviews.length > 0 ? (
+                                    <BarSeries
+                                        name="BunPro"
+                                        valueField="bunProCount"
+                                        argumentField="date"
+                                        color={bunProColors.blue}
+                                    />
+                                ) : null}
 
-                            <BarSeries
-                                name="BunPro"
-                                valueField="bunProCount"
-                                argumentField="date"
-                            />
+                                {!!wanikaniReviews && wanikaniReviews.length > 0 ? (
+                                    <BarSeries
+                                        name="Wanikani"
+                                        valueField="wanikaniCount"
+                                        argumentField="date"
+                                        color={wanikaniColors.pink}
+                                    />
+                                ) : null}
 
+                                <Stack
+                                    stacks={[{series: ['Anki', 'BunPro', 'Wanikani']}]}
+                                />
 
-                            <BarSeries
-                                name="Wanikani"
-                                valueField="wanikaniCount"
-                                argumentField="date"
-                            />
+                                <Legend/>
+                                <EventTracker/>
+                                <Tooltip targetItem={targetItem}
+                                         onTargetItemChange={setTargetItem}
+                                         contentComponent={ReviewsToolTip}
+                                />
+                                <Animation/>
+                            </Chart>
+                        </div>
+                    )}
 
-                            <Stack
-                                stacks={[{series: ['Anki', 'BunPro', 'Wanikani']}]}
-                            />
-
-                            <Legend/>
-                            <EventTracker/>
-                            <Tooltip targetItem={targetItem}
-                                     onTargetItemChange={setTargetItem}
-                                     contentComponent={ReviewsToolTip}
-                            />
-                            <Animation/>
-                        </Chart>
-                    </div>
                 </div>
             </CardContent>
         </Card>

@@ -13,6 +13,7 @@ import AnkiApiService from "../../anki/service/AnkiApiService.js";
 import {Add} from "@mui/icons-material";
 import {useGlobalState} from "../../GlobalState.js";
 import {ankiAppName, bunproAppName, wanikaniAppName} from "../../Constants.js";
+import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
 
 const styles = {
     titleText: {
@@ -138,7 +139,6 @@ function AddAppDropdown({showAnki, showBunPro, showWanikani}) {
                     </MenuItem>
                 ) : null}
 
-
                 {showBunPro ? (
                     <MenuItem onClick={() => setSelectedApp(bunproAppName)}>
                         Add BunPro
@@ -158,20 +158,7 @@ function AddAppDropdown({showAnki, showBunPro, showWanikani}) {
 function OverviewWelcomeTile() {
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
     const {apiKey: bunProApiKey} = useBunProApiKey();
-    const [isAnkiConnected, setIsAnkiConnected] = useState(false);
-
-    useEffect(() => {
-        let isSubscribed = true;
-
-        AnkiApiService.connect()
-            .then(isConnected => {
-                if (!isSubscribed)
-                    return;
-                setIsAnkiConnected(isConnected);
-            })
-            .catch(() => console.warn('Could not connect to Anki'));
-        return () => isSubscribed = false;
-    }, []);
+    const isAnkiConnected = useAnkiConnection();
 
     const showAddAppDropdown = !isAnkiConnected || !bunProApiKey || !wanikaniApiKey;
     const showNotSignedIn = !isAnkiConnected && !bunProApiKey && !wanikaniApiKey;

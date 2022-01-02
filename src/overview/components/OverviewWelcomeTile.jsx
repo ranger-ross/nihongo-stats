@@ -168,11 +168,13 @@ function OverviewWelcomeTile() {
                 if (!isSubscribed)
                     return;
                 setIsAnkiConnected(isConnected);
-            });
+            })
+            .catch(() => console.warn('Could not connect to Anki'));
         return () => isSubscribed = false;
     }, []);
 
     const showAddAppDropdown = !isAnkiConnected || !bunProApiKey || !wanikaniApiKey;
+    const showNotSignedIn = !isAnkiConnected && !bunProApiKey && !wanikaniApiKey;
 
     return (
         <Card>
@@ -196,6 +198,12 @@ function OverviewWelcomeTile() {
                 {isAnkiConnected ? (<AnkiSection/>) : null}
                 {bunProApiKey ? (<BunProSection/>) : null}
                 {wanikaniApiKey ? (<WanikaniSection/>) : null}
+
+                {showNotSignedIn ? (
+                    <div>
+                        Connect an app using the + icon above
+                    </div>
+                ) : null}
             </CardContent>
         </Card>
     );

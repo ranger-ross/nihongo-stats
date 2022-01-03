@@ -68,7 +68,7 @@ async function getAnkiReviews(decks, numberOfDays) {
     let data = [];
 
     for (let i = 0; i < listOfListDueCards.length; i++) {
-        const day = i % numberOfDays;
+        const day = Math.floor(i / decks.length);
         const date = truncDate(Date.now() + daysToMillis(day));
 
         data.push(...listOfListDueCards[i]

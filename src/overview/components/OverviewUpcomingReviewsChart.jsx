@@ -68,7 +68,7 @@ async function getAnkiReviews(decks, numberOfDays) {
     let data = [];
 
     for (let i = 0; i < listOfListDueCards.length; i++) {
-        const day = i % numberOfDays;
+        const day = Math.floor(i / decks.length);
         const date = truncDate(Date.now() + daysToMillis(day));
 
         data.push(...listOfListDueCards[i]
@@ -119,7 +119,11 @@ async function fetchWanikaniReviews() {
 }
 
 function OverviewUpcomingReviewsChart() {
-    const [targetItem, setTargetItem] = useState();
+    const ankiSeriesName = 'Anki';
+    const bunProSeriesName = 'BunPro';
+    const wanikaniSeriesName = 'Wanikani';
+
+    const [toolTipTargetItem, setToolTipTargetItem] = useState();
     const [days, setDays] = useState(14);
 
     const isAnkiConnected = useAnkiConnection();
@@ -239,6 +243,23 @@ function OverviewUpcomingReviewsChart() {
         );
     }
 
+    const showAnkiSeries = isAnkiConnected && !!ankiReviews && ankiReviews.length > 0;
+    const showBunProSeries = !!bunProReviews && bunProReviews.length > 0;
+    const showWanikaniSeries = !!wanikaniReviews && wanikaniReviews.length > 0;
+
+    function onTooltipChange(target) {
+        if (target) {
+            if (showWanikaniSeries) {
+                target.series = wanikaniSeriesName;
+            } else if (showBunProSeries) {
+                target.series = bunProSeriesName;
+            } else if (showAnkiSeries) {
+                target.series = ankiSeriesName;
+            }
+        }
+        setToolTipTargetItem(target);
+    }
+
     return (
         <Card style={{height: '100%'}}>
             <CardContent style={{height: '100%'}}>
@@ -276,27 +297,27 @@ function OverviewUpcomingReviewsChart() {
                                 <ArgumentScale factory={scaleBand}/>
                                 <ArgumentAxis labelComponent={LabelWithDate}/>
 
-                                {isAnkiConnected && !!ankiReviews && ankiReviews.length > 0 ? (
+                                {showAnkiSeries ? (
                                     <BarSeries
-                                        name="Anki"
+                                        name={ankiSeriesName}
                                         valueField="ankiCount"
                                         argumentField="date"
                                         color={ankiColors.lightGreen}
                                     />
                                 ) : null}
 
-                                {!!bunProReviews && bunProReviews.length > 0 ? (
+                                {showBunProSeries ? (
                                     <BarSeries
-                                        name="BunPro"
+                                        name={bunProSeriesName}
                                         valueField="bunProCount"
                                         argumentField="date"
                                         color={bunProColors.blue}
                                     />
                                 ) : null}
 
-                                {!!wanikaniReviews && wanikaniReviews.length > 0 ? (
+                                {showWanikaniSeries ? (
                                     <BarSeries
-                                        name="Wanikani"
+                                        name={wanikaniSeriesName}
                                         valueField="wanikaniCount"
                                         argumentField="date"
                                         color={wanikaniColors.pink}
@@ -309,8 +330,8 @@ function OverviewUpcomingReviewsChart() {
 
                                 <Legend/>
                                 <EventTracker/>
-                                <Tooltip targetItem={targetItem}
-                                         onTargetItemChange={setTargetItem}
+                                <Tooltip targetItem={toolTipTargetItem}
+                                         onTargetItemChange={onTooltipChange}
                                          contentComponent={ReviewsToolTip}
                                 />
                                 <Animation/>

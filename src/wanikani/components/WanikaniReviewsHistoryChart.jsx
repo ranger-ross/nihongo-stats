@@ -9,6 +9,7 @@ import {scaleBand} from 'd3-scale';
 import React from 'react';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import DaysSelector from "../../shared/DaysSelector.jsx";
+import {truncDate} from "../../util/DateUtils.js";
 
 function DataPoint(date) {
     let data = {
@@ -38,10 +39,6 @@ function DataPoint(date) {
     };
 
     return data;
-};
-
-function truncDate(date) {
-    return new Date(new Date(date).toDateString());
 }
 
 function createSubjectMap(subjects) {

@@ -1,4 +1,4 @@
-import {ankiColors} from "../Constants.js";
+import {AnkiColors} from "../Constants.js";
 import AnkiApiService from "../anki/service/AnkiApiService.js";
 
 // TODO: Need to find a way to account for Custom Study adding new cards and other funky scenarios
@@ -40,9 +40,9 @@ function AnkiDeckSummaries({deckData}) {
             <p style={{marginTop: '3px', marginBottom: '10px'}}>
                 <strong>
                     <span style={{color: 'lightgray'}}>Reviews: <span
-                        style={{color: ankiColors.lightGreen}}>{data.dueCards}</span></span>
+                        style={{color: AnkiColors.lightGreen}}>{data.dueCards}</span></span>
                     <span style={{marginLeft: '15px', color: 'lightgray'}}>New: <span
-                        style={{color: ankiColors.blue}}>{data.newCards}</span></span>
+                        style={{color: AnkiColors.blue}}>{data.newCards}</span></span>
                 </strong>
             </p>
         </div>

@@ -13,7 +13,7 @@ import EnterBunProApiKeyPage from "./bunpro/EnterBunProApiKeyPage.jsx";
 import BunProHistory from "./bunpro/BunProHistory.jsx";
 import OverviewDashboard from "./overview/OverviewDashboard.jsx";
 import OverviewHistory from "./overview/OverviewHistory.jsx";
-import {ankiAppName, bunproAppName, overviewAppName, wanikaniAppName} from "./Constants.js";
+import {AppNames} from "./Constants.js";
 
 function AppRoute(path, appName) {
     return {
@@ -25,24 +25,24 @@ function AppRoute(path, appName) {
 export const RoutePaths = {
 
     // Overview
-    overviewDashboard: new AppRoute('/dashboard', overviewAppName),
-    overviewHistory: new AppRoute('/history', overviewAppName),
+    overviewDashboard: new AppRoute('/dashboard', AppNames.overview),
+    overviewHistory: new AppRoute('/history', AppNames.overview),
 
     // Wanikani
-    wanikaniDashboard: new AppRoute('/wanikani-dashboard', wanikaniAppName),
-    wanikaniLogin: new AppRoute('/wanikani-login', wanikaniAppName),
-    wanikaniHistory: new AppRoute('/wanikani-history', wanikaniAppName),
-    wanikaniItems: new AppRoute('/wanikani-items', wanikaniAppName),
+    wanikaniDashboard: new AppRoute('/wanikani-dashboard', AppNames.wanikani),
+    wanikaniLogin: new AppRoute('/wanikani-login', AppNames.wanikani),
+    wanikaniHistory: new AppRoute('/wanikani-history', AppNames.wanikani),
+    wanikaniItems: new AppRoute('/wanikani-items', AppNames.wanikani),
 
     // Anki
-    ankiConnect: new AppRoute('/anki-connect', ankiAppName),
-    ankiDashboard: new AppRoute('/anki-dashboard', ankiAppName),
-    ankiHistory: new AppRoute('/anki-history', ankiAppName),
+    ankiConnect: new AppRoute('/anki-connect', AppNames.anki),
+    ankiDashboard: new AppRoute('/anki-dashboard', AppNames.anki),
+    ankiHistory: new AppRoute('/anki-history', AppNames.anki),
 
     // BunPro
-    bunproDashboard: new AppRoute('/bunpro-dashboard', bunproAppName),
-    bunproHistory: new AppRoute('/bunpro-history', bunproAppName),
-    bunproLogin: new AppRoute('/bunpro-login', bunproAppName),
+    bunproDashboard: new AppRoute('/bunpro-dashboard', AppNames.bunpro),
+    bunproHistory: new AppRoute('/bunpro-history', AppNames.bunpro),
+    bunproLogin: new AppRoute('/bunpro-login', AppNames.bunpro),
 
     // About
     aboutPage: new AppRoute('/about'),

@@ -2,7 +2,7 @@ import {Chart, ValueAxis, ArgumentAxis, Tooltip} from '@devexpress/dx-react-char
 import React, {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {LineSeries} from "@devexpress/dx-react-chart";
-import {wanikaniColors} from '../../Constants.js';
+import {WanikaniColors} from '../../Constants.js';
 import {Checkbox, Card, CardContent, Typography, Grid, FormControlLabel} from "@mui/material";
 import {EventTracker} from "@devexpress/dx-react-chart";
 import DaysSelector from "../../shared/DaysSelector.jsx";
@@ -197,21 +197,21 @@ function WanikaniTotalItemsHistoryChart() {
                                 name="radicals"
                                 valueField="radicals"
                                 argumentField="date"
-                                color={wanikaniColors.blue}
+                                color={WanikaniColors.blue}
                             />
 
                             <LineSeries
                                 name="kanji"
                                 valueField="kanji"
                                 argumentField="date"
-                                color={wanikaniColors.pink}
+                                color={WanikaniColors.pink}
                             />
 
                             <LineSeries
                                 name="vocabulary"
                                 valueField="vocabulary"
                                 argumentField="date"
-                                color={wanikaniColors.purple}
+                                color={WanikaniColors.purple}
                             />
 
                             <EventTracker/>

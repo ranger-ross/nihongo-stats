@@ -1,11 +1,11 @@
 import {Tooltip} from "@mui/material";
-import {wanikaniColors} from "../../Constants";
+import {WanikaniColors} from "../../Constants";
 import VisibilitySensor from "react-visibility-sensor"
 import {useState, useMemo} from "react";
 
-const racialColor = wanikaniColors.blue;
-const kanjiColor = wanikaniColors.pink;
-const vocabularyColor = wanikaniColors.purple;
+const racialColor = WanikaniColors.blue;
+const kanjiColor = WanikaniColors.pink;
+const vocabularyColor = WanikaniColors.purple;
 
 const baseTile = {
     width: 'fit-content',

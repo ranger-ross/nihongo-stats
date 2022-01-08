@@ -1,12 +1,12 @@
 import {Button, createTheme, ThemeProvider} from "@mui/material";
-import { wanikaniColors } from "../../Constants";
+import { WanikaniColors } from "../../Constants";
 
 const createPinkButtonTheme = ({ darkMode }) =>
     createTheme({
         palette: {
             type: darkMode ? "dark" : "light",
             primary: {
-                main: wanikaniColors.pink
+                main: WanikaniColors.pink
             }
         },
     });
@@ -27,7 +27,7 @@ const createBlueButtonTheme = ({ darkMode }) =>
         palette: {
             type: darkMode ? "dark" : "light",
             primary: {
-                main: wanikaniColors.blue
+                main: WanikaniColors.blue
             }
         }
     });

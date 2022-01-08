@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import { Card, CardContent, Tooltip, Typography } from "@mui/material";
-import { wanikaniColors } from "../../Constants.js";
+import { WanikaniColors } from "../../Constants.js";
 
 function assignmentsToCounts(assignments) {
     return {
@@ -99,13 +99,13 @@ function WanikaniItemCountsChart() {
                     <CountTile
                         label={'Apprentice'}
                         data={data?.apprentice}
-                        color={wanikaniColors.pink}
+                        color={WanikaniColors.pink}
                     />
 
                     <CountTile
                         label={'Guru'}
                         data={data?.guru}
-                        color={wanikaniColors.purple}
+                        color={WanikaniColors.purple}
                     />
                 </div>
 

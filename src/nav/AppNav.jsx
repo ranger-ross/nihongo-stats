@@ -1,7 +1,6 @@
 import {Box, Grid} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router";
-import {bunproAppName, wanikaniAppName, ankiAppName, overviewAppName} from '../Constants.js';
 import {useGlobalState} from "../GlobalState";
 import {AllRoutes, RoutePaths} from '../Routes';
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
@@ -11,6 +10,7 @@ import AnkiNav from "./navbars/AnkiNav";
 import BunProNav from "./navbars/BunProNav.jsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 import OverviewNav from "./navbars/OverviewNav.jsx";
+import {AppNames} from "../Constants";
 
 const styles = {
     container: {
@@ -24,10 +24,10 @@ const styles = {
 };
 
 const appOptions = [
-    {appName: overviewAppName, displayName: 'Overview'},
-    {appName: ankiAppName, displayName: 'Anki'},
-    {appName: bunproAppName, displayName: 'BunPro'},
-    {appName: wanikaniAppName, displayName: 'Wanikani'},
+    {appName: AppNames.overview, displayName: 'Overview'},
+    {appName: AppNames.anki, displayName: 'Anki'},
+    {appName: AppNames.bunpro, displayName: 'BunPro'},
+    {appName: AppNames.wanikani, displayName: 'Wanikani'},
 ]
 
 function AppNav() {
@@ -55,16 +55,16 @@ function AppNav() {
         }
 
         switch (selectedApp) {
-            case overviewAppName:
+            case AppNames.overview:
                 navigate(RoutePaths.overviewDashboard.path);
                 break;
-            case wanikaniAppName:
+            case AppNames.wanikani:
                 navigate(RoutePaths.wanikaniDashboard.path);
                 break;
-            case ankiAppName:
+            case AppNames.anki:
                 navigate(RoutePaths.ankiDashboard.path);
                 break;
-            case bunproAppName:
+            case AppNames.bunpro:
                 navigate(RoutePaths.bunproDashboard.path);
                 break;
         }
@@ -79,10 +79,10 @@ function AppNav() {
             </Grid>
 
             <Box sx={{flexGrow: 1}}>
-                {selectedApp === overviewAppName ? (<OverviewNav/>) : null}
-                {selectedApp === ankiAppName ? (<AnkiNav/>) : null}
-                {selectedApp === bunproAppName && !!bunProApiKey ? (<BunProNav/>) : null}
-                {selectedApp === wanikaniAppName && !!wanikaniApiKey ? (<WanikaniNav/>) : null}
+                {selectedApp === AppNames.overview ? (<OverviewNav/>) : null}
+                {selectedApp === AppNames.anki ? (<AnkiNav/>) : null}
+                {selectedApp === AppNames.bunpro && !!bunProApiKey ? (<BunProNav/>) : null}
+                {selectedApp === AppNames.wanikani && !!wanikaniApiKey ? (<WanikaniNav/>) : null}
             </Box>
         </Grid>
     );

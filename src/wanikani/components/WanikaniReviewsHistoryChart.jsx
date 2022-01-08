@@ -2,7 +2,7 @@ import {Chart, ValueAxis, ArgumentAxis, Tooltip} from '@devexpress/dx-react-char
 import {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {ArgumentScale, BarSeries, Stack} from "@devexpress/dx-react-chart";
-import {wanikaniColors} from '../../Constants.js';
+import {WanikaniColors} from '../../Constants.js';
 import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/material";
 import {EventTracker} from "@devexpress/dx-react-chart";
 import {scaleBand} from 'd3-scale';
@@ -203,21 +203,21 @@ function WanikaniReviewsHistoryChart() {
                                     name="radicals"
                                     valueField="radicals"
                                     argumentField="date"
-                                    color={wanikaniColors.blue}
+                                    color={WanikaniColors.blue}
                                 />
 
                                 <BarSeries
                                     name="kanji"
                                     valueField="kanji"
                                     argumentField="date"
-                                    color={wanikaniColors.pink}
+                                    color={WanikaniColors.pink}
                                 />
 
                                 <BarSeries
                                     name="vocabulary"
                                     valueField="vocabulary"
                                     argumentField="date"
-                                    color={wanikaniColors.purple}
+                                    color={WanikaniColors.purple}
                                 />
 
                                 <Stack

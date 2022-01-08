@@ -2,7 +2,7 @@ import {ArgumentAxis, Chart, Tooltip, ValueAxis} from '@devexpress/dx-react-char
 import React, {useEffect, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {EventTracker, LineSeries, ValueScale} from "@devexpress/dx-react-chart";
-import {wanikaniColors} from '../../Constants.js';
+import {WanikaniColors} from '../../Constants.js';
 import {Card, CardContent, Grid, Typography} from "@mui/material";
 import _ from 'lodash';
 import {scaleLinear} from 'd3-scale';
@@ -150,7 +150,7 @@ function WanikaniAccuracyHistoryChart() {
                             <LineSeries
                                 valueField="ratio"
                                 argumentField="date"
-                                color={wanikaniColors.blue}
+                                color={WanikaniColors.blue}
                             />
 
                             <EventTracker/>

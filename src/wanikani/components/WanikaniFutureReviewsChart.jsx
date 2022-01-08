@@ -4,7 +4,7 @@ import WanikaniApiService from "../service/WanikaniApiService.js";
 import {Animation, EventTracker, Stack} from "@devexpress/dx-react-chart";
 import {Card, CardContent, Typography, Box} from "@mui/material";
 import {addDays, areDatesSameDay} from '../../util/DateUtils.js';
-import {wanikaniColors} from '../../Constants.js';
+import {WanikaniColors} from '../../Constants.js';
 import DaysSelector from "../../shared/DaysSelector.jsx";
 
 function WanikaniFutureReviewsChart() {
@@ -96,21 +96,21 @@ function WanikaniFutureReviewsChart() {
                                 name="radicals"
                                 valueField="radicals"
                                 argumentField="label"
-                                color={wanikaniColors.blue}
+                                color={WanikaniColors.blue}
                             />
 
                             <BarSeries
                                 name="kanji"
                                 valueField="kanji"
                                 argumentField="label"
-                                color={wanikaniColors.pink}
+                                color={WanikaniColors.pink}
                             />
 
                             <BarSeries
                                 name="vocabulary"
                                 valueField="vocabulary"
                                 argumentField="label"
-                                color={wanikaniColors.purple}
+                                color={WanikaniColors.purple}
                             />
 
                             <Stack

@@ -13,12 +13,9 @@ import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {createAnkiCardsDueQuery} from "../../anki/service/AnkiDataUtil.js";
 import {
-    ankiAppName,
-    ankiColors,
-    bunproAppName,
-    bunProColors,
-    wanikaniAppName,
-    wanikaniColors
+    AnkiColors, AppNames,
+    BunProColors,
+    WanikaniColors
 } from "../../Constants.js";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
@@ -37,11 +34,11 @@ function DataPoint(date) {
     };
 
     dp.addReview = (appName) => {
-        if (appName === ankiAppName)
+        if (appName === AppNames.anki)
             dp.ankiCount += 1;
-        else if (appName === bunproAppName)
+        else if (appName === AppNames.bunpro)
             dp.bunProCount += 1;
-        else if (appName === wanikaniAppName)
+        else if (appName === AppNames.wanikani)
             dp.wanikaniCount += 1;
     };
 
@@ -84,9 +81,9 @@ function addAppNameToReviewData(data, appName) {
 
 function aggregateData(ankiReviews, bunProReviews, wanikaniReviews, days) {
     const reviews = [
-        ...(bunProReviews ? addAppNameToReviewData(bunProReviews, bunproAppName) : []),
-        ...(ankiReviews ? addAppNameToReviewData(ankiReviews, ankiAppName) : []),
-        ...(wanikaniReviews ? addAppNameToReviewData(wanikaniReviews, wanikaniAppName) : []),
+        ...(bunProReviews ? addAppNameToReviewData(bunProReviews, AppNames.bunpro) : []),
+        ...(ankiReviews ? addAppNameToReviewData(ankiReviews, AppNames.anki) : []),
+        ...(wanikaniReviews ? addAppNameToReviewData(wanikaniReviews, AppNames.wanikani) : []),
     ]
         .filter(review => review.date >= truncDate(Date.now()) && review.date < truncDate(Date.now() + daysToMillis(days)))
         .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -302,7 +299,7 @@ function OverviewUpcomingReviewsChart() {
                                         name={ankiSeriesName}
                                         valueField="ankiCount"
                                         argumentField="date"
-                                        color={ankiColors.lightGreen}
+                                        color={AnkiColors.lightGreen}
                                     />
                                 ) : null}
 
@@ -311,7 +308,7 @@ function OverviewUpcomingReviewsChart() {
                                         name={bunProSeriesName}
                                         valueField="bunProCount"
                                         argumentField="date"
-                                        color={bunProColors.blue}
+                                        color={BunProColors.blue}
                                     />
                                 ) : null}
 
@@ -320,7 +317,7 @@ function OverviewUpcomingReviewsChart() {
                                         name={wanikaniSeriesName}
                                         valueField="wanikaniCount"
                                         argumentField="date"
-                                        color={wanikaniColors.pink}
+                                        color={WanikaniColors.pink}
                                     />
                                 ) : null}
 

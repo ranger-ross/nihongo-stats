@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import { wanikaniColors } from '../../Constants.js';
+import { WanikaniColors } from '../../Constants.js';
 import { Card, CardContent, Typography, Grid } from "@mui/material";
 import {sortAndGetMedian} from "../../util/MathUtils.js";
 
@@ -141,9 +141,9 @@ function WanikaniHistorySummaryChart() {
                 <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                     <Grid container style={{ maxWidth: '325px', marginTop: '10px' }}>
                         <TotalLabel label={'Total Reviews'} count={totalsData.total} />
-                        <TotalLabel label={'Radicals Reviews'} count={totalsData.radicals} color={wanikaniColors.blue} />
-                        <TotalLabel label={'Kanji Reviews'} count={totalsData.kanji} color={wanikaniColors.pink} />
-                        <TotalLabel label={'Vocabulary Reviews'} count={totalsData.vocabulary} color={wanikaniColors.purple} />
+                        <TotalLabel label={'Radicals Reviews'} count={totalsData.radicals} color={WanikaniColors.blue} />
+                        <TotalLabel label={'Kanji Reviews'} count={totalsData.kanji} color={WanikaniColors.pink} />
+                        <TotalLabel label={'Vocabulary Reviews'} count={totalsData.vocabulary} color={WanikaniColors.purple} />
                     </Grid>
 
                     <Grid container style={{ maxWidth: '350px', marginTop: '10px' }}>

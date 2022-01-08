@@ -12,11 +12,13 @@ import AnkiHistory from "./anki/AnkiHistory";
 import EnterBunProApiKeyPage from "./bunpro/EnterBunProApiKeyPage.jsx";
 import BunProHistory from "./bunpro/BunProHistory.jsx";
 import OverviewDashboard from "./overview/OverviewDashboard.jsx";
+import OverviewHistory from "./overview/OverviewHistory.jsx";
 
 export const RoutePaths = {
 
     // Overview
     overviewDashboard: '/dashboard',
+    overviewHistory: '/history',
 
     // Wanikani
     wanikaniDashboard: '/wanikani-dashboard',
@@ -43,6 +45,7 @@ export function AppRoutes() {
     return (
         <Routes>
             <Route path={RoutePaths.overviewDashboard} element={<OverviewDashboard/>}/>
+            <Route path={RoutePaths.overviewHistory} element={<OverviewHistory/>}/>
             <Route path={RoutePaths.wanikaniDashboard} element={<WanikaniDashboard/>}/>
             <Route path={RoutePaths.wanikaniLogin} element={<EnterWanikaniApiKeyPage/>}/>
             <Route path={RoutePaths.wanikaniHistory} element={<WanikaniHistory/>}/>

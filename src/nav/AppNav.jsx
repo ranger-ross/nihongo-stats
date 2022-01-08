@@ -1,5 +1,5 @@
 import {Box, Grid} from "@mui/material";
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useNavigate} from "react-router";
 import {bunproAppName, wanikaniAppName, ankiAppName, overviewAppName} from '../Constants.js';
 import {useGlobalState} from "../GlobalState";
@@ -10,6 +10,7 @@ import WanikaniNav from "./navbars/WanikaniNav.jsx";
 import AnkiNav from "./navbars/AnkiNav";
 import BunProNav from "./navbars/BunProNav.jsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
+import OverviewNav from "./navbars/OverviewNav.jsx";
 
 const styles = {
     container: {
@@ -69,6 +70,7 @@ function AppNav() {
             </Grid>
 
             <Box sx={{flexGrow: 1}}>
+                {selectedApp === overviewAppName ? (<OverviewNav/>) : null}
                 {selectedApp === ankiAppName ? (<AnkiNav/>) : null}
                 {selectedApp === bunproAppName && !!bunProApiKey ? (<BunProNav/>) : null}
                 {selectedApp === wanikaniAppName && !!wanikaniApiKey ? (<WanikaniNav/>) : null}

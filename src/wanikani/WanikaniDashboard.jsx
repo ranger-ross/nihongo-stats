@@ -21,7 +21,7 @@ function WanikaniDashboard() {
     const {apiKey} = useWanikaniApiKey();
     return (
         <>
-            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true}/>) : (
+            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin.path} replace={true}/>) : (
                 <WanikaniPreloadedData>
                     <div style={styles.container}>
                         <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'stretch'}}>

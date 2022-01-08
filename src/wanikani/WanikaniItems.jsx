@@ -26,7 +26,7 @@ function WanikaniItems() {
     return (
         <div style={styles.container}>
 
-            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true}/>) : null}
+            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin.path} replace={true}/>) : null}
 
             {getWanikaniLevels().map(level => (
                 <div key={level} style={styles.container}>

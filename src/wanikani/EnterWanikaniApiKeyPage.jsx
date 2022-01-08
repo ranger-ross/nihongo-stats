@@ -30,7 +30,7 @@ function EnterWanikaniApiKeyPage() {
             .then(user => {
                 console.log(user)
                 setApiKey(key);
-                navigate(RoutePaths.wanikaniDashboard);
+                navigate(RoutePaths.wanikaniDashboard.path);
             })
             .catch(console.error);
     };

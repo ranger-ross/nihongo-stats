@@ -33,7 +33,7 @@ function WanikaniHistory() {
 
     return (
         <>
-            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true}/>) : (
+            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin.path} replace={true}/>) : (
                 <WanikaniPreloadedData>
                     <div>
 

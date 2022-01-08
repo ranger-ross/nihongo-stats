@@ -1,9 +1,9 @@
 import {Box, Grid} from "@mui/material";
 import React, {useEffect, useState} from "react";
-import {useNavigate} from "react-router";
+import {useLocation, useNavigate} from "react-router";
 import {bunproAppName, wanikaniAppName, ankiAppName, overviewAppName} from '../Constants.js';
 import {useGlobalState} from "../GlobalState";
-import {RoutePaths} from '../Routes';
+import {AllRoutes, RoutePaths} from '../Routes';
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import AppSelector from "./components/AppSelector";
 import WanikaniNav from "./navbars/WanikaniNav.jsx";
@@ -33,6 +33,7 @@ const appOptions = [
 function AppNav() {
     const {selectedApp, setSelectedApp} = useGlobalState();
     const navigate = useNavigate();
+    const location = useLocation();
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
     const {apiKey: bunProApiKey} = useBunProApiKey();
     const [isFirstLoad, setIsFirstLoad] = useState(true);
@@ -41,22 +42,30 @@ function AppNav() {
         // Don't navigate to dashboard on page load.
         // (If user refreshes page on history they should not be rerouted)
         if (isFirstLoad) {
+
+            // If path changes, we need to update the SelectedApp to match
+            const route = AllRoutes.find(route => route.path === location.pathname)
+            if (route.appName !== selectedApp) {
+                setSelectedApp(route.appName);
+                return;
+            }
+
             setIsFirstLoad(false);
             return;
         }
 
         switch (selectedApp) {
             case overviewAppName:
-                navigate(RoutePaths.overviewDashboard);
+                navigate(RoutePaths.overviewDashboard.path);
                 break;
             case wanikaniAppName:
-                navigate(RoutePaths.wanikaniDashboard);
+                navigate(RoutePaths.wanikaniDashboard.path);
                 break;
             case ankiAppName:
-                navigate(RoutePaths.ankiDashboard);
+                navigate(RoutePaths.ankiDashboard.path);
                 break;
             case bunproAppName:
-                navigate(RoutePaths.bunproDashboard);
+                navigate(RoutePaths.bunproDashboard.path);
                 break;
         }
     }, [selectedApp])

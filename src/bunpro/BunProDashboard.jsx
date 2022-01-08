@@ -46,7 +46,7 @@ function BunProDashboard() {
     return (
 
         <div style={styles.container}>
-            {!apiKey ? (<Navigate to={RoutePaths.bunproLogin} replace={true}/>) : (
+            {!apiKey ? (<Navigate to={RoutePaths.bunproLogin.path} replace={true}/>) : (
                 <BunProPreloadedData>
                     <div style={styles.container}>
 

@@ -1,9 +1,9 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
-import {Navigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import WanikaniLevelItemsChart from "./components/WanikaniLevelItemsChart.jsx";
 import ReactVisibilitySensor from "react-visibility-sensor";
 import {useState} from "react";
+import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
 
 const styles = {
     container: {
@@ -24,23 +24,23 @@ function WanikaniItems() {
     }
 
     return (
-        <div style={styles.container}>
+        <RequireOrRedirect resource={apiKey}
+                           redirectPath={RoutePaths.wanikaniLogin.path}
+        >
+            <div style={styles.container}>
+                {getWanikaniLevels().map(level => (
+                    <div key={level} style={styles.container}>
+                        <ReactVisibilitySensor partialVisibility={true}
+                                               onChange={(isVisible) => isVisible ? setLevelAsLoaded(level) : null}>
+                            {loadedLevels[level] ? (
+                                <WanikaniLevelItemsChart level={level} showLevel={true}/>
 
-            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin.path} replace={true}/>) : null}
-
-            {getWanikaniLevels().map(level => (
-                <div key={level} style={styles.container}>
-                    <ReactVisibilitySensor partialVisibility={true}
-                                           onChange={(isVisible) => isVisible ? setLevelAsLoaded(level) : null}>
-                        {loadedLevels[level] ? (
-                            <WanikaniLevelItemsChart level={level} showLevel={true}/>
-
-                        ) : <div style={{height: '300px'}}></div>}
-                    </ReactVisibilitySensor>
-                </div>
-            ))}
-
-        </div>
+                            ) : <div style={{height: '300px'}}></div>}
+                        </ReactVisibilitySensor>
+                    </div>
+                ))}
+            </div>
+        </RequireOrRedirect>
     );
 }
 

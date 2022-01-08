@@ -1,5 +1,4 @@
 import {useEffect} from "react";
-import {Navigate} from "react-router";
 import {RoutePaths} from "../Routes.jsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 import {BunProWelcomeTile} from "./components/BunProWelcomeTile.jsx";
@@ -7,6 +6,7 @@ import BunProApiService from "./service/BunProApiService.js";
 import BunProPreloadedData from "./components/BunProPreloadedData.jsx";
 import {BunProJLPTTile} from "./components/BunProJLPTTile";
 import BunProUpcomingReviewsChart from "./components/BunProUpcomingReviewsChart.jsx";
+import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
 
 const styles = {
     container: {
@@ -44,9 +44,10 @@ function BunProDashboard() {
     }, []);
 
     return (
-
-        <div style={styles.container}>
-            {!apiKey ? (<Navigate to={RoutePaths.bunproLogin.path} replace={true}/>) : (
+        <RequireOrRedirect resource={apiKey}
+                           redirectPath={RoutePaths.bunproLogin.path}
+        >
+            <div style={styles.container}>
                 <BunProPreloadedData>
                     <div style={styles.container}>
 
@@ -63,13 +64,11 @@ function BunProDashboard() {
                             </div>
 
                         </div>
-
-
                     </div>
                 </BunProPreloadedData>
-            )}
+            </div>
+        </RequireOrRedirect>
 
-        </div>
     );
 }
 

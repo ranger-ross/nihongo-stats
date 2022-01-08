@@ -1,5 +1,4 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
-import {Navigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import WanikaniLevelSummaryChart from "./components/WanikaniLevelSummaryChart.jsx";
 import WanikaniFutureReviewsChart from "./components/WanikaniFutureReviewsChart.jsx";
@@ -7,6 +6,7 @@ import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
 import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart.jsx";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import WanikaniActiveItemsChart from "./components/WanikaniActiveItemChart.jsx";
+import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
 
 const styles = {
     container: {
@@ -20,33 +20,33 @@ const styles = {
 function WanikaniDashboard() {
     const {apiKey} = useWanikaniApiKey();
     return (
-        <>
-            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin.path} replace={true}/>) : (
-                <WanikaniPreloadedData>
-                    <div style={styles.container}>
-                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'stretch'}}>
+        <RequireOrRedirect resource={apiKey}
+                           redirectPath={RoutePaths.wanikaniLogin.path}
+        >
+            <WanikaniPreloadedData>
+                <div style={styles.container}>
+                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'stretch'}}>
 
-                            <div style={{display: 'flex', gap: '10px', flexDirection: 'column', flexGrow: '1'}}>
-                                <WanikaniWelcomeTile/>
+                        <div style={{display: 'flex', gap: '10px', flexDirection: 'column', flexGrow: '1'}}>
+                            <WanikaniWelcomeTile/>
 
-                                <WanikaniLevelSummaryChart/>
+                            <WanikaniLevelSummaryChart/>
 
-                                <WanikaniItemCountsChart/>
-                            </div>
-
-                            <div style={{flexGrow: '25'}}>
-                                <WanikaniFutureReviewsChart/>
-                            </div>
-
+                            <WanikaniItemCountsChart/>
                         </div>
-                    </div>
 
-                    <div style={styles.container}>
-                        <WanikaniActiveItemsChart/>
+                        <div style={{flexGrow: '25'}}>
+                            <WanikaniFutureReviewsChart/>
+                        </div>
+
                     </div>
-                </WanikaniPreloadedData>
-            )}
-        </>
+                </div>
+
+                <div style={styles.container}>
+                    <WanikaniActiveItemsChart/>
+                </div>
+            </WanikaniPreloadedData>
+        </RequireOrRedirect>
     );
 }
 

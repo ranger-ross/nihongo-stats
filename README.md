@@ -13,14 +13,14 @@ When opening an issue please do you best to include as much information as possi
 
 If you are reporting a bug please include a description of the bug and a screenshot of the issue if possible.
 
-In the GitHub issues tag the issue as a `bug`.
+Be sure to tag the issue with `bug`.
 
 ### Feature Requests
 
 If you are requesting a new feature, please include why it is important and use cases. Also feel free to include ideas
 and possible ways to implement the feature.
 
-In the GitHub issues tag the issue as a `enhancement`.
+Be sure to tag the issue with `enhancement`.
 
 ## Contributing
 

@@ -10,6 +10,7 @@ import React from 'react';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import {truncDate} from "../../util/DateUtils.js";
+import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 
 function DataPoint(date) {
     let data = {
@@ -39,16 +40,6 @@ function DataPoint(date) {
     };
 
     return data;
-}
-
-function createSubjectMap(subjects) {
-    let map = {};
-
-    for (const subject of subjects) {
-        map[subject.id] = subject;
-    }
-
-    return map;
 }
 
 async function fetchData() {

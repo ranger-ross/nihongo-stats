@@ -1,19 +1,25 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import { WanikaniColors } from '../../Constants.js';
-import { Card, CardContent, Typography, Grid } from "@mui/material";
+import {WanikaniColors} from '../../Constants.js';
+import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/material";
 import {sortAndGetMedian} from "../../util/MathUtils.js";
+import {createSubjectMap} from "../service/WanikaniDataUtil.js";
+import {millisToDays, millisToHours} from "../../util/DateUtils.js";
 
+const styles = {
+    loadingContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        margin: '20px',
+        minHeight: '100px'
+    },
+    container: {
+        display: 'flex',
+        flexWrap: 'wrap'
+    },
+};
 
-function createSubjectMap(subjects) {
-    let map = {};
-    for (const subject of subjects) {
-        map[subject.id] = subject;
-    }
-    return map;
-}
-
-async function fetchData() {
+async function fetchTotalsData() {
     const reviews = await WanikaniApiService.getReviews();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
     let data = [];
@@ -23,7 +29,40 @@ async function fetchData() {
             subject: subjects[review.data['subject_id']]
         });
     }
-    return data;
+    return {
+        total: data.length,
+        radicals: data.filter(r => r.subject?.object == 'radical').length,
+        kanji: data.filter(r => r.subject?.object == 'kanji').length,
+        vocabulary: data.filter(r => r.subject?.object == 'vocabulary').length,
+    };
+}
+
+async function fetchLevelData() {
+    const [user, levelProgressData] = await Promise.all([
+        WanikaniApiService.getUser(),
+        WanikaniApiService.getLevelProgress()
+    ]);
+
+    const timeSinceStart = Date.now() - new Date(user.data['started_at']).getTime();
+
+    let levelTimes = [];
+    for (const level of levelProgressData.data) {
+        const start = new Date(level.data['unlocked_at']).getTime();
+        const end = !!level.data['passed_at'] ? new Date(level.data['passed_at']).getTime() : null;
+        if (!end) {
+            continue;
+        }
+        levelTimes.push(end - start);
+    }
+
+    const averageInMillis = levelTimes.reduce((sum, value) => sum + value) / levelTimes.length;
+    const medianInMillis = sortAndGetMedian(levelTimes);
+
+    return {
+        average: averageInMillis,
+        median: medianInMillis,
+        timeSinceStart
+    };
 }
 
 function numberWithCommas(x) {
@@ -32,12 +71,12 @@ function numberWithCommas(x) {
     return parseFloat(x).toLocaleString();
 }
 
-function TotalLabel({ label, count, color }) {
+function TotalLabel({label, count, color}) {
     return (
         <>
             <Grid item xs={6}>{label}: </Grid>
             <Grid item xs={6}>
-                <strong style={{ color: color, textShadow: '1px 1px 3px #000000aa' }}>
+                <strong style={{color: color, textShadow: '1px 1px 3px #000000aa'}}>
                     {numberWithCommas(count)}
                 </strong>
             </Grid>
@@ -45,14 +84,14 @@ function TotalLabel({ label, count, color }) {
     );
 }
 
-function DaysAndHoursLabel({ label, milliseconds }) {
-    const days = millisecondsToDays(milliseconds);
-    const hours = millisecondsToHours(milliseconds - (days * 1000 * 3600 * 24));
+function DaysAndHoursLabel({label, milliseconds}) {
+    const days = millisToDays(milliseconds);
+    const hours = millisToHours(milliseconds - (days * 1000 * 3600 * 24));
     return (
         <>
             <Grid item xs={6}>{label}: </Grid>
             <Grid item xs={6}>
-                <strong style={{ textShadow: '1px 1px 3px #000000aa' }}>
+                <strong style={{textShadow: '1px 1px 3px #000000aa'}}>
                     {days} Days {hours} Hours
                 </strong>
             </Grid>
@@ -60,99 +99,73 @@ function DaysAndHoursLabel({ label, milliseconds }) {
     );
 }
 
-function millisecondsToDays(ms) {
-    return Math.floor(ms / (1000 * 60 * 60 * 24));
-}
-
-function millisecondsToHours(ms) {
-    return Math.floor(ms / (1000 * 60 * 60));
-}
 
 function WanikaniHistorySummaryChart() {
-    const [data, setData] = useState([]);
-    const [totalsData, setTotalsData] = useState({ total: 0, radicals: 0, kanji: 0, vocabulary: 0 });
-    const [levelData, setLevelData] = useState({ timeSinceStart: '', average: '', median: '' });
+    const [totalsData, setTotalsData] = useState();
+    const [levelData, setLevelData] = useState();
+
+    const isLoading = !totalsData || !levelData;
 
     useEffect(() => {
         let isSubscribed = true;
-        fetchData()
+        fetchTotalsData()
             .then(data => {
                 if (!isSubscribed)
                     return;
-
-                setTotalsData({
-                    total: data.length,
-                    radicals: data.filter(r => r.subject?.object == 'radical').length,
-                    kanji: data.filter(r => r.subject?.object == 'kanji').length,
-                    vocabulary: data.filter(r => r.subject?.object == 'vocabulary').length,
-                });
-
-                setData(data);
+                setTotalsData(data);
             })
             .catch(console.error);
 
-        WanikaniApiService.getUser()
-            .then(user => {
+        fetchLevelData()
+            .then(data => {
                 if (!isSubscribed)
                     return;
-                const timeSinceStart = Date.now() - new Date(user.data['started_at']).getTime();
-                setLevelData(lvlData => ({
-                    ...lvlData,
-                    timeSinceStart
-                }));
-            });
-
-        WanikaniApiService.getLevelProgress()
-            .then(levelProgressData => {
-                if (!isSubscribed)
-                    return;
-
-                let levelTimes = [];
-                for (const level of levelProgressData.data) {
-                    const start = new Date(level.data['unlocked_at']).getTime();
-                    const end = !!level.data['passed_at'] ? new Date(level.data['passed_at']).getTime() : null;
-                    if (!end) {
-                        continue;
-                    }
-                    levelTimes.push(end - start);
-                }
-
-                const averageInMillis = levelTimes.reduce((sum, value) => sum + value) / levelTimes.length;
-                const medianInMillis = sortAndGetMedian(levelTimes);
-
-                setLevelData(lvlData => ({
-                    ...lvlData,
-                    average: averageInMillis,
-                    median: medianInMillis
-                }));
-
+                setLevelData(data);
             });
 
         return () => isSubscribed = false;
     }, []);
 
     return (
-        <Card style={{ height: '100%' }}>
-            <CardContent style={{ height: '100%' }}>
+        <Card style={{height: '100%'}}>
+            <CardContent style={{height: '100%'}}>
                 <Typography variant={'h5'} align={'center'}>
                     History Summary
                 </Typography>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                    <Grid container style={{ maxWidth: '325px', marginTop: '10px' }}>
-                        <TotalLabel label={'Total Reviews'} count={totalsData.total} />
-                        <TotalLabel label={'Radicals Reviews'} count={totalsData.radicals} color={WanikaniColors.blue} />
-                        <TotalLabel label={'Kanji Reviews'} count={totalsData.kanji} color={WanikaniColors.pink} />
-                        <TotalLabel label={'Vocabulary Reviews'} count={totalsData.vocabulary} color={WanikaniColors.purple} />
-                    </Grid>
+                {isLoading ? (
+                    <div style={styles.loadingContainer}>
+                        <CircularProgress/>
+                    </div>
+                ) : (
+                    <div style={styles.container}>
+                        <Grid container style={{maxWidth: '325px', marginTop: '10px'}}>
+                            <TotalLabel label={'Total Reviews'}
+                                        count={totalsData.total}
+                            />
+                            <TotalLabel label={'Radicals Reviews'}
+                                        count={totalsData.radicals}
+                                        color={WanikaniColors.blue}
+                            />
+                            <TotalLabel label={'Kanji Reviews'}
+                                        count={totalsData.kanji}
+                                        color={WanikaniColors.pink}
+                            />
+                            <TotalLabel label={'Vocabulary Reviews'}
+                                        count={totalsData.vocabulary}
+                                        color={WanikaniColors.purple}
+                            />
+                        </Grid>
 
-                    <Grid container style={{ maxWidth: '350px', marginTop: '10px' }}>
-                        <DaysAndHoursLabel label={'Time since start'} milliseconds={levelData.timeSinceStart} />
-                        <DaysAndHoursLabel label={'Average Time per level'} milliseconds={levelData.average} />
-                        <DaysAndHoursLabel label={'Median Time per level'} milliseconds={levelData.median} />
-                    </Grid>
+                        <Grid container style={{maxWidth: '350px', marginTop: '10px'}}>
+                            <DaysAndHoursLabel label={'Time since start'} milliseconds={levelData.timeSinceStart}/>
+                            <DaysAndHoursLabel label={'Average Time per level'} milliseconds={levelData.average}/>
+                            <DaysAndHoursLabel label={'Median Time per level'} milliseconds={levelData.median}/>
+                        </Grid>
+                    </div>
+                )}
 
-                </div>
+
             </CardContent>
         </Card>
     );

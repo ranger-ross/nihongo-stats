@@ -7,6 +7,7 @@ import {Card, CardContent, Grid, Typography} from "@mui/material";
 import _ from 'lodash';
 import {scaleLinear} from 'd3-scale';
 import DaysSelector from "../../shared/DaysSelector.jsx";
+import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 
 const scale = () => scaleLinear();
 const modifyDomain = () => [0, 100];
@@ -34,16 +35,6 @@ const PercentageLabel = (props) => {
 
 function truncDate(date) {
     return new Date(new Date(date).toDateString());
-}
-
-function createSubjectMap(subjects) {
-    let map = {};
-
-    for (const subject of subjects) {
-        map[subject.id] = subject;
-    }
-
-    return map;
 }
 
 async function fetchData() {

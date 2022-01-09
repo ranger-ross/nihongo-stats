@@ -1,6 +1,6 @@
 import WanikaniLevelItemsChart from "./WanikaniLevelItemsChart.jsx";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 
 function WanikaniActiveItemsChart() {
     const [user, setUser] = useState();
@@ -17,7 +17,13 @@ function WanikaniActiveItemsChart() {
     }, [])
     return (
         <>
-            {!!user ? <WanikaniLevelItemsChart level={user.data.level} showPreviousLevelSelector={true} /> : null}
+            {!!user ? (
+                <WanikaniLevelItemsChart
+                    level={user.data.level}
+                    showPreviousLevelSelector={true}
+                    showRatios={true}
+                />
+            ) : null}
         </>
     )
 }

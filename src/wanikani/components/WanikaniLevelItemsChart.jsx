@@ -38,6 +38,10 @@ async function fetchData(level) {
         .filter(subject => subject.data.level === level);
 
     let assignments = (await WanikaniApiService.getAssignmentsForLevel(level)).data;
+    const radicalsStarted = assignments.filter(s => s.data['subject_type'] === 'radical' && !!s.data['started_at']).length;
+    const kanjiStarted = assignments.filter(s => s.data['subject_type'] === 'kanji' && !!s.data['started_at']).length;
+    const vocabularyStarted = assignments.filter(s => s.data['subject_type'] === 'vocabulary' && !!s.data['started_at']).length;
+
     assignments = createAssignmentMap(assignments);
 
     const radicals = subjects
@@ -53,7 +57,10 @@ async function fetchData(level) {
     const data = {
         radicals,
         kanji,
-        vocabulary
+        vocabulary,
+        radicalsStarted,
+        kanjiStarted,
+        vocabularyStarted,
     };
     memCache[level] = data;
     return data;
@@ -76,13 +83,35 @@ function PreviousLevelSelector({selected, setSelected}) {
     );
 }
 
-function WanikaniLevelItemsChart({level, showLevel, showPreviousLevelSelector}) {
+function RatioLabel({started, total}) {
+    const percent = (started / total) * 100;
+    const percentAsString = Number(percent.toFixed(1)).toString();
+    return (
+        <Typography variant={'body1'}
+                    color={'textPrimary'}
+                    fontSize={14}
+                    style={{
+                        color: 'lightgray',
+                        display: 'inline-block',
+                    }}
+        >
+            {started} / {total} ({percentAsString}%)
+        </Typography>
+    );
+}
+
+const defaultState = {
+    radicals: [],
+    kanji: [],
+    vocabulary: [],
+    radicalsStarted: 0,
+    kanjiStarted: 0,
+    vocabularyStarted: 0,
+};
+
+function WanikaniLevelItemsChart({level, showLevel, showPreviousLevelSelector, showRatios}) {
     const [isPreviousLevel, setIsPreviousLevel] = useState(false);
-    const [data, setData] = useState({
-        radicals: [],
-        kanji: [],
-        vocabulary: [],
-    });
+    const [data, setData] = useState(defaultState);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -113,7 +142,12 @@ function WanikaniLevelItemsChart({level, showLevel, showPreviousLevelSelector}) 
                                 color={'textPrimary'}
                                 style={{paddingBottom: '10px'}}
                     >
-                        Radicals
+                        Radicals {showRatios ? (
+                        <RatioLabel
+                            started={data.radicalsStarted}
+                            total={data.radicals.length}
+                        />
+                    ) : null}
                     </Typography>
                     {showPreviousLevelSelector ? (
                         <>
@@ -142,7 +176,12 @@ function WanikaniLevelItemsChart({level, showLevel, showPreviousLevelSelector}) 
                             color={'textPrimary'}
                             style={{paddingBottom: '10px', paddingTop: '15px'}}
                 >
-                    Kanji
+                    Kanji {showRatios ? (
+                    <RatioLabel
+                        started={data.kanjiStarted}
+                        total={data.kanji.length}
+                    />
+                ) : null}
                 </Typography>
                 <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     {data.kanji.map(subject => (
@@ -164,7 +203,12 @@ function WanikaniLevelItemsChart({level, showLevel, showPreviousLevelSelector}) 
                             color={'textPrimary'}
                             style={{paddingBottom: '10px', paddingTop: '15px'}}
                 >
-                    Vocabulary
+                    Vocabulary {showRatios ? (
+                    <RatioLabel
+                        started={data.vocabularyStarted}
+                        total={data.vocabulary.length}
+                    />
+                ) : null}
                 </Typography>
                 <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     {data.vocabulary.map(subject => (

@@ -1,7 +1,6 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
-import {Navigate} from "react-router";
 import {RoutePaths} from "../Routes";
-import WanikaniLevelProgessChart from "./components/WanikaniLevelProgressChart.jsx";
+import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart.jsx";
 import {Card, CircularProgress, Typography} from "@mui/material";
 import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart.jsx";
 import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart.jsx";
@@ -10,6 +9,7 @@ import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChar
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import ReactVisibilitySensor from "react-visibility-sensor";
 import {useState} from "react";
+import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
 
 
 function LoadableChart({placeholderTitle, children}) {
@@ -32,35 +32,35 @@ function WanikaniHistory() {
     const {apiKey} = useWanikaniApiKey();
 
     return (
-        <>
-            {!apiKey ? (<Navigate to={RoutePaths.wanikaniLogin} replace={true}/>) : (
-                <WanikaniPreloadedData>
-                    <div>
+        <RequireOrRedirect resource={apiKey}
+                           redirectPath={RoutePaths.wanikaniLogin.path}
+        >
+            <WanikaniPreloadedData>
+                <div>
 
-                        <Card variant={'outlined'} style={{margin: '15px'}}>
-                            <WanikaniHistorySummaryChart/>
-                        </Card>
+                    <Card variant={'outlined'} style={{margin: '15px'}}>
+                        <WanikaniHistorySummaryChart/>
+                    </Card>
 
-                        <Card variant={'outlined'} style={{margin: '15px'}}>
-                            <WanikaniReviewsHistoryChart/>
-                        </Card>
+                    <Card variant={'outlined'} style={{margin: '15px'}}>
+                        <WanikaniReviewsHistoryChart/>
+                    </Card>
 
-                        <LoadableChart placeholderTitle="Total Items">
-                            <WanikaniTotalItemsHistoryChart/>
-                        </LoadableChart>
+                    <LoadableChart placeholderTitle="Total Items">
+                        <WanikaniTotalItemsHistoryChart/>
+                    </LoadableChart>
 
-                        <LoadableChart placeholderTitle="Level Progress">
-                            <WanikaniLevelProgessChart/>
-                        </LoadableChart>
+                    <LoadableChart placeholderTitle="Level Progress">
+                        <WanikaniLevelProgressChart/>
+                    </LoadableChart>
 
-                        <LoadableChart placeholderTitle="Review Accuracy">
-                            <WanikaniAccuracyHistoryChart/>
-                        </LoadableChart>
+                    <LoadableChart placeholderTitle="Review Accuracy">
+                        <WanikaniAccuracyHistoryChart/>
+                    </LoadableChart>
 
-                    </div>
-                </WanikaniPreloadedData>
-            )}
-        </>
+                </div>
+            </WanikaniPreloadedData>
+        </RequireOrRedirect>
     );
 }
 

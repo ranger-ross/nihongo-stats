@@ -1,9 +1,8 @@
 import {Box, Grid} from "@mui/material";
 import React, {useEffect, useState} from "react";
-import {useNavigate} from "react-router";
-import {bunproAppName, wanikaniAppName, ankiAppName, overviewAppName} from '../Constants.js';
+import {useLocation, useNavigate} from "react-router";
 import {useGlobalState} from "../GlobalState";
-import {RoutePaths} from '../Routes';
+import {AllRoutes, RoutePaths} from '../Routes';
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import AppSelector from "./components/AppSelector";
 import WanikaniNav from "./navbars/WanikaniNav.jsx";
@@ -11,6 +10,7 @@ import AnkiNav from "./navbars/AnkiNav";
 import BunProNav from "./navbars/BunProNav.jsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 import OverviewNav from "./navbars/OverviewNav.jsx";
+import {AppNames} from "../Constants";
 
 const styles = {
     container: {
@@ -24,15 +24,16 @@ const styles = {
 };
 
 const appOptions = [
-    {appName: overviewAppName, displayName: 'Overview'},
-    {appName: ankiAppName, displayName: 'Anki'},
-    {appName: bunproAppName, displayName: 'BunPro'},
-    {appName: wanikaniAppName, displayName: 'Wanikani'},
+    {appName: AppNames.overview, displayName: 'Overview'},
+    {appName: AppNames.anki, displayName: 'Anki'},
+    {appName: AppNames.bunpro, displayName: 'BunPro'},
+    {appName: AppNames.wanikani, displayName: 'Wanikani'},
 ]
 
 function AppNav() {
     const {selectedApp, setSelectedApp} = useGlobalState();
     const navigate = useNavigate();
+    const location = useLocation();
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
     const {apiKey: bunProApiKey} = useBunProApiKey();
     const [isFirstLoad, setIsFirstLoad] = useState(true);
@@ -41,22 +42,30 @@ function AppNav() {
         // Don't navigate to dashboard on page load.
         // (If user refreshes page on history they should not be rerouted)
         if (isFirstLoad) {
+
+            // If path changes, we need to update the SelectedApp to match
+            const route = AllRoutes.find(route => route.path === location.pathname)
+            if (route.appName !== selectedApp) {
+                setSelectedApp(route.appName);
+                return;
+            }
+
             setIsFirstLoad(false);
             return;
         }
 
         switch (selectedApp) {
-            case overviewAppName:
-                navigate(RoutePaths.overviewDashboard);
+            case AppNames.overview:
+                navigate(RoutePaths.overviewDashboard.path);
                 break;
-            case wanikaniAppName:
-                navigate(RoutePaths.wanikaniDashboard);
+            case AppNames.wanikani:
+                navigate(RoutePaths.wanikaniDashboard.path);
                 break;
-            case ankiAppName:
-                navigate(RoutePaths.ankiDashboard);
+            case AppNames.anki:
+                navigate(RoutePaths.ankiDashboard.path);
                 break;
-            case bunproAppName:
-                navigate(RoutePaths.bunproDashboard);
+            case AppNames.bunpro:
+                navigate(RoutePaths.bunproDashboard.path);
                 break;
         }
     }, [selectedApp])
@@ -70,10 +79,10 @@ function AppNav() {
             </Grid>
 
             <Box sx={{flexGrow: 1}}>
-                {selectedApp === overviewAppName ? (<OverviewNav/>) : null}
-                {selectedApp === ankiAppName ? (<AnkiNav/>) : null}
-                {selectedApp === bunproAppName && !!bunProApiKey ? (<BunProNav/>) : null}
-                {selectedApp === wanikaniAppName && !!wanikaniApiKey ? (<WanikaniNav/>) : null}
+                {selectedApp === AppNames.overview ? (<OverviewNav/>) : null}
+                {selectedApp === AppNames.anki ? (<AnkiNav/>) : null}
+                {selectedApp === AppNames.bunpro && !!bunProApiKey ? (<BunProNav/>) : null}
+                {selectedApp === AppNames.wanikani && !!wanikaniApiKey ? (<WanikaniNav/>) : null}
             </Box>
         </Grid>
     );

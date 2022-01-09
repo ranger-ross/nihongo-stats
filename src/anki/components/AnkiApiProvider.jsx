@@ -11,7 +11,7 @@ function AnkiApiProvider({children}) {
     useEffect(() => {
         AnkiApiService.connect()
             .then(() => setIsConnected(true))
-            .catch(() => navigate(RoutePaths.ankiConnect, {replace: true}));
+            .catch(() => navigate(RoutePaths.ankiConnect.path, {replace: true}));
     }, []);
 
     return (

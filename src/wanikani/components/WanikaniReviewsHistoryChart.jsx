@@ -2,7 +2,7 @@ import {Chart, ValueAxis, ArgumentAxis, Tooltip} from '@devexpress/dx-react-char
 import {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {ArgumentScale, BarSeries, Stack} from "@devexpress/dx-react-chart";
-import {wanikaniColors} from '../../Constants.js';
+import {WanikaniColors} from '../../Constants.js';
 import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/material";
 import {EventTracker} from "@devexpress/dx-react-chart";
 import {scaleBand} from 'd3-scale';
@@ -10,6 +10,7 @@ import React from 'react';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import {truncDate} from "../../util/DateUtils.js";
+import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 
 function DataPoint(date) {
     let data = {
@@ -39,16 +40,6 @@ function DataPoint(date) {
     };
 
     return data;
-}
-
-function createSubjectMap(subjects) {
-    let map = {};
-
-    for (const subject of subjects) {
-        map[subject.id] = subject;
-    }
-
-    return map;
 }
 
 async function fetchData() {
@@ -96,6 +87,7 @@ function WanikaniReviewsHistoryChart() {
     const [daysToLookBack, setDaysToLookBack] = useState(30);
     const [totalDays, setTotalDays] = useState(5000);
     const [isLoading, setIsLoading] = useState(false);
+    const [tooltipTargetItem, setTooltipTargetItem] = useState();
 
     useEffect(() => {
         setIsLoading(true);
@@ -203,21 +195,21 @@ function WanikaniReviewsHistoryChart() {
                                     name="radicals"
                                     valueField="radicals"
                                     argumentField="date"
-                                    color={wanikaniColors.blue}
+                                    color={WanikaniColors.blue}
                                 />
 
                                 <BarSeries
                                     name="kanji"
                                     valueField="kanji"
                                     argumentField="date"
-                                    color={wanikaniColors.pink}
+                                    color={WanikaniColors.pink}
                                 />
 
                                 <BarSeries
                                     name="vocabulary"
                                     valueField="vocabulary"
                                     argumentField="date"
-                                    color={wanikaniColors.purple}
+                                    color={WanikaniColors.purple}
                                 />
 
                                 <Stack
@@ -225,7 +217,11 @@ function WanikaniReviewsHistoryChart() {
                                 />
 
                                 <EventTracker/>
-                                <Tooltip contentComponent={ReviewsToolTip}/>
+                                <Tooltip
+                                    targetItem={tooltipTargetItem ? {...tooltipTargetItem, series: 'vocabulary'} : null}
+                                    onTargetItemChange={setTooltipTargetItem}
+                                    contentComponent={ReviewsToolTip}
+                                />
                             </Chart>
                         </div>
                     ) : null}

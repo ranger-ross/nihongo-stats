@@ -29,7 +29,7 @@ function EnterBunProApiKeyPage() {
             .then(user => {
                 console.log('Logged in to BunPro', user);
                 setApiKey(key);
-                navigate(RoutePaths.bunproDashboard);
+                navigate(RoutePaths.bunproDashboard.path);
             })
             .catch(console.error);
     };

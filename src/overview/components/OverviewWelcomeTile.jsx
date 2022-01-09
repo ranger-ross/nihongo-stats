@@ -9,11 +9,10 @@ import BunProPendingReviews from "../../shared/BunProPendingReviews.jsx";
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
-import AnkiApiService from "../../anki/service/AnkiApiService.js";
 import {Add} from "@mui/icons-material";
 import {useGlobalState} from "../../GlobalState.js";
-import {ankiAppName, bunproAppName, wanikaniAppName} from "../../Constants.js";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
+import {AppNames} from "../../Constants.js";
 
 const styles = {
     titleText: {
@@ -134,19 +133,19 @@ function AddAppDropdown({showAnki, showBunPro, showWanikani}) {
                 onClose={() => setAnchorEl(null)}
             >
                 {showAnki ? (
-                    <MenuItem onClick={() => setSelectedApp(ankiAppName)}>
+                    <MenuItem onClick={() => setSelectedApp(AppNames.anki)}>
                         Add Anki
                     </MenuItem>
                 ) : null}
 
                 {showBunPro ? (
-                    <MenuItem onClick={() => setSelectedApp(bunproAppName)}>
+                    <MenuItem onClick={() => setSelectedApp(AppNames.bunpro)}>
                         Add BunPro
                     </MenuItem>
                 ) : null}
 
                 {showWanikani ? (
-                    <MenuItem onClick={() => setSelectedApp(wanikaniAppName)}>
+                    <MenuItem onClick={() => setSelectedApp(AppNames.wanikani)}>
                         Add Wanikani
                     </MenuItem>
                 ) : null}

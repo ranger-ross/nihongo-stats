@@ -1,7 +1,27 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import { Card, CardContent, Tooltip, Typography } from "@mui/material";
-import { wanikaniColors } from "../../Constants.js";
+import {Card, CardContent, CircularProgress, Tooltip, Typography} from "@mui/material";
+import {WanikaniColors} from "../../Constants.js";
+
+const styles = {
+    topContainer: {
+        display: 'flex',
+        gap: '5px',
+        justifyContent: 'space-around'
+    },
+    bottomContainer: {
+        display: 'flex',
+        gap: '5px',
+        justifyContent: 'space-around',
+        marginTop: '10px'
+    },
+    loadingContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '120px'
+    },
+};
 
 function assignmentsToCounts(assignments) {
     return {
@@ -9,11 +29,10 @@ function assignmentsToCounts(assignments) {
         radicals: assignments.filter(assignment => assignment.data['subject_type'] === 'radical').length,
         kanji: assignments.filter(assignment => assignment.data['subject_type'] === 'kanji').length,
         vocabulary: assignments.filter(assignment => assignment.data['subject_type'] === 'vocabulary').length,
-    }
-
+    };
 }
 
-function CountTile({ label, data, color }) {
+function CountTile({label, data, color}) {
     return (
         <Tooltip title={
             <div>
@@ -39,7 +58,7 @@ function CountTile({ label, data, color }) {
                     {data?.total}
                 </div>
 
-                <div style={{ marginTop: '5px' }}>
+                <div style={{marginTop: '5px'}}>
                     <Typography variant={'caption'} color={'textPrimary'}>
                         {label}
                     </Typography>
@@ -89,45 +108,53 @@ function WanikaniItemCountsChart() {
         <Card>
             <CardContent>
 
-                <div style={{ display: 'flex', gap: '5px', justifyContent: 'space-around' }}>
-                    <CountTile
-                        label={'Available'}
-                        data={data?.available}
-                        color={'#686868'}
-                    />
+                {!data ? (
+                    <div style={styles.loadingContainer}>
+                        <CircularProgress/>
+                    </div>
+                ) : (
+                    <>
+                        <div style={styles.topContainer}>
+                            <CountTile
+                                label={'Available'}
+                                data={data?.available}
+                                color={'#686868'}
+                            />
 
-                    <CountTile
-                        label={'Apprentice'}
-                        data={data?.apprentice}
-                        color={wanikaniColors.pink}
-                    />
+                            <CountTile
+                                label={'Apprentice'}
+                                data={data?.apprentice}
+                                color={WanikaniColors.pink}
+                            />
 
-                    <CountTile
-                        label={'Guru'}
-                        data={data?.guru}
-                        color={wanikaniColors.purple}
-                    />
-                </div>
+                            <CountTile
+                                label={'Guru'}
+                                data={data?.guru}
+                                color={WanikaniColors.purple}
+                            />
+                        </div>
 
-                <div style={{ display: 'flex', gap: '5px', justifyContent: 'space-around', marginTop: '10px' }}>
-                    <CountTile
-                        label={'Master'}
-                        data={data?.master}
-                        color={'#3556dd'}
-                    />
+                        <div style={styles.bottomContainer}>
+                            <CountTile
+                                label={'Master'}
+                                data={data?.master}
+                                color={'#3556dd'}
+                            />
 
-                    <CountTile
-                        label={'Enlightened'}
-                        data={data?.enlightened}
-                        color={'#0098e5'}
-                    />
+                            <CountTile
+                                label={'Enlightened'}
+                                data={data?.enlightened}
+                                color={'#0098e5'}
+                            />
 
-                    <CountTile
-                        label={'Burned'}
-                        data={data?.burned}
-                        color={'#474647'}
-                    />
-                </div>
+                            <CountTile
+                                label={'Burned'}
+                                data={data?.burned}
+                                color={'#474647'}
+                            />
+                        </div>
+                    </>
+                )}
 
 
             </CardContent>

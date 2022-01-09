@@ -21,7 +21,7 @@ function AnkiConnectLogin() {
             .then((data) => {
                 console.log(data);
                 if (data?.permission === 'granted') {
-                    navigate(RoutePaths.ankiDashboard, {replace: true});
+                    navigate(RoutePaths.ankiDashboard.path, {replace: true});
                 } else {
                     setError('Permission to Anki was Denied');
                 }

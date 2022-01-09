@@ -3,7 +3,7 @@ import {useEffect, useState} from "react";
 import AnkiApiService from "../service/AnkiApiService.js";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import {Chart, PieSeries, Legend, Title} from '@devexpress/dx-react-chart-material-ui';
-import {ankiColors} from "../../Constants.js";
+import {AnkiColors} from "../../Constants.js";
 
 async function fetchCardBreakDownData(decks) {
     const query = decks
@@ -17,11 +17,11 @@ async function fetchCardBreakDownData(decks) {
     const relearningCards = await AnkiApiService.findCards(`(${query}) ("is:review" AND "is:learn")`);
 
     return [
-        {type: 'New', color: ankiColors.blue, count: newCards.length},
-        {type: 'Learning', color: ankiColors.lightOrange, count: learningCards.length},
-        {type: 'Relearning', color: ankiColors.redOrange, count: relearningCards.length},
-        {type: 'Young', color: ankiColors.lightGreen, count: youngCards.length},
-        {type: 'Mature', color: ankiColors.darkGreen, count: matureCards.length},
+        {type: 'New', color: AnkiColors.blue, count: newCards.length},
+        {type: 'Learning', color: AnkiColors.lightOrange, count: learningCards.length},
+        {type: 'Relearning', color: AnkiColors.redOrange, count: relearningCards.length},
+        {type: 'Young', color: AnkiColors.lightGreen, count: youngCards.length},
+        {type: 'Mature', color: AnkiColors.darkGreen, count: matureCards.length},
     ];
 }
 

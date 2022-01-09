@@ -2,12 +2,10 @@ import {Chart, ValueAxis, ArgumentAxis, Tooltip, Legend} from '@devexpress/dx-re
 import {useState, useEffect, useMemo} from "react";
 import {ArgumentScale, BarSeries, Stack} from "@devexpress/dx-react-chart";
 import {
-    ankiAppName,
-    ankiColors,
-    bunproAppName,
-    bunProColors,
-    wanikaniAppName,
-    wanikaniColors
+    AnkiColors,
+    AppNames,
+    BunProColors,
+    WanikaniColors
 } from '../../Constants.js';
 import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/material";
 import {EventTracker} from "@devexpress/dx-react-chart";
@@ -21,6 +19,7 @@ import AnkiApiService from "../../anki/service/AnkiApiService.js";
 import {useAnkiDecks} from "../../hooks/useAnkiDecks.jsx";
 import {fetchAllBunProReviews} from "../../bunpro/service/BunProDataUtil.js";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
+import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil.js";
 
 function DataPoint(date) {
     let data = {
@@ -49,16 +48,6 @@ function DataPoint(date) {
     };
 
     return data;
-};
-
-function createSubjectMap(subjects) {
-    let map = {};
-
-    for (const subject of subjects) {
-        map[subject.id] = subject;
-    }
-
-    return map;
 }
 
 async function fetchWanikaniData() {
@@ -82,9 +71,9 @@ function addAppNameToReviewData(data, appName) {
 
 function aggregateDate(ankiReviews, bunProReviews, wanikaniReviews, daysToLookBack) {
     const reviews = [
-        ...(bunProReviews ? addAppNameToReviewData(bunProReviews, bunproAppName) : []),
-        ...(ankiReviews ? addAppNameToReviewData(ankiReviews, ankiAppName) : []),
-        ...(wanikaniReviews ? addAppNameToReviewData(wanikaniReviews, wanikaniAppName) : []),
+        ...(bunProReviews ? addAppNameToReviewData(bunProReviews, AppNames.bunpro) : []),
+        ...(ankiReviews ? addAppNameToReviewData(ankiReviews, AppNames.anki) : []),
+        ...(wanikaniReviews ? addAppNameToReviewData(wanikaniReviews, AppNames.wanikani) : []),
     ]
         .filter(review => review.date > truncDate(Date.now() - daysToMillis(daysToLookBack)))
         .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -102,11 +91,11 @@ function aggregateDate(ankiReviews, bunProReviews, wanikaniReviews, daysToLookBa
 
         const lastDay = aggregatedDate[aggregatedDate.length - 1];
 
-        if (data.appName === wanikaniAppName) {
+        if (data.appName === AppNames.wanikani) {
             lastDay.addWanikani(data);
-        } else if (data.appName === ankiAppName) {
+        } else if (data.appName === AppNames.anki) {
             lastDay.addAnki(data);
-        } else if (data.appName === bunproAppName) {
+        } else if (data.appName === AppNames.bunpro) {
             lastDay.addBunPro(data);
         }
     }
@@ -316,7 +305,7 @@ function OverviewReviewsHistoryChart() {
                                         name="Anki"
                                         valueField="anki"
                                         argumentField="date"
-                                        color={ankiColors.lightGreen}
+                                        color={AnkiColors.lightGreen}
                                     />
                                 ) : null}
 
@@ -325,7 +314,7 @@ function OverviewReviewsHistoryChart() {
                                         name="BunPro"
                                         valueField="bunPro"
                                         argumentField="date"
-                                        color={bunProColors.blue}
+                                        color={BunProColors.blue}
                                     />
                                 ) : null}
 
@@ -334,7 +323,7 @@ function OverviewReviewsHistoryChart() {
                                         name="Wanikani"
                                         valueField="wanikani"
                                         argumentField="date"
-                                        color={wanikaniColors.pink}
+                                        color={WanikaniColors.pink}
                                     />
                                 ) : null}
 

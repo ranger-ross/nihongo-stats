@@ -1,22 +1,24 @@
-export const overviewAppName = 'overview';
-export const wanikaniAppName = 'wanikani';
-export const bunproAppName = 'bunpro';
-export const ankiAppName = 'anki';
+export const AppNames = {
+    overview: 'overview',
+    anki: 'anki',
+    bunpro: 'bunpro',
+    wanikani: 'wanikani',
+};
 
 export const apiProxyUrl = 'https://api-proxy.nihongostats.com';
 export const bunproApiUrl = 'https://bunpro.jp/api';
 
-export const wanikaniColors = {
+export const WanikaniColors = {
     blue: '#00a1f1',
     pink: '#f100a1',
     purple: '#a100f1',
 }
 
-export const bunProColors = {
+export const BunProColors = {
     blue: '#5babf2',
 }
 
-export const ankiColors = {
+export const AnkiColors = {
     blue: '#77ccff',
     lightGreen: '#74c464',
     darkGreen: '#31a354',

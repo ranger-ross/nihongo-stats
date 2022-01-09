@@ -3,13 +3,13 @@ import WanikaniApiService from "../service/WanikaniApiService.js";
 import { Box, Card, CardContent, Typography, Grid, Tooltip } from "@mui/material";
 import { millisToDays, millisToHours } from '../../util/DateUtils.js';
 import { Stack } from '@mui/material';
-import { wanikaniColors } from "../../Constants.js";
+import { WanikaniColors } from "../../Constants.js";
 import { CircularProgress } from '@mui/material'
 
 
-const racialColor = wanikaniColors.blue;
-const kanjiColor = wanikaniColors.pink;
-const vocabularyColor = wanikaniColors.purple;
+const racialColor = WanikaniColors.blue;
+const kanjiColor = WanikaniColors.pink;
+const vocabularyColor = WanikaniColors.purple;
 
 const styles = {
     container: {

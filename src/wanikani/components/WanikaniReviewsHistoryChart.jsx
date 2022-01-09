@@ -87,6 +87,7 @@ function WanikaniReviewsHistoryChart() {
     const [daysToLookBack, setDaysToLookBack] = useState(30);
     const [totalDays, setTotalDays] = useState(5000);
     const [isLoading, setIsLoading] = useState(false);
+    const [tooltipTargetItem, setTooltipTargetItem] = useState();
 
     useEffect(() => {
         setIsLoading(true);
@@ -216,7 +217,11 @@ function WanikaniReviewsHistoryChart() {
                                 />
 
                                 <EventTracker/>
-                                <Tooltip contentComponent={ReviewsToolTip}/>
+                                <Tooltip
+                                    targetItem={tooltipTargetItem ? {...tooltipTargetItem, series: 'vocabulary'} : null}
+                                    onTargetItemChange={setTooltipTargetItem}
+                                    contentComponent={ReviewsToolTip}
+                                />
                             </Chart>
                         </div>
                     ) : null}

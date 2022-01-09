@@ -118,7 +118,7 @@ function WanikaniFutureReviewsChart() {
                             />
 
                             <EventTracker/>
-                            <Tooltip targetItem={targetItem}
+                            <Tooltip targetItem={targetItem ? {...targetItem, series: 'vocabulary'} : null}
                                      onTargetItemChange={setTargetItem}
                                      contentComponent={ReviewsToolTip}
                             />

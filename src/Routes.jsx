@@ -17,8 +17,8 @@ import {AppNames} from "./Constants.js";
 
 function AppRoute(path, appName) {
     return {
-        path,
-        appName
+        path: path,
+        appName: appName
     };
 }
 

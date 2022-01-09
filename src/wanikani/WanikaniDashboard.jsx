@@ -14,7 +14,28 @@ const styles = {
         flexDirection: 'column',
         margin: '10px',
         gap: '10px',
-    }
+    },
+    topContainer: {
+        display: 'flex',
+        gap: '10px',
+        flexWrap: 'wrap',
+        alignItems: 'stretch'
+    },
+    leftContainer: {
+        display: 'flex',
+        gap: '10px',
+        flexDirection: 'column',
+        flexGrow: '1'
+    },
+    rightContainer: {
+        flexGrow: '25'
+    },
+    bottomContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        margin: '10px',
+        gap: '10px',
+    },
 };
 
 function WanikaniDashboard() {
@@ -25,9 +46,8 @@ function WanikaniDashboard() {
         >
             <WanikaniPreloadedData>
                 <div style={styles.container}>
-                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'stretch'}}>
-
-                        <div style={{display: 'flex', gap: '10px', flexDirection: 'column', flexGrow: '1'}}>
+                    <div style={styles.topContainer}>
+                        <div style={styles.leftContainer}>
                             <WanikaniWelcomeTile/>
 
                             <WanikaniLevelSummaryChart/>
@@ -35,14 +55,13 @@ function WanikaniDashboard() {
                             <WanikaniItemCountsChart/>
                         </div>
 
-                        <div style={{flexGrow: '25'}}>
+                        <div style={styles.rightContainer}>
                             <WanikaniFutureReviewsChart/>
                         </div>
-
                     </div>
                 </div>
 
-                <div style={styles.container}>
+                <div style={styles.bottomContainer}>
                     <WanikaniActiveItemsChart/>
                 </div>
             </WanikaniPreloadedData>

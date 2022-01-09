@@ -1,6 +1,6 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import {RoutePaths} from "../Routes";
-import WanikaniLevelProgessChart from "./components/WanikaniLevelProgressChart.jsx";
+import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart.jsx";
 import {Card, CircularProgress, Typography} from "@mui/material";
 import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart.jsx";
 import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart.jsx";
@@ -51,7 +51,7 @@ function WanikaniHistory() {
                     </LoadableChart>
 
                     <LoadableChart placeholderTitle="Level Progress">
-                        <WanikaniLevelProgessChart/>
+                        <WanikaniLevelProgressChart/>
                     </LoadableChart>
 
                     <LoadableChart placeholderTitle="Review Accuracy">

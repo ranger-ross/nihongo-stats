@@ -13,19 +13,26 @@ When opening an issue please do you best to include as much information as possi
 
 If you are reporting a bug please include a description of the bug and a screenshot of the issue if possible.
 
+In the GitHub issues tag the issue as a `bug`.
+
 ### Feature Requests
 
 If you are requesting a new feature, please include why it is important and use cases. Also feel free to include ideas
 and possible ways to implement the feature.
 
+In the GitHub issues tag the issue as a `enhancement`.
+
 ## Contributing
 
 This project is open source, and you are welcome to contribute to it.
 
+This project is following [trunk based development](https://trunkbaseddevelopment.com/), meaning all features merged to `main` should be complete and ready to
+be deployed.
+
 ### Pull Requests
 
 Before submitting a pull request, make sure that there is an Open GitHub issue for the bug/feature. Be sure to reference
-the issue in your pull request to make it easy to find for code reviewers.
+the issue in your pull request title to make it easy to find for code reviewers.
 
 When introducing UI changes, be sure include screenshots of the new UI in the pull request description.
 

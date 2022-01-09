@@ -34,7 +34,8 @@ no longer needed in the pull request description.
 
 #### Prerequisites
 
-- Docker
+- Docker + Docker Compose
+- NodeJS
 - (Optional) GNU Make
 
 #### Installing Dependencies

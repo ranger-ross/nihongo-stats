@@ -35,6 +35,7 @@ const styles = {
 };
 
 const defaultData = {
+    isLoading: true,
     timeOnLevel: 0,
     timeLeft: 0,
     radicals: {
@@ -96,6 +97,7 @@ async function getCurrentLevelProgressData() {
     const vocabularyStarted = assignments.data.filter(s => s.data['subject_type'] === 'vocabulary' && !!s.data['started_at']);
 
     return {
+        isLoading: false,
         level: currentLevel,
         timeOnLevel: timeOnLevel,
         radicals: {
@@ -145,10 +147,8 @@ function SubjectProgressLabel({started, passed, total, name, color}) {
 
 function WanikaniLevelSummaryChart() {
     const [progressData, setProgressData] = useState(defaultData);
-    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        setIsLoading(true);
         let isSubscribed = true;
         getCurrentLevelProgressData()
             .then(data => {
@@ -157,22 +157,15 @@ function WanikaniLevelSummaryChart() {
                 setProgressData(data);
             })
             .catch(console.error)
-            .finally(() => {
-                if (!isSubscribed)
-                    return;
-                setIsLoading(false)
-            });
         return () => isSubscribed = false;
     }, []);
-
-    console.log(progressData);
 
     return (
         <Card style={styles.container}>
             <CardContent style={{height: '100%'}}>
 
                 <Stack height={'100%'}>
-                    {isLoading ? (
+                    {progressData.isLoading ? (
                         <Box sx={{flexGrow: 1}} style={styles.spinnerContainer}>
                             <CircularProgress/>
                         </Box>

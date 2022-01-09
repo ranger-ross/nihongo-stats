@@ -45,7 +45,7 @@ function AppNav() {
 
             // If path changes, we need to update the SelectedApp to match
             const route = AllRoutes.find(route => route.path === location.pathname)
-            if (route.appName !== selectedApp) {
+            if (!!route && route.appName !== selectedApp) {
                 setSelectedApp(route.appName);
                 return;
             }

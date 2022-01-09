@@ -1,5 +1,5 @@
 import {Chart, ValueAxis, BarSeries, ArgumentAxis, Tooltip} from '@devexpress/dx-react-chart-material-ui';
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useMemo} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {Animation, EventTracker, Stack} from "@devexpress/dx-react-chart";
 import {Card, CardContent, Typography, Box} from "@mui/material";
@@ -7,9 +7,29 @@ import {addDays, areDatesSameDay} from '../../util/DateUtils.js';
 import {WanikaniColors} from '../../Constants.js';
 import DaysSelector from "../../shared/DaysSelector.jsx";
 
+function formatChartData(rawData, days) {
+    const data = rawData
+        .filter(assignment => new Date(assignment.data['available_at']) > addDays(new Date(), -1))
+        .filter(assignment => new Date(assignment.data['available_at']) < addDays(new Date(), days));
+
+    let daysData = []
+    for (let i = 0; i < days; i++) {
+        const date = addDays(new Date(), i)
+        const assignmentsOnDay = data.filter(assignment => areDatesSameDay(new Date(assignment.data['available_at']), date))
+
+        daysData.push({
+            radicals: assignmentsOnDay.filter(assignment => assignment.data['subject_type'] === 'radical').length,
+            kanji: assignmentsOnDay.filter(assignment => assignment.data['subject_type'] === 'kanji').length,
+            vocabulary: assignmentsOnDay.filter(assignment => assignment.data['subject_type'] === 'vocabulary').length,
+            reviews: assignmentsOnDay.length,
+            label: `${date.getMonth() + 1}/${date.getDate()}`
+        });
+    }
+    return daysData;
+}
+
 function WanikaniFutureReviewsChart() {
     const [rawData, setRawData] = useState([]);
-    const [chartData, setChartData] = useState([]);
     const [targetItem, setTargetItem] = useState();
     const [days, setDays] = useState(14);
 
@@ -19,37 +39,17 @@ function WanikaniFutureReviewsChart() {
             .then(data => {
                 if (!isSubscribed)
                     return;
-                const _rawData = data.filter(assignment => !assignment.data['burned_at'] || !assignment.data['available_at']);
-                setRawData(_rawData);
+                setRawData(data.filter(assignment => !assignment.data['burned_at'] || !assignment.data['available_at']));
             })
         return () => isSubscribed = false;
     }, []);
 
-
-    useEffect(() => {
+    const chartData = useMemo(() => {
         if (!rawData || rawData.length == 0) {
-            return;
+            return [];
         }
 
-        const data = rawData
-            .filter(assignment => new Date(assignment.data['available_at']) > addDays(new Date(), -1))
-            .filter(assignment => new Date(assignment.data['available_at']) < addDays(new Date(), days));
-
-        let daysData = []
-        for (let i = 0; i < days; i++) {
-            const date = addDays(new Date(), i)
-            const assignmentsOnDay = data.filter(assignment => areDatesSameDay(new Date(assignment.data['available_at']), date))
-
-            daysData.push({
-                radicals: assignmentsOnDay.filter(assignment => assignment.data['subject_type'] === 'radical').length,
-                kanji: assignmentsOnDay.filter(assignment => assignment.data['subject_type'] === 'kanji').length,
-                vocabulary: assignmentsOnDay.filter(assignment => assignment.data['subject_type'] === 'vocabulary').length,
-                reviews: assignmentsOnDay.length,
-                label: `${date.getMonth() + 1}/${date.getDate()}`
-            });
-        }
-
-        setChartData(daysData);
+        return formatChartData(rawData, days);
     }, [rawData, days]);
 
     function ReviewsToolTip({targetItem}) {

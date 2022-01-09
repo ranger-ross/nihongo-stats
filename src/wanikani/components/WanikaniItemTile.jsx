@@ -71,12 +71,15 @@ function WanikaniItemTile({text, type, link, meaning, srsLevel, isStarted, isAva
     return (
         <VisibilitySensor partialVisibility={true} onChange={(isVisible) => isVisible ? setIsLoaded(true) : null}>
             {isLoaded ? (
-                <Tooltip title={
-                    <>
-                        <p>Meaning: {meaning}</p>
-                        {!!srsLevel ? (<p>SRS Level: {srsLevel}</p>) : null}
-                    </>
-                } placement={'top'}>
+                <Tooltip
+                    title={
+                        <>
+                            <p>Meaning: {meaning}</p>
+                            {!!srsLevel ? (<p>SRS Level: {srsLevel}</p>) : null}
+                        </>
+                    }
+                    placement={'top'}
+                >
                     <a href={link} target="_blank" style={style}>{text}</a>
                 </Tooltip>
             ) : <div style={styles.placeholderDiv}>-</div>}

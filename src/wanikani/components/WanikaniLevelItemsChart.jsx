@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import { Card, CardContent, Typography, Switch, FormGroup, FormControlLabel } from "@mui/material";
+import {Card, CardContent, Typography, Switch, FormGroup, FormControlLabel} from "@mui/material";
 import WanikaniItemTile from "./WanikaniItemTile.jsx";
 
 function createAssignmentMap(subjects) {
@@ -54,32 +54,35 @@ async function fetchData(level) {
         radicals,
         kanji,
         vocabulary
-    }
+    };
     memCache[level] = data;
     return data;
 }
 
-function PreviousLevelSelector({ selected, setSelected }) {
+function PreviousLevelSelector({selected, setSelected}) {
     return (
         <FormGroup>
             <FormControlLabel
-                label="Show Previous Level"
+                label={
+                    <div style={{color: 'lightgray'}}>Show Previous Level</div>
+                }
                 control={
                     <Switch checked={selected}
-                        onChange={e => setSelected(e.target.checked)} />
+                            size={'small'}
+                            onChange={e => setSelected(e.target.checked)}/>
                 }
             />
         </FormGroup>
-    )
+    );
 }
 
-function WanikaniLevelItemsChart({ level, showLevel, showPreviousLevelSelector }) {
+function WanikaniLevelItemsChart({level, showLevel, showPreviousLevelSelector}) {
     const [isPreviousLevel, setIsPreviousLevel] = useState(false);
     const [data, setData] = useState({
         radicals: [],
         kanji: [],
         vocabulary: [],
-    })
+    });
 
     useEffect(() => {
         let isSubscribed = true;
@@ -98,29 +101,29 @@ function WanikaniLevelItemsChart({ level, showLevel, showPreviousLevelSelector }
             <CardContent>
                 {showLevel ? (
                     <Typography variant={'h5'}
-                        color={'textPrimary'}
-                        style={{ paddingBottom: '10px' }}
+                                color={'textPrimary'}
+                                style={{paddingBottom: '10px'}}
                     >
                         Level {level}
                     </Typography>
                 ) : null}
 
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     <Typography variant={'h5'}
-                        color={'textPrimary'}
-                        style={{ paddingBottom: '10px' }}
+                                color={'textPrimary'}
+                                style={{paddingBottom: '10px'}}
                     >
                         Radicals
                     </Typography>
                     {showPreviousLevelSelector ? (
                         <>
-                            <div style={{ flexGrow: 1 }}></div>
-                            <PreviousLevelSelector selected={isPreviousLevel} setSelected={setIsPreviousLevel} />
+                            <div style={{flexGrow: 1}}/>
+                            <PreviousLevelSelector selected={isPreviousLevel} setSelected={setIsPreviousLevel}/>
                         </>
                     ) : null}
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     {data.radicals.map(subject => (
                         <WanikaniItemTile
                             key={subject.subjectId + '-radical'}
@@ -136,12 +139,12 @@ function WanikaniLevelItemsChart({ level, showLevel, showPreviousLevelSelector }
                 </div>
 
                 <Typography variant={'h5'}
-                    color={'textPrimary'}
-                    style={{ paddingBottom: '10px', paddingTop: '15px' }}
+                            color={'textPrimary'}
+                            style={{paddingBottom: '10px', paddingTop: '15px'}}
                 >
                     Kanji
                 </Typography>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     {data.kanji.map(subject => (
                         <WanikaniItemTile
                             key={subject.subjectId + '-kaji'}
@@ -158,12 +161,12 @@ function WanikaniLevelItemsChart({ level, showLevel, showPreviousLevelSelector }
                 </div>
 
                 <Typography variant={'h5'}
-                    color={'textPrimary'}
-                    style={{ paddingBottom: '10px', paddingTop: '15px' }}
+                            color={'textPrimary'}
+                            style={{paddingBottom: '10px', paddingTop: '15px'}}
                 >
                     Vocabulary
                 </Typography>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     {data.vocabulary.map(subject => (
                         <WanikaniItemTile
                             key={subject.subjectId + '-vocabulary'}

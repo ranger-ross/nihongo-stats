@@ -7,9 +7,16 @@ Nihongo Stats is a statistics aggregation tool for Japanese learning platforms l
 If you have a feature request or bug you would like to report please
 use [GitHub Issues](https://github.com/ranger-ross/nihongo-stats/issues) to report them.
 
-When opening an issue please do you best to include as much information as possible. If you are reporting a bug, if
-possible include a screenshot of the issue.  
-If you are requesting a new feature, feel free to include possible ways to implement it.
+When opening an issue please do you best to include as much information as possible.
+
+### Bugs
+
+If you are reporting a bug please include a description of the bug and a screenshot of the issue if possible.
+
+### Feature Requests
+
+If you are requesting a new feature, please include why it is important and use cases. Also feel free to include ideas
+and possible ways to implement the feature.
 
 ## Contributing
 

@@ -8,10 +8,14 @@ import {
 } from "@mui/material";
 import {useState} from "react";
 import * as React from "react";
-import ankiAddOns from '../../../assets/anki/macos/anki-add-ons.png'
-import ankiGetAddOns from '../../../assets/anki/macos/anki-get-add-ons.png'
-import ankiInstallAddOns from '../../../assets/anki/macos/anki-install-add-ons.png'
-import ankiRequestPermission from '../../../assets/anki/macos/anki-request-permission.png'
+import macosAnkiAddOns from '../../../assets/anki/macos/anki-add-ons.png'
+import macosAnkiGetAddOns from '../../../assets/anki/macos/anki-get-add-ons.png'
+import macosAnkiInstallAddOns from '../../../assets/anki/macos/anki-install-add-ons.png'
+import macosAnkiRequestPermission from '../../../assets/anki/macos/anki-request-permission.png'
+import windowsAnkiAddOns from '../../../assets/anki/windows/anki-add-ons.png'
+import windowsAnkiGetAddOns from '../../../assets/anki/windows/anki-get-add-ons.png'
+import windowsAnkiInstallAddOns from '../../../assets/anki/windows/anki-install-add-ons.png'
+import windowsAnkiRequestPermission from '../../../assets/anki/windows/anki-request-permission.png'
 
 
 const windows = 'Windows';
@@ -26,7 +30,7 @@ function OsSelector({options, os, setOs}) {
             onChange={e => setOs(e.target.value)}
         >
             {options.map(option => (
-                <ToggleButton value={option}>{option}</ToggleButton>
+                <ToggleButton key={option} value={option}>{option}</ToggleButton>
             ))}
         </ToggleButtonGroup>
     );
@@ -61,12 +65,13 @@ function AnkiHowToInstall({onConnect}) {
 
                 {isWindows ? (
                     <>
+                        <img style={{margin: '10px'}} height={400} src={windowsAnkiAddOns}/>
+                        <img style={{margin: '10px'}} height={400} src={windowsAnkiGetAddOns}/>
                     </>
                 ) : (
                     <>
-                        <img style={{margin: '10px'}} height={500} src={ankiAddOns}/>
-                        <img style={{margin: '10px'}} height={500} src={ankiGetAddOns}/>
-
+                        <img style={{margin: '10px'}} height={500} src={macosAnkiAddOns}/>
+                        <img style={{margin: '10px'}} height={500} src={macosAnkiGetAddOns}/>
                     </>
                 )}
 
@@ -83,12 +88,9 @@ function AnkiHowToInstall({onConnect}) {
 
 
                 {isWindows ? (
-                    <>
-                    </>
+                    <img style={{margin: '10px'}} height={300} src={windowsAnkiInstallAddOns}/>
                 ) : (
-                    <>
-                        <img style={{margin: '10px'}} height={500} src={ankiInstallAddOns}/>
-                    </>
+                    <img style={{margin: '10px'}} height={500} src={macosAnkiInstallAddOns}/>
                 )}
 
                 <Typography variant={'h5'} textAlign={'left'} marginTop={3}>
@@ -117,12 +119,9 @@ function AnkiHowToInstall({onConnect}) {
                 </Typography>
 
                 {isWindows ? (
-                    <>
-                    </>
+                    <img style={{margin: '10px'}} height={200} src={windowsAnkiRequestPermission}/>
                 ) : (
-                    <>
-                        <img style={{margin: '10px'}} height={200} src={ankiRequestPermission}/>
-                    </>
+                    <img style={{margin: '10px'}} height={200} src={macosAnkiRequestPermission}/>
                 )}
 
                 {isMacOs ? (

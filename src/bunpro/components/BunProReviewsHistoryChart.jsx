@@ -7,8 +7,7 @@ import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.js";
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import DaysSelector from "../../shared/DaysSelector.jsx";
-import BunProApiService from "../service/BunProApiService.js";
-import {createGrammarPointsLookupMap, fetchAllBunProReviews} from "../service/BunProDataUtil.js";
+import {fetchAllBunProReviews} from "../service/BunProDataUtil.js";
 import useWindowDimensions from "../../hooks/useWindowDimensions.jsx";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];

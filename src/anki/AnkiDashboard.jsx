@@ -1,7 +1,3 @@
-import {useEffect, useState} from "react";
-import AnkiApiService from "./service/AnkiApiService";
-import {useNavigate} from "react-router";
-import {RoutePaths} from "../Routes";
 import AnkiDeckSummariesTile from "./components/AnkiDeckSummariesTile.jsx";
 import AnkiCardBreakDownChart from "./components/AnkiCardBreakDownChart.jsx";
 import AnkiApiProvider from "./components/AnkiApiProvider.jsx";

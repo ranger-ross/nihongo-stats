@@ -2,13 +2,12 @@ import * as React from 'react';
 import {useEffect, useMemo, useState} from 'react';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack} from "@devexpress/dx-react-chart";
+import {ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.js";
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import DaysSelector from "../../shared/DaysSelector.jsx";
-import BunProApiService from "../service/BunProApiService.js";
-import {createGrammarPointsLookupMap, fetchAllBunProReviews} from "../service/BunProDataUtil.js";
+import {fetchAllBunProReviews} from "../service/BunProDataUtil.js";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 

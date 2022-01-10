@@ -1,5 +1,5 @@
-import { memoryCache } from "../../GlobalState"
 import * as localForage from "localforage/dist/localforage"
+import {memoryCache} from "../../App.jsx";
 
 const wanikaniApiUrl = 'https://api.wanikani.com';
 const cacheKeys = {

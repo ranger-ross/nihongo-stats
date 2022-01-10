@@ -14,15 +14,20 @@ import BunProHistory from "./bunpro/BunProHistory.jsx";
 import OverviewDashboard from "./overview/OverviewDashboard.jsx";
 import OverviewHistory from "./overview/OverviewHistory.jsx";
 import {AppNames} from "./Constants.js";
+import LandingPage from "./landing/LandingPage.jsx";
 
-function AppRoute(path, appName) {
+function AppRoute(path, appName, hideNav = false) {
     return {
         path: path,
-        appName: appName
+        appName: appName,
+        hideNav: hideNav,
     };
 }
 
 export const RoutePaths = {
+
+    // Landing Page
+    landingPage: new AppRoute('/', null, true),
 
     // Overview
     overviewDashboard: new AppRoute('/dashboard', AppNames.overview),
@@ -54,6 +59,7 @@ export const AllRoutes = Object.keys(RoutePaths).map(key => RoutePaths[key]);
 export function AppRoutes() {
     return (
         <Routes>
+            <Route path={RoutePaths.landingPage.path} element={<LandingPage/>} exact={true}/>
             <Route path={RoutePaths.overviewDashboard.path} element={<OverviewDashboard/>}/>
             <Route path={RoutePaths.overviewHistory.path} element={<OverviewHistory/>}/>
             <Route path={RoutePaths.wanikaniDashboard.path} element={<WanikaniDashboard/>}/>

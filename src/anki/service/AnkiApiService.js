@@ -1,4 +1,3 @@
-import {memoryCache} from "../../GlobalState"
 import * as localForage from "localforage/dist/localforage"
 
 const ankiConnectApiUrl = 'http://localhost:8765';

@@ -10,9 +10,9 @@ import BunProApiService from "../../bunpro/service/BunProApiService.js";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {Add} from "@mui/icons-material";
-import {useGlobalState} from "../../GlobalState.js";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
 import {AppNames} from "../../Constants.js";
+import {useSelectedApp} from "../../hooks/useSelectedApp.jsx";
 
 const styles = {
     titleText: {
@@ -118,7 +118,7 @@ function BunProSection() {
 }
 
 function AddAppDropdown({showAnki, showBunPro, showWanikani}) {
-    const {setSelectedApp} = useGlobalState();
+    const {setSelectedApp} = useSelectedApp();
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     return (

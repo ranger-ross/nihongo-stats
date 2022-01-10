@@ -2,11 +2,13 @@
   "name": "nihongo-stats",
   "version": "1.0.0",
   "type": "module",
+  "eslintIgnore": ["*.test.*"],
   "scripts": {
     "dev": "vite --host",
     "test": "TZ=UTC vite-jest --no-cache",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "lint": "eslint src"
   },
   "dependencies": {
     "@devexpress/dx-react-chart": "^3.0.0-beta.2",
@@ -34,7 +36,7 @@
     "eslint": "^7.26.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
-    "eslint-plugin-react": "^7.23.2",
+    "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "jest": "^27.4.3",
     "jest-environment-jsdom": "^27.4.3",

@@ -1,7 +1,7 @@
 import {Tooltip} from "@mui/material";
 import {WanikaniColors} from "../../Constants";
 import VisibilitySensor from "react-visibility-sensor"
-import {useState, useMemo} from "react";
+import {useState} from "react";
 
 const racialColor = WanikaniColors.blue;
 const kanjiColor = WanikaniColors.pink;
@@ -80,7 +80,7 @@ function WanikaniItemTile({text, type, link, meaning, srsLevel, isStarted, isAva
                     }
                     placement={'top'}
                 >
-                    <a href={link} target="_blank" style={style}>{text}</a>
+                    <a href={link} target="_blank" style={style} rel="noreferrer">{text}</a>
                 </Tooltip>
             ) : <div style={styles.placeholderDiv}>-</div>}
         </VisibilitySensor>

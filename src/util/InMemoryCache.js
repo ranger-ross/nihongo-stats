@@ -1,18 +1,23 @@
-class InMemoryCache {
-    cache = {};
+function InMemoryCache() {
+    let cache = {};
 
-    includes(key) {
-        return key in this.cache && !!this.cache[key];
+    function includes(key) {
+        return key in cache && !!cache[key];
     }
 
-    get(key) {
-        return this.cache[key];
+    function get(key) {
+        return cache[key];
     }
 
-    put(key, value) {
-        this.cache[key] = value;
+    function put(key, value) {
+        cache[key] = value;
     }
 
+    return {
+        includes,
+        get,
+        put,
+    };
 }
 
 export default InMemoryCache;

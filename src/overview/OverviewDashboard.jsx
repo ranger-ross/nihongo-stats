@@ -1,6 +1,3 @@
-import {useEffect} from "react";
-import {Navigate} from "react-router";
-import {RoutePaths} from "../Routes.jsx";
 import OverviewWelcomeTile from "./components/OverviewWelcomeTile.jsx";
 import OverviewUpcomingReviewsChart from "./components/OverviewUpcomingReviewsChart.jsx";
 

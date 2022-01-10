@@ -13,9 +13,11 @@ function invoke(action, version, params = {}) {
                 if (Object.getOwnPropertyNames(response).length != 2) {
                     throw 'response has an unexpected number of fields';
                 }
+                // eslint-disable-next-line no-prototype-builtins
                 if (!response.hasOwnProperty('error')) {
                     throw 'response is missing required error field';
                 }
+                // eslint-disable-next-line no-prototype-builtins
                 if (!response.hasOwnProperty('result')) {
                     throw 'response is missing required result field';
                 }

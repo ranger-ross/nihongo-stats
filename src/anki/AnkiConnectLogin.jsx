@@ -1,4 +1,4 @@
-import {Box, Button, Container, Link} from "@mui/material";
+import {Button, Container, Link} from "@mui/material";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";

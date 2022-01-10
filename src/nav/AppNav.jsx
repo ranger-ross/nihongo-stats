@@ -1,7 +1,6 @@
 import {Box, Grid} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router";
-import {useGlobalState} from "../GlobalState";
 import {AllRoutes, RoutePaths} from '../Routes';
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import AppSelector from "./components/AppSelector";
@@ -11,6 +10,7 @@ import BunProNav from "./navbars/BunProNav.jsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 import OverviewNav from "./navbars/OverviewNav.jsx";
 import {AppNames} from "../Constants";
+import {useSelectedApp} from "../hooks/useSelectedApp.jsx";
 
 const styles = {
     container: {
@@ -31,12 +31,14 @@ const appOptions = [
 ]
 
 function AppNav() {
-    const {selectedApp, setSelectedApp} = useGlobalState();
+    const {selectedApp, setSelectedApp} = useSelectedApp();
     const navigate = useNavigate();
     const location = useLocation();
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
     const {apiKey: bunProApiKey} = useBunProApiKey();
     const [isFirstLoad, setIsFirstLoad] = useState(true);
+
+    const route = AllRoutes.find(route => route.path === location.pathname)
 
     useEffect(() => {
         // Don't navigate to dashboard on page load.
@@ -44,8 +46,7 @@ function AppNav() {
         if (isFirstLoad) {
 
             // If path changes, we need to update the SelectedApp to match
-            const route = AllRoutes.find(route => route.path === location.pathname)
-            if (!!route && route.appName !== selectedApp) {
+            if (!!route && route.appName !== selectedApp && !route.hideNav) {
                 setSelectedApp(route.appName);
                 return;
             }
@@ -70,21 +71,25 @@ function AppNav() {
         }
     }, [selectedApp])
 
-    return (
-        <Grid container style={styles.container} alignItems={'flex-end'}>
-            <Grid item xs={12} sm={3} md={2} lg={1}>
-                <AppSelector options={appOptions}
-                             selectedApp={selectedApp}
-                             setSelectedApp={setSelectedApp}/>
-            </Grid>
+    const hideNav = !!route && route.hideNav;
 
-            <Box sx={{flexGrow: 1}}>
-                {selectedApp === AppNames.overview ? (<OverviewNav/>) : null}
-                {selectedApp === AppNames.anki ? (<AnkiNav/>) : null}
-                {selectedApp === AppNames.bunpro && !!bunProApiKey ? (<BunProNav/>) : null}
-                {selectedApp === AppNames.wanikani && !!wanikaniApiKey ? (<WanikaniNav/>) : null}
-            </Box>
-        </Grid>
+    return (
+        hideNav ? null : (
+            <Grid container style={styles.container} alignItems={'flex-end'}>
+                <Grid item xs={12} sm={3} md={2} lg={1}>
+                    <AppSelector options={appOptions}
+                                 selectedApp={selectedApp}
+                                 setSelectedApp={setSelectedApp}/>
+                </Grid>
+
+                <Box sx={{flexGrow: 1}}>
+                    {selectedApp === AppNames.overview ? (<OverviewNav/>) : null}
+                    {selectedApp === AppNames.anki ? (<AnkiNav/>) : null}
+                    {selectedApp === AppNames.bunpro && !!bunProApiKey ? (<BunProNav/>) : null}
+                    {selectedApp === AppNames.wanikani && !!wanikaniApiKey ? (<WanikaniNav/>) : null}
+                </Box>
+            </Grid>
+        )
     );
 }
 

@@ -1,10 +1,13 @@
-import {apiProxyUrl, bunproApiUrl} from "../../Constants.js";
 import * as localForage from "localforage/dist/localforage"
+import {AppUrls} from "../../Constants.js";
+
+const {apiProxy, bunproApi} = AppUrls;
+
 
 // API Notes
 // https://github.com/bunpro-srs/BunPro-iOS/blob/main/BunProKit/Sources/BunProKit/Server.swift#L16
 
-const baseBunProUrl = `${apiProxyUrl}/${bunproApiUrl}`;
+const baseBunProUrl = `${apiProxy}/${bunproApi}`;
 
 const cacheKeys = {
     apiKey: 'bunpro-api-key',

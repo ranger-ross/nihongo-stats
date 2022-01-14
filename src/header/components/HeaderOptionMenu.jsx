@@ -1,4 +1,4 @@
-import {IconButton, Menu, MenuItem} from "@mui/material";
+import {IconButton, Link, Menu, MenuItem} from "@mui/material";
 import MoreIcon from '@mui/icons-material/MoreVert';
 import React from "react";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
@@ -8,6 +8,7 @@ import {RoutePaths} from "../../Routes.jsx";
 import {useNavigate} from "react-router";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {useAppVersion} from "../../hooks/useAppVersion.jsx";
+import {AppUrls} from "../../Constants.js";
 
 const styles = {
     logoutOption: {
@@ -16,7 +17,18 @@ const styles = {
     },
     versionText: {
         fontSize: 'small',
-    }
+        color: 'gray',
+    },
+    whatsNewText: {
+        fontSize: 'small',
+    },
+    versionMenuItem: {
+        marginLeft: '15px',
+        marginRight: '15px',
+        marginTop: '5px',
+        display: 'flex',
+        justifyContent: 'space-between',
+    },
 };
 
 function HeaderOptionMenu() {
@@ -67,16 +79,22 @@ function HeaderOptionMenu() {
                     </MenuItem>
                 ) : null}
 
-                <MenuItem onClick={goToAboutPage}>
+                <MenuItem onClick={goToAboutPage} divider={true}>
                     <InfoIcon style={{marginRight: '3px'}}/>
                     About
                 </MenuItem>
 
-                <MenuItem disabled={true}>
-                    <span style={styles.versionText}>
+
+                <div style={styles.versionMenuItem}>
+                     <span style={styles.versionText}>
                         {version}
                     </span>
-                </MenuItem>
+                    <Link target="_blank"
+                          href={AppUrls.releasesPage}
+                          style={styles.whatsNewText}>
+                        What's New
+                    </Link>
+                </div>
 
             </Menu>
         </>

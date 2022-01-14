@@ -1,9 +1,10 @@
 import * as localForage from "localforage/dist/localforage"
 import InMemoryCache from "../../util/InMemoryCache.js";
+import {AppUrls} from "../../Constants.js";
 
 const memoryCache = new InMemoryCache();
 
-const wanikaniApiUrl = 'https://api.wanikani.com';
+const wanikaniApiUrl = AppUrls.wanikaniApi;
 const cacheKeys = {
     apiKey: 'wanikani-api-key',
     reviews: 'wanikani-all-reviews',

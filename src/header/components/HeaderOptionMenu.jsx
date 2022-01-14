@@ -7,11 +7,15 @@ import InfoIcon from '@mui/icons-material/Info';
 import {RoutePaths} from "../../Routes.jsx";
 import {useNavigate} from "react-router";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
+import {useAppVersion} from "../../hooks/useAppVersion.jsx";
 
 const styles = {
     logoutOption: {
         color: 'red',
         marginRight: '3px'
+    },
+    versionText: {
+        fontSize: 'small',
     }
 };
 
@@ -21,6 +25,7 @@ function HeaderOptionMenu() {
     const wanikaniApiKeyStore = useWanikaniApiKey();
     const bunProApiKeyStore = useBunProApiKey();
     const navigate = useNavigate();
+    const version = useAppVersion();
 
     const handleWanikaniLogout = () => {
         wanikaniApiKeyStore.setApiKey(null);
@@ -33,7 +38,7 @@ function HeaderOptionMenu() {
     }
 
     const goToAboutPage = () => {
-        navigate(RoutePaths.aboutPage);
+        navigate(RoutePaths.aboutPage.path);
         setAnchorEl(null);
     }
 
@@ -48,10 +53,6 @@ function HeaderOptionMenu() {
                 open={open}
                 onClose={() => setAnchorEl(null)}
             >
-                <MenuItem onClick={goToAboutPage}>
-                    <InfoIcon style={{marginRight: '3px'}}/> About
-                </MenuItem>
-
                 {bunProApiKeyStore.apiKey ? (
                     <MenuItem onClick={handleBunProLogout}>
                         <LogoutIcon style={styles.logoutOption}/>
@@ -65,6 +66,17 @@ function HeaderOptionMenu() {
                         Logout of Wanikani
                     </MenuItem>
                 ) : null}
+
+                <MenuItem onClick={goToAboutPage}>
+                    <InfoIcon style={{marginRight: '3px'}}/>
+                    About
+                </MenuItem>
+
+                <MenuItem disabled={true}>
+                    <span style={styles.versionText}>
+                        {version}
+                    </span>
+                </MenuItem>
 
             </Menu>
         </>

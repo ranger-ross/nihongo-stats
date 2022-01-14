@@ -1,4 +1,4 @@
-name: Retag image and Deploy to Google Cloud
+name: Build and Deploy to Google Cloud
 
 on:
   release:
@@ -10,13 +10,38 @@ env:
 
 jobs:
 
-  Retag-Image:
+  Build-React-App:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+          cache: "npm"
+      - run: echo $GITHUB_REF_NAME > assets/version.txt
+      - run: npm install
+      - run: npm run build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: react-app
+          path: dist
+
+  Build-Docker-Image:
+    needs: [Build-React-App]
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
     steps:
-      
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: react-app
+          path: dist
+
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.2.1
         with:
@@ -29,13 +54,19 @@ jobs:
           credentials_json: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 
       - run: gcloud auth configure-docker ${{ env.REGISTRY }}
-      
-      - name: Tag image
-        run: gcloud artifacts docker tags add ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME
 
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME
 
   Deploy-To-Cloud-Run:
-    needs: [Retag-Image]
+    needs: [Build-Docker-Image]
     runs-on: ubuntu-latest
     permissions:
       contents: read

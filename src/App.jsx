@@ -4,9 +4,6 @@ import AppNav from './nav/AppNav'
 import AppHeader from './header/AppHeader'
 import {AppRoutes} from './Routes'
 import {AppThemeProvider} from './Theme'
-import InMemoryCache from './util/InMemoryCache'
-
-export const memoryCache = new InMemoryCache();
 
 function App() {
     return (

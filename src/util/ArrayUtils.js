@@ -1,8 +1,12 @@
 export const distinct = function (array, compareFn) {
-    return array.filter((e, i) => array.findIndex((a) => {
-        if (compareFn) {
-            return compareFn(a) === compareFn(e);
+    const compare = !!compareFn ? compareFn : entry => entry;
+
+    let flags = {};
+    return array.filter(entry => {
+        if (flags[compare(entry)]) {
+            return false;
         }
-        return a === e;
-    }) === i);
+        flags[compare(entry)] = true;
+        return true;
+    });
 };

@@ -57,7 +57,7 @@ async function fetchData() {
 }
 
 function aggregateDate(rawData, daysToLookBack) {
-    const startDate = Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1));
+    const startDate = truncDate(Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1))).getTime();
 
     let dataForTimeRange = rawData;
     if (daysToLookBack != -1) {

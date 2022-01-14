@@ -209,12 +209,12 @@ function OverviewReviewsHistoryChart() {
     const showWanikaniSeries = !!wanikaniReviews && wanikaniReviews.length > 0;
 
     function onTooltipChange(target) {
-        if (target) {
-            if (showWanikaniSeries) {
+        if (target?.point) {
+            if (showWanikaniSeries && chartData[target.point].wanikani > 0) {
                 target.series = wanikaniSeriesName;
-            } else if (showBunProSeries) {
+            } else if (showBunProSeries && chartData[target.point].bunPro > 0) {
                 target.series = bunProSeriesName;
-            } else if (showAnkiSeries) {
+            } else if (showAnkiSeries && chartData[target.point].anki > 0) {
                 target.series = ankiSeriesName;
             }
         }

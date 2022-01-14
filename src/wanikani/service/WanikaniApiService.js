@@ -1,5 +1,7 @@
 import * as localForage from "localforage/dist/localforage"
-import {memoryCache} from "../../App.jsx";
+import InMemoryCache from "../../util/InMemoryCache.js";
+
+const memoryCache = new InMemoryCache();
 
 const wanikaniApiUrl = 'https://api.wanikani.com';
 const cacheKeys = {
@@ -7,7 +9,7 @@ const cacheKeys = {
     reviews: 'wanikani-all-reviews',
 }
 
-const authHeader = (apiKey) => ({ 'Authorization': `Bearer ${apiKey}` })
+const authHeader = (apiKey) => ({'Authorization': `Bearer ${apiKey}`})
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -70,7 +72,7 @@ function saveApiKey(key) {
 
 async function fetchMultiPageRequest(path, startingId) {
     const headers = {
-        headers: { ...authHeader(apiKey()) },
+        headers: {...authHeader(apiKey())},
     };
 
     const startingPageParam = !!startingId ? `?page_after_id=${startingId}` : '';

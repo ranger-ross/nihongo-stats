@@ -5,6 +5,6 @@ export const useWanikaniApiKey = create(set => ({
     apiKey: WanikaniApiService.apiKey() || null,
     setApiKey: (apiKey) => set(() => {
         WanikaniApiService.saveApiKey(apiKey);
-        return { apiKey: apiKey };
+        return {apiKey: apiKey};
     }),
 }));

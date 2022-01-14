@@ -5,6 +5,7 @@ import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/materi
 import {sortAndGetMedian} from "../../util/MathUtils.js";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 import {millisToDays, millisToHours} from "../../util/DateUtils.js";
+import {distinct} from "../../util/ArrayUtils.js";
 
 const styles = {
     loadingContainer: {
@@ -15,9 +16,15 @@ const styles = {
     },
     container: {
         display: 'flex',
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
+        justifyContent: 'space-between'
     },
 };
+
+function getBurnedItems(allReviewsByType) {
+    const burned = allReviewsByType.filter(review => review.review.data['ending_srs_stage'] == 9);
+    return distinct(burned, review => review.subject.id);
+}
 
 async function fetchTotalsData() {
     const reviews = await WanikaniApiService.getReviews();
@@ -29,11 +36,30 @@ async function fetchTotalsData() {
             subject: subjects[review.data['subject_id']]
         });
     }
+
+    const radicalsTotal = data.filter(r => r.subject?.object == 'radical');
+    const radicalsDistinct = distinct(radicalsTotal, review => review.subject.id);
+    const radicalsBurned = getBurnedItems(radicalsTotal);
+
+    const kanjiTotal = data.filter(r => r.subject?.object == 'kanji');
+    const kanjiDistinct = distinct(kanjiTotal, review => review.subject.id);
+    const kanjiBurned = getBurnedItems(kanjiTotal);
+
+    const vocabularyTotal = data.filter(r => r.subject?.object == 'vocabulary');
+    const vocabularyDistinct = distinct(vocabularyTotal, review => review.subject.id);
+    const vocabularyBurned = getBurnedItems(vocabularyTotal);
+
     return {
         total: data.length,
-        radicals: data.filter(r => r.subject?.object == 'radical').length,
-        kanji: data.filter(r => r.subject?.object == 'kanji').length,
-        vocabulary: data.filter(r => r.subject?.object == 'vocabulary').length,
+        radicals: radicalsTotal.length,
+        radicalsDistinct: radicalsDistinct.length,
+        radicalsBurned: radicalsBurned.length,
+        kanji: kanjiTotal.length,
+        kanjiDistinct: kanjiDistinct.length,
+        kanjiBurned: kanjiBurned.length,
+        vocabulary: vocabularyTotal.length,
+        vocabularyDistinct: vocabularyDistinct.length,
+        vocabularyBurned: vocabularyBurned.length,
     };
 }
 
@@ -139,7 +165,7 @@ function WanikaniHistorySummaryChart() {
                     </div>
                 ) : (
                     <div style={styles.container}>
-                        <Grid container style={{maxWidth: '325px', marginTop: '10px'}}>
+                        <Grid container style={{maxWidth: '310px', marginTop: '10px'}}>
                             <TotalLabel label={'Total Reviews'}
                                         count={totalsData.total}
                             />
@@ -157,11 +183,46 @@ function WanikaniHistorySummaryChart() {
                             />
                         </Grid>
 
+                        <Grid container style={{maxWidth: '275px', marginTop: '10px'}}>
+                            <Grid item xs={6} style={{fontWeight: 'bold'}}>Total Lessons</Grid>
+                            <Grid item xs={6}/>
+                            <TotalLabel label={'Radicals'}
+                                        count={totalsData.radicalsDistinct}
+                                        color={WanikaniColors.blue}
+                            />
+                            <TotalLabel label={'Kanji'}
+                                        count={totalsData.kanjiDistinct}
+                                        color={WanikaniColors.pink}
+                            />
+                            <TotalLabel label={'Vocabulary'}
+                                        count={totalsData.vocabularyDistinct}
+                                        color={WanikaniColors.purple}
+                            />
+                        </Grid>
+
+                        <Grid container style={{maxWidth: '275px', marginTop: '10px'}}>
+                            <Grid item xs={6} style={{fontWeight: 'bold'}}>Burned Items</Grid>
+                            <Grid item xs={6}/>
+                            <TotalLabel label={'Radicals'}
+                                        count={totalsData.radicalsBurned}
+                                        color={WanikaniColors.blue}
+                            />
+                            <TotalLabel label={'Kanji'}
+                                        count={totalsData.kanjiBurned}
+                                        color={WanikaniColors.pink}
+                            />
+                            <TotalLabel label={'Vocabulary'}
+                                        count={totalsData.vocabularyBurned}
+                                        color={WanikaniColors.purple}
+                            />
+                        </Grid>
+
                         <Grid container style={{maxWidth: '350px', marginTop: '10px'}}>
                             <DaysAndHoursLabel label={'Time since start'} milliseconds={levelData.timeSinceStart}/>
                             <DaysAndHoursLabel label={'Average Time per level'} milliseconds={levelData.average}/>
                             <DaysAndHoursLabel label={'Median Time per level'} milliseconds={levelData.median}/>
                         </Grid>
+
                     </div>
                 )}
 

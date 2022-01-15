@@ -1,5 +1,4 @@
 import {RoutePaths} from "../Routes";
-import {Card, CardContent} from "@mui/material";
 import BunProPreloadedData from "./components/BunProPreloadedData.jsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 import BunProReviewsHistoryChart from "./components/BunProReviewsHistoryChart.jsx";

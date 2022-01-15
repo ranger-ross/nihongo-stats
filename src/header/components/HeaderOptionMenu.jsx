@@ -1,6 +1,6 @@
 import {IconButton, Link, Menu, MenuItem} from "@mui/material";
 import MoreIcon from '@mui/icons-material/MoreVert';
-import React from "react";
+import React, {useState} from "react";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
 import LogoutIcon from '@mui/icons-material/Logout';
 import InfoIcon from '@mui/icons-material/Info';
@@ -9,11 +9,19 @@ import {useNavigate} from "react-router";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {useAppVersion} from "../../hooks/useAppVersion.jsx";
 import {AppUrls} from "../../Constants.js";
+import {Replay} from "@mui/icons-material";
+import {ClearCacheDialog} from "./ClearCacheDialog.jsx";
+
+const iconPaddingRight = '7px';
 
 const styles = {
     logoutOption: {
         color: 'red',
-        marginRight: '3px'
+        marginRight: iconPaddingRight
+    },
+    refreshOption: {
+        color: '#5babf2',
+        marginRight: iconPaddingRight
     },
     versionText: {
         fontSize: 'small',
@@ -32,7 +40,8 @@ const styles = {
 };
 
 function HeaderOptionMenu() {
-    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const open = Boolean(anchorEl);
     const wanikaniApiKeyStore = useWanikaniApiKey();
     const bunProApiKeyStore = useBunProApiKey();
@@ -46,6 +55,11 @@ function HeaderOptionMenu() {
 
     const handleBunProLogout = () => {
         bunProApiKeyStore.setApiKey(null);
+        setAnchorEl(null);
+    }
+
+    const handleForceRefresh = () => {
+        setIsDialogOpen(true);
         setAnchorEl(null);
     }
 
@@ -67,20 +81,25 @@ function HeaderOptionMenu() {
             >
                 {bunProApiKeyStore.apiKey ? (
                     <MenuItem onClick={handleBunProLogout}>
-                        <LogoutIcon style={styles.logoutOption}/>
+                        <LogoutIcon fontSize={'small'} style={styles.logoutOption}/>
                         Logout of BunPro
                     </MenuItem>
                 ) : null}
 
                 {wanikaniApiKeyStore.apiKey ? (
                     <MenuItem onClick={handleWanikaniLogout}>
-                        <LogoutIcon style={styles.logoutOption}/>
+                        <LogoutIcon fontSize={'small'} style={styles.logoutOption}/>
                         Logout of Wanikani
                     </MenuItem>
                 ) : null}
 
+                <MenuItem onClick={handleForceRefresh}>
+                    <Replay fontSize={'small'} style={styles.refreshOption}/>
+                    Force Refresh
+                </MenuItem>
+
                 <MenuItem onClick={goToAboutPage} divider={true}>
-                    <InfoIcon style={{marginRight: '3px'}}/>
+                    <InfoIcon fontSize={'small'} style={{marginRight: iconPaddingRight}}/>
                     About
                 </MenuItem>
 
@@ -97,6 +116,10 @@ function HeaderOptionMenu() {
                 </div>
 
             </Menu>
+
+            <ClearCacheDialog isOpen={isDialogOpen}
+                              onClose={() => setIsDialogOpen(false)}
+            />
         </>
     );
 }

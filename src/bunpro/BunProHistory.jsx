@@ -5,6 +5,7 @@ import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 import BunProReviewsHistoryChart from "./components/BunProReviewsHistoryChart.jsx";
 import BunProTotalReviewsChart from "./components/BunProTotalReviewsChart.jsx";
 import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
+import BunProStudyHistoryChart from "./components/BunProStudyHistoryChart.jsx";
 
 
 function BunProHistory() {
@@ -29,6 +30,11 @@ function BunProHistory() {
                         </CardContent>
                     </Card>
 
+                    <Card variant={'outlined'} style={{margin: '15px'}}>
+                        <CardContent>
+                            <BunProStudyHistoryChart/>
+                        </CardContent>
+                    </Card>
 
                 </div>
             </BunProPreloadedData>

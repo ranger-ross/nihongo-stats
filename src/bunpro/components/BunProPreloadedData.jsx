@@ -34,7 +34,6 @@ function LoadingItem({text, isLoading}) {
 }
 
 function BunProPreloadedData({children}) {
-    const [userProgress, setUserProgress] = useState(false);
     const [grammarPoints, setGrammarPoints] = useState(false);
     const [allReviews, setAllReviews] = useState(false);
     const {status, setStatus} = useWanikaniPreloadStatus();
@@ -46,8 +45,6 @@ function BunProPreloadedData({children}) {
         console.log('Preloading BunPro Data');
 
         Promise.all([
-            BunProApiService.getUserProgress()
-                .then(() => setUserProgress(true)),
             BunProApiService.getGrammarPoints()
                 .then(() => setGrammarPoints(true)),
             BunProApiService.getAllReviews()
@@ -59,7 +56,7 @@ function BunProPreloadedData({children}) {
             });
     }, []);
 
-    const isLoaded = status || (userProgress && grammarPoints && allReviews);
+    const isLoaded = status || (grammarPoints && allReviews);
 
     return (
         <>
@@ -72,7 +69,6 @@ function BunProPreloadedData({children}) {
                             <strong>Loading BunPro Data...</strong>
                             <br/>
                             <LoadingItem text={'Grammar Points'} isLoading={!grammarPoints}/>
-                            <LoadingItem text={'User Progress'} isLoading={!userProgress}/>
                             <LoadingItem text={'Reviews'} isLoading={!grammarPoints}/>
                         </div>
                     </div>

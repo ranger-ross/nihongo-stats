@@ -5,7 +5,7 @@ import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 import BunProReviewsHistoryChart from "./components/BunProReviewsHistoryChart.jsx";
 import BunProTotalReviewsChart from "./components/BunProTotalReviewsChart.jsx";
 import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
-import BunProStudyHistoryChart from "./components/BunProStudyHistoryChart.jsx";
+import BunProTotalGrammarPointsChart from "./components/BunProTotalGrammarPointsChart.jsx";
 
 
 function BunProHistory() {
@@ -18,23 +18,11 @@ function BunProHistory() {
             <BunProPreloadedData>
                 <div>
 
-                    <Card variant={'outlined'} style={{margin: '15px'}}>
-                        <CardContent>
-                            <BunProReviewsHistoryChart/>
-                        </CardContent>
-                    </Card>
+                    <BunProReviewsHistoryChart/>
 
-                    <Card variant={'outlined'} style={{margin: '15px'}}>
-                        <CardContent>
-                            <BunProTotalReviewsChart/>
-                        </CardContent>
-                    </Card>
+                    <BunProTotalReviewsChart/>
 
-                    <Card variant={'outlined'} style={{margin: '15px'}}>
-                        <CardContent>
-                            <BunProStudyHistoryChart/>
-                        </CardContent>
-                    </Card>
+                    <BunProTotalGrammarPointsChart/>
 
                 </div>
             </BunProPreloadedData>

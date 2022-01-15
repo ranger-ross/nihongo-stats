@@ -8,6 +8,7 @@ import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import {fetchAllBunProReviews} from "../service/BunProDataUtil.js";
+import useWindowDimensions from "../../hooks/useWindowDimensions.jsx";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -64,6 +65,8 @@ function BunProTotalReviewsChart() {
     const [rawData, setRawData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
+    const {width} = useWindowDimensions();
+    const isMobile = width < 400;
 
     useEffect(() => {
         let isSubscribed = true;
@@ -101,7 +104,7 @@ function BunProTotalReviewsChart() {
         );
     }
 
-    const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], 6);
+    const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], isMobile ? 3 : 6);
 
     const LabelWithDate = (props) => {
         const date = new Date(props.text);
@@ -125,7 +128,7 @@ function BunProTotalReviewsChart() {
     };
 
     return (
-        <Card>
+        <Card style={{margin: '15px'}}>
             <CardContent>
 
                 <Grid container>
@@ -177,7 +180,7 @@ function BunProTotalReviewsChart() {
                                 valueField="total"
                                 argumentField="date"/>
 
-                            <Legend/>
+                            <Legend position={isMobile ? 'bottom' : 'right'}/>
                             <EventTracker/>
                             <Tooltip contentComponent={ReviewToolTip}/>
                         </Chart>

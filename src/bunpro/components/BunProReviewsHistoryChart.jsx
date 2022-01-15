@@ -121,7 +121,7 @@ function BunProReviewsHistoryChart() {
     };
 
     return (
-        <Card>
+        <Card style={{margin: '15px'}}>
             <CardContent>
 
                 <Grid container>

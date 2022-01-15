@@ -78,7 +78,7 @@ function daysSinceDate(date) {
     return millisToDays(millis);
 }
 
-function BunProStudyHistoryChart() {
+function BunProTotalGrammarPointsChart() {
     const [rawData, setRawData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [daysToLookBack, setDaysToLookBack] = useState(60);
@@ -146,7 +146,7 @@ function BunProStudyHistoryChart() {
     };
 
     return (
-        <Card>
+        <Card style={{margin: '15px'}}>
             <CardContent>
 
                 <Grid container>
@@ -211,4 +211,4 @@ function BunProStudyHistoryChart() {
     );
 }
 
-export default BunProStudyHistoryChart;
+export default BunProTotalGrammarPointsChart;

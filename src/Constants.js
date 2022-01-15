@@ -5,8 +5,16 @@ export const AppNames = {
     wanikani: 'wanikani',
 };
 
-export const apiProxyUrl = 'https://api-proxy.nihongostats.com';
-export const bunproApiUrl = 'https://bunpro.jp/api';
+export const AppUrls = {
+    apiProxy: 'https://api-proxy.nihongostats.com',
+
+    // API URLs
+    ankiApi: 'http://localhost:8765',
+    bunproApi: 'https://bunpro.jp/api',
+    wanikaniApi: 'https://api.wanikani.com',
+
+    releasesPage: 'https://github.com/ranger-ross/nihongo-stats/releases',
+};
 
 export const WanikaniColors = {
     blue: '#00a1f1',

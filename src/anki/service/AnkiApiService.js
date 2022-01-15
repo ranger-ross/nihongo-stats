@@ -1,6 +1,7 @@
 import * as localForage from "localforage/dist/localforage"
+import {AppUrls} from "../../Constants.js";
 
-const ankiConnectApiUrl = 'http://localhost:8765';
+const ankiConnectApiUrl = AppUrls.ankiApi;
 
 
 function invoke(action, version, params = {}) {

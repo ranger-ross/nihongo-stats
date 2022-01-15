@@ -13,7 +13,13 @@ export const AppUrls = {
     bunproApi: 'https://bunpro.jp/api',
     wanikaniApi: 'https://api.wanikani.com',
 
-    releasesPage: 'https://github.com/ranger-ross/nihongo-stats/releases',
+    // GitHub Pages
+    githubPage: 'https://github.com/ranger-ross/nihongo-stats',
+    githubIssuesPage: 'https://github.com/ranger-ross/nihongo-stats/issues',
+    githubReleasesPage: 'https://github.com/ranger-ross/nihongo-stats/releases',
+
+    wkStats: 'https://www.wkstats.com/',
+
 };
 
 export const WanikaniColors = {

@@ -117,9 +117,16 @@ async function login(apiKey) {
 }
 
 
+async function flushCache() {
+    for (const key of Object.keys(cacheKeys)) {
+        await localForage.removeItem(cacheKeys[key]);
+    }
+}
+
 export default {
     saveApiKey: saveApiKey,
     apiKey: apiKey,
+    flushCache: flushCache,
 
     login: login,
     getAllReviews: getAllReviews,

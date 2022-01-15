@@ -3,6 +3,10 @@ import {AppUrls} from "../../Constants.js";
 
 const ankiConnectApiUrl = AppUrls.ankiApi;
 
+const cacheKeys = {
+    decks: 'anki-deck-names-and-ids',
+    reviewsPrefix: 'anki-reviews-'
+}
 
 function invoke(action, version, params = {}) {
     return new Promise((resolve, reject) => {
@@ -81,8 +85,12 @@ function getCardReviews(deckName, startTimestamp = new Date(2000, 0, 1).getTime(
     }).then(data => data.map(createCardReviewFromTuple));
 }
 
+function getReviewsCacheKey(deckName) {
+    return `${cacheKeys.reviewsPrefix}${deckName}`;
+}
+
 async function getAllReviewsByDeck(deckName) {
-    let cachedValue = await localForage.getItem(`anki-reviews-${deckName}`);
+    let cachedValue = await localForage.getItem(getReviewsCacheKey(deckName));
     let reviews;
     if (!!cachedValue && cachedValue.data.length > 0) {
         reviews = cachedValue.data;
@@ -95,7 +103,7 @@ async function getAllReviewsByDeck(deckName) {
         reviews = await getCardReviews(deckName);
     }
     reviews = reviews.sort((a, b) => a.reviewTime - b.reviewTime);
-    localForage.setItem(`anki-reviews-${deckName}`, {
+    localForage.setItem(getReviewsCacheKey(deckName), {
         data: reviews,
         lastUpdate: Date.now()
     });
@@ -103,13 +111,13 @@ async function getAllReviewsByDeck(deckName) {
 }
 
 async function getDeckNamesAndIds() {
-    let cachedValue = await localForage.getItem(`anki-deck-names-and-ids`);
+    let cachedValue = await localForage.getItem(cacheKeys.decks);
     if (!!cachedValue && cachedValue.lastUpdate > Date.now() - 1000 * 60 * 60 * 5) {
         return cachedValue.data;
     }
     let data = await invoke("deckNamesAndIds", 6).then(convertDeckMapToArray);
     data = data.filter(deck => deck.name.toLowerCase() !== 'default')
-    localForage.setItem(`anki-deck-names-and-ids`, {
+    localForage.setItem(cacheKeys.decks, {
         data: data,
         lastUpdate: Date.now()
     });
@@ -130,9 +138,23 @@ function requestPermission() {
     return invoke("requestPermission", 6);
 }
 
+async function flushCache() {
+
+    await localForage.iterate(async function (value, key) {
+        if (key.indexOf(cacheKeys.reviewsPrefix) > -1) {
+            await localForage.removeItem(key);
+        }
+    });
+
+    for (const key of Object.keys(cacheKeys)) {
+        await localForage.removeItem(cacheKeys[key]);
+    }
+}
+
 export default {
     connect: () => connect(),
     getDecks: getDeckNames,
+    flushCache: flushCache,
     getDeckNamesAndIds: getDeckNamesAndIds,
     getNumCardsReviewedByDay: () => invoke("getNumCardsReviewedByDay", 6),
     getCollectionStatsHtml: () => invoke("getCollectionStatsHTML", 6),

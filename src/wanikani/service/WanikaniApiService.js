@@ -7,7 +7,11 @@ const memoryCache = new InMemoryCache();
 const wanikaniApiUrl = AppUrls.wanikaniApi;
 const cacheKeys = {
     apiKey: 'wanikani-api-key',
-    reviews: 'wanikani-all-reviews',
+    reviews: 'wanikani-reviews',
+    subjects: 'wanikani-subjects',
+    assignments: 'wanikani-assignments',
+    summary: 'wanikani-summary',
+    levelProgression: 'wanikani-level-progressions',
 }
 
 const authHeader = (apiKey) => ({'Authorization': `Bearer ${apiKey}`})
@@ -101,15 +105,15 @@ async function getFromMemoryCacheOrFetchMultiPageRequest(path) {
 }
 
 async function getAllAssignments() {
-    if (memoryCache.includes('wanikani-assignments')) {
-        const cachedValue = memoryCache.get('wanikani-assignments');
+    if (memoryCache.includes(cacheKeys.assignments)) {
+        const cachedValue = memoryCache.get(cacheKeys.assignments);
         // Assignments ttl is 5 mins in Mem Cache
         if (cachedValue.lastUpdated > (Date.now() - 1000 * 60 * 5)) {
             return cachedValue.data;
         }
     }
 
-    const cachedValue = await localForage.getItem('wanikani-assignments');
+    const cachedValue = await localForage.getItem(cacheKeys.assignments);
     if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 10)) {
         return cachedValue.data;
     }
@@ -120,15 +124,23 @@ async function getAllAssignments() {
         data: assignments,
         lastUpdated: new Date().getTime(),
     };
-    localForage.setItem('wanikani-assignments', cacheObject);
-    memoryCache.put('wanikani-assignments', cacheObject);
+    localForage.setItem(cacheKeys.assignments, cacheObject);
+    memoryCache.put(cacheKeys.assignments, cacheObject);
 
     return assignments;
+}
+
+async function flushCache() {
+    for (const key of Object.keys(cacheKeys)) {
+        await localForage.removeItem(cacheKeys[key]);
+    }
 }
 
 export default {
     saveApiKey: saveApiKey,
     apiKey: apiKey,
+    flushCache: flushCache,
+
 
     login: async (apiKey) => {
         const user = await getFromMemoryCacheOrFetch('/v2/user', apiKey);
@@ -137,7 +149,7 @@ export default {
     },
     getUser: async () => getFromMemoryCacheOrFetch('/v2/user'),
     getSummary: async () => {
-        const cachedValue = await localForage.getItem('wanikani-summary');
+        const cachedValue = await localForage.getItem(cacheKeys.summary);
         if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 5)) {
             return cachedValue.data;
         }
@@ -145,7 +157,7 @@ export default {
         const response = await fetchWanikaniApi('/v2/summary', apiKey());
         const summary = await response.json();
 
-        localForage.setItem('wanikani-summary', {
+        localForage.setItem(cacheKeys.summary, {
             data: summary,
             lastUpdated: new Date().getTime(),
         });
@@ -153,7 +165,7 @@ export default {
         return summary;
     },
     getLevelProgress: async () => {
-        const cachedValue = await localForage.getItem('wanikani-level-progressions');
+        const cachedValue = await localForage.getItem(cacheKeys.levelProgression);
         if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 60)) {
             return cachedValue.data;
         }
@@ -161,7 +173,7 @@ export default {
         const response = await fetchWanikaniApi('/v2/level_progressions', apiKey());
         const data = await response.json();
 
-        localForage.setItem('wanikani-level-progressions', {
+        localForage.setItem(cacheKeys.levelProgression, {
             data: data,
             lastUpdated: new Date().getTime(),
         });
@@ -172,35 +184,35 @@ export default {
     getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
     getAllAssignments: getAllAssignments,
     getSubjects: async () => {
-        if (memoryCache.includes('wanikani-subjects')) {
-            return memoryCache.get('wanikani-subjects');
+        if (memoryCache.includes(cacheKeys.subjects)) {
+            return memoryCache.get(cacheKeys.subjects);
         }
 
-        const cachedValue = await localForage.getItem('wanikani-subjects');
+        const cachedValue = await localForage.getItem(cacheKeys.subjects);
         if (!!cachedValue) {
-            memoryCache.put('wanikani-subjects', cachedValue.data);
+            memoryCache.put(cacheKeys.subjects, cachedValue.data);
             return cachedValue.data;
         }
 
         const subjects = await fetchMultiPageRequest('/v2/subjects');
 
-        localForage.setItem('wanikani-subjects', {
+        localForage.setItem(cacheKeys.subjects, {
             data: subjects,
             lastUpdated: new Date().getTime(),
         });
-        memoryCache.put('wanikani-subjects', subjects);
+        memoryCache.put(cacheKeys.subjects, subjects);
         return subjects;
     },
     getReviews: async () => {
-        if (memoryCache.includes('wanikani-reviews')) {
-            const cachedValue = memoryCache.get('wanikani-reviews');
+        if (memoryCache.includes(cacheKeys.reviews)) {
+            const cachedValue = memoryCache.get(cacheKeys.reviews);
             // Only check for new reviews every 60 seconds
             if (cachedValue.lastUpdated > (Date.now() - 1000 * 60)) {
                 return cachedValue.data;
             }
         }
 
-        const cachedValue = await localForage.getItem('wanikani-reviews');
+        const cachedValue = await localForage.getItem(cacheKeys.reviews);
         let reviews;
         if (!!cachedValue) {
             reviews = cachedValue.data;
@@ -215,8 +227,8 @@ export default {
             data: reviews,
             lastUpdated: new Date().getTime(),
         };
-        localForage.setItem('wanikani-reviews', cacheObject);
-        memoryCache.put('wanikani-reviews', cacheObject);
+        localForage.setItem(cacheKeys.reviews, cacheObject);
+        memoryCache.put(cacheKeys.reviews, cacheObject);
 
         return reviews;
     },

@@ -1,8 +1,6 @@
-import {useEffect} from "react";
 import {RoutePaths} from "../Routes.jsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 import {BunProWelcomeTile} from "./components/BunProWelcomeTile.jsx";
-import BunProApiService from "./service/BunProApiService.js";
 import BunProPreloadedData from "./components/BunProPreloadedData.jsx";
 import {BunProJLPTTile} from "./components/BunProJLPTTile";
 import BunProUpcomingReviewsChart from "./components/BunProUpcomingReviewsChart.jsx";
@@ -34,15 +32,7 @@ const styles = {
 };
 
 function BunProDashboard() {
-
     const {apiKey} = useBunProApiKey();
-
-    useEffect(() => {
-        BunProApiService.getUserProgress()
-            .then(console.log)
-            .catch(console.error);
-    }, []);
-
     return (
         <RequireOrRedirect resource={apiKey}
                            redirectPath={RoutePaths.bunproLogin.path}

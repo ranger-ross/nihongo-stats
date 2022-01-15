@@ -27,15 +27,6 @@ const styles = {
 };
 
 function OverviewDashboard() {
-
-    // const {apiKey} = useBunProApiKey();
-    //
-    // useEffect(() => {
-    //     BunProApiService.getUserProgress()
-    //         .then(console.log)
-    //         .catch(console.error);
-    // }, []);
-
     return (
 
         <div style={styles.container}>

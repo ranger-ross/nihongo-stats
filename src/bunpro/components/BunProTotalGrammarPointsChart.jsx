@@ -7,11 +7,11 @@ import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.js";
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import DaysSelector from "../../shared/DaysSelector.jsx";
-import {fetchAllBunProReviews} from "../service/BunProDataUtil.js";
 import useWindowDimensions from "../../hooks/useWindowDimensions.jsx";
+import BunProApiService from "../service/BunProApiService.js";
+import {createGrammarPointsLookupMap} from "../service/BunProDataUtil.js";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
-
 
 function DataPoint(date, previousDataPoint) {
     const createEmptyDataPoint = () => ({
@@ -26,47 +26,65 @@ function DataPoint(date, previousDataPoint) {
 
     dp.date = truncDate(date);
 
-    dp.addReview = (review) => {
+    dp.addReview = (level) => {
         dp.total += 1;
-
-        const level = review.level;
-        if (!dp[level]) {
-            dp[level] = 1;
-        } else {
+        if (!!dp[level]) {
             dp[level] += 1;
+        } else {
+            dp[level] = 1;
         }
     };
+
     return dp;
 }
 
+function aggregateReviewByDay(reviews, grammarPoints) {
+    const orderedReviews = reviews
+        .map(review => ({
+            ...review,
+            createdAt: new Date(review['created_at'])
+        }))
+        .sort((a, b,) => a.createdAt.getTime() - b.createdAt.getTime());
 
-function aggregateReviewByDay(reviews) {
-    const orderedReviews = reviews.sort((a, b,) => a.current.time.getTime() - b.current.time.getTime());
 
-    let days = [new DataPoint(orderedReviews[0].current.time)];
+    let days = [new DataPoint(orderedReviews[0].createdAt)];
 
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
-        if (lastDay.date.getTime() !== truncDate(review.current.time).getTime()) {
-            days.push(new DataPoint(review.current.time, lastDay));
+        if (lastDay.date.getTime() !== truncDate(review.createdAt).getTime()) {
+            days.push(new DataPoint(review.createdAt, lastDay));
             lastDay = days[days.length - 1];
         }
-        lastDay.addReview(review);
+        const gp = grammarPoints[review['grammar_point_id']]
+        lastDay.addReview(gp.level.replace('JLPT', 'N'));
     }
+
     return days;
 }
 
-async function fetchData() {
-    const reviews = await fetchAllBunProReviews();
-    return aggregateReviewByDay(reviews)
+async function fetchGrammarPoints() {
+    const gp = await BunProApiService.getGrammarPoints();
+    return createGrammarPointsLookupMap(gp);
 }
 
-function BunProTotalReviewsChart() {
+async function fetchData() {
+    const reviews = await BunProApiService.getAllReviews();
+    const grammarPoints = await fetchGrammarPoints();
+    return aggregateReviewByDay(reviews.reviews, grammarPoints);
+}
+
+function daysSinceDate(date) {
+    const millis = truncDate(Date.now()).getTime() - truncDate(date).getTime();
+    return millisToDays(millis);
+}
+
+function BunProTotalGrammarPointsChart() {
     const [rawData, setRawData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [daysToLookBack, setDaysToLookBack] = useState(10_000);
+    const [daysToLookBack, setDaysToLookBack] = useState(60);
     const {width} = useWindowDimensions();
     const isMobile = width < 400;
+
 
     useEffect(() => {
         let isSubscribed = true;
@@ -76,7 +94,10 @@ function BunProTotalReviewsChart() {
             .then(data => {
                 if (!isSubscribed)
                     return;
-                setDaysToLookBack(data.length)
+
+                if (data.length > 0) {
+                    setDaysToLookBack(daysSinceDate(data[0].date));
+                }
                 setRawData(data);
             })
             .finally(() => {
@@ -92,14 +113,11 @@ function BunProTotalReviewsChart() {
 
     function ReviewToolTip({targetItem}) {
         const dp = chartData[targetItem.point];
+        const value = targetItem.series.toLowerCase() === 'total' ? dp.total : dp[targetItem.series];
         return (
             <>
                 <p>{dp.date.toLocaleDateString()}</p>
-                {targetItem.series == 'Total' ? (
-                    <p>Total: {(dp.total).toLocaleString()}</p>
-                ) : (
-                    <p>{targetItem.series}: {dp[targetItem.series]}</p>
-                )}
+                <p>{targetItem.series}: {(value)?.toLocaleString()}</p>
             </>
         );
     }
@@ -135,7 +153,7 @@ function BunProTotalReviewsChart() {
                     <Grid item xs={12} md={4}/>
                     <Grid item xs={12} md={4}>
                         <Typography variant={'h5'} style={{textAlign: 'center'}}>
-                            Total Reviews
+                            Total Grammar Points
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
@@ -167,6 +185,7 @@ function BunProTotalReviewsChart() {
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
                             <ValueAxis/>
 
+
                             {JLPTLevels.map(level => (
                                 <LineSeries
                                     key={level}
@@ -192,4 +211,4 @@ function BunProTotalReviewsChart() {
     );
 }
 
-export default BunProTotalReviewsChart;
+export default BunProTotalGrammarPointsChart;

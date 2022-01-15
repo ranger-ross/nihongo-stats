@@ -90,7 +90,7 @@ function HeaderOptionMenu() {
                         {version}
                     </span>
                     <Link target="_blank"
-                          href={AppUrls.releasesPage}
+                          href={AppUrls.githubReleasesPage}
                           style={styles.whatsNewText}>
                         What's New
                     </Link>

@@ -38,7 +38,8 @@ function SubjectTile({subject}) {
     ), [subject]);
 }
 
-function ItemGrouping({title, subjects}) {
+function ItemGrouping({title, subjects, secondaryGroupBy}) {
+    const subGroups = useMemo(() => secondaryGroupBy.group(subjects), [subjects, secondaryGroupBy.key])
     return (
         <Card style={{margin: '5px'}}>
             <CardContent>
@@ -53,13 +54,28 @@ function ItemGrouping({title, subjects}) {
                 </div>
 
 
-                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                    {subjects?.map(subject => (
-                        <SubjectTile key={subject.subjectId + '-subject'}
-                                     subject={subject}
-                        />
-                    ))}
-                </div>
+                {secondaryGroupBy.key === groupByOptions.none.key ? (
+                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                        {subjects?.map(subject => (
+                            <SubjectTile key={subject.subjectId + '-subject'}
+                                         subject={subject}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    subGroups.map(group => (
+                        <div key={group.title}>
+                            {group.title}
+                            <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                {group.subjects?.map(subject => (
+                                    <SubjectTile key={subject.subjectId + '-subject'}
+                                                 subject={subject}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    ))
+                )}
             </CardContent>
         </Card>
     );
@@ -86,10 +102,12 @@ function groupByLevel(subjects) {
         levelsData[subject.level].push(subject);
     }
 
-    return getWanikaniLevels().map(level => ({
-        title: 'Level ' + level,
-        subjects: levelsData[level] ?? []
-    }));
+    return getWanikaniLevels()
+        .map(level => ({
+            title: 'Level ' + level,
+            subjects: levelsData[level] ?? []
+        }))
+        .filter(group => group.subjects.length > 0);
 }
 
 function groupBySrsStage(subjects) {
@@ -103,10 +121,12 @@ function groupBySrsStage(subjects) {
         stageMap[srsStage].push(subject);
     }
 
-    return getWanikaniSrsStages().map((stage, index) => ({
-        title: stage,
-        subjects: stageMap[stage === 'Locked' ? 'locked' : index]
-    }));
+    return getWanikaniSrsStages()
+        .map((stage, index) => ({
+            title: stage,
+            subjects: stageMap[stage === 'Locked' ? 'locked' : index] ?? []
+        }))
+        .filter(group => group.subjects.length > 0);
 }
 
 function filterSubjectsByType(subjects, typesToShow) {
@@ -119,6 +139,11 @@ function filterSubjectsByType(subjects, typesToShow) {
 }
 
 const groupByOptions = {
+    none: {
+        key: 'none',
+        displayText: 'None',
+        group: (subjects) => subjects,
+    },
     level: {
         key: 'level',
         displayText: 'Level',
@@ -131,13 +156,40 @@ const groupByOptions = {
     },
 };
 
-function FilterControls({groupBy, setGroupBy, typesToShow, setTypesToShow}) {
+function GroupByToggle({options, groupBy, setGroupBy}) {
+    return (
+        <ToggleButtonGroup
+            value={groupBy.key}
+            size={'small'}
+            exclusive
+            onChange={e => setGroupBy(options.find(o => o.key === e.target.value))}
+        >
+            {options.map((option) => (
+                <ToggleButton key={option.key}
+                              value={option.key}
+                >
+                    {option.displayText}
+                </ToggleButton>
+            ))}
+        </ToggleButtonGroup>
+    );
+}
+
+function FilterControls({
+                            primaryGroupBy,
+                            setPrimaryGroupBy,
+                            secondaryGroupBy,
+                            setSecondaryGroupBy,
+                            typesToShow,
+                            setTypesToShow
+                        }) {
     const groupByOptionsList = [
+        groupByOptions.none,
         groupByOptions.level,
         groupByOptions.srsStage
     ];
 
-    const onTypeChange = useCallback((option) => {
+    function onTypeChange(option) {
         let removeIndex = typesToShow.indexOf(option.toLowerCase());
         if (removeIndex === -1) {
             setTypesToShow([...typesToShow, option.toLowerCase()]);
@@ -145,39 +197,33 @@ function FilterControls({groupBy, setGroupBy, typesToShow, setTypesToShow}) {
             typesToShow.splice(removeIndex, 1)
             setTypesToShow([...typesToShow]);
         }
-    }, [typesToShow, setTypesToShow]);
-
+    }
 
     return (
         <Card>
             <CardContent>
-                Group By
-                <ToggleButtonGroup
-                    value={groupBy.key}
-                    size={'small'}
-                    exclusive
-                    onChange={e => setGroupBy(groupByOptionsList.find(o => o.key === e.target.value))}
-                >
-                    {groupByOptionsList.map((option) => (
-                        <ToggleButton key={option.key}
-                                      value={option.key}
-                        >
-                            {option.displayText}
-                        </ToggleButton>
-                    ))}
-                </ToggleButtonGroup>
+                Group By Primary
+                <GroupByToggle options={groupByOptionsList}
+                               groupBy={primaryGroupBy}
+                               setGroupBy={setPrimaryGroupBy}
+                />
+                <br/>
 
+                Group By Secondary
+                <GroupByToggle options={groupByOptionsList}
+                               groupBy={secondaryGroupBy}
+                               setGroupBy={setSecondaryGroupBy}
+                />
                 <br/>
 
                 Display Types
                 {['Radical', 'Kanji', 'Vocabulary'].map((option) => (
-                    <>
-                        <Checkbox key={option}
-                                  checked={typesToShow.includes(option.toLowerCase())}
+                    <span key={option}>
+                        <Checkbox checked={typesToShow.includes(option.toLowerCase())}
                                   size="small"
-                                  onClick={e => onTypeChange(option)}
+                                  onClick={() => onTypeChange(option)}
                         /> {option}
-                    </>
+                    </span>
                 ))}
 
             </CardContent>
@@ -188,7 +234,8 @@ function FilterControls({groupBy, setGroupBy, typesToShow, setTypesToShow}) {
 function WanikaniItems() {
     const {apiKey} = useWanikaniApiKey();
     const [subjects, setSubjects] = useState([]);
-    const [groupBy, setGroupBy] = useState(groupByOptions.srsStage);
+    const [primaryGroupBy, setPrimaryGroupBy] = useState(groupByOptions.srsStage);
+    const [secondaryGroupBy, setSecondaryGroupBy] = useState(groupByOptions.none);
     const [typesToShow, setTypesToShow] = useState(['kanji']);
 
     useEffect(() => {
@@ -198,15 +245,17 @@ function WanikaniItems() {
 
     const subjectsToShow = useMemo(() => filterSubjectsByType(subjects, typesToShow), [subjects, typesToShow]);
 
-    const data = useMemo(() => groupBy.group(subjectsToShow), [groupBy, subjectsToShow]);
+    const data = useMemo(() => primaryGroupBy.group(subjectsToShow), [primaryGroupBy, subjectsToShow]);
 
     return (
         <RequireOrRedirect resource={apiKey}
                            redirectPath={RoutePaths.wanikaniLogin.path}
         >
             <div style={styles.container}>
-                <FilterControls groupBy={groupBy}
-                                setGroupBy={setGroupBy}
+                <FilterControls primaryGroupBy={primaryGroupBy}
+                                setPrimaryGroupBy={setPrimaryGroupBy}
+                                secondaryGroupBy={secondaryGroupBy}
+                                setSecondaryGroupBy={setSecondaryGroupBy}
                                 typesToShow={typesToShow}
                                 setTypesToShow={setTypesToShow}
                 />
@@ -215,6 +264,7 @@ function WanikaniItems() {
                     <ItemGrouping key={group.title}
                                   title={group.title}
                                   subjects={group.subjects}
+                                  secondaryGroupBy={secondaryGroupBy}
                     />
                 ))}
             </div>

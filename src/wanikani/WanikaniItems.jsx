@@ -1,13 +1,13 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import {RoutePaths} from "../Routes";
-import {useEffect, useState} from "react";
+import * as React from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
-import {Card, CardContent, ToggleButton, ToggleButtonGroup, Typography} from "@mui/material";
-import WanikaniItemTile, {WanikaniItemTileV2} from "./components/WanikaniItemTile.jsx";
+import {Card, CardContent, Checkbox, ToggleButton, ToggleButtonGroup, Typography} from "@mui/material";
+import {WanikaniItemTileV2} from "./components/WanikaniItemTile.jsx";
 import WanikaniApiService from "./service/WanikaniApiService.js";
 import {combineAssignmentAndSubject, createAssignmentMap, isSubjectHidden} from "./service/WanikaniDataUtil.js";
 import {getColorByWanikaniSrsStage} from "./service/WanikaniStyleUtil.js";
-import * as React from "react";
 
 const styles = {
     container: {
@@ -20,9 +20,23 @@ function getWanikaniLevels() {
 }
 
 function getWanikaniSrsStages() {
-    return ['Unlocked', 'Apprentice 1', 'Apprentice 2', 'Apprentice 3', 'Apprentice 4', 'Guru 1', 'Guru 2', 'Master', 'Enlightened', 'Burned', 'Locked'];
+    return ['Unlocked', 'Apprentice 1', 'Apprentice 2', 'Apprentice 3', 'Apprentice 4',
+        'Guru 1', 'Guru 2', 'Master', 'Enlightened', 'Burned', 'Locked'];
 }
 
+
+function SubjectTile({subject}) {
+    return useMemo(() => (
+        <WanikaniItemTileV2
+            text={subject.characters || '?'}
+            link={subject['document_url']}
+            meaning={subject.meanings.map(m => m.meaning).join(', ')}
+            srsLevel={subject['srs_stage']}
+            color={getColorByWanikaniSrsStage(subject['srs_stage'])}
+            size={5}
+        />
+    ), [subject]);
+}
 
 function ItemGrouping({title, subjects}) {
     return (
@@ -41,14 +55,8 @@ function ItemGrouping({title, subjects}) {
 
                 <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     {subjects?.map(subject => (
-                        <WanikaniItemTileV2
-                            key={subject.subjectId + '-subject'}
-                            text={subject.characters || '?'}
-                            link={subject['document_url']}
-                            meaning={subject.meanings.map(m => m.meaning).join(', ')}
-                            srsLevel={subject['srs_stage']}
-                            color={getColorByWanikaniSrsStage(subject['srs_stage'])}
-                            size={5}
+                        <SubjectTile key={subject.subjectId + '-subject'}
+                                     subject={subject}
                         />
                     ))}
                 </div>
@@ -68,27 +76,46 @@ async function fetchData() {
         .map(s => combineAssignmentAndSubject(assignments[s.id], s));
 }
 
-function groupByLevel(subjects, typesToShow) {
+function groupByLevel(subjects) {
+    let levelsData = {};
+
+    for (let subject of subjects) {
+        if (!levelsData[subject.level]) {
+            levelsData[subject.level] = [];
+        }
+        levelsData[subject.level].push(subject);
+    }
+
     return getWanikaniLevels().map(level => ({
         title: 'Level ' + level,
-        subjects: subjects.filter(subject => subject.level == level && typesToShow.includes(subject.subjectType))
+        subjects: levelsData[level] ?? []
     }));
 }
 
-function groupBySrsStage(subjects, typesToShow) {
-    function getSubjects(stage, index) {
-        if (stage === 'Locked') {
-            return subjects.filter(subject => subject['srs_stage'] != 0
-                && !subject['srs_stage']
-                && typesToShow.includes(subject.subjectType));
+function groupBySrsStage(subjects) {
+    let stageMap = {};
+
+    for (let subject of subjects) {
+        let srsStage = subject['srs_stage'] != 0 && !subject['srs_stage'] ? 'locked' : subject['srs_stage'];
+        if (!stageMap[srsStage]) {
+            stageMap[srsStage] = [];
         }
-        return subjects.filter(subject => subject['srs_stage'] == index && typesToShow.includes(subject.subjectType))
+        stageMap[srsStage].push(subject);
     }
 
     return getWanikaniSrsStages().map((stage, index) => ({
         title: stage,
-        subjects: getSubjects(stage, index)
+        subjects: stageMap[stage === 'Locked' ? 'locked' : index]
     }));
+}
+
+function filterSubjectsByType(subjects, typesToShow) {
+    let lookupMap = {};
+
+    for (let type of typesToShow) {
+        lookupMap[type.toLowerCase()] = true;
+    }
+    return subjects.filter(subject => lookupMap[subject.subjectType.toLowerCase()]);
 }
 
 const groupByOptions = {
@@ -104,21 +131,34 @@ const groupByOptions = {
     },
 };
 
-function FilterControls({groupBy, setGroupBy}) {
+function FilterControls({groupBy, setGroupBy, typesToShow, setTypesToShow}) {
+    const groupByOptionsList = [
+        groupByOptions.level,
+        groupByOptions.srsStage
+    ];
+
+    const onTypeChange = useCallback((option) => {
+        let removeIndex = typesToShow.indexOf(option.toLowerCase());
+        if (removeIndex === -1) {
+            setTypesToShow([...typesToShow, option.toLowerCase()]);
+        } else {
+            typesToShow.splice(removeIndex, 1)
+            setTypesToShow([...typesToShow]);
+        }
+    }, [typesToShow, setTypesToShow]);
+
+
     return (
         <Card>
             <CardContent>
                 Group By
                 <ToggleButtonGroup
-                    value={groupBy}
+                    value={groupBy.key}
                     size={'small'}
                     exclusive
-                    onChange={e => setGroupBy(e.target.value)}
+                    onChange={e => setGroupBy(groupByOptionsList.find(o => o.key === e.target.value))}
                 >
-                    {[
-                        groupByOptions.level,
-                        groupByOptions.srsStage
-                    ].map((option) => (
+                    {groupByOptionsList.map((option) => (
                         <ToggleButton key={option.key}
                                       value={option.key}
                         >
@@ -126,6 +166,20 @@ function FilterControls({groupBy, setGroupBy}) {
                         </ToggleButton>
                     ))}
                 </ToggleButtonGroup>
+
+                <br/>
+
+                Display Types
+                {['Radical', 'Kanji', 'Vocabulary'].map((option) => (
+                    <>
+                        <Checkbox key={option}
+                                  checked={typesToShow.includes(option.toLowerCase())}
+                                  size="small"
+                                  onClick={e => onTypeChange(option)}
+                        /> {option}
+                    </>
+                ))}
+
             </CardContent>
         </Card>
     )
@@ -134,22 +188,17 @@ function FilterControls({groupBy, setGroupBy}) {
 function WanikaniItems() {
     const {apiKey} = useWanikaniApiKey();
     const [subjects, setSubjects] = useState([]);
-    const [groupBy, setGroupBy] = useState(groupByOptions.srsStage.key);
-    const [groups, setGroups] = useState([]);
+    const [groupBy, setGroupBy] = useState(groupByOptions.srsStage);
     const [typesToShow, setTypesToShow] = useState(['kanji']);
 
     useEffect(() => {
         fetchData().then(setSubjects)
     }, []);
 
-    useEffect(() => {
 
-        if (groupBy === groupByOptions.level.key) {
-            setGroups(groupByOptions.level.group(subjects, typesToShow));
-        } else if (groupBy === groupByOptions.srsStage.key) {
-            setGroups(groupByOptions.srsStage.group(subjects, typesToShow));
-        }
-    }, [groupBy, subjects]);
+    const subjectsToShow = useMemo(() => filterSubjectsByType(subjects, typesToShow), [subjects, typesToShow]);
+
+    const data = useMemo(() => groupBy.group(subjectsToShow), [groupBy, subjectsToShow]);
 
     return (
         <RequireOrRedirect resource={apiKey}
@@ -158,9 +207,11 @@ function WanikaniItems() {
             <div style={styles.container}>
                 <FilterControls groupBy={groupBy}
                                 setGroupBy={setGroupBy}
+                                typesToShow={typesToShow}
+                                setTypesToShow={setTypesToShow}
                 />
 
-                {groups.map(group => (
+                {data.map(group => (
                     <ItemGrouping key={group.title}
                                   title={group.title}
                                   subjects={group.subjects}

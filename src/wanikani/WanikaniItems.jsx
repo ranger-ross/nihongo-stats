@@ -1,7 +1,7 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import {RoutePaths} from "../Routes";
 import * as React from "react";
-import {useCallback, useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
 import {Card, CardContent, Checkbox, ToggleButton, ToggleButtonGroup, Typography} from "@mui/material";
 import {WanikaniItemTileV2} from "./components/WanikaniItemTile.jsx";
@@ -15,15 +15,101 @@ const styles = {
     }
 };
 
-function getWanikaniLevels() {
-    return Array.from({length: 60}, (_, i) => i + 1);
-}
+const groupByOptions = {
+    none: {
+        key: 'none',
+        displayText: 'None',
+        group: (subjects) => [
+            {
+                title: 'All Items',
+                subjects: subjects,
+            }
+        ],
+    },
+    level: {
+        key: 'level',
+        displayText: 'Level',
+        group: (subjects) => {
+            let levelsData = {};
 
-function getWanikaniSrsStages() {
-    return ['Unlocked', 'Apprentice 1', 'Apprentice 2', 'Apprentice 3', 'Apprentice 4',
-        'Guru 1', 'Guru 2', 'Master', 'Enlightened', 'Burned', 'Locked'];
-}
+            for (let subject of subjects) {
+                if (!levelsData[subject.level]) {
+                    levelsData[subject.level] = [];
+                }
+                levelsData[subject.level].push(subject);
+            }
 
+            function getWanikaniLevels() {
+                return Array.from({length: 60}, (_, i) => i + 1);
+            }
+
+            return getWanikaniLevels()
+                .map(level => ({
+                    title: 'Level ' + level,
+                    subjects: levelsData[level] ?? []
+                }))
+                .filter(group => group.subjects.length > 0);
+        },
+    },
+    srsStage: {
+        key: 'srsStage',
+        displayText: 'SRS Stage',
+        group: (subjects) => {
+            let stageMap = {};
+
+            for (let subject of subjects) {
+                let srsStage = subject['srs_stage'] != 0 && !subject['srs_stage'] ? 'locked' : subject['srs_stage'];
+                if (!stageMap[srsStage]) {
+                    stageMap[srsStage] = [];
+                }
+                stageMap[srsStage].push(subject);
+            }
+
+            return ['Unlocked', 'Apprentice 1', 'Apprentice 2', 'Apprentice 3', 'Apprentice 4',
+                'Guru 1', 'Guru 2', 'Master', 'Enlightened', 'Burned', 'Locked']
+                .map((stage, index) => ({
+                    title: stage,
+                    subjects: stageMap[stage === 'Locked' ? 'locked' : index] ?? []
+                }))
+                .filter(group => group.subjects.length > 0);
+        },
+    },
+};
+
+const sortByOptions = {
+    none: {
+        key: 'none',
+        displayText: 'None',
+        sort: (subjects) => subjects
+    },
+    itemName: {
+        key: 'itemName',
+        displayText: 'Item Name',
+        sort: (subjects) => subjects.sort((a, b) => a.slug.toLowerCase().localeCompare(b.slug.toLowerCase()))
+    },
+    level: {
+        key: 'level',
+        displayText: 'Level',
+        sort: (subjects) => subjects.sort((a, b) => a.level - b.level)
+    },
+    srsStage: {
+        key: 'srsStage',
+        displayText: 'SRS Stage',
+        sort: (subjects) => subjects.sort((a, b) => a['srs_stage'] - b['srs_stage'])
+    },
+    itemType: {
+        key: 'itemType',
+        displayText: 'Item Type',
+        sort: (subjects) => {
+            const typeOrder = {
+                radical: 1,
+                kanji: 2,
+                vocabulary: 3
+            };
+            return subjects.sort((a, b) => typeOrder[a.subjectType] - typeOrder[b.subjectType]);
+        }
+    },
+};
 
 function SubjectTile({subject}) {
     return useMemo(() => (
@@ -38,8 +124,17 @@ function SubjectTile({subject}) {
     ), [subject]);
 }
 
-function ItemGrouping({title, subjects, secondaryGroupBy}) {
-    const subGroups = useMemo(() => secondaryGroupBy.group(subjects), [subjects, secondaryGroupBy.key])
+function ItemGrouping({title, subjects, secondaryGroupBy, sortBy}) {
+    const subGroups = useMemo(() => secondaryGroupBy.group(subjects), [subjects, secondaryGroupBy.key]);
+
+    const sortedSubGroups = useMemo(() => {
+        if (secondaryGroupBy.key === groupByOptions.none.key) {
+            return sortBy.sort(subGroups);
+        } else {
+            return subGroups.map(sg => sortBy.sort(sg));
+        }
+    }, [subGroups, sortBy.key])
+
     return (
         <Card style={{margin: '5px'}}>
             <CardContent>
@@ -56,14 +151,14 @@ function ItemGrouping({title, subjects, secondaryGroupBy}) {
 
                 {secondaryGroupBy.key === groupByOptions.none.key ? (
                     <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                        {subjects?.map(subject => (
+                        {sortedSubGroups?.map(subject => (
                             <SubjectTile key={subject.subjectId + '-subject'}
                                          subject={subject}
                             />
                         ))}
                     </div>
                 ) : (
-                    subGroups.map(group => (
+                    sortedSubGroups.map(group => (
                         <div key={group.title}>
                             {group.title}
                             <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
@@ -92,43 +187,6 @@ async function fetchData() {
         .map(s => combineAssignmentAndSubject(assignments[s.id], s));
 }
 
-function groupByLevel(subjects) {
-    let levelsData = {};
-
-    for (let subject of subjects) {
-        if (!levelsData[subject.level]) {
-            levelsData[subject.level] = [];
-        }
-        levelsData[subject.level].push(subject);
-    }
-
-    return getWanikaniLevels()
-        .map(level => ({
-            title: 'Level ' + level,
-            subjects: levelsData[level] ?? []
-        }))
-        .filter(group => group.subjects.length > 0);
-}
-
-function groupBySrsStage(subjects) {
-    let stageMap = {};
-
-    for (let subject of subjects) {
-        let srsStage = subject['srs_stage'] != 0 && !subject['srs_stage'] ? 'locked' : subject['srs_stage'];
-        if (!stageMap[srsStage]) {
-            stageMap[srsStage] = [];
-        }
-        stageMap[srsStage].push(subject);
-    }
-
-    return getWanikaniSrsStages()
-        .map((stage, index) => ({
-            title: stage,
-            subjects: stageMap[stage === 'Locked' ? 'locked' : index] ?? []
-        }))
-        .filter(group => group.subjects.length > 0);
-}
-
 function filterSubjectsByType(subjects, typesToShow) {
     let lookupMap = {};
 
@@ -137,24 +195,6 @@ function filterSubjectsByType(subjects, typesToShow) {
     }
     return subjects.filter(subject => lookupMap[subject.subjectType.toLowerCase()]);
 }
-
-const groupByOptions = {
-    none: {
-        key: 'none',
-        displayText: 'None',
-        group: (subjects) => subjects,
-    },
-    level: {
-        key: 'level',
-        displayText: 'Level',
-        group: groupByLevel,
-    },
-    srsStage: {
-        key: 'srsStage',
-        displayText: 'SRS Stage',
-        group: groupBySrsStage,
-    },
-};
 
 function GroupByToggle({options, groupBy, setGroupBy}) {
     return (
@@ -180,6 +220,8 @@ function FilterControls({
                             setPrimaryGroupBy,
                             secondaryGroupBy,
                             setSecondaryGroupBy,
+                            sortBy,
+                            setSortBy,
                             typesToShow,
                             setTypesToShow
                         }) {
@@ -187,6 +229,13 @@ function FilterControls({
         groupByOptions.none,
         groupByOptions.level,
         groupByOptions.srsStage
+    ];
+
+    const sortByOptionsList = [
+        sortByOptions.itemName,
+        sortByOptions.level,
+        sortByOptions.srsStage,
+        sortByOptions.itemType
     ];
 
     function onTypeChange(option) {
@@ -225,6 +274,24 @@ function FilterControls({
                         /> {option}
                     </span>
                 ))}
+                <br/>
+
+                Sort By
+                <ToggleButtonGroup
+                    value={sortBy.key}
+                    size={'small'}
+                    exclusive
+                    onChange={e => setSortBy(sortByOptionsList.find(o => o.key === e.target.value))}
+                >
+                    {sortByOptionsList.map((option) => (
+                        <ToggleButton key={option.key}
+                                      value={option.key}
+                        >
+                            {option.displayText}
+                        </ToggleButton>
+                    ))}
+                </ToggleButtonGroup>
+                <br/>
 
             </CardContent>
         </Card>
@@ -237,6 +304,7 @@ function WanikaniItems() {
     const [primaryGroupBy, setPrimaryGroupBy] = useState(groupByOptions.srsStage);
     const [secondaryGroupBy, setSecondaryGroupBy] = useState(groupByOptions.none);
     const [typesToShow, setTypesToShow] = useState(['kanji']);
+    const [sortBy, setSortBy] = useState(sortByOptions.none);
 
     useEffect(() => {
         fetchData().then(setSubjects)
@@ -245,7 +313,7 @@ function WanikaniItems() {
 
     const subjectsToShow = useMemo(() => filterSubjectsByType(subjects, typesToShow), [subjects, typesToShow]);
 
-    const data = useMemo(() => primaryGroupBy.group(subjectsToShow), [primaryGroupBy, subjectsToShow]);
+    const groups = useMemo(() => primaryGroupBy.group(subjectsToShow), [primaryGroupBy, subjectsToShow]);
 
     return (
         <RequireOrRedirect resource={apiKey}
@@ -258,13 +326,16 @@ function WanikaniItems() {
                                 setSecondaryGroupBy={setSecondaryGroupBy}
                                 typesToShow={typesToShow}
                                 setTypesToShow={setTypesToShow}
+                                sortBy={sortBy}
+                                setSortBy={setSortBy}
                 />
 
-                {data.map(group => (
+                {groups.map(group => (
                     <ItemGrouping key={group.title}
                                   title={group.title}
                                   subjects={group.subjects}
                                   secondaryGroupBy={secondaryGroupBy}
+                                  sortBy={sortBy}
                     />
                 ))}
             </div>

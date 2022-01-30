@@ -2,6 +2,7 @@ import {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {Card, CardContent, Typography, Switch, FormGroup, FormControlLabel} from "@mui/material";
 import WanikaniItemTile from "./WanikaniItemTile.jsx";
+import {combineAssignmentAndSubject} from "../service/WanikaniDataUtil.js";
 
 function createAssignmentMap(subjects) {
     let map = {};
@@ -11,15 +12,6 @@ function createAssignmentMap(subjects) {
     }
 
     return map;
-}
-
-function combineAssignmentAndSubject(assignment, subject) {
-    return {
-        ...subject.data,
-        ...assignment?.data,
-        hasAssignment: !!assignment,
-        subjectId: subject.id,
-    };
 }
 
 function isHidden(subject) {

@@ -40,23 +40,27 @@ const colorByOptionsList = [
     colorByOptions.srsStage,
 ];
 
-function GroupByToggle({options, groupBy, setGroupBy, disableOptions}) {
+function GroupByToggle({title, options, groupBy, setGroupBy, disableOptions}) {
     return (
-        <ToggleButtonGroup
-            value={groupBy.key}
-            size={'small'}
-            exclusive
-            onChange={e => setGroupBy(options.find(o => o.key === e.target.value))}
-        >
-            {options.map((option) => (
-                <ToggleButton key={option.key}
-                              value={option.key}
-                              disabled={disableOptions?.map(o => o?.key).includes(option.key)}
-                >
-                    {option.displayText}
-                </ToggleButton>
-            ))}
-        </ToggleButtonGroup>
+
+        <div style={styles.optionContainer}>
+            <div style={styles.optionLabel}>{title}</div>
+            <ToggleButtonGroup
+                value={groupBy.key}
+                size={'small'}
+                exclusive
+                onChange={e => setGroupBy(options.find(o => o.key === e.target.value))}
+            >
+                {options.map((option) => (
+                    <ToggleButton key={option.key}
+                                  value={option.key}
+                                  disabled={disableOptions?.map(o => o?.key).includes(option.key)}
+                    >
+                        {option.displayText}
+                    </ToggleButton>
+                ))}
+            </ToggleButtonGroup>
+        </div>
     );
 }
 
@@ -178,23 +182,18 @@ function WanikaniItemsControlPanel({control, set}) {
             <ControlContainer>
                 <strong style={{padding: '4px'}}>Group By</strong>
 
-                <div style={styles.optionContainer}>
-                    <div style={styles.optionLabel}>Primary</div>
-                    <GroupByToggle options={groupByOptionsList}
-                                   groupBy={primaryGroupBy}
-                                   setGroupBy={onPrimaryGroupByChange}
-                    />
-                </div>
+                <GroupByToggle title={'Primary'}
+                               options={groupByOptionsList}
+                               groupBy={primaryGroupBy}
+                               setGroupBy={onPrimaryGroupByChange}
+                />
 
-
-                <div style={styles.optionContainer}>
-                    <div style={styles.optionLabel}>Secondary</div>
-                    <GroupByToggle options={groupByOptionsList}
-                                   groupBy={secondaryGroupBy}
-                                   setGroupBy={set.secondaryGroupBy}
-                                   disableOptions={secondaryGroupDisabled}
-                    />
-                </div>
+                <GroupByToggle title={'Secondary'}
+                               options={groupByOptionsList}
+                               groupBy={secondaryGroupBy}
+                               setGroupBy={set.secondaryGroupBy}
+                               disableOptions={secondaryGroupDisabled}
+                />
 
             </ControlContainer>
 

@@ -8,6 +8,7 @@ import {WanikaniItemTileV2} from "./components/WanikaniItemTile.jsx";
 import WanikaniApiService from "./service/WanikaniApiService.js";
 import {combineAssignmentAndSubject, createAssignmentMap, isSubjectHidden} from "./service/WanikaniDataUtil.js";
 import {getColorByWanikaniSrsStage} from "./service/WanikaniStyleUtil.js";
+import {WanikaniColors} from "../Constants.js";
 
 const styles = {
     container: {
@@ -111,29 +112,46 @@ const sortByOptions = {
     },
 };
 
-function SubjectTile({subject}) {
+const colorByOptions = {
+    srsStage: {
+        key: 'srsStage',
+        displayText: 'SRS Stage',
+        color: (subject) => getColorByWanikaniSrsStage(subject['srs_stage'])
+    },
+    itemType: {
+        key: 'itemType',
+        displayText: 'Item Type',
+        color: (subject) => {
+            if (subject.subjectType === 'radical')
+                return WanikaniColors.blue;
+            else if (subject.subjectType === 'kanji')
+                return WanikaniColors.pink;
+            else
+                return WanikaniColors.purple;
+        }
+    },
+};
+
+function SubjectTile({subject, colorBy}) {
     return useMemo(() => (
         <WanikaniItemTileV2
             text={subject.characters || '?'}
             link={subject['document_url']}
-            meaning={subject.meanings.map(m => m.meaning).join(', ')}
+            meaning={subject?.meanings?.map(m => m.meaning).join(', ')}
             srsLevel={subject['srs_stage']}
-            color={getColorByWanikaniSrsStage(subject['srs_stage'])}
+            color={colorBy.color(subject)}
             size={5}
         />
-    ), [subject]);
+    ), [subject, colorBy.key]);
 }
 
-function ItemGrouping({title, subjects, secondaryGroupBy, sortBy}) {
+function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy}) {
     const subGroups = useMemo(() => secondaryGroupBy.group(subjects), [subjects, secondaryGroupBy.key]);
 
-    const sortedSubGroups = useMemo(() => {
-        if (secondaryGroupBy.key === groupByOptions.none.key) {
-            return sortBy.sort(subGroups);
-        } else {
-            return subGroups.map(sg => sortBy.sort(sg));
-        }
-    }, [subGroups, sortBy.key])
+    const sortedSubGroups = useMemo(() => subGroups.map(sg => ({
+        ...sg,
+        subjects: sortBy.sort(sg.subjects)
+    })), [subGroups, sortBy.key])
 
     return (
         <Card style={{margin: '5px'}}>
@@ -148,29 +166,19 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy}) {
                     </Typography>
                 </div>
 
-
-                {secondaryGroupBy.key === groupByOptions.none.key ? (
-                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                        {sortedSubGroups?.map(subject => (
-                            <SubjectTile key={subject.subjectId + '-subject'}
-                                         subject={subject}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    sortedSubGroups.map(group => (
-                        <div key={group.title}>
-                            {group.title}
-                            <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                                {group.subjects?.map(subject => (
-                                    <SubjectTile key={subject.subjectId + '-subject'}
-                                                 subject={subject}
-                                    />
-                                ))}
-                            </div>
+                {sortedSubGroups.map(group => (
+                    <div key={group.title}>
+                        {group.title === 'All Items' ? null : group.title}
+                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                            {group.subjects?.map(subject => (
+                                <SubjectTile key={subject.subjectId + '-subject'}
+                                             subject={subject}
+                                             colorBy={colorBy}
+                                />
+                            ))}
                         </div>
-                    ))
-                )}
+                    </div>
+                ))}
             </CardContent>
         </Card>
     );
@@ -222,6 +230,8 @@ function FilterControls({
                             setSecondaryGroupBy,
                             sortBy,
                             setSortBy,
+                            colorBy,
+                            setColorBy,
                             typesToShow,
                             setTypesToShow
                         }) {
@@ -236,6 +246,11 @@ function FilterControls({
         sortByOptions.level,
         sortByOptions.srsStage,
         sortByOptions.itemType
+    ];
+
+    const colorByOptionsList = [
+        colorByOptions.itemType,
+        colorByOptions.srsStage,
     ];
 
     function onTypeChange(option) {
@@ -293,6 +308,23 @@ function FilterControls({
                 </ToggleButtonGroup>
                 <br/>
 
+                Color By
+                <ToggleButtonGroup
+                    value={colorBy.key}
+                    size={'small'}
+                    exclusive
+                    onChange={e => setColorBy(colorByOptionsList.find(o => o.key === e.target.value))}
+                >
+                    {colorByOptionsList.map((option) => (
+                        <ToggleButton key={option.key}
+                                      value={option.key}
+                        >
+                            {option.displayText}
+                        </ToggleButton>
+                    ))}
+                </ToggleButtonGroup>
+                <br/>
+
             </CardContent>
         </Card>
     )
@@ -305,6 +337,7 @@ function WanikaniItems() {
     const [secondaryGroupBy, setSecondaryGroupBy] = useState(groupByOptions.none);
     const [typesToShow, setTypesToShow] = useState(['kanji']);
     const [sortBy, setSortBy] = useState(sortByOptions.none);
+    const [colorBy, setColorBy] = useState(colorByOptions.itemType);
 
     useEffect(() => {
         fetchData().then(setSubjects)
@@ -328,6 +361,8 @@ function WanikaniItems() {
                                 setTypesToShow={setTypesToShow}
                                 sortBy={sortBy}
                                 setSortBy={setSortBy}
+                                colorBy={colorBy}
+                                setColorBy={setColorBy}
                 />
 
                 {groups.map(group => (
@@ -336,6 +371,7 @@ function WanikaniItems() {
                                   subjects={group.subjects}
                                   secondaryGroupBy={secondaryGroupBy}
                                   sortBy={sortBy}
+                                  colorBy={colorBy}
                     />
                 ))}
             </div>

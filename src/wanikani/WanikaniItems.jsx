@@ -17,7 +17,13 @@ import VisibilitySensor from "react-visibility-sensor";
 const styles = {
     container: {
         margin: '5px'
-    }
+    },
+    groupTitle: {
+        paddingBottom: '10px'
+    },
+    subGroupTitle: {
+        paddingTop: '12px',
+    },
 };
 
 function SubjectTile({subject, colorBy}) {
@@ -50,7 +56,7 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy}) {
                 <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     <Typography variant={'h6'}
                                 color={'textPrimary'}
-                                style={{paddingBottom: '10px'}}
+                                style={styles.groupTitle}
                     >
                         {title}
                     </Typography>
@@ -62,7 +68,8 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy}) {
                         <>
                             {sortedSubGroups.map(group => (
                                 <div key={group.title}>
-                                    {group.title === 'All Items' ? null : group.title}
+                                    <div
+                                        style={styles.subGroupTitle}>{group.title === 'All Items' ? null : group.title}</div>
                                     <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                                         {group.subjects?.map(subject => (
                                             <SubjectTile key={subject.subjectId + '-subject'}
@@ -106,7 +113,7 @@ function filterSubjectsByType(subjects, typesToShow) {
 function WanikaniItems() {
     const {apiKey} = useWanikaniApiKey();
     const [subjects, setSubjects] = useState([]);
-    const [primaryGroupBy, setPrimaryGroupBy] = useState(groupByOptions.srsStage);
+    const [primaryGroupBy, setPrimaryGroupBy] = useState(groupByOptions.level);
     const [secondaryGroupBy, setSecondaryGroupBy] = useState(groupByOptions.none);
     const [typesToShow, setTypesToShow] = useState(['kanji']);
     const [sortBy, setSortBy] = useState(sortByOptions.itemName);

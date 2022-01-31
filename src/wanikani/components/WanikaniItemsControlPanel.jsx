@@ -1,6 +1,7 @@
 import {Checkbox, Paper, ToggleButton, ToggleButtonGroup} from "@mui/material";
 import * as React from "react";
 import {getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.js";
+import {useMemo} from "react";
 
 export const groupByOptions = {
     none: {
@@ -128,7 +129,7 @@ const styles = {
     }
 };
 
-function GroupByToggle({options, groupBy, setGroupBy}) {
+function GroupByToggle({options, groupBy, setGroupBy, disableOptions}) {
     return (
         <ToggleButtonGroup
             value={groupBy.key}
@@ -139,6 +140,7 @@ function GroupByToggle({options, groupBy, setGroupBy}) {
             {options.map((option) => (
                 <ToggleButton key={option.key}
                               value={option.key}
+                              disabled={disableOptions?.map(o => o?.key).includes(option.key)}
                 >
                     {option.displayText}
                 </ToggleButton>
@@ -165,39 +167,106 @@ const colorByOptionsList = [
     colorByOptions.srsStage,
 ];
 
-function WanikaniItemsControlPanel({ // TODO: add disabling for options when appropriate
-                                       primaryGroupBy,
-                                       setPrimaryGroupBy,
-                                       secondaryGroupBy,
-                                       setSecondaryGroupBy,
-                                       sortBy,
-                                       setSortBy,
-                                       colorBy,
-                                       setColorBy,
-                                       typesToShow,
-                                       setTypesToShow
-                                   }) {
+function ControlContainer({children}) {
+    return (
+        <Paper elevation={2} style={styles.groupingPaper}>
+            {children}
+        </Paper>
+    );
+}
 
-    function onTypeChange(option) {
-        let removeIndex = typesToShow.indexOf(option.toLowerCase());
+function SegmentControl({title, value, setValue, options}) {
+    return (
+        <ControlContainer>
+            <div style={styles.optionContainer}>
+                <strong style={styles.optionLabel}>{title}</strong>
+                <ToggleButtonGroup
+                    value={value.key}
+                    size={'small'}
+                    exclusive
+                    onChange={e => setValue(options.find(o => o.key === e.target.value))}
+                >
+                    {options.map((option) => (
+                        <ToggleButton key={option.key}
+                                      value={option.key}
+                        >
+                            {option.displayText}
+                        </ToggleButton>
+                    ))}
+                </ToggleButtonGroup>
+            </div>
+        </ControlContainer>
+    );
+}
+
+function CheckboxControl({title, subtitle, value, setValue, options}) {
+    function onChange(option) {
+        let removeIndex = value.indexOf(option.toLowerCase());
         if (removeIndex === -1) {
-            setTypesToShow([...typesToShow, option.toLowerCase()]);
+            setValue([...value, option.toLowerCase()]);
         } else {
-            typesToShow.splice(removeIndex, 1)
-            setTypesToShow([...typesToShow]);
+            value.splice(removeIndex, 1)
+            setValue([...value]);
         }
     }
 
     return (
+        <ControlContainer>
+            <strong style={{padding: '4px'}}>{title}</strong>
+
+            <div style={styles.optionContainer}>
+                {subtitle ? (
+                    <div style={styles.optionLabel}>{subtitle}</div>
+                ) : null}
+                <div>
+                    {options.map((option) => (
+                        <span key={option}>
+                        <Checkbox checked={value.includes(option.toLowerCase())}
+                                  size="small"
+                                  disabled={value.length == 1 && value.includes(option.toLowerCase())}
+                                  onClick={() => onChange(option)}
+                        /> {option}</span>
+                    ))}
+                </div>
+            </div>
+        </ControlContainer>
+    );
+}
+
+function WanikaniItemsControlPanel(props) {
+
+    const {
+        primaryGroupBy, setPrimaryGroupBy,
+        secondaryGroupBy, setSecondaryGroupBy,
+        sortBy, setSortBy,
+        colorBy, setColorBy,
+        typesToShow, setTypesToShow
+    } = props
+
+    function onPrimaryGroupByChange(value) {
+        if (value.key === groupByOptions.none.key) {
+            setSecondaryGroupBy(value);
+        }
+        setPrimaryGroupBy(value);
+    }
+
+    const secondaryGroupDisabled = useMemo(() => {
+        if (primaryGroupBy.key === groupByOptions.none.key)
+            return [groupByOptions.none, groupByOptions.srsStage, groupByOptions.level];
+        else
+            return [primaryGroupBy];
+    }, [primaryGroupBy.key]);
+
+    return (
         <Paper>
-            <Paper elevation={2} style={styles.groupingPaper}>
+            <ControlContainer>
                 <strong style={{padding: '4px'}}>Group By</strong>
 
                 <div style={styles.optionContainer}>
                     <div style={styles.optionLabel}>Primary</div>
                     <GroupByToggle options={groupByOptionsList}
                                    groupBy={primaryGroupBy}
-                                   setGroupBy={setPrimaryGroupBy}
+                                   setGroupBy={onPrimaryGroupByChange}
                     />
                 </div>
 
@@ -207,68 +276,30 @@ function WanikaniItemsControlPanel({ // TODO: add disabling for options when app
                     <GroupByToggle options={groupByOptionsList}
                                    groupBy={secondaryGroupBy}
                                    setGroupBy={setSecondaryGroupBy}
+                                   disableOptions={secondaryGroupDisabled}
                     />
                 </div>
 
-            </Paper>
+            </ControlContainer>
 
-            <Paper elevation={2} style={styles.groupingPaper}>
-                <div style={styles.optionContainer}>
-                    <strong style={styles.optionLabel}>Sort By</strong>
-                    <ToggleButtonGroup
-                        value={sortBy.key}
-                        size={'small'}
-                        exclusive
-                        onChange={e => setSortBy(sortByOptionsList.find(o => o.key === e.target.value))}
-                    >
-                        {sortByOptionsList.map((option) => (
-                            <ToggleButton key={option.key}
-                                          value={option.key}
-                            >
-                                {option.displayText}
-                            </ToggleButton>
-                        ))}
-                    </ToggleButtonGroup>
-                </div>
-            </Paper>
+            <SegmentControl title={'Sort By'}
+                            value={sortBy}
+                            setValue={setSortBy}
+                            options={sortByOptionsList}
+            />
 
-            <Paper elevation={2} style={styles.groupingPaper}>
-                <div style={styles.optionContainer}>
-                    <strong style={styles.optionLabel}>Color By</strong>
-                    <ToggleButtonGroup
-                        value={colorBy.key}
-                        size={'small'}
-                        exclusive
-                        onChange={e => setColorBy(colorByOptionsList.find(o => o.key === e.target.value))}
-                    >
-                        {colorByOptionsList.map((option) => (
-                            <ToggleButton key={option.key}
-                                          value={option.key}
-                            >
-                                {option.displayText}
-                            </ToggleButton>
-                        ))}
-                    </ToggleButtonGroup>
-                </div>
-            </Paper>
+            <SegmentControl title={'Color By'}
+                            value={colorBy}
+                            setValue={setColorBy}
+                            options={colorByOptionsList}
+            />
 
-
-            <Paper elevation={2} style={styles.groupingPaper}>
-                <strong style={{padding: '4px'}}>Display</strong>
-
-                <div style={styles.optionContainer}>
-                    <div style={styles.optionLabel}>Types</div>
-                    <div>
-                        {['Radical', 'Kanji', 'Vocabulary'].map((option) => (
-                            <span key={option}>
-                        <Checkbox checked={typesToShow.includes(option.toLowerCase())}
-                                  size="small"
-                                  onClick={() => onTypeChange(option)}
-                        /> {option}</span>
-                        ))}
-                    </div>
-                </div>
-            </Paper>
+            <CheckboxControl title={'Display'}
+                             subtitle={'Types'}
+                             value={typesToShow}
+                             setValue={setTypesToShow}
+                             options={['Radical', 'Kanji', 'Vocabulary']}
+            />
 
             <div style={{height: '6px'}}/>
 

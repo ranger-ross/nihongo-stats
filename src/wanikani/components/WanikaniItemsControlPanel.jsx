@@ -244,8 +244,8 @@ function WanikaniItemsControlPanel(props) {
     } = props
 
     function onPrimaryGroupByChange(value) {
-        if (value.key === groupByOptions.none.key) {
-            setSecondaryGroupBy(value);
+        if (value.key === groupByOptions.none.key || value.key === secondaryGroupBy.key) {
+            setSecondaryGroupBy(groupByOptions.none)
         }
         setPrimaryGroupBy(value);
     }

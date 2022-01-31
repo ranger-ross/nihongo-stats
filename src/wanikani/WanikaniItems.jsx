@@ -12,6 +12,7 @@ import WanikaniItemsControlPanel, {
     groupByOptions,
     sortByOptions
 } from "./components/WanikaniItemsControlPanel.jsx";
+import VisibilitySensor from "react-visibility-sensor";
 
 const styles = {
     container: {
@@ -40,6 +41,8 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy}) {
         subjects: sortBy.sort(sg.subjects)
     })), [subGroups, sortBy.key])
 
+    const [isLoaded, setIsLoaded] = useState(false);
+
     return (
         <Card style={{margin: '5px'}}>
             <CardContent>
@@ -52,20 +55,28 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy}) {
                         {title}
                     </Typography>
                 </div>
-
-                {sortedSubGroups.map(group => (
-                    <div key={group.title}>
-                        {group.title === 'All Items' ? null : group.title}
-                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                            {group.subjects?.map(subject => (
-                                <SubjectTile key={subject.subjectId + '-subject'}
-                                             subject={subject}
-                                             colorBy={colorBy}
-                                />
+                <VisibilitySensor partialVisibility={true}
+                                  offset={{bottom: -400}}
+                                  onChange={(isVisible) => isVisible ? setIsLoaded(true) : null}>
+                    {isLoaded ? (
+                        <>
+                            {sortedSubGroups.map(group => (
+                                <div key={group.title}>
+                                    {group.title === 'All Items' ? null : group.title}
+                                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                                        {group.subjects?.map(subject => (
+                                            <SubjectTile key={subject.subjectId + '-subject'}
+                                                         subject={subject}
+                                                         colorBy={colorBy}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
                             ))}
-                        </div>
-                    </div>
-                ))}
+                        </>
+                    ) : <div style={{height: '75px'}}>Loading...</div>}
+
+                </VisibilitySensor>
             </CardContent>
         </Card>
     );

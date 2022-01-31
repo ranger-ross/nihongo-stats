@@ -7,11 +7,7 @@ import {Card, CardContent, Typography} from "@mui/material";
 import WanikaniItemTile from "./components/WanikaniItemTile.jsx";
 import WanikaniApiService from "./service/WanikaniApiService.js";
 import {combineAssignmentAndSubject, createAssignmentMap, isSubjectHidden} from "./service/WanikaniDataUtil.js";
-import WanikaniItemsControlPanel, {
-    colorByOptions,
-    groupByOptions,
-    sortByOptions
-} from "./components/WanikaniItemsControlPanel.jsx";
+import WanikaniItemsControlPanel, {useWanikaniItemControls} from "./components/WanikaniItemsControlPanel.jsx";
 import VisibilitySensor from "react-visibility-sensor";
 
 const styles = {
@@ -113,45 +109,33 @@ function filterSubjectsByType(subjects, typesToShow) {
 function WanikaniItems() {
     const {apiKey} = useWanikaniApiKey();
     const [subjects, setSubjects] = useState([]);
-    const [primaryGroupBy, setPrimaryGroupBy] = useState(groupByOptions.level);
-    const [secondaryGroupBy, setSecondaryGroupBy] = useState(groupByOptions.none);
-    const [typesToShow, setTypesToShow] = useState(['kanji']);
-    const [sortBy, setSortBy] = useState(sortByOptions.itemName);
-    const [colorBy, setColorBy] = useState(colorByOptions.itemType);
+    const [control, set] = useWanikaniItemControls();
 
     useEffect(() => {
         fetchItems().then(setSubjects)
     }, []);
 
 
-    const subjectsToShow = useMemo(() => filterSubjectsByType(subjects, typesToShow), [subjects, typesToShow]);
+    const subjectsToShow = useMemo(() => filterSubjectsByType(subjects, control.typesToShow), [subjects, control.typesToShow]);
 
-    const groups = useMemo(() => primaryGroupBy.group(subjectsToShow), [primaryGroupBy, subjectsToShow]);
+    const groups = useMemo(() => control.primaryGroupBy.group(subjectsToShow), [control.primaryGroupBy, subjectsToShow]);
 
     return (
         <RequireOrRedirect resource={apiKey}
                            redirectPath={RoutePaths.wanikaniLogin.path}
         >
             <div style={styles.container}>
-                <WanikaniItemsControlPanel primaryGroupBy={primaryGroupBy}
-                                           setPrimaryGroupBy={setPrimaryGroupBy}
-                                           secondaryGroupBy={secondaryGroupBy}
-                                           setSecondaryGroupBy={setSecondaryGroupBy}
-                                           typesToShow={typesToShow}
-                                           setTypesToShow={setTypesToShow}
-                                           sortBy={sortBy}
-                                           setSortBy={setSortBy}
-                                           colorBy={colorBy}
-                                           setColorBy={setColorBy}
+                <WanikaniItemsControlPanel control={control}
+                                           set={set}
                 />
 
                 {groups.map(group => (
                     <ItemGrouping key={group.title}
                                   title={group.title}
                                   subjects={group.subjects}
-                                  secondaryGroupBy={secondaryGroupBy}
-                                  sortBy={sortBy}
-                                  colorBy={colorBy}
+                                  secondaryGroupBy={control.secondaryGroupBy}
+                                  sortBy={control.sortBy}
+                                  colorBy={control.colorBy}
                     />
                 ))}
             </div>

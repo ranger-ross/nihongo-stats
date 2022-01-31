@@ -26,6 +26,7 @@ const groupByOptionsList = [
     groupByOptions.level,
     groupByOptions.srsStage,
     groupByOptions.jtpt,
+    groupByOptions.itemType,
 ];
 
 const sortByOptionsList = [

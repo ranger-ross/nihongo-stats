@@ -35,7 +35,7 @@ function SubjectTile({subject, colorBy}) {
     ), [subject, colorBy.key]);
 }
 
-function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortReverse}) {
+function ItemGroupingData({subjects, secondaryGroupBy, sortBy, colorBy, sortReverse}) {
     const subGroups = useMemo(() => secondaryGroupBy.group(subjects), [subjects, secondaryGroupBy.key]);
 
     const sortedSubGroups = useMemo(() => subGroups.map(sg => ({
@@ -43,8 +43,29 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortR
         subjects: sortReverse ? sortBy.sort(sg.subjects).reverse() : sortBy.sort(sg.subjects)
     })), [subGroups, sortBy.key, sortReverse]);
 
-    const [isLoaded, setIsLoaded] = useState(false);
+    return (
+        <>
+            {sortedSubGroups.map(group => (
+                <div key={group.title}>
+                    <div style={styles.subGroupTitle}>
+                        {group.title === 'All Items' ? null : group.title}
+                    </div>
+                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                        {group.subjects?.map(subject => (
+                            <SubjectTile key={subject.subjectId + '-subject'}
+                                         subject={subject}
+                                         colorBy={colorBy}
+                            />
+                        ))}
+                    </div>
+                </div>
+            ))}
+        </>
+    )
+}
 
+function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortReverse}) {
+    const [isLoaded, setIsLoaded] = useState(false);
     return (
         <Card style={{margin: '5px'}}>
             <CardContent>
@@ -61,22 +82,12 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortR
                                   offset={{bottom: -400}}
                                   onChange={(isVisible) => isVisible ? setIsLoaded(true) : null}>
                     {isLoaded ? (
-                        <>
-                            {sortedSubGroups.map(group => (
-                                <div key={group.title}>
-                                    <div
-                                        style={styles.subGroupTitle}>{group.title === 'All Items' ? null : group.title}</div>
-                                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                                        {group.subjects?.map(subject => (
-                                            <SubjectTile key={subject.subjectId + '-subject'}
-                                                         subject={subject}
-                                                         colorBy={colorBy}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </>
+                        <ItemGroupingData subjects={subjects}
+                                          secondaryGroupBy={secondaryGroupBy}
+                                          sortBy={sortBy}
+                                          colorBy={colorBy}
+                                          sortReverse={sortReverse}
+                        />
                     ) : <div style={{height: '75px'}}>Loading...</div>}
 
                 </VisibilitySensor>

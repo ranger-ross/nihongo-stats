@@ -135,6 +135,22 @@ export const groupByOptions = {
                 .filter(group => group.subjects.length > 0);
         },
     },
+    itemType: {
+        key: 'itemType',
+        displayText: 'Item Type',
+        group: (subjects) => {
+            return [
+                {text: 'Radicals', type: 'radical'},
+                {text: 'Kanji', type: 'kanji'},
+                {text: 'Vocabulary', type: 'vocabulary'},
+            ]
+                .map((type) => ({
+                    title: type.text,
+                    subjects: subjects.filter(subject => subject.subjectType === type.type)
+                }))
+                .filter(group => group.subjects.length > 0);
+        },
+    },
 };
 
 export const sortByOptions = {
@@ -189,6 +205,7 @@ export const sortByOptions = {
                 }
                 return 100;
             }
+
             return subjects.sort((a, b) => getJLPTLevel(a) - getJLPTLevel(b));
         }
     },

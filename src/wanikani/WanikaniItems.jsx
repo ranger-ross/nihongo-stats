@@ -4,7 +4,7 @@ import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
 import {Card, CardContent, Typography} from "@mui/material";
-import {WanikaniItemTileV2} from "./components/WanikaniItemTile.jsx";
+import WanikaniItemTile from "./components/WanikaniItemTile.jsx";
 import WanikaniApiService from "./service/WanikaniApiService.js";
 import {combineAssignmentAndSubject, createAssignmentMap, isSubjectHidden} from "./service/WanikaniDataUtil.js";
 import WanikaniItemsControlPanel, {
@@ -22,7 +22,7 @@ const styles = {
 
 function SubjectTile({subject, colorBy}) {
     return useMemo(() => (
-        <WanikaniItemTileV2
+        <WanikaniItemTile
             text={subject.characters || '?'}
             link={subject['document_url']}
             meaning={subject?.meanings?.map(m => m.meaning).join(', ')}

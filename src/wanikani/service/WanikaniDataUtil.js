@@ -1,6 +1,6 @@
 import kanji from "kanji";
-import {kanjiFrequencyLookupMap} from "../../util/KanjiDataUtil.js";
-import {getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "./WanikaniStyleUtil.js";
+import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil.js";
+import {getColorByJLPTLevel, getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "./WanikaniStyleUtil.js";
 
 export function createSubjectMap(subjects) {
     let map = {};
@@ -170,6 +170,28 @@ export const sortByOptions = {
             return subjects.sort((a, b) => typeOrder[a.subjectType] - typeOrder[b.subjectType]);
         }
     },
+    jlpt: {
+        key: 'jlpt',
+        displayText: 'JLPT',
+        sort: (subjects) => {
+            function getJLPTLevel(subject) {
+                const level = kanjiJLPTLookupMap[subject.slug];
+                if (level === 'N5') {
+                    return 1;
+                } else if (level === 'N4') {
+                    return 2;
+                } else if (level === 'N3') {
+                    return 3;
+                } else if (level === 'N2') {
+                    return 4;
+                } else if (level === 'N1') {
+                    return 5;
+                }
+                return 100;
+            }
+            return subjects.sort((a, b) => getJLPTLevel(a) - getJLPTLevel(b));
+        }
+    },
     frequency: {
         key: 'frequency',
         displayText: 'Frequency',
@@ -194,5 +216,10 @@ export const colorByOptions = {
         key: 'itemType',
         displayText: 'Item Type',
         color: (subject) => getColorByWanikaniSubjectType(subject.subjectType)
+    },
+    jlpt: {
+        key: 'jlpt',
+        displayText: 'JLPT',
+        color: (subject) => getColorByJLPTLevel(kanjiJLPTLookupMap[subject.slug])
     },
 };

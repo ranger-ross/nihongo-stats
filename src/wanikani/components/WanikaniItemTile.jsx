@@ -1,5 +1,5 @@
 import {Tooltip} from "@mui/material";
-import {kanjiFrequencyLookupMap} from "../../util/KanjiDataUtil.js";
+import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil.js";
 
 function useTileStyle(color, size) { // 10 is base
     const topPadding = (size / 2) + 'px';
@@ -23,6 +23,7 @@ function WanikaniItemTile({text, link, meaning, srsLevel, color, size = 10}) {
     const style = useTileStyle(color, size);
 
     const frequency = kanjiFrequencyLookupMap[text];
+    const jlptLevel = kanjiJLPTLookupMap[text];
 
     return (
         <Tooltip
@@ -31,6 +32,7 @@ function WanikaniItemTile({text, link, meaning, srsLevel, color, size = 10}) {
                     <p>Meaning: {meaning}</p>
                     {!!srsLevel ? (<p>SRS Level: {srsLevel}</p>) : null}
                     {!!frequency ? (<p>Frequency: {frequency}</p>) : null}
+                    {!!jlptLevel ? (<p>JLPT: {jlptLevel}</p>) : null}
                 </>
             }
             placement={'top'}

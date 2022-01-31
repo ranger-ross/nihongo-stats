@@ -32,17 +32,18 @@ const sortByOptionsList = [
     sortByOptions.level,
     sortByOptions.srsStage,
     sortByOptions.itemType,
+    sortByOptions.jlpt,
     sortByOptions.frequency,
 ];
 
 const colorByOptionsList = [
     colorByOptions.itemType,
     colorByOptions.srsStage,
+    colorByOptions.jlpt,
 ];
 
 function GroupByToggle({title, options, groupBy, setGroupBy, disableOptions}) {
     return (
-
         <div style={styles.optionContainer}>
             <div style={styles.optionLabel}>{title}</div>
             <ToggleButtonGroup

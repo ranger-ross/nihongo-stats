@@ -40,3 +40,17 @@ export function getColorByWanikaniSubjectType(subjectType) { // TODO: unit test
     else
         return WanikaniColors.purple;
 }
+
+export function getColorByJLPTLevel(level) { // TODO: unit test
+    if (level === 'N5')
+        return '#3261c5'
+    else if (level === 'N4')
+        return '#48ad26'
+    else if (level === 'N3')
+        return '#d9697c'
+    else if (level === 'N2')
+        return '#c79f34'
+    else if (level === 'N1')
+        return '#00a0a9'
+    return 'gray'
+}

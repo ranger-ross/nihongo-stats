@@ -2,6 +2,8 @@ import {Checkbox, Paper, ToggleButton, ToggleButtonGroup} from "@mui/material";
 import * as React from "react";
 import {getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.js";
 import {useMemo} from "react";
+import kanji from "kanji";
+import {kanjiFrequencyLookupMap} from "../../util/KanjiDataUtil.js";
 
 export const groupByOptions = {
     none: {
@@ -62,6 +64,45 @@ export const groupByOptions = {
                 .filter(group => group.subjects.length > 0);
         },
     },
+    jtpt: {
+        key: 'jlpt',
+        displayText: 'JLPT',
+        group: (subjects) => {
+
+            function toMap(array) {
+                let map = {};
+                for (const value of array) {
+                    map[value] = true;
+                }
+                return map;
+            }
+
+            const jtlp = [
+                toMap(kanji.jlpt.n5),
+                toMap(kanji.jlpt.n4),
+                toMap(kanji.jlpt.n3),
+                toMap(kanji.jlpt.n2),
+                toMap(kanji.jlpt.n1),
+            ];
+
+            let map = {};
+
+            for (let subject of subjects) {
+                let idx = jtlp.findIndex(lvl => lvl[subject['slug']]);
+                if (!map[idx]) {
+                    map[idx] = [];
+                }
+                map[idx].push(subject);
+            }
+
+            return ['N5', 'N4', 'N3', 'N2', 'N1', 'Non-JLPT']
+                .map((level, index) => ({
+                    title: level,
+                    subjects: map[level === 'Non-JLPT' ? -1 : index] ?? []
+                }))
+                .filter(group => group.subjects.length > 0);
+        },
+    },
 };
 
 export const sortByOptions = {
@@ -95,6 +136,18 @@ export const sortByOptions = {
                 vocabulary: 3
             };
             return subjects.sort((a, b) => typeOrder[a.subjectType] - typeOrder[b.subjectType]);
+        }
+    },
+    frequency: {
+        key: 'frequency',
+        displayText: 'Frequency',
+        sort: (subjects) => {
+
+            function getFrequency(subject) {
+                return kanjiFrequencyLookupMap[subject.slug];
+            }
+
+            return subjects.sort((a, b) => getFrequency(a) - getFrequency(b));
         }
     },
 };
@@ -152,14 +205,16 @@ function GroupByToggle({options, groupBy, setGroupBy, disableOptions}) {
 const groupByOptionsList = [
     groupByOptions.none,
     groupByOptions.level,
-    groupByOptions.srsStage
+    groupByOptions.srsStage,
+    groupByOptions.jtpt,
 ];
 
 const sortByOptionsList = [
     sortByOptions.itemName,
     sortByOptions.level,
     sortByOptions.srsStage,
-    sortByOptions.itemType
+    sortByOptions.itemType,
+    sortByOptions.frequency,
 ];
 
 const colorByOptionsList = [

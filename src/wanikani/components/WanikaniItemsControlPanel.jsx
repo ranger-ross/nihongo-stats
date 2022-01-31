@@ -2,6 +2,7 @@ import {Checkbox, Paper, ToggleButton, ToggleButtonGroup} from "@mui/material";
 import * as React from "react";
 import {useMemo, useState} from "react";
 import {groupByOptions, sortByOptions, colorByOptions} from "../service/WanikaniDataUtil.js";
+import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
 
 const styles = {
     groupingPaper: {
@@ -73,7 +74,7 @@ function ControlContainer({children}) {
     );
 }
 
-function SegmentControl({title, value, setValue, options}) {
+function SegmentControl({title, value, setValue, options, sortArrow}) {
     return (
         <ControlContainer>
             <div style={styles.optionContainer}>
@@ -89,6 +90,10 @@ function SegmentControl({title, value, setValue, options}) {
                                       value={option.key}
                         >
                             {option.displayText}
+                            {!!sortArrow && sortArrow(option) !== 'none' ? (
+                                sortArrow(option) === 'up' ? <ArrowDropDown fontSize={"small"}/> :
+                                    <ArrowDropUp fontSize={"small"}/>
+                            ) : null}
                         </ToggleButton>
                     ))}
                 </ToggleButtonGroup>
@@ -137,7 +142,16 @@ export function useWanikaniItemControls() {
         secondaryGroupBy: groupByOptions.none,
         sortBy: sortByOptions.itemName,
         colorBy: colorByOptions.itemType,
-        typesToShow: ['kanji']
+        typesToShow: ['kanji'],
+        sortReverse: false,
+    });
+
+    const onSortByChange = (sortBy) => setControl(prev => {
+        if (!sortBy)
+            return prev;
+        const isChange = prev.sortBy.key !== sortBy.key;
+        let sortReverse = isChange ? false : !prev.sortReverse;
+        return {...prev, sortBy: sortBy, sortReverse: sortReverse};
     });
 
     return [
@@ -146,7 +160,7 @@ export function useWanikaniItemControls() {
             control: setControl,
             primaryGroupBy: (groupBy) => setControl(prev => ({...prev, primaryGroupBy: groupBy})),
             secondaryGroupBy: (groupBy) => setControl(prev => ({...prev, secondaryGroupBy: groupBy})),
-            sortBy: (sortBy) => setControl(prev => ({...prev, sortBy: sortBy})),
+            sortBy: onSortByChange,
             colorBy: (colorBy) => setControl(prev => ({...prev, colorBy: colorBy})),
             typesToShow: (typesToShow) => setControl(prev => ({...prev, typesToShow: typesToShow})),
         }
@@ -160,7 +174,8 @@ function WanikaniItemsControlPanel({control, set}) {
         secondaryGroupBy,
         sortBy,
         colorBy,
-        typesToShow
+        typesToShow,
+        sortReverse
     } = control;
 
     function onPrimaryGroupByChange(value) {
@@ -202,6 +217,7 @@ function WanikaniItemsControlPanel({control, set}) {
                             value={sortBy}
                             setValue={set.sortBy}
                             options={sortByOptionsList}
+                            sortArrow={option => option.key === sortBy.key ? (sortReverse ? 'down' : 'up') : 'none'}
             />
 
             <SegmentControl title={'Color By'}

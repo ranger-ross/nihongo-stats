@@ -35,13 +35,13 @@ function SubjectTile({subject, colorBy}) {
     ), [subject, colorBy.key]);
 }
 
-function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy}) {
+function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortReverse}) {
     const subGroups = useMemo(() => secondaryGroupBy.group(subjects), [subjects, secondaryGroupBy.key]);
 
     const sortedSubGroups = useMemo(() => subGroups.map(sg => ({
         ...sg,
-        subjects: sortBy.sort(sg.subjects)
-    })), [subGroups, sortBy.key])
+        subjects: sortReverse ? sortBy.sort(sg.subjects).reverse() : sortBy.sort(sg.subjects)
+    })), [subGroups, sortBy.key, sortReverse]);
 
     const [isLoaded, setIsLoaded] = useState(false);
 
@@ -136,6 +136,7 @@ function WanikaniItems() {
                                   secondaryGroupBy={control.secondaryGroupBy}
                                   sortBy={control.sortBy}
                                   colorBy={control.colorBy}
+                                  sortReverse={control.sortReverse}
                     />
                 ))}
             </div>

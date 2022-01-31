@@ -96,7 +96,7 @@ export const groupByOptions = {
                 .filter(group => group.subjects.length > 0);
         },
     },
-    jtpt: {
+    jlpt: {
         key: 'jlpt',
         displayText: 'JLPT',
         group: (subjects) => {

@@ -1,4 +1,4 @@
-import {Checkbox, Paper, ToggleButton, ToggleButtonGroup} from "@mui/material";
+import {Card, CardContent, Checkbox, Paper, ToggleButton, ToggleButtonGroup} from "@mui/material";
 import * as React from "react";
 import {useMemo, useState} from "react";
 import {groupByOptions, sortByOptions, colorByOptions} from "../service/WanikaniDataUtil.js";
@@ -20,29 +20,6 @@ const styles = {
         minWidth: '85px'
     }
 };
-
-const groupByOptionsList = [
-    groupByOptions.none,
-    groupByOptions.level,
-    groupByOptions.srsStage,
-    groupByOptions.jtpt,
-    groupByOptions.itemType,
-];
-
-const sortByOptionsList = [
-    sortByOptions.itemName,
-    sortByOptions.level,
-    sortByOptions.srsStage,
-    sortByOptions.itemType,
-    sortByOptions.jlpt,
-    sortByOptions.frequency,
-];
-
-const colorByOptionsList = [
-    colorByOptions.itemType,
-    colorByOptions.srsStage,
-    colorByOptions.jlpt,
-];
 
 function GroupByToggle({title, options, groupBy, setGroupBy, disableOptions}) {
     return (
@@ -124,12 +101,12 @@ function CheckboxControl({title, subtitle, value, setValue, options}) {
                 ) : null}
                 <div>
                     {options.map((option) => (
-                        <span key={option}>
-                        <Checkbox checked={value.includes(option.toLowerCase())}
+                        <span key={option.key}>
+                        <Checkbox checked={value.includes(option.key)}
                                   size="small"
-                                  disabled={value.length == 1 && value.includes(option.toLowerCase())}
-                                  onClick={() => onChange(option)}
-                        /> {option}</span>
+                                  disabled={option.disabled || (value.length == 1 && value.includes(option.key))}
+                                  onClick={() => onChange(option.key)}
+                        /> {option.text}</span>
                     ))}
                 </div>
             </div>
@@ -147,6 +124,14 @@ export function useWanikaniItemControls() {
         sortReverse: false,
     });
 
+    const onPrimaryGroupByChange = (value) => setControl(prev => {
+        let changes = {primaryGroupBy: value};
+        if (value.key === groupByOptions.none.key || value.key === prev.secondaryGroupBy.key) {
+            changes.secondaryGroupBy = groupByOptions.none;
+        }
+        return ({...prev, ...changes});
+    });
+
     const onSortByChange = (sortBy) => setControl(prev => {
         if (!sortBy)
             return prev;
@@ -155,21 +140,89 @@ export function useWanikaniItemControls() {
         return {...prev, sortBy: sortBy, sortReverse: sortReverse};
     });
 
+
+    const onTypesToShowChange = (typesToShow) => setControl(prev => {
+        if (!typesToShow || typesToShow.length == 0)
+            return prev;
+
+        let changes = {
+            typesToShow: typesToShow
+        };
+
+        const isKanjiOnly = typesToShow.length === 1 && typesToShow[0] === 'kanji';
+
+        if (!isKanjiOnly && prev.colorBy.key === colorByOptions.jlpt.key) {
+            changes.colorBy = colorByOptions.itemType;
+        } else if (isKanjiOnly && prev.colorBy.key === colorByOptions.itemType.key) {
+            changes.colorBy = colorByOptions.srsStage;
+        }
+
+        return {...prev, ...changes};
+    });
+
     return [
         control,
         {
             control: setControl,
-            primaryGroupBy: (groupBy) => setControl(prev => ({...prev, primaryGroupBy: groupBy})),
+            primaryGroupBy: onPrimaryGroupByChange,
             secondaryGroupBy: (groupBy) => setControl(prev => ({...prev, secondaryGroupBy: groupBy})),
             sortBy: onSortByChange,
             colorBy: (colorBy) => setControl(prev => ({...prev, colorBy: colorBy})),
-            typesToShow: (typesToShow) => setControl(prev => ({...prev, typesToShow: typesToShow})),
+            typesToShow: onTypesToShowChange,
         }
     ];
 }
 
-function WanikaniItemsControlPanel({control, set}) {
+function getGroupByOptions(typesToShow) {
+    let isKanjiOnly = typesToShow.length === 1 && typesToShow[0] === 'kanji';
 
+    let groupByOptionsList = [
+        groupByOptions.none,
+        groupByOptions.level,
+        groupByOptions.srsStage,
+    ];
+    if (isKanjiOnly) {
+        groupByOptionsList.push(groupByOptions.jlpt);
+    } else {
+        groupByOptionsList.push(groupByOptions.itemType);
+    }
+    return groupByOptionsList;
+}
+
+function getSortByOptions(typesToShow) {
+    let isKanjiOnly = typesToShow.length === 1 && typesToShow[0] === 'kanji';
+
+    let sortByOptionsList = [
+        sortByOptions.itemName,
+        sortByOptions.level,
+        sortByOptions.srsStage,
+    ];
+
+    if (isKanjiOnly) {
+        sortByOptionsList.push(sortByOptions.jlpt);
+        sortByOptionsList.push(sortByOptions.frequency);
+    } else {
+        sortByOptionsList.push(sortByOptions.itemType);
+    }
+    return sortByOptionsList;
+}
+
+function getColorByOptions(typesToShow) {
+    let isKanjiOnly = typesToShow.length === 1 && typesToShow[0] === 'kanji';
+
+    let colorByOptionsList = [
+        colorByOptions.srsStage,
+    ];
+
+    if (isKanjiOnly) {
+        colorByOptionsList.push(colorByOptions.jlpt);
+    } else {
+        colorByOptionsList.push(colorByOptions.itemType);
+    }
+    return colorByOptionsList;
+}
+
+function WanikaniItemsControlPanel({control, set}) {
     const {
         primaryGroupBy,
         secondaryGroupBy,
@@ -179,14 +232,6 @@ function WanikaniItemsControlPanel({control, set}) {
         sortReverse
     } = control;
 
-    function onPrimaryGroupByChange(value) {
-        let controlChanges = {primaryGroupBy: value};
-        if (value.key === groupByOptions.none.key || value.key === secondaryGroupBy.key) {
-            controlChanges.secondaryGroupBy = groupByOptions.none;
-        }
-        set.control(prev => ({...prev, ...controlChanges}))
-    }
-
     const secondaryGroupDisabled = useMemo(() => {
         if (primaryGroupBy.key === groupByOptions.none.key)
             return [groupByOptions.none, groupByOptions.srsStage, groupByOptions.level];
@@ -194,49 +239,61 @@ function WanikaniItemsControlPanel({control, set}) {
             return [primaryGroupBy];
     }, [primaryGroupBy.key]);
 
+    const allowRadicalsAndVocab = primaryGroupBy.key !== groupByOptions.jlpt.key && secondaryGroupBy.key !== groupByOptions.jlpt.key;
+
+    const groupByOptionsList = getGroupByOptions(typesToShow);
+    const sortByOptionsList = getSortByOptions(typesToShow);
+    const colorByOptionsList = getColorByOptions(typesToShow);
+    const displayTypeOptionsList = [
+        {text: 'Radicals', key: 'radical', disabled: !allowRadicalsAndVocab},
+        {text: 'Kanji', key: 'kanji', disabled: false},
+        {text: 'Vocabulary', key: 'vocabulary', disabled: !allowRadicalsAndVocab},
+    ];
+
     return (
-        <Paper>
-            <ControlContainer>
-                <strong style={{padding: '4px'}}>Group By</strong>
+        <Card style={{margin: '5px'}}>
+            <CardContent>
+                <ControlContainer>
+                    <strong style={{padding: '4px'}}>Group By</strong>
 
-                <GroupByToggle title={'Primary'}
-                               options={groupByOptionsList}
-                               groupBy={primaryGroupBy}
-                               setGroupBy={onPrimaryGroupByChange}
+                    <GroupByToggle title={'Primary'}
+                                   options={groupByOptionsList}
+                                   groupBy={primaryGroupBy}
+                                   setGroupBy={set.primaryGroupBy}
+                    />
+
+                    <GroupByToggle title={'Secondary'}
+                                   options={groupByOptionsList}
+                                   groupBy={secondaryGroupBy}
+                                   setGroupBy={set.secondaryGroupBy}
+                                   disableOptions={secondaryGroupDisabled}
+                    />
+
+                </ControlContainer>
+
+                <SegmentControl title={'Sort By'}
+                                value={sortBy}
+                                setValue={set.sortBy}
+                                options={sortByOptionsList}
+                                sortArrow={option => option.key === sortBy.key ? (sortReverse ? 'down' : 'up') : 'none'}
                 />
 
-                <GroupByToggle title={'Secondary'}
-                               options={groupByOptionsList}
-                               groupBy={secondaryGroupBy}
-                               setGroupBy={set.secondaryGroupBy}
-                               disableOptions={secondaryGroupDisabled}
+                <SegmentControl title={'Color By'}
+                                value={colorBy}
+                                setValue={set.colorBy}
+                                options={colorByOptionsList}
                 />
 
-            </ControlContainer>
+                <CheckboxControl title={'Display'}
+                                 subtitle={'Types'}
+                                 value={typesToShow}
+                                 setValue={set.typesToShow}
+                                 options={displayTypeOptionsList}
+                />
 
-            <SegmentControl title={'Sort By'}
-                            value={sortBy}
-                            setValue={set.sortBy}
-                            options={sortByOptionsList}
-                            sortArrow={option => option.key === sortBy.key ? (sortReverse ? 'down' : 'up') : 'none'}
-            />
-
-            <SegmentControl title={'Color By'}
-                            value={colorBy}
-                            setValue={set.colorBy}
-                            options={colorByOptionsList}
-            />
-
-            <CheckboxControl title={'Display'}
-                             subtitle={'Types'}
-                             value={typesToShow}
-                             setValue={set.typesToShow}
-                             options={['Radical', 'Kanji', 'Vocabulary']}
-            />
-
-            <div style={{height: '6px'}}/>
-
-        </Paper>
+                <div style={{height: '6px'}}/>
+            </CardContent>
+        </Card>
     )
 }
 

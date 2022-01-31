@@ -124,7 +124,7 @@ export const sortByOptions = {
     srsStage: {
         key: 'srsStage',
         displayText: 'SRS Stage',
-        sort: (subjects) => subjects.sort((a, b) => a['srs_stage'] - b['srs_stage'])
+        sort: (subjects) => subjects.sort((a, b) => (a['srs_stage'] ?? 100) - (b['srs_stage'] ?? 100))
     },
     itemType: {
         key: 'itemType',

@@ -30,3 +30,13 @@ export function getColorByWanikaniSrsStage(stage) { // TODO: unit test
     }
     return null;
 }
+
+
+export function getColorByWanikaniSubjectType(subjectType) { // TODO: unit test
+    if (subjectType === 'radical')
+        return WanikaniColors.blue;
+    else if (subjectType === 'kanji')
+        return WanikaniColors.pink;
+    else
+        return WanikaniColors.purple;
+}

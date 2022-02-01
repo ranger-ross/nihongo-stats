@@ -1,6 +1,6 @@
 import {WanikaniColors} from "../../Constants.js";
 
-export function getColorByWanikaniSrsStage(stage) { // TODO: unit test
+export function getColorByWanikaniSrsStage(stage) {
     if (!stage && stage !== 0) {
         return WanikaniColors.lockedGray;
     }
@@ -32,7 +32,7 @@ export function getColorByWanikaniSrsStage(stage) { // TODO: unit test
 }
 
 
-export function getColorByWanikaniSubjectType(subjectType) { // TODO: unit test
+export function getColorByWanikaniSubjectType(subjectType) {
     if (subjectType === 'radical')
         return WanikaniColors.blue;
     else if (subjectType === 'kanji')
@@ -41,7 +41,7 @@ export function getColorByWanikaniSubjectType(subjectType) { // TODO: unit test
         return WanikaniColors.purple;
 }
 
-export function getColorByJLPTLevel(level) { // TODO: unit test
+export function getColorByJLPTLevel(level) {
     if (level === 'N5')
         return '#3261c5'
     else if (level === 'N4')

@@ -66,15 +66,17 @@ function getLabelText(unit, date, isToolTipLabel) {
     }
 }
 
-function formatChartData(rawData, unit, period) {
+function formatChartData(rawData, unit, period, initialReviewCount) {
     const data = rawData
         .filter(assignment => new Date(assignment.data['available_at']) > addTimeToDate(new Date(), unit, -1))
         .filter(assignment => new Date(assignment.data['available_at']) < addTimeToDate(new Date(), unit, period));
 
+    let totalReviewCount = initialReviewCount;
     let daysData = []
     for (let i = 0; i < period; i++) {
-        const date = addTimeToDate(new Date(), unit, i)
-        const assignmentsOnDay = data.filter(assignment => isPeriodTheSame(new Date(assignment.data['available_at']), date))
+        const date = addTimeToDate(new Date(), unit, i);
+        const assignmentsOnDay = data.filter(assignment => isPeriodTheSame(new Date(assignment.data['available_at']), date, unit));
+        totalReviewCount += assignmentsOnDay.length;
 
         daysData.push({
             radicals: assignmentsOnDay.filter(assignment => assignment.data['subject_type'] === 'radical').length,
@@ -82,6 +84,7 @@ function formatChartData(rawData, unit, period) {
             vocabulary: assignmentsOnDay.filter(assignment => assignment.data['subject_type'] === 'vocabulary').length,
             reviews: assignmentsOnDay.length,
             time: date.getTime(),
+            total: totalReviewCount
         });
     }
     return daysData;
@@ -94,6 +97,7 @@ async function fetchFutureReviews() {
 
 function WanikaniFutureReviewsChart() {
     const [rawData, setRawData] = useState([]);
+    const [initialReviewCount, setInitialReviewCount] = useState(0);
     const [targetItem, setTargetItem] = useState();
     const [unit, setUnit] = useState(units.hours);
     const [period, setPeriod] = useState(48);
@@ -105,25 +109,39 @@ function WanikaniFutureReviewsChart() {
                 if (!isSubscribed)
                     return;
                 setRawData(data);
-            })
+            });
+        WanikaniApiService.getPendingLessonsAndReviews()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setInitialReviewCount(data.reviews);
+            });
         return () => isSubscribed = false;
     }, []);
 
-    const chartData = useMemo(() => !rawData || rawData.length == 0 ? [] : formatChartData(rawData, unit, period), [rawData, unit, period]);
+    const chartData = useMemo(() => !rawData || rawData.length == 0 ? [] : formatChartData(rawData, unit, period, initialReviewCount), [rawData, unit, period, initialReviewCount]);
 
     function ReviewsToolTip({targetItem}) {
-        const {reviews, radicals, kanji, vocabulary, time} = chartData[targetItem.point];
+        const {radicals, kanji, vocabulary, time} = chartData[targetItem.point];
+        const rowStyle = {display: 'flex', justifyContent: 'space-between', gap: '10px'};
         return (
             <div>
-                {unit == units.hours ? 'Time' : 'Date'}: {getLabelText(unit, time, true)}
-                <br/>
-                Total: {reviews}
-                <br/>
-                Radicals: {radicals}
-                <br/>
-                Kanji: {kanji}
-                <br/>
-                Vocabulary: {vocabulary}
+                <div style={rowStyle}>
+                    <div>{unit == units.hours ? 'Time' : 'Date'}:</div>
+                    <div>{getLabelText(unit, time, true)}</div>
+                </div>
+                <div style={rowStyle}>
+                    <div>Radicals:</div>
+                    <div>{radicals}</div>
+                </div>
+                <div style={rowStyle}>
+                    <div>Kanji:</div>
+                    <div>{kanji}</div>
+                </div>
+                <div style={rowStyle}>
+                    <div>Vocabulary:</div>
+                    <div>{vocabulary}</div>
+                </div>
             </div>
         );
     }

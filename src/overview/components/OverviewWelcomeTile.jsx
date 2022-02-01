@@ -2,9 +2,7 @@ import {Card, CardContent, IconButton, Menu, MenuItem, Typography} from "@mui/ma
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import React, {useEffect, useState} from "react";
 import AnkiDeckSummaries, {fetchAnkiDeckSummaries} from "../../shared/AnkiDeckSummaries.jsx";
-import WanikaniPendingLessonsAndReviews, {
-    fetchWanikaniPendingLessonsAndReviews
-} from "../../shared/WanikaniPendingLessonAndReviews";
+import WanikaniPendingLessonsAndReviews from "../../shared/WanikaniPendingLessonAndReviews";
 import BunProPendingReviews from "../../shared/BunProPendingReviews.jsx";
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
@@ -13,6 +11,7 @@ import {Add} from "@mui/icons-material";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
 import {AppNames} from "../../Constants.js";
 import {useSelectedApp} from "../../hooks/useSelectedApp.jsx";
+import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
 
 const styles = {
     titleText: {
@@ -65,7 +64,7 @@ function WanikaniSection() {
 
     useEffect(() => {
         let isSubscribed = true;
-        fetchWanikaniPendingLessonsAndReviews()
+        WanikaniApiService.getPendingLessonsAndReviews()
             .then(data => {
                 if (!isSubscribed)
                     return;

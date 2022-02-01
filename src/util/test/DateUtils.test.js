@@ -6,7 +6,7 @@ import {
     daysToMillis,
     millisToDays,
     millisToHours,
-    truncDate
+    truncDate, truncMinutes
 } from "../DateUtils.js";
 
 describe('Timezones', () => {
@@ -116,6 +116,13 @@ describe('DateUtils', function () {
 
     });
 
+    describe('truncDate()', function () {
+
+        it('should trunc minutes properly', function () {
+            expect(truncMinutes(1640020316111).getTime()).toBe(1640019600000);
+        });
+
+    });
 
     describe('daysToMillis()', function () {
 

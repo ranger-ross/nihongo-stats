@@ -3,7 +3,7 @@ import React, {useState, useEffect, useMemo} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {Animation, ArgumentScale, EventTracker, Stack} from "@devexpress/dx-react-chart";
 import {Card, CardContent, Typography, Checkbox} from "@mui/material";
-import {addDays, addHours, areDatesSameDay, areDatesSameDayAndHour} from '../../util/DateUtils.js';
+import {addDays, addHours, areDatesSameDay, areDatesSameDayAndHour, truncMinutes} from '../../util/DateUtils.js';
 import {WanikaniColors} from '../../Constants.js';
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import {scaleBand} from 'd3-scale';
@@ -66,6 +66,10 @@ function getLabelText(unit, date, isToolTipLabel) {
     }
 }
 
+function getChartStartTime() { // Start chart at the beginning of the next hour
+    return addHours(truncMinutes(new Date()), 1);
+}
+
 function formatChartData(rawData, unit, period, initialReviewCount) {
     const data = rawData
         .filter(assignment => new Date(assignment.data['available_at']) > addTimeToDate(new Date(), unit, -1))
@@ -74,7 +78,7 @@ function formatChartData(rawData, unit, period, initialReviewCount) {
     let totalReviewCount = initialReviewCount;
     let daysData = []
     for (let i = 0; i < period; i++) {
-        const date = addTimeToDate(new Date(), unit, i);
+        const date = addTimeToDate(getChartStartTime(), unit, i);
         const assignmentsOnDay = data.filter(assignment => isPeriodTheSame(new Date(assignment.data['available_at']), date, unit));
         totalReviewCount += assignmentsOnDay.length;
 

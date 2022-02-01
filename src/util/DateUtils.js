@@ -44,3 +44,10 @@ export function areDatesSameDayAndHour(date1, date2) {
 export function truncDate(date) {
     return new Date(new Date(date).toDateString());
 }
+
+export function truncMinutes(date) {
+    let _date = new Date(date);
+    _date.setHours(_date.getHours() + Math.round(_date.getMinutes() / 60));
+    _date.setMinutes(0, 0, 0);
+    return _date;
+}

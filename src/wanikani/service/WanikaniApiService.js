@@ -136,6 +136,23 @@ async function flushCache() {
     }
 }
 
+async function getSummary() {
+    const cachedValue = await localForage.getItem(cacheKeys.summary);
+    if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 5)) {
+        return cachedValue.data;
+    }
+
+    const response = await fetchWanikaniApi('/v2/summary', apiKey());
+    const summary = await response.json();
+
+    localForage.setItem(cacheKeys.summary, {
+        data: summary,
+        lastUpdated: new Date().getTime(),
+    });
+
+    return summary;
+}
+
 export default {
     saveApiKey: saveApiKey,
     apiKey: apiKey,
@@ -148,22 +165,7 @@ export default {
         return user;
     },
     getUser: async () => getFromMemoryCacheOrFetch('/v2/user'),
-    getSummary: async () => {
-        const cachedValue = await localForage.getItem(cacheKeys.summary);
-        if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 5)) {
-            return cachedValue.data;
-        }
-
-        const response = await fetchWanikaniApi('/v2/summary', apiKey());
-        const summary = await response.json();
-
-        localForage.setItem(cacheKeys.summary, {
-            data: summary,
-            lastUpdated: new Date().getTime(),
-        });
-
-        return summary;
-    },
+    getSummary: getSummary,
     getLevelProgress: async () => {
         const cachedValue = await localForage.getItem(cacheKeys.levelProgression);
         if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 60)) {
@@ -232,4 +234,24 @@ export default {
 
         return reviews;
     },
+    getPendingLessonsAndReviews: async () => {
+        const summary = await getSummary();
+        let lessons = 0;
+        for (const group of summary.data.lessons) {
+            if (new Date(group['available_at']).getTime() < Date.now()) {
+                lessons += group['subject_ids'].length;
+            }
+        }
+
+        let reviews = 0;
+        for (const group of summary.data.reviews) {
+            if (new Date(group['available_at']).getTime() < Date.now()) {
+                reviews += group['subject_ids'].length;
+            }
+        }
+        return {
+            lessons,
+            reviews
+        };
+    }
 }

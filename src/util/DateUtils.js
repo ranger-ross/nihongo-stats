@@ -10,9 +10,19 @@ export function millisToHours(millis) {
     return Math.floor(millis / (86400000 / 24));
 }
 
+export function hoursToMillis(hours) {
+    return hours * (1000 * 60 * 60);
+}
+
 export function addDays(date, days) {
     let _date = new Date(date);
     _date.setDate(date.getDate() + days);
+    return _date;
+}
+
+export function addHours(date, hours) {
+    let _date = new Date(date);
+    _date.setTime(date.getTime() + hoursToMillis(hours));
     return _date;
 }
 
@@ -21,6 +31,13 @@ export function areDatesSameDay(date1, date2) {
         date1.getFullYear() === date2.getFullYear() &&
         date1.getMonth() === date2.getMonth() &&
         date1.getDate() === date2.getDate()
+    );
+}
+
+export function areDatesSameDayAndHour(date1, date2) {
+    return (
+        areDatesSameDay(date1, date2) &&
+        date1.getHours() === date2.getHours()
     );
 }
 

@@ -2,6 +2,9 @@ import {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {Card, CardContent, Typography, Switch, FormGroup, FormControlLabel} from "@mui/material";
 import WanikaniItemTile from "./WanikaniItemTile.jsx";
+import {combineAssignmentAndSubject} from "../service/WanikaniDataUtil.js";
+import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.js";
+import {WanikaniColors} from "../../Constants.js";
 
 function createAssignmentMap(subjects) {
     let map = {};
@@ -11,15 +14,6 @@ function createAssignmentMap(subjects) {
     }
 
     return map;
-}
-
-function combineAssignmentAndSubject(assignment, subject) {
-    return {
-        ...subject.data,
-        ...assignment?.data,
-        hasAssignment: !!assignment,
-        subjectId: subject.id,
-    };
 }
 
 function isHidden(subject) {
@@ -109,6 +103,27 @@ const defaultState = {
     vocabularyStarted: 0,
 };
 
+function getTileColor(subject) {
+    if (subject['started_at']) {
+        return getColorByWanikaniSubjectType(subject.subjectType);
+    } else if (subject.hasAssignment) {
+        return WanikaniColors.lessonGray;
+    }
+    return WanikaniColors.lockedGray;
+}
+
+function SubjectTile({subject}) {
+    return (
+        <WanikaniItemTile
+            text={subject.characters || '?'}
+            link={subject['document_url']}
+            meaning={subject.meanings.map(m => m.meaning).join(', ')}
+            srsLevel={subject['srs_stage']}
+            color={getTileColor(subject)}
+        />
+    );
+}
+
 function WanikaniLevelItemsChart({level, showLevel, showPreviousLevelSelector, showRatios}) {
     const [isPreviousLevel, setIsPreviousLevel] = useState(false);
     const [data, setData] = useState(defaultState);
@@ -159,16 +174,7 @@ function WanikaniLevelItemsChart({level, showLevel, showPreviousLevelSelector, s
 
                 <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     {data.radicals.map(subject => (
-                        <WanikaniItemTile
-                            key={subject.subjectId + '-radical'}
-                            text={subject.characters || '?'}
-                            isStarted={subject['started_at']}
-                            isAvailable={subject.hasAssignment}
-                            link={subject['document_url']}
-                            meaning={subject.meanings.map(m => m.meaning).join(', ')}
-                            srsLevel={subject['srs_stage']}
-                            type={'radical'}
-                        />
+                        <SubjectTile key={subject.subjectId + '-radicals'} subject={subject}/>
                     ))}
                 </div>
 
@@ -185,16 +191,7 @@ function WanikaniLevelItemsChart({level, showLevel, showPreviousLevelSelector, s
                 </Typography>
                 <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     {data.kanji.map(subject => (
-                        <WanikaniItemTile
-                            key={subject.subjectId + '-kaji'}
-                            text={subject.characters}
-                            isStarted={subject['started_at']}
-                            isAvailable={subject.hasAssignment}
-                            link={subject['document_url']}
-                            meaning={subject.meanings.map(m => m.meaning).join(', ')}
-                            srsLevel={subject['srs_stage']}
-                            type={'kanji'}
-                        />
+                        <SubjectTile key={subject.subjectId + '-kanji'} subject={subject}/>
                     ))}
 
                 </div>
@@ -212,16 +209,7 @@ function WanikaniLevelItemsChart({level, showLevel, showPreviousLevelSelector, s
                 </Typography>
                 <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     {data.vocabulary.map(subject => (
-                        <WanikaniItemTile
-                            key={subject.subjectId + '-vocabulary'}
-                            text={subject.characters}
-                            isStarted={subject['started_at']}
-                            isAvailable={subject.hasAssignment}
-                            link={subject['document_url']}
-                            meaning={subject.meanings.map(m => m.meaning).join(', ')}
-                            srsLevel={subject['srs_stage']}
-                            type={'vocabulary'}
-                        />
+                        <SubjectTile key={subject.subjectId + '-vocab'} subject={subject}/>
                     ))}
                 </div>
 

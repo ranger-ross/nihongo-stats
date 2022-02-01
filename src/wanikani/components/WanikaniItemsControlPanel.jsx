@@ -1,4 +1,14 @@
-import {Card, CardContent, Checkbox, Paper, ToggleButton, ToggleButtonGroup} from "@mui/material";
+import {
+    Card,
+    CardContent,
+    Checkbox,
+    MenuItem,
+    Paper,
+    Select,
+    ToggleButton,
+    ToggleButtonGroup,
+    Typography
+} from "@mui/material";
 import * as React from "react";
 import {useMemo, useState} from "react";
 import {groupByOptions, sortByOptions, colorByOptions} from "../service/WanikaniDataUtil.js";
@@ -6,7 +16,8 @@ import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
 
 const styles = {
     groupingPaper: {
-        margin: '10px'
+        margin: '5px',
+        padding: '8px',
     },
     optionContainer: {
         display: 'flex',
@@ -16,9 +27,36 @@ const styles = {
         flexWrap: 'wrap'
     },
     optionLabel: {
-        paddingLeft: '8px',
+        paddingLeft: '6px',
         minWidth: '85px'
     }
+};
+
+const presetOptions = {
+    levels: {
+        key: 'levels',
+        text: 'Wanikani Levels',
+        controls: {
+            primaryGroupBy: groupByOptions.level,
+            secondaryGroupBy: groupByOptions.itemType,
+            sortBy: sortByOptions.itemName,
+            colorBy: colorByOptions.itemType,
+            typesToShow: ['radical', 'kanji', 'vocabulary'],
+            sortReverse: false,
+        }
+    },
+    jlpt: {
+        key: 'jlpt',
+        text: 'JLPT Levels',
+        controls: {
+            primaryGroupBy: groupByOptions.jlpt,
+            secondaryGroupBy: groupByOptions.none,
+            sortBy: sortByOptions.itemName,
+            colorBy: colorByOptions.jlpt,
+            typesToShow: ['kanji'],
+            sortReverse: false,
+        }
+    },
 };
 
 function GroupByToggle({title, options, groupBy, setGroupBy, disableOptions}) {
@@ -93,7 +131,7 @@ function CheckboxControl({title, subtitle, value, setValue, options}) {
 
     return (
         <ControlContainer>
-            <strong style={{padding: '4px'}}>{title}</strong>
+            <strong>{title}</strong>
 
             <div style={styles.optionContainer}>
                 {subtitle ? (
@@ -222,6 +260,34 @@ function getColorByOptions(typesToShow) {
     return colorByOptionsList;
 }
 
+function PresetSelector({options, onChange}) {
+    const placeholder = {
+        key: 'placeholder',
+        text: 'Presets'
+    }
+
+    return (
+        <Select
+            style={{minWidth: '150px'}}
+            size={'small'}
+            value={placeholder}
+            onChange={e => onChange(e.target.value)}
+        >
+            <MenuItem value={placeholder}>
+                {placeholder.text}
+            </MenuItem>
+
+            {options.map((option) => (
+                <MenuItem key={option.key}
+                          value={option.controls}
+                >
+                    {option.text}
+                </MenuItem>
+            ))}
+        </Select>
+    );
+}
+
 function WanikaniItemsControlPanel({control, set}) {
     const {
         primaryGroupBy,
@@ -253,8 +319,19 @@ function WanikaniItemsControlPanel({control, set}) {
     return (
         <Card style={{margin: '5px'}}>
             <CardContent>
+                <div style={{display: 'flex', justifyContent: 'space-between', marginRight: '25px'}}>
+                    <Typography variant={'h6'}>Controls</Typography>
+                    <PresetSelector
+                        options={[
+                            presetOptions.levels,
+                            presetOptions.jlpt,
+                        ]}
+                        onChange={preset => set.control(preset)}
+                    />
+                </div>
+
                 <ControlContainer>
-                    <strong style={{padding: '4px'}}>Group By</strong>
+                    <strong>Group By</strong>
 
                     <GroupByToggle title={'Primary'}
                                    options={groupByOptionsList}

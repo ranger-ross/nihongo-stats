@@ -208,7 +208,7 @@ function OverviewUpcomingReviewsChart() {
 
     const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], 14);
 
-    const LabelWithDate = (props) => {
+    function LabelWithDate(props) {
         const dateAsString = props.text;
         if (!dateAsString) {
             return (<></>);
@@ -225,7 +225,7 @@ function OverviewUpcomingReviewsChart() {
                 text={(date.getMonth() + 1) + '/' + (date.getDate())}
             />
         );
-    };
+    }
 
     function ReviewsToolTip({targetItem}) {
         const dp = chartData[targetItem.point];

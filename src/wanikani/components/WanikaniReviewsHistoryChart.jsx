@@ -127,7 +127,7 @@ function WanikaniReviewsHistoryChart() {
 
     const visibleLabelIndices = calculateLabelPositions(chartData);
 
-    const LabelWithDate = (props) => {
+    function LabelWithDate(props) {
         const date = props.text;
         if (!date) {
             return (<></>);
@@ -147,7 +147,7 @@ function WanikaniReviewsHistoryChart() {
                 />
             </>
         );
-    };
+    }
 
     return (
         <Card style={{height: '100%'}}>

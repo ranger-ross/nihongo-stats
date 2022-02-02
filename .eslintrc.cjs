@@ -18,6 +18,13 @@ module.exports = {
         'react',
     ],
     'rules': {
+        'react/function-component-definition': 'error',
+        'react/no-invalid-html-attribute': 'error',
+        'react/no-this-in-sfc': 'error',
+        'react/no-typos': 'error',
+        'react/no-unsafe': 'error',
+
+        // Disabled
         'no-extra-boolean-cast': 'off',
         'react/react-in-jsx-scope': 'off',
         'react/prop-types': 'off',

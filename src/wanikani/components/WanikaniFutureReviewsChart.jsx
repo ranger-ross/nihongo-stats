@@ -150,7 +150,7 @@ function WanikaniFutureReviewsChart() {
         );
     }
 
-    const LabelWithDate = (props) => {
+    function LabelWithDate(props) {
         const {text} = props;
         let label = '';
         if (text) {
@@ -163,7 +163,7 @@ function WanikaniFutureReviewsChart() {
                 text={label}
             />
         );
-    };
+    }
 
     return (
         <Card style={{height: '100%'}}>

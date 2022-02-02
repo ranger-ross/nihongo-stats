@@ -113,7 +113,7 @@ function AnkiReviewsChart({deckNames, showTotals}) {
 
     const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], 6);
 
-    const LabelWithDate = (props) => {
+    function LabelWithDate(props) {
         const date = new Date(props.text);
         if (!date) {
             return (<></>)
@@ -132,7 +132,7 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                 ) : null}
             </>
         );
-    };
+    }
 
     return (
         <Card>

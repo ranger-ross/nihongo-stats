@@ -12,7 +12,7 @@ import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 const scale = () => scaleLinear();
 const modifyDomain = () => [0, 100];
 
-const LabelWithDate = (props) => {
+function LabelWithDate(props) {
     const {text} = props;
     const rawTimestamp = parseInt(text.split(',').join(''));
     return (
@@ -21,9 +21,9 @@ const LabelWithDate = (props) => {
             text={new Date(rawTimestamp).toLocaleDateString()}
         />
     );
-};
+}
 
-const PercentageLabel = (props) => {
+function PercentageLabel(props) {
     const {text} = props;
     return (
         <ValueAxis.Label
@@ -31,7 +31,7 @@ const PercentageLabel = (props) => {
             text={text + '%'}
         />
     );
-};
+}
 
 function truncDate(date) {
     return new Date(new Date(date).toDateString());

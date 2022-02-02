@@ -77,7 +77,7 @@ function AnkiUpcomingReviewsChart() {
 
     const visibleLabelIndices = getVisibleLabelIndices(chartData?.data ?? [], 20);
 
-    const LabelWithDate = (props) => {
+    function LabelWithDate(props) {
         const dateAsString = props.text;
         if (!dateAsString) {
             return (<></>);
@@ -94,7 +94,7 @@ function AnkiUpcomingReviewsChart() {
                 text={(date.getMonth() + 1) + '/' + (date.getDate())}
             />
         );
-    };
+    }
 
     function ReviewsToolTip({targetItem}) {
         const data = chartData.data[targetItem.point];
@@ -122,11 +122,11 @@ function AnkiUpcomingReviewsChart() {
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
                         <DaysSelector
                             options={[
-                                {value: 7, text: '7' },
-                                {value: 14, text: '14' },
-                                {value: 30, text: '30' },
-                                {value: 60, text: '60' },
-                                {value: 90, text: '90' },
+                                {value: 7, text: '7'},
+                                {value: 14, text: '14'},
+                                {value: 30, text: '30'},
+                                {value: 60, text: '60'},
+                                {value: 90, text: '90'},
                             ]}
                             days={days}
                             setDays={setDays}

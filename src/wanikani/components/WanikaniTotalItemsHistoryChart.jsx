@@ -8,7 +8,7 @@ import {EventTracker} from "@devexpress/dx-react-chart";
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import {daysToMillis, millisToDays} from "../../util/DateUtils.js";
 
-const LabelWithDate = (props) => {
+function LabelWithDate(props) {
     const {text} = props;
     const rawTimestamp = parseInt(text.split(',').join(''));
     return (
@@ -17,7 +17,7 @@ const LabelWithDate = (props) => {
             text={new Date(rawTimestamp).toLocaleDateString()}
         />
     );
-};
+}
 
 function sortByStartedAtDate(a, b) {
     if (a.startedAt.getTime() < b.startedAt.getTime()) {

@@ -1,7 +1,14 @@
-import {Chart, ValueAxis, BarSeries, ArgumentAxis, Tooltip} from '@devexpress/dx-react-chart-material-ui';
+import {
+    Chart,
+    ValueAxis,
+    BarSeries,
+    ScatterSeries,
+    ArgumentAxis,
+    Tooltip
+} from '@devexpress/dx-react-chart-material-ui';
 import React, {useState, useEffect, useMemo} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import {Animation, ArgumentScale, EventTracker, Stack} from "@devexpress/dx-react-chart";
+import {ArgumentScale, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
 import {Card, CardContent, Typography, Checkbox} from "@mui/material";
 import {addDays, addHours, areDatesSameDay, areDatesSameDayAndHour, truncMinutes} from '../../util/DateUtils.js';
 import {WanikaniColors} from '../../Constants.js';
@@ -99,6 +106,21 @@ async function fetchFutureReviews() {
     return data.filter(assignment => !assignment.data['burned_at'] || !assignment.data['available_at']);
 }
 
+function SimpleBar({x, y, width, offsetY, fill, style}) {
+    const path = `M ${x} ${offsetY}
+   L ${width + x} ${offsetY}
+   L ${width + x} ${y}
+   L ${x} ${y}
+   Z`;
+
+    return (
+        <path d={path}
+              fill={fill}
+              style={style}
+        />
+    );
+}
+
 function WanikaniFutureReviewsChart() {
     const [rawData, setRawData] = useState([]);
     const [initialReviewCount, setInitialReviewCount] = useState(0);
@@ -125,8 +147,13 @@ function WanikaniFutureReviewsChart() {
 
     const chartData = useMemo(() => !rawData || rawData.length == 0 ? [] : formatChartData(rawData, unit, period, initialReviewCount), [rawData, unit, period, initialReviewCount]);
 
+    const maxScale = useMemo(() => {
+        const totals = chartData.map(dp => dp.radicals + dp.kanji + dp.vocabulary)
+        return Math.max(5, ...totals) + 5;
+    }, [chartData]);
+
     function ReviewsToolTip({targetItem}) {
-        const {radicals, kanji, vocabulary, time} = chartData[targetItem.point];
+        const {radicals, kanji, vocabulary, total, time} = chartData[targetItem.point];
         const rowStyle = {display: 'flex', justifyContent: 'space-between', gap: '10px'};
         return (
             <div>
@@ -134,18 +161,27 @@ function WanikaniFutureReviewsChart() {
                     <div>{unit == units.hours ? 'Time' : 'Date'}:</div>
                     <div>{getLabelText(unit, time, true)}</div>
                 </div>
-                <div style={rowStyle}>
-                    <div>Radicals:</div>
-                    <div>{radicals}</div>
-                </div>
-                <div style={rowStyle}>
-                    <div>Kanji:</div>
-                    <div>{kanji}</div>
-                </div>
-                <div style={rowStyle}>
-                    <div>Vocabulary:</div>
-                    <div>{vocabulary}</div>
-                </div>
+                {targetItem.series.includes('total') ? (
+                    <div style={rowStyle}>
+                        <div>Total:</div>
+                        <div>{total}</div>
+                    </div>
+                ) : (
+                    <>
+                        <div style={rowStyle}>
+                            <div>Radicals:</div>
+                            <div>{radicals}</div>
+                        </div>
+                        <div style={rowStyle}>
+                            <div>Kanji:</div>
+                            <div>{kanji}</div>
+                        </div>
+                        <div style={rowStyle}>
+                            <div>Vocabulary:</div>
+                            <div>{vocabulary}</div>
+                        </div>
+                    </>
+                )}
             </div>
         );
     }
@@ -162,6 +198,51 @@ function WanikaniFutureReviewsChart() {
                 {...props}
                 text={label}
             />
+        );
+    }
+
+    function isLabelVisible(seriesIndex, index) {
+        if (seriesIndex === 2)
+            return true;
+
+        if (seriesIndex === 1)
+            return chartData[index].vocabulary === 0;
+
+        if (seriesIndex === 0)
+            return chartData[index].kanji === 0 && chartData[index].vocabulary === 0;
+        return false;
+    }
+
+    function BarWithLabel({
+                              arg, barWidth, maxBarWidth, val, startVal,
+                              color, value, style, seriesIndex, index
+                          }) {
+        if (value === 0)
+            return (<></>);
+
+        const width = maxBarWidth * barWidth;
+
+        return (
+            <>
+                <SimpleBar x={arg - width / 2}
+                           width={width}
+                           y={val}
+                           offsetY={startVal}
+                           fill={color}
+                           style={style}
+                />
+
+                {isLabelVisible(seriesIndex, index) ? (
+                    <Chart.Label
+                        x={arg}
+                        y={val - 10}
+                        textAnchor={'middle'}
+                        style={{fill: 'white', fontWeight: 'bold'}}
+                    >
+                        {value}
+                    </Chart.Label>
+                ) : null}
+            </>
         );
     }
 
@@ -198,7 +279,15 @@ function WanikaniFutureReviewsChart() {
 
                     <div style={{flexGrow: '1'}}>
                         <Chart data={chartData}>
-                            <ValueAxis/>
+
+                            <ValueScale name="total"
+                                        modifyDomain={() => [0, chartData.length > 0 ? chartData[chartData.length - 1].total : 1]}/>
+
+                            <ValueScale name="daily"
+                                        modifyDomain={() => [0, maxScale]}/>
+
+                            <ValueAxis position={'left'} scaleName="total"/>
+
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate}/>
 
@@ -207,6 +296,8 @@ function WanikaniFutureReviewsChart() {
                                 valueField="radicals"
                                 argumentField="time"
                                 color={WanikaniColors.blue}
+                                pointComponent={BarWithLabel}
+                                scaleName="daily"
                             />
 
                             <BarSeries
@@ -214,6 +305,8 @@ function WanikaniFutureReviewsChart() {
                                 valueField="kanji"
                                 argumentField="time"
                                 color={WanikaniColors.pink}
+                                pointComponent={BarWithLabel}
+                                scaleName="daily"
                             />
 
                             <BarSeries
@@ -221,6 +314,25 @@ function WanikaniFutureReviewsChart() {
                                 valueField="vocabulary"
                                 argumentField="time"
                                 color={WanikaniColors.purple}
+                                pointComponent={BarWithLabel}
+                                scaleName="daily"
+                            />
+
+
+                            <LineSeries
+                                name="total"
+                                valueField="total"
+                                argumentField="time"
+                                color={'#e0b13e'}
+                                scaleName="total"
+                            />
+
+                            <ScatterSeries
+                                name="total-points"
+                                valueField="total"
+                                argumentField="time"
+                                color={'#e0b13e'}
+                                scaleName="total"
                             />
 
                             <Stack
@@ -228,11 +340,11 @@ function WanikaniFutureReviewsChart() {
                             />
 
                             <EventTracker/>
-                            <Tooltip targetItem={targetItem ? {...targetItem, series: 'vocabulary'} : null}
+                            <Tooltip targetItem={!!targetItem && !targetItem.series.includes('total')
+                                ? {...targetItem, series: 'vocabulary'} : targetItem}
                                      onTargetItemChange={setTargetItem}
                                      contentComponent={ReviewsToolTip}
                             />
-                            <Animation/>
                         </Chart>
                     </div>
                 </div>

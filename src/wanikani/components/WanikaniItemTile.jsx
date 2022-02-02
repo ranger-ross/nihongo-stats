@@ -1,5 +1,6 @@
 import {Tooltip} from "@mui/material";
 import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil.js";
+import {getWanikaniSrsStageDescription} from "../service/WanikaniDataUtil.js";
 
 function useTileStyle(color, size) { // 10 is base
     const topPadding = (size / 2) + 'px';
@@ -19,21 +20,48 @@ function useTileStyle(color, size) { // 10 is base
     }
 }
 
-function WanikaniItemTile({text, link, meaning, srsLevel, color, size = 10}) {
+function ValueLabel({label, value}) {
+    return (
+        <div style={{display: 'flex', justifyContent: 'space-between', gap: '10px'}}>
+            <div style={{fontSize: 'large'}}>{label}</div>
+            <div style={{fontSize: 'large'}}>{value}</div>
+        </div>
+    );
+}
+
+function formatReadings(readings) {
+    if (!readings)
+        return null;
+    return readings.map(r => r.reading).join(', ');
+}
+
+function WanikaniItemTile({text, link, meaning, srsLevel, color, type, level, readings, size = 10}) {
     const style = useTileStyle(color, size);
 
+    const reading = formatReadings(readings)
     const frequency = kanjiFrequencyLookupMap[text];
     const jlptLevel = kanjiJLPTLookupMap[text];
 
     return (
         <Tooltip
             title={
-                <>
-                    <p>Meaning: {meaning}</p>
-                    {!!srsLevel ? (<p>SRS Level: {srsLevel}</p>) : null}
-                    {!!frequency ? (<p>Frequency: {frequency}</p>) : null}
-                    {!!jlptLevel ? (<p>JLPT: {jlptLevel}</p>) : null}
-                </>
+                <div style={{minWidth: '265px'}}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                        <div style={{fontSize: 'xx-large', fontWeight: 'bold'}}>{text}</div>
+                    </div>
+                    {!!reading ? (<ValueLabel label={reading}/>) : null}
+                    <br/>
+
+                    {!!meaning ? (<ValueLabel label={meaning}/>) : null}
+
+                    <br/>
+
+                    {type == 'kanji' && !!frequency ? (<ValueLabel label={'Frequency'} value={frequency}/>) : null}
+                    {type == 'kanji' && !!jlptLevel ? (<ValueLabel label={'JLPT'} value={jlptLevel}/>) : null}
+                    {!!type ? (<ValueLabel label={'Type'} value={type[0].toUpperCase() + type.substr(1)}/>) : null}
+                    {!!level ? (<ValueLabel label={'Wanikani Level'} value={level}/>) : null}
+                    <ValueLabel label={'SRS Level'} value={getWanikaniSrsStageDescription(srsLevel)}/>
+                </div>
             }
             placement={'top'}
         >

@@ -280,10 +280,13 @@ function WanikaniFutureReviewsChart() {
                     <div style={{flexGrow: '1'}}>
                         <Chart data={chartData}>
 
-                            <ValueScale name={'daily'}
+                            <ValueScale name="total"
+                                        modifyDomain={() => [0, chartData.length > 0 ? chartData[chartData.length - 1].total : 1]}/>
+
+                            <ValueScale name="daily"
                                         modifyDomain={() => [0, maxScale]}/>
 
-                            <ValueAxis position={'left'}/>
+                            <ValueAxis position={'left'} scaleName="total"/>
 
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate}/>
@@ -321,6 +324,7 @@ function WanikaniFutureReviewsChart() {
                                 valueField="total"
                                 argumentField="time"
                                 color={'#e0b13e'}
+                                scaleName="total"
                             />
 
                             <ScatterSeries
@@ -328,6 +332,7 @@ function WanikaniFutureReviewsChart() {
                                 valueField="total"
                                 argumentField="time"
                                 color={'#e0b13e'}
+                                scaleName="total"
                             />
 
                             <Stack

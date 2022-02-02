@@ -153,14 +153,7 @@ function CheckboxControl({title, subtitle, value, setValue, options}) {
 }
 
 export function useWanikaniItemControls() {
-    const [control, setControl] = useState({
-        primaryGroupBy: groupByOptions.level,
-        secondaryGroupBy: groupByOptions.none,
-        sortBy: sortByOptions.itemName,
-        colorBy: colorByOptions.itemType,
-        typesToShow: ['kanji'],
-        sortReverse: false,
-    });
+    const [control, setControl] = useState(presetOptions.levels.controls);
 
     const onPrimaryGroupByChange = (value) => setControl(prev => {
         let changes = {primaryGroupBy: value};

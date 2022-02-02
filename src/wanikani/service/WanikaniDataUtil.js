@@ -1,6 +1,7 @@
 import kanji from "kanji";
 import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil.js";
 import {getColorByJLPTLevel, getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "./WanikaniStyleUtil.js";
+import {WanikaniColors} from "../../Constants.js";
 
 export function createSubjectMap(subjects) {
     let map = {};
@@ -279,7 +280,15 @@ export const colorByOptions = {
     itemType: {
         key: 'itemType',
         displayText: 'Item Type',
-        color: (subject) => getColorByWanikaniSubjectType(subject.subjectType)
+        color: (subject) => {
+            if (!subject['srs_stage'] && subject['srs_stage'] !== 0)
+                return WanikaniColors.lockedGray;
+
+            if (subject['srs_stage'] === 0)
+                return WanikaniColors.lessonGray;
+
+            return getColorByWanikaniSubjectType(subject.subjectType)
+        }
     },
     jlpt: {
         key: 'jlpt',

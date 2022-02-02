@@ -67,6 +67,12 @@ function ItemGroupingData({subjects, secondaryGroupBy, sortBy, colorBy, sortReve
     )
 }
 
+function UnloadedGrouping() {
+    return (
+        <div style={{height: '100px'}}>Loading...</div>
+    );
+}
+
 function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortReverse}) {
     const [isLoaded, setIsLoaded] = useState(false);
     return (
@@ -82,7 +88,7 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortR
                     </Typography>
                 </div>
                 <VisibilitySensor partialVisibility={true}
-                                  offset={{bottom: -400}}
+                                  offset={{bottom: -300}}
                                   onChange={(isVisible) => isVisible ? setIsLoaded(true) : null}>
                     {isLoaded ? (
                         <ItemGroupingData subjects={subjects}
@@ -91,7 +97,7 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortR
                                           colorBy={colorBy}
                                           sortReverse={sortReverse}
                         />
-                    ) : <div style={{height: '75px'}}>Loading...</div>}
+                    ) : <UnloadedGrouping/>}
 
                 </VisibilitySensor>
             </CardContent>

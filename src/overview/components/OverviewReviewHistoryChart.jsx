@@ -236,7 +236,7 @@ function OverviewReviewsHistoryChart() {
 
     const visibleLabelIndices = calculateLabelPositions(chartData);
 
-    const LabelWithDate = (props) => {
+    function LabelWithDate(props) {
         const date = props.text;
         if (!date) {
             return (<></>);
@@ -256,7 +256,7 @@ function OverviewReviewsHistoryChart() {
                 />
             </>
         );
-    };
+    }
 
     return (
         <Card style={{height: '100%'}}>

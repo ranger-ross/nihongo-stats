@@ -124,7 +124,7 @@ function BunProTotalGrammarPointsChart() {
 
     const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], isMobile ? 3 : 6);
 
-    const LabelWithDate = (props) => {
+    function LabelWithDate(props) {
         const date = new Date(props.text);
         if (!date) {
             return (<></>)
@@ -143,7 +143,7 @@ function BunProTotalGrammarPointsChart() {
                 ) : null}
             </>
         );
-    };
+    }
 
     return (
         <Card style={{margin: '15px'}}>

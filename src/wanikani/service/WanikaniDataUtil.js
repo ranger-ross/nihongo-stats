@@ -1,7 +1,6 @@
 import kanji from "kanji";
 import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil.js";
 import {getColorByJLPTLevel, getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "./WanikaniStyleUtil.js";
-import {WanikaniColors} from "../../Constants.js";
 
 export function createSubjectMap(subjects) {
     let map = {};

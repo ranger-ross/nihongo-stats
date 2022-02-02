@@ -16,7 +16,7 @@ function LoadableChart({placeholderTitle, children}) {
     const [isLoaded, setIsLoaded] = useState(false)
     return (
         <ReactVisibilitySensor partialVisibility={true} onChange={(isVisible) => isVisible ? setIsLoaded(true) : null}>
-            <Card variant={'outlined'} style={{margin: '15px'}}>
+            <Card style={{margin: '15px'}}>
                 {isLoaded ? children : (
                     <div style={{height: '500px', textAlign: 'center'}}>
                         <Typography variant={'h5'}>{placeholderTitle}</Typography>

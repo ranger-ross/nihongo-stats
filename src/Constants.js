@@ -27,11 +27,11 @@ export const WanikaniColors = {
     pink: '#f100a1',
     purple: '#a100f1',
 
-    lockedGray: '#b5b5b5',
-    lessonGray: '#686868',
+    lockedGray: '#c4c4c4',
+    lessonGray: '#868686',
     masterBlue: '#3556dd',
     enlightenedBlue: '#0098e5',
-    burnedGray: '#474647',
+    burnedGray: '#343434',
 
 }
 

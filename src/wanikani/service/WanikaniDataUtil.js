@@ -37,6 +37,53 @@ export function isSubjectHidden(subject) {
     return !!subject && !!subject.data && subject.data['hidden_at'];
 }
 
+export function getWanikaniSrsStageDescription(stage) {
+    if (!stage && stage !== 0) {
+        return 'Locked';
+    }
+
+    if (stage === 0) {
+        return 'Lesson';
+    }
+
+    if (stage === 1) {
+        return 'Apprentice 1';
+    }
+
+    if (stage === 2) {
+        return 'Apprentice 2';
+    }
+
+    if (stage === 3) {
+        return 'Apprentice 3';
+    }
+
+    if (stage === 4) {
+        return 'Apprentice 4';
+    }
+
+    if (stage === 5) {
+        return 'Guru 1';
+    }
+
+    if (stage === 6) {
+        return 'Guru 2';
+    }
+
+    if (stage === 7) {
+        return 'Master';
+    }
+
+    if (stage === 8) {
+        return 'Enlightened';
+    }
+
+    if (stage === 9) {
+        return 'Burned';
+    }
+    return null;
+}
+
 export const groupByOptions = {
     none: {
         key: 'none',

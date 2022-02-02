@@ -120,6 +120,9 @@ function SubjectTile({subject}) {
             meaning={subject.meanings.map(m => m.meaning).join(', ')}
             srsLevel={subject['srs_stage']}
             color={getTileColor(subject)}
+            type={subject.subjectType}
+            level={subject.level}
+            readings={subject.readings}
         />
     );
 }

@@ -31,6 +31,9 @@ function SubjectTile({subject, colorBy}) {
             srsLevel={subject['srs_stage']}
             color={colorBy.color(subject)}
             size={5}
+            type={subject.subjectType}
+            level={subject.level}
+            readings={subject.readings}
         />
     ), [subject, colorBy.key]);
 }

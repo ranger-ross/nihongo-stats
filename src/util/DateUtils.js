@@ -51,3 +51,30 @@ export function truncMinutes(date) {
     _date.setMinutes(0, 0, 0);
     return _date;
 }
+
+export function truncWeek(date) {
+    let d = truncDate(date);
+
+    while (d.getDay() != 0) {
+        d = addDays(d, -1);
+    }
+
+    return d;
+}
+
+export function truncMonth(date) {
+    let d = truncDate(date);
+
+    while (d.getDate() != 1) {
+        d = addDays(d, -1);
+    }
+
+    return d;
+}
+
+
+export function getMonthName(date, isShort = false) {
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const shortMonths = ["Jan", "Feb", "Mar", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
+    return isShort ? shortMonths[date.getMonth()] : months[date.getMonth()];
+}

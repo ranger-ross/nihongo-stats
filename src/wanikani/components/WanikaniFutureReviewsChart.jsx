@@ -48,9 +48,7 @@ function isPeriodTheSame(date1, date2, unit) {
 }
 
 function getHoursLabelText(date, isToolTipLabel) {
-    let hours = date.getHours();
-
-    if (!isToolTipLabel && ![0, 6, 12, 18].includes(hours)) {
+    if (!isToolTipLabel && ![0, 6, 12, 18].includes(date.getHours())) {
         return '';
     }
 

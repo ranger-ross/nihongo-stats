@@ -123,6 +123,7 @@ function SubjectTile({subject}) {
             type={subject.subjectType}
             level={subject.level}
             readings={subject.readings}
+            nextReviewDate={!!subject['available_at'] ? new Date(subject['available_at']) : null}
         />
     );
 }

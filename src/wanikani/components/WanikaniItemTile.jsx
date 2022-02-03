@@ -35,7 +35,13 @@ function formatReadings(readings) {
     return readings.map(r => r.reading).join(', ');
 }
 
-function WanikaniItemTile({text, link, meaning, srsLevel, color, type, level, readings, size = 10}) {
+function formatNextReviewDate(date) {
+    if (!date)
+        return null;
+    return date.toLocaleDateString() + ', ' + date.toLocaleTimeString('en-US', {hour: 'numeric'});
+}
+
+function WanikaniItemTile({text, link, meaning, srsLevel, color, type, level, readings, nextReviewDate, size = 10}) {
     const style = useTileStyle(color, size);
 
     const reading = formatReadings(readings)
@@ -61,6 +67,8 @@ function WanikaniItemTile({text, link, meaning, srsLevel, color, type, level, re
                     {!!type ? (<ValueLabel label={'Type'} value={type[0].toUpperCase() + type.substr(1)}/>) : null}
                     {!!level ? (<ValueLabel label={'Wanikani Level'} value={level}/>) : null}
                     <ValueLabel label={'SRS Level'} value={getWanikaniSrsStageDescription(srsLevel)}/>
+                    {!!nextReviewDate ? (<ValueLabel label={'Next Review'}
+                                                     value={formatNextReviewDate(nextReviewDate)}/>) : null}
                 </div>
             }
             placement={'top'}

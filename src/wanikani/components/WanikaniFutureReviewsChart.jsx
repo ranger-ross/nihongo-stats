@@ -106,21 +106,6 @@ async function fetchFutureReviews() {
     return data.filter(assignment => !assignment.data['burned_at'] || !assignment.data['available_at']);
 }
 
-function SimpleBar({x, y, width, offsetY, fill, style}) {
-    const path = `M ${x} ${offsetY}
-   L ${width + x} ${offsetY}
-   L ${width + x} ${y}
-   L ${x} ${y}
-   Z`;
-
-    return (
-        <path d={path}
-              fill={fill}
-              style={style}
-        />
-    );
-}
-
 function WanikaniFutureReviewsChart() {
     const [rawData, setRawData] = useState([]);
     const [initialReviewCount, setInitialReviewCount] = useState(0);
@@ -213,24 +198,15 @@ function WanikaniFutureReviewsChart() {
         return false;
     }
 
-    function BarWithLabel({
-                              arg, barWidth, maxBarWidth, val, startVal,
-                              color, value, style, seriesIndex, index
-                          }) {
+    function BarWithLabel(props) {
+        const {arg, val, value, seriesIndex, index} = props;
+
         if (value === 0)
             return (<></>);
 
-        const width = maxBarWidth * barWidth;
-
         return (
             <>
-                <SimpleBar x={arg - width / 2}
-                           width={width}
-                           y={val}
-                           offsetY={startVal}
-                           fill={color}
-                           style={style}
-                />
+                <BarSeries.Point {...props}/>
 
                 {isLabelVisible(seriesIndex, index) ? (
                     <Chart.Label

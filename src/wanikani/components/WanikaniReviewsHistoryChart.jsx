@@ -1,16 +1,34 @@
 import {Chart, ValueAxis, ArgumentAxis, Tooltip} from '@devexpress/dx-react-chart-material-ui';
-import {useState, useEffect} from "react";
+import {useState, useEffect, useMemo} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {ArgumentScale, BarSeries, Stack} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants.js';
-import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/material";
+import {Card, CardContent, Typography, Grid, CircularProgress, Select, MenuItem} from "@mui/material";
 import {EventTracker} from "@devexpress/dx-react-chart";
 import {scaleBand} from 'd3-scale';
 import React from 'react';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import DaysSelector from "../../shared/DaysSelector.jsx";
-import {truncDate} from "../../util/DateUtils.js";
+import {getMonthName, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.js";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
+
+const units = {
+    days: {
+        key: 'days',
+        text: 'Days',
+        trunc: truncDate
+    },
+    weeks: {
+        key: 'weeks',
+        text: 'Weeks',
+        trunc: truncWeek
+    },
+    months: {
+        key: 'months',
+        text: 'Months',
+        trunc: truncMonth
+    },
+};
 
 function DataPoint(date) {
     let data = {
@@ -56,8 +74,9 @@ async function fetchData() {
     return data;
 }
 
-function aggregateDate(rawData, daysToLookBack) {
-    const startDate = truncDate(Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1))).getTime();
+function aggregateDate(rawData, daysToLookBack, unit) {
+    const areDatesDifferent = (date1, date2) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
+    const startDate = unit.trunc(Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1))).getTime();
 
     let dataForTimeRange = rawData;
     if (daysToLookBack != -1) {
@@ -66,8 +85,8 @@ function aggregateDate(rawData, daysToLookBack) {
 
     let aggregatedDate = [new DataPoint(truncDate(dataForTimeRange[0].review['data_updated_at']))];
     for (const data of dataForTimeRange) {
-        if (aggregatedDate[aggregatedDate.length - 1].date.getTime() != truncDate(data.review['data_updated_at']).getTime()) {
-            aggregatedDate.push(new DataPoint(truncDate(data.review['data_updated_at'])));
+        if (areDatesDifferent(aggregatedDate[aggregatedDate.length - 1].date, data.review['data_updated_at'])) {
+            aggregatedDate.push(new DataPoint(unit.trunc(data.review['data_updated_at'])));
         }
 
         aggregatedDate[aggregatedDate.length - 1].push(data);
@@ -81,13 +100,40 @@ function calculateLabelPositions(data) {
     return getVisibleLabelIndices(data, numberOfLabels);
 }
 
+function UnitSelector({options, unit, onChange}) {
+    return (
+        <Select
+            style={{minWidth: '130px'}}
+            size={'small'}
+            value={unit.key}
+            onChange={e => onChange(options.find(o => o.key === e.target.value))}
+        >
+            {options.map((option) => (
+                <MenuItem key={option.key}
+                          value={option.key}
+                >
+                    {option.text}
+                </MenuItem>
+            ))}
+        </Select>
+    );
+}
+
+function ToolTipLabel({title, value}) {
+    return (
+        <div style={{display: 'flex', justifyContent: 'space-between', gap: '10px'}}>
+            <div style={{fontSize: 'large'}}>{title}</div>
+            <div style={{fontSize: 'large'}}>{value}</div>
+        </div>
+    );
+}
+
 function WanikaniReviewsHistoryChart() {
     const [rawData, setRawData] = useState([]);
-    const [chartData, setChartData] = useState([]);
     const [daysToLookBack, setDaysToLookBack] = useState(30);
-    const [totalDays, setTotalDays] = useState(5000);
     const [isLoading, setIsLoading] = useState(false);
     const [tooltipTargetItem, setTooltipTargetItem] = useState();
+    const [unit, setUnit] = useState(units.days);
 
     useEffect(() => {
         setIsLoading(true);
@@ -96,7 +142,6 @@ function WanikaniReviewsHistoryChart() {
             .then(data => {
                 if (!isSubscribed)
                     return;
-                setTotalDays(aggregateDate(data, -1).length);
                 setRawData(data);
                 setIsLoading(false);
             })
@@ -104,57 +149,77 @@ function WanikaniReviewsHistoryChart() {
         return () => isSubscribed = false;
     }, []);
 
-    useEffect(() => {
-        if (rawData.length == 0) {
-            return;
-        }
-        setChartData(aggregateDate(rawData, daysToLookBack));
-    }, [rawData, daysToLookBack])
+    const totalDays = useMemo(() => rawData.length === 0 ? 5000 : aggregateDate(rawData, -1, units.days).length, [rawData, unit]);
 
+    const chartData = useMemo(() => rawData.length == 0 ? [] :
+        aggregateDate(rawData, daysToLookBack, unit), [rawData, daysToLookBack, unit])
 
-    function ReviewsToolTip({targetItem}) {
-        const data = chartData[targetItem.point];
-        return (
-            <>
-                <p>Date: {data.date.toLocaleDateString()}</p>
-                <p>Total: {data.total}</p>
-                <p>Radicals: {data.radicals}</p>
-                <p>Kanji: {data.kanji}</p>
-                <p>Vocabulary: {data.vocabulary}</p>
-            </>
-        );
-    }
-
-    const visibleLabelIndices = calculateLabelPositions(chartData);
-
-    function LabelWithDate(props) {
-        const date = props.text;
-        if (!date) {
-            return (<></>);
+    const ReviewsToolTip = useMemo(() => {
+        function getDateLabelText(date) {
+            if (unit.key === units.days.key)
+                return date.toLocaleDateString()
+            else if (unit.key === units.weeks.key)
+                return date.toLocaleDateString()
+            else if (unit.key === units.months.key)
+                return `${getMonthName(date, true)} ${date.getFullYear()}`
         }
 
-        const index = chartData.findIndex(d => d.date === date);
-
-        if (!visibleLabelIndices.includes(index)) {
-            return (<></>);
+        return function ReviewsToolTip({targetItem}) {
+            const data = chartData[targetItem.point];
+            return (
+                <>
+                    <ToolTipLabel title="Date" value={getDateLabelText(data.date)}/>
+                    <br/>
+                    <ToolTipLabel title="Total" value={data.total}/>
+                    <ToolTipLabel title="Radicals" value={data.radicals}/>
+                    <ToolTipLabel title="Kanji" value={data.kanji}/>
+                    <ToolTipLabel title="Vocabulary" value={data.vocabulary}/>
+                </>
+            );
         }
+    }, [chartData, unit]);
 
-        return (
-            <>
+
+    const LabelWithDate = useMemo(() => {
+        const visibleLabelIndices = calculateLabelPositions(chartData);
+
+        return function LabelWithDate(props) {
+            const date = props.text;
+            if (!date) {
+                return (<></>);
+            }
+
+            const index = chartData.findIndex(d => d.date === date);
+
+            if (!visibleLabelIndices.includes(index)) {
+                return (<></>);
+            }
+
+            return (
                 <ArgumentAxis.Label
                     {...props}
                     text={new Date(date).toLocaleDateString()}
                 />
-            </>
-        );
-    }
+            );
+        }
+    }, [chartData])
 
     return (
         <Card style={{height: '100%'}}>
             <CardContent style={{height: '100%'}}>
                 <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
                     <Grid container>
-                        <Grid item xs={12} md={4}/>
+                        <Grid item xs={12} md={4}>
+                            <UnitSelector
+                                options={[
+                                    units.days,
+                                    units.weeks,
+                                    units.months
+                                ]}
+                                unit={unit}
+                                onChange={setUnit}
+                            />
+                        </Grid>
                         <Grid item xs={12} md={4}>
                             <Typography variant={'h5'} style={{textAlign: 'center', paddingBottom: '5px'}}>
                                 Review History

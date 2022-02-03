@@ -1,5 +1,5 @@
 import {Chart, ValueAxis, BarSeries, ArgumentAxis, Title, Tooltip} from '@devexpress/dx-react-chart-material-ui';
-import {useState, useEffect} from "react";
+import {useState, useEffect, useMemo} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {EventTracker, Animation} from "@devexpress/dx-react-chart";
 
@@ -106,7 +106,7 @@ function WanikaniLevelProgressChart() {
             <BarSeries
                 valueField="days"
                 argumentField="level"
-                pointComponent={BarWithLabel}
+                pointComponent={useMemo(() => BarWithLabel, [levelProgress])}
             />
             <EventTracker/>
             <Animation/>

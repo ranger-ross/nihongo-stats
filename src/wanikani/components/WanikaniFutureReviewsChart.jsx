@@ -48,20 +48,11 @@ function isPeriodTheSame(date1, date2, unit) {
 }
 
 function getHoursLabelText(date, isToolTipLabel) {
-    let hours = date.getHours();
-    let isPm = hours > 12;
-    if (isPm) {
-        hours -= 12;
-    }
-    if (hours == 0) {
-        hours = 12;
-    }
-
-    if (!isToolTipLabel && ![6, 12].includes(hours)) {
+    if (!isToolTipLabel && ![0, 6, 12, 18].includes(date.getHours())) {
         return '';
     }
 
-    return `${hours} ${isPm ? 'PM' : 'AM'}`;
+    return date.toLocaleTimeString("en-US", {hour: 'numeric'});
 }
 
 function getLabelText(unit, date, isToolTipLabel) {

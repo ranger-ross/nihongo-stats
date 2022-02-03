@@ -71,11 +71,7 @@ function WanikaniLevelProgressChart() {
 
         return (
             <>
-                <BarSeries.Point {...props}
-                                 animation={(startCoords, endCoords, processAnimation, setAttributes, delay) => {
-                                     console.log({startCoords, endCoords, processAnimation, setAttributes, delay})
-                                     return props.animation(startCoords, endCoords, processAnimation, setAttributes, delay)
-                                 }}/>
+                <BarSeries.Point {...props}/>
 
                 {days > 0 ? (
                     <Chart.Label

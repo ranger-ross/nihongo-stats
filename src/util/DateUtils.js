@@ -47,7 +47,7 @@ export function truncDate(date) {
 
 export function truncMinutes(date) {
     let _date = new Date(date);
-    _date.setHours(_date.getHours() + Math.round(_date.getMinutes() / 60));
+    _date.setHours(_date.getHours());
     _date.setMinutes(0, 0, 0);
     return _date;
 }

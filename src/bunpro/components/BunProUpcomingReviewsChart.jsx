@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useMemo} from "react";
-import {Card, CardContent, Typography, Checkbox, CircularProgress} from "@mui/material";
+import React, {useEffect, useMemo, useState} from "react";
+import {Card, CardContent, Checkbox, CircularProgress, Typography} from "@mui/material";
 import {
     addDays,
     addHours,
@@ -12,15 +12,8 @@ import DaysSelector from "../../shared/DaysSelector.jsx";
 import {scaleBand} from 'd3-scale';
 import BunProApiService from "../service/BunProApiService.js";
 import {createGrammarPointsLookupMap} from "../service/BunProDataUtil.js";
-import {Chart, Legend, Tooltip, ValueAxis, ArgumentAxis, ScatterSeries,} from '@devexpress/dx-react-chart-material-ui';
-import {
-    ArgumentScale,
-    BarSeries,
-    EventTracker,
-    LineSeries,
-    Stack,
-    ValueScale
-} from "@devexpress/dx-react-chart";
+import {ArgumentAxis, Chart, Legend, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
+import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -220,6 +213,9 @@ function BunProUpcomingReviewsChart() {
         }
     ), [chartData])
 
+    const getTopSeries = useMemo(() => (targetItem) => {
+        return [...JLPTLevels].reverse().find(level => chartData[targetItem.point][level] > 0);
+    }, [chartData]);
 
     const LabelWithDate = useMemo(() => (
         function LabelWithDate(props) {
@@ -243,23 +239,29 @@ function BunProUpcomingReviewsChart() {
             const dp = chartData[targetItem.point];
             const rowStyle = {display: 'flex', justifyContent: 'space-between', gap: '10px'};
 
-            let total = 0;
-            for (const level of JLPTLevels) {
-                if (dp[level])
-                    total += dp[level];
-            }
-
+            const isTotal = !targetItem.series.startsWith('N');
             return (
                 <>
                     <div style={rowStyle}>
                         <div>{unit.key == units.hours.key ? 'Time' : 'Date'}:</div>
                         <div>{getLabelText(unit, dp.date, true)}</div>
                     </div>
-                    <p>Total: {total}</p>
 
-                    {JLPTLevels.map(level => (
-                        dp[level] ? <p key={level}>{level}: {dp[level]}</p> : null
-                    ))}
+                    {isTotal ? (
+                        <div style={rowStyle}>
+                            <div>Total:</div>
+                            <div>{dp.total}</div>
+                        </div>
+                    ) : (
+                        JLPTLevels.map(level => (
+                            dp[level] ? (
+                                <div key={level} style={rowStyle}>
+                                    <div>{level}:</div>
+                                    <div>{dp[level]}</div>
+                                </div>
+                            ) : null
+                        ))
+                    )}
                 </>
             );
         }
@@ -348,7 +350,8 @@ function BunProUpcomingReviewsChart() {
                                 {/*TODO: fix legend showing totals*/}
                                 <Legend/>
                                 <EventTracker/>
-                                <Tooltip targetItem={targetItem}
+                                <Tooltip targetItem={!!targetItem && !targetItem.series.includes('total')
+                                    ? {...targetItem, series: getTopSeries(targetItem)} : targetItem}
                                          onTargetItemChange={setTargetItem}
                                          contentComponent={ReviewsToolTip}
                                 />

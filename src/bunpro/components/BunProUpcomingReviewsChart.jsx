@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useMemo} from "react";
-import {Card, CardContent, Typography, Checkbox} from "@mui/material";
+import {Card, CardContent, Typography, Checkbox, CircularProgress} from "@mui/material";
 import {
     addDays,
     addHours,
@@ -194,69 +194,76 @@ function BunProUpcomingReviewsChart() {
         return false;
     }
 
-    function BarWithLabel(props) {
-        const {arg, val, value, seriesIndex, index} = props;
+    const BarWithLabel = useMemo(() => (
+        function BarWithLabel(props) {
+            const {arg, val, value, seriesIndex, index} = props;
 
-        if (value === 0)
-            return (<></>);
+            if (value === 0)
+                return (<></>);
 
-        return (
-            <>
-                <BarSeries.Point {...props}/>
+            return (
+                <>
+                    <BarSeries.Point {...props}/>
 
-                {isLabelVisible(seriesIndex, index) ? (
-                    <Chart.Label
-                        x={arg}
-                        y={val - 10}
-                        textAnchor={'middle'}
-                        style={{fill: 'white', fontWeight: 'bold'}}
-                    >
-                        {value}
-                    </Chart.Label>
-                ) : null}
-            </>
-        );
-    }
-
-    function LabelWithDate(props) {
-        const {text} = props;
-        let label = '';
-        if (text) {
-            const rawTimestamp = parseInt(text);
-            label = !!rawTimestamp ? getLabelText(unit, rawTimestamp, false) : '';
+                    {isLabelVisible(seriesIndex, index) ? (
+                        <Chart.Label
+                            x={arg}
+                            y={val - 10}
+                            textAnchor={'middle'}
+                            style={{fill: 'white', fontWeight: 'bold'}}
+                        >
+                            {value}
+                        </Chart.Label>
+                    ) : null}
+                </>
+            );
         }
-        return (
-            <ArgumentAxis.Label
-                {...props}
-                text={label}
-            />
-        );
-    }
+    ), [chartData])
 
-    function ReviewsToolTip({targetItem}) { // TODO: Handle totals
-        const dp = chartData[targetItem.point];
-        const rowStyle = {display: 'flex', justifyContent: 'space-between', gap: '10px'};
 
-        let total = 0;
-        for (const level of JLPTLevels) {
-            if (dp[level])
-                total += dp[level];
+    const LabelWithDate = useMemo(() => (
+        function LabelWithDate(props) {
+            const {text} = props;
+            let label = '';
+            if (text) {
+                const rawTimestamp = parseInt(text);
+                label = !!rawTimestamp ? getLabelText(unit, rawTimestamp, false) : '';
+            }
+            return (
+                <ArgumentAxis.Label
+                    {...props}
+                    text={label}
+                />
+            );
         }
+    ), [unit.key]);
 
-        return (
-            <>
-                <div style={rowStyle}>
-                    <div>{unit.key == units.hours.key ? 'Time' : 'Date'}:</div>
-                    <div>{getLabelText(unit, dp.date, true)}</div>
-                </div>
-                <p>Total: {total}</p>
+    const ReviewsToolTip = useMemo(() => (
+        function ReviewsToolTip({targetItem}) { // TODO: Handle totals
+            const dp = chartData[targetItem.point];
+            const rowStyle = {display: 'flex', justifyContent: 'space-between', gap: '10px'};
 
-                {JLPTLevels.map(level => (
-                    dp[level] ? <p key={level}>{level}: {dp[level]}</p> : null
-                ))}
-            </>
-        );
-    }
+            let total = 0;
+            for (const level of JLPTLevels) {
+                if (dp[level])
+                    total += dp[level];
+            }
+
+            return (
+                <>
+                    <div style={rowStyle}>
+                        <div>{unit.key == units.hours.key ? 'Time' : 'Date'}:</div>
+                        <div>{getLabelText(unit, dp.date, true)}</div>
+                    </div>
+                    <p>Total: {total}</p>
+
+                    {JLPTLevels.map(level => (
+                        dp[level] ? <p key={level}>{level}: {dp[level]}</p> : null
+                    ))}
+                </>
+            );
+        }
+    ), [chartData]);
 
     return (
         <Card style={{height: '100%'}}>
@@ -289,59 +296,66 @@ function BunProUpcomingReviewsChart() {
                         />
                     </div>
 
-                    <div style={{flexGrow: '1'}}>
-                        <Chart data={chartData}>
+                    {rawData.length === 0 ? (
+                        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90%'}}>
+                            <CircularProgress/>
+                        </div>
+                    ) : (
+                        <div style={{flexGrow: '1'}}>
+                            <Chart data={chartData}>
 
-                            <ValueScale name="total"
-                                        modifyDomain={() => [0, chartData.length > 0 ? chartData[chartData.length - 1].total : 1]}/>
+                                <ValueScale name="total"
+                                            modifyDomain={() => [0, chartData.length > 0 ? chartData[chartData.length - 1].total : 1]}/>
 
-                            <ValueScale name="daily"
-                                        modifyDomain={() => [0, maxScale]}/>
+                                <ValueScale name="daily"
+                                            modifyDomain={() => [0, maxScale]}/>
 
-                            <ValueAxis scaleName="total"/>
-                            <ArgumentScale factory={scaleBand}/>
-                            <ArgumentAxis labelComponent={useMemo(() => LabelWithDate, [unit.key])}/>
+                                <ValueAxis scaleName="total"/>
+                                <ArgumentScale factory={scaleBand}/>
+                                <ArgumentAxis labelComponent={LabelWithDate}/>
 
-                            {JLPTLevels.map(level => (
-                                <BarSeries
-                                    key={level}
-                                    name={level}
-                                    valueField={level}
+                                {JLPTLevels.map(level => (
+                                    <BarSeries
+                                        key={level}
+                                        name={level}
+                                        valueField={level}
+                                        argumentField="date"
+                                        scaleName="daily"
+                                        pointComponent={BarWithLabel}
+                                    />
+                                ))}
+
+                                <LineSeries
+                                    name="total"
+                                    valueField="total"
                                     argumentField="date"
-                                    scaleName="daily"
-                                    pointComponent={useMemo(() => BarWithLabel, [chartData])}
+                                    color={'#e0b13e'}
+                                    scaleName="total"
                                 />
-                            ))}
 
-                            <LineSeries
-                                name="total"
-                                valueField="total"
-                                argumentField="date"
-                                color={'#e0b13e'}
-                                scaleName="total"
-                            />
+                                <ScatterSeries
+                                    name="total-points"
+                                    valueField="total"
+                                    argumentField="date"
+                                    color={'#e0b13e'}
+                                    scaleName="total"
+                                />
 
-                            <ScatterSeries
-                                name="total-points"
-                                valueField="total"
-                                argumentField="date"
-                                color={'#e0b13e'}
-                                scaleName="total"
-                            />
+                                <Stack
+                                    stacks={[{series: JLPTLevels}]}
+                                />
 
-                            <Stack
-                                stacks={[{series: JLPTLevels}]}
-                            />
+                                {/*TODO: fix legend showing totals*/}
+                                <Legend/>
+                                <EventTracker/>
+                                <Tooltip targetItem={targetItem}
+                                         onTargetItemChange={setTargetItem}
+                                         contentComponent={ReviewsToolTip}
+                                />
+                            </Chart>
+                        </div>
+                    )}
 
-                            {/*TODO: fix legend showing totals*/}
-                            <Legend/>
-                            <EventTracker/>
-                            <Tooltip targetItem={targetItem}
-                                     onTargetItemChange={setTargetItem}
-                                     contentComponent={useMemo(() => ReviewsToolTip, [chartData])}
-                            />
-                        </Chart>
-                    </div>
                 </div>
             </CardContent>
         </Card>

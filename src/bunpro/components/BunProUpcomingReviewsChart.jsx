@@ -329,10 +329,10 @@ function BunProUpcomingReviewsChart() {
                                 ))}
 
                                 <LineSeries
-                                    name="total"
+                                    name="Total"
                                     valueField="total"
                                     argumentField="date"
-                                    color={'#e0b13e'}
+                                    color={'#a45bff'}
                                     scaleName="total"
                                 />
 
@@ -340,7 +340,7 @@ function BunProUpcomingReviewsChart() {
                                     name="total-points"
                                     valueField="total"
                                     argumentField="date"
-                                    color={'#e0b13e'}
+                                    color={'#a45bff'}
                                     scaleName="total"
                                 />
 
@@ -350,12 +350,11 @@ function BunProUpcomingReviewsChart() {
 
                                 <FilterableLegend
                                     filterItems={[
-                                        'total',
                                         'total-points'
                                     ]}
                                 />
                                 <EventTracker/>
-                                <Tooltip targetItem={!!targetItem && !targetItem.series.includes('total')
+                                <Tooltip targetItem={!!targetItem && !targetItem.series.toLowerCase().includes('total')
                                     ? {...targetItem, series: getTopSeries(targetItem)} : targetItem}
                                          onTargetItemChange={setTargetItem}
                                          contentComponent={ReviewsToolTip}

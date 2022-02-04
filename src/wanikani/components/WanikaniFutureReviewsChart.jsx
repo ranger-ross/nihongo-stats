@@ -97,6 +97,16 @@ async function fetchFutureReviews() {
     return data.filter(assignment => !assignment.data['burned_at'] || !assignment.data['available_at']);
 }
 
+function getTopSeries(targetItem, chartData) {
+    const dp = chartData[targetItem.point];
+    if (dp.vocabulary > 0)
+        return 'vocabulary';
+    else if (dp.kanji > 0)
+        return 'kanji';
+    else
+        return 'radicals'
+}
+
 function WanikaniFutureReviewsChart() {
     const [rawData, setRawData] = useState([]);
     const [initialReviewCount, setInitialReviewCount] = useState(0);
@@ -308,7 +318,7 @@ function WanikaniFutureReviewsChart() {
 
                             <EventTracker/>
                             <Tooltip targetItem={!!targetItem && !targetItem.series.includes('total')
-                                ? {...targetItem, series: 'vocabulary'} : targetItem}
+                                ? {...targetItem, series: getTopSeries(targetItem, chartData)} : targetItem}
                                      onTargetItemChange={setTargetItem}
                                      contentComponent={ReviewsToolTip}
                             />

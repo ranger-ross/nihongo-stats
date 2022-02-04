@@ -116,7 +116,7 @@ describe('DateUtils', function () {
 
     });
 
-    describe('truncDate()', function () {
+    describe('truncMinutes()', function () {
 
         it('should trunc minutes properly', function () {
             expect(truncMinutes(1640020316111).getTime()).toBe(1640019600000);

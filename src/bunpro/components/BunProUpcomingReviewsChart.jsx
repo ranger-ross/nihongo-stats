@@ -12,8 +12,9 @@ import DaysSelector from "../../shared/DaysSelector.jsx";
 import {scaleBand} from 'd3-scale';
 import BunProApiService from "../service/BunProApiService.js";
 import {createGrammarPointsLookupMap} from "../service/BunProDataUtil.js";
-import {ArgumentAxis, Chart, Legend, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
+import {ArgumentAxis, Chart, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
+import FilterableLegend from "../../shared/FilterableLegend.jsx";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -347,8 +348,12 @@ function BunProUpcomingReviewsChart() {
                                     stacks={[{series: JLPTLevels}]}
                                 />
 
-                                {/*TODO: fix legend showing totals*/}
-                                <Legend/>
+                                <FilterableLegend
+                                    filterItems={[
+                                        'total',
+                                        'total-points'
+                                    ]}
+                                />
                                 <EventTracker/>
                                 <Tooltip targetItem={!!targetItem && !targetItem.series.includes('total')
                                     ? {...targetItem, series: getTopSeries(targetItem)} : targetItem}

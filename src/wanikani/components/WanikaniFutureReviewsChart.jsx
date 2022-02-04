@@ -235,12 +235,12 @@ function WanikaniFutureReviewsChart() {
                         </div>
 
                         <Typography variant={'h5'}>
-                            Future Reviews
+                            Upcoming Reviews
                         </Typography>
 
                         <DaysSelector days={period}
                                       setDays={setPeriod}
-                                      options={unit === units.days ? daysOptions : hoursOptions}
+                                      options={unit.key === units.days.key ? daysOptions : hoursOptions}
                         />
                     </div>
 

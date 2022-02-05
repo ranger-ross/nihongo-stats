@@ -59,7 +59,7 @@ export const AllRoutes = Object.keys(RoutePaths).map(key => RoutePaths[key]);
 function lazyRoute(route, element, exact = false) {
     return (
         <Route path={route.path} element={
-            <React.Suspense fallback={<>...</>}>
+            <React.Suspense fallback={<></>}>
                 {element}
             </React.Suspense>
         } exact={exact}/>

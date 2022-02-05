@@ -53,7 +53,7 @@ async function sendCacheableRequest(request, cacheKey, timeout = 60_000) {
         return cachedValue.data;
     }
 
-    const response = await request;
+    const response = await fetch(request.url, request.options);
     const data = await response.json();
 
     localForage.setItem(cacheKey, {
@@ -66,7 +66,10 @@ async function sendCacheableRequest(request, cacheKey, timeout = 60_000) {
 
 async function getGrammarPoints() {
     return await sendCacheableRequest(
-        fetch(`${baseBunProUrl}/v3/grammar_points`, {headers: bunproHeaders()}),
+        {
+            url: `${baseBunProUrl}/v3/grammar_points`,
+            options: {headers: bunproHeaders()}
+        },
         cacheKeys.grammarPoints,
         1000 * 60 * 60 * 24
     );
@@ -74,7 +77,10 @@ async function getGrammarPoints() {
 
 async function getUserProgress() {
     return await sendCacheableRequest(
-        fetch(`${baseBunProUrl}/v3/user/progress`, {headers: bunproHeaders()}),
+        {
+            url: `${baseBunProUrl}/v3/user/progress`,
+            options: {headers: bunproHeaders()}
+        },
         cacheKeys.userProgress,
         1000 * 60 * 3
     );
@@ -82,7 +88,10 @@ async function getUserProgress() {
 
 async function getAllReviews() {
     return await sendCacheableRequest(
-        fetch(`${baseBunProUrl}/v3/reviews/all_reviews_total`, {headers: bunproHeaders()}),
+        {
+            url: `${baseBunProUrl}/v3/reviews/all_reviews_total`,
+            options: {headers: bunproHeaders()}
+        },
         cacheKeys.allReviews,
         1000 * 60 * 3
     );
@@ -90,7 +99,10 @@ async function getAllReviews() {
 
 async function getPendingReviews() {
     return await sendCacheableRequest(
-        fetch(`${baseBunProUrl}/v3/reviews/current_reviews`, {headers: bunproHeaders()}),
+        {
+            url: `${baseBunProUrl}/v3/reviews/current_reviews`,
+            options: {headers: bunproHeaders()}
+        },
         cacheKeys.pendingReviews,
         1000 * 60 * 3
     );
@@ -98,7 +110,10 @@ async function getPendingReviews() {
 
 async function getBunProUser() {
     return await sendCacheableRequest(
-        getRawBunProUser(),
+        {
+            url: `${baseBunProUrl}/v3/user`,
+            options: {headers: bunproHeaders()}
+        },
         cacheKeys.user,
         1000 * 60
     );

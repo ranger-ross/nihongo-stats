@@ -93,10 +93,8 @@ function getChartStartTime() { // Start chart at the beginning of the next hour
     return addHours(truncMinutes(new Date()), 1);
 }
 
-function aggregateData(reviews, unit, period) {
+function aggregateData(reviews, unit, period, pendingReviews) {
     let data = [];
-
-    // TODO: handle initial reviews
 
     for (let i = 0; i < period; i++) {
         const date = addTimeToDate(getChartStartTime(), unit, i);
@@ -116,6 +114,8 @@ function aggregateData(reviews, unit, period) {
         let total = JLPTLevels.map(level => dp[level]).reduce((a, c) => a + c);
         if (data.length > 0)
             total += data[data.length - 1].total;
+        else
+            total += pendingReviews;
 
         dp.total = total;
         data.push(dp);
@@ -141,6 +141,7 @@ async function fetchData() {
 }
 
 function BunProUpcomingReviewsChart() {
+    const [pendingReviews, setPendingReviews] = useState(0);
     const [rawData, setRawData] = useState([]);
     const [targetItem, setTargetItem] = useState();
     const [period, setPeriod] = useState(48);
@@ -154,12 +155,18 @@ function BunProUpcomingReviewsChart() {
                     return;
                 setRawData(data);
             });
+        BunProApiService.getPendingReviews()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setPendingReviews(data.length);
+            });
         return () => isSubscribed = false;
     }, []);
 
     const chartData = useMemo(
-        () => aggregateData(rawData, unit, period),
-        [rawData, period, unit]
+        () => aggregateData(rawData, unit, period, pendingReviews),
+        [rawData, period, unit, pendingReviews]
     );
 
     const maxScale = useMemo(() => {
@@ -236,7 +243,7 @@ function BunProUpcomingReviewsChart() {
     ), [unit.key]);
 
     const ReviewsToolTip = useMemo(() => (
-        function ReviewsToolTip({targetItem}) { // TODO: Handle totals
+        function ReviewsToolTip({targetItem}) {
             const dp = chartData[targetItem.point];
             const rowStyle = {display: 'flex', justifyContent: 'space-between', gap: '10px'};
 

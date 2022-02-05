@@ -64,12 +64,12 @@ async function fetchData(level) {
     return data;
 }
 
-function PreviousLevelSelector({selected, setSelected, level}) {
+function PreviousLevelSelector({selected, setSelected}) {
     return (
         <FormGroup>
             <FormControlLabel
                 label={
-                    <div style={{color: 'lightgray'}}>Level {selected ? level - 1 : level}</div>
+                    <div style={{color: 'lightgray'}}>Show Previous Level</div>
                 }
                 control={
                     <Switch checked={selected}
@@ -165,11 +165,17 @@ function WanikaniLevelItemsChart({level}) {
                         Radicals <RatioLabel started={data.radicalsStarted} total={data.radicals.length}/>
                     </Typography>
 
-                    <div style={{flexGrow: 1}}/>
+                    <div style={{flexGrow: 1, textAlign: 'center'}}>
+                        <Typography variant={'body1'}
+                                    style={{color: 'lightgray'}}
+                        >
+                            Level {isPreviousLevel ? level - 1 : level}
+                        </Typography>
+                    </div>
+
                     <PreviousLevelSelector
                         selected={isPreviousLevel}
                         setSelected={setIsPreviousLevel}
-                        level={level}
                     />
                 </div>
 

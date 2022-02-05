@@ -250,7 +250,7 @@ function WanikaniFutureReviewsChart() {
 
                         <DaysSelector days={period}
                                       setDays={setPeriod}
-                                      options={unit.key === units.days.key ? daysOptions : hoursOptions}
+                                      options={unit === units.days ? daysOptions : hoursOptions}
                         />
                     </div>
 

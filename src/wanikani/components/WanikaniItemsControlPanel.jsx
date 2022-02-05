@@ -51,8 +51,8 @@ const presetOptions = {
         controls: {
             primaryGroupBy: groupByOptions.jlpt,
             secondaryGroupBy: groupByOptions.none,
-            sortBy: sortByOptions.itemName,
-            colorBy: colorByOptions.jlpt,
+            sortBy: sortByOptions.srsStage,
+            colorBy: colorByOptions.srsStage,
             typesToShow: ['kanji'],
             sortReverse: false,
         }

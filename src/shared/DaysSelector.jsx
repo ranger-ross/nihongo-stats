@@ -1,5 +1,4 @@
 import {ToggleButton, ToggleButtonGroup} from "@mui/material";
-import * as React from "react";
 
 function DaysSelector({options, days, setDays}) {
     return (

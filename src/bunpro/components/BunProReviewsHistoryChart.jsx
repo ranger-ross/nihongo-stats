@@ -1,20 +1,58 @@
-import * as React from 'react';
 import {useEffect, useMemo, useState} from 'react';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
-import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
+import {Card, CardContent, CircularProgress, Grid, MenuItem, Select, Typography} from "@mui/material";
 import {ArgumentScale, BarSeries, EventTracker, Stack} from "@devexpress/dx-react-chart";
-import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.js";
+import {daysToMillis, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.js";
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import {fetchAllBunProReviews} from "../service/BunProDataUtil.js";
 import useWindowDimensions from "../../hooks/useWindowDimensions.jsx";
+import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
-function DataPoint(date) {
+const units = {
+    days: {
+        key: 'days',
+        text: 'Days',
+        trunc: truncDate
+    },
+    weeks: {
+        key: 'weeks',
+        text: 'Weeks',
+        trunc: truncWeek
+    },
+    months: {
+        key: 'months',
+        text: 'Months',
+        trunc: truncMonth
+    },
+};
+
+function UnitSelector({options, unit, onChange}) {
+    return (
+        <Select
+            style={{minWidth: '130px'}}
+            size={'small'}
+            value={unit.key}
+            onChange={e => onChange(options.find(o => o.key === e.target.value))}
+        >
+            {options.map((option) => (
+                <MenuItem key={option.key}
+                          value={option.key}
+                >
+                    {option.text}
+                </MenuItem>
+            ))}
+        </Select>
+    );
+}
+
+
+function DataPoint(date, unit) {
     let dp = {
-        date: truncDate(date),
+        date: unit.trunc(date),
         total: 0,
         reviews: [],
         N5: 0,
@@ -34,15 +72,15 @@ function DataPoint(date) {
     return dp;
 }
 
-function aggregateReviewByDay(reviews) {
+function aggregateReviewByUnit(reviews, unit) {
     const orderedReviews = reviews.sort((a, b,) => a.current.time.getTime() - b.current.time.getTime());
 
-    let days = [new DataPoint(orderedReviews[0].current.time)];
+    let days = [new DataPoint(orderedReviews[0].current.time, unit)];
 
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
-        if (lastDay.date.getTime() !== truncDate(review.current.time).getTime()) {
-            days.push(new DataPoint(review.current.time));
+        if (lastDay.date.getTime() !== unit.trunc(review.current.time).getTime()) {
+            days.push(new DataPoint(review.current.time, unit));
             lastDay = days[days.length - 1];
         }
         lastDay.addReview(review);
@@ -50,14 +88,10 @@ function aggregateReviewByDay(reviews) {
     return days;
 }
 
-async function fetchData() {
-    const reviews = await fetchAllBunProReviews();
-    return aggregateReviewByDay(reviews)
-}
-
 function BunProReviewsHistoryChart() {
     const [rawData, setRawData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [unit, setUnit] = useState(units.days);
     const [daysToLookBack, setDaysToLookBack] = useState(60);
     const {width} = useWindowDimensions();
     const isMobile = width < 400;
@@ -67,7 +101,7 @@ function BunProReviewsHistoryChart() {
         let isSubscribed = true;
 
         setIsLoading(true);
-        fetchData()
+        fetchAllBunProReviews()
             .then(data => {
                 if (!isSubscribed)
                     return;
@@ -82,50 +116,74 @@ function BunProReviewsHistoryChart() {
         return () => isSubscribed = false;
     }, []);
 
-    const chartData = useMemo(() => rawData?.filter(day => day.date.getTime() > Date.now() - (daysToMillis(daysToLookBack))), [rawData, daysToLookBack]);
+    const aggregatedDate = useMemo(() => rawData ? aggregateReviewByUnit(rawData, unit) : [], [rawData, unit.key])
+    const chartData = useMemo(() => aggregatedDate?.filter(day => day.date.getTime() > Date.now() - (daysToMillis(daysToLookBack))), [aggregatedDate, daysToLookBack]);
 
-    function ReviewToolTip({targetItem}) {
-        const dp = chartData[targetItem.point];
-        return (
-            <>
-                <p>{dp.date.toLocaleDateString()}</p>
-                <p>Total: {(dp.total).toLocaleString()}</p>
-                {JLPTLevels.map(level => (
-                    dp[level] ? <p key={level}>{level}: {dp[level]}</p> : null
-                ))}
-            </>
-        );
-    }
-
-    const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], isMobile ? 3 : 6);
-
-    function LabelWithDate(props) {
-        const date = new Date(props.text);
-        if (!date) {
-            return (<></>)
+    const ReviewToolTip = useMemo(() => {
+        function getDateLabelText(date) {
+            if (unit.key === units.days.key)
+                return date.toLocaleDateString()
+            else if (unit.key === units.weeks.key)
+                return date.toLocaleDateString()
+            else if (unit.key === units.months.key)
+                return `${getMonthName(date, true)} ${date.getFullYear()}`
         }
 
-        const index = chartData.findIndex(dp => dp.date.getTime() === date.getTime());
-        const isVisible = visibleLabelIndices.includes(index);
+        return function ReviewToolTip({targetItem}) {
+            const dp = chartData[targetItem.point];
+            return (
+                <>
+                    <ToolTipLabel title="Date" value={getDateLabelText(dp.date)}/>
+                    <br/>
+                    <ToolTipLabel title="Total" value={(dp.total).toLocaleString()}/>
+                    {JLPTLevels.map(level => (
+                        dp[level] ? <ToolTipLabel key={level} title={level} value={dp[level]}/> : null
+                    ))}
+                </>
+            );
+        }
+    }, [chartData, unit.key])
 
-        return (
-            <>
-                {isVisible ? (
-                    <ArgumentAxis.Label
-                        {...props}
-                        text={new Date(date).toLocaleDateString()}
-                    />
-                ) : null}
-            </>
-        );
-    }
+    const LabelWithDate = useMemo(() => {
+        const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], isMobile ? 3 : 6);
+        return function LabelWithDate(props) {
+            const date = new Date(props.text);
+            if (!date) {
+                return (<></>)
+            }
+
+            const index = chartData.findIndex(dp => dp.date.getTime() === date.getTime());
+            const isVisible = visibleLabelIndices.includes(index);
+
+            return (
+                <>
+                    {isVisible ? (
+                        <ArgumentAxis.Label
+                            {...props}
+                            text={new Date(date).toLocaleDateString()}
+                        />
+                    ) : null}
+                </>
+            );
+        }
+    }, [chartData]);
 
     return (
         <Card style={{margin: '15px'}}>
             <CardContent>
 
                 <Grid container>
-                    <Grid item xs={12} md={4}/>
+                    <Grid item xs={12} md={4}>
+                        <UnitSelector
+                            options={[
+                                units.days,
+                                units.weeks,
+                                units.months
+                            ]}
+                            unit={unit}
+                            onChange={setUnit}
+                        />
+                    </Grid>
                     <Grid item xs={12} md={4}>
                         <Typography variant={'h5'} style={{textAlign: 'center'}}>
                             Reviews
@@ -140,8 +198,8 @@ function BunProReviewsHistoryChart() {
                                           {value: 90, text: '3 Mon'},
                                           {value: 180, text: '6 Mon'},
                                           {value: 365, text: '1 Yr'},
-                                          !!rawData ? {
-                                              value: millisToDays(Date.now() - rawData[0].date),
+                                          !!rawData && rawData.length > 0 ? {
+                                              value: millisToDays(Date.now() - new Date(rawData[0]['created_at'])),
                                               text: 'All'
                                           } : null
                                       ]}

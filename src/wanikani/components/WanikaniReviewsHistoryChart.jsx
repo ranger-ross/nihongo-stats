@@ -11,6 +11,7 @@ import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import {getMonthName, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.js";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
+import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
 
 const units = {
     days: {
@@ -116,15 +117,6 @@ function UnitSelector({options, unit, onChange}) {
                 </MenuItem>
             ))}
         </Select>
-    );
-}
-
-function ToolTipLabel({title, value}) {
-    return (
-        <div style={{display: 'flex', justifyContent: 'space-between', gap: '10px'}}>
-            <div style={{fontSize: 'large'}}>{title}</div>
-            <div style={{fontSize: 'large'}}>{value}</div>
-        </div>
     );
 }
 

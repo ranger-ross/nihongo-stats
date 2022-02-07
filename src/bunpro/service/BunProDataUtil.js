@@ -52,3 +52,8 @@ export async function fetchAllBunProReviews(grammarPoints = null) {
 
     return reviews;
 }
+
+export function filterDeadGhostReviews(review) {
+    const fiveYearsFromNow = Date.now() + (1000 * 60 * 60 * 24 * 365 * 5)
+    return new Date(review['next_review']).getTime() < fiveYearsFromNow;
+}

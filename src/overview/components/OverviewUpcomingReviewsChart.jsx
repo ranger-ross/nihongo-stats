@@ -28,11 +28,9 @@ import {
     UpcomingReviewUnits
 } from "../../util/UpcomingReviewChartUtils.jsx";
 import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
+import {filterDeadGhostReviews} from "../../bunpro/service/BunProDataUtil.js";
 
-function filterDeadGhostReviews(review) {
-    const fiveYearsFromNow = Date.now() + (1000 * 60 * 60 * 24 * 365 * 5)
-    return new Date(review['next_review']).getTime() < fiveYearsFromNow;
-}
+const maxDaysIntoFuture = 31;
 
 function DataPoint(date, unit, reviews, previousDataPoint) {
     let dp = {
@@ -71,7 +69,7 @@ async function getBunProReviews() {
 
 async function getAnkiReviews(decks) {
     let actions = [];
-    for (let i = 0; i < 31; i++) {       // <== Use 31 days since it is more that the max,
+    for (let i = 0; i < maxDaysIntoFuture; i++) {       // <== Use 31 days since it is more that the max,
         for (const deck of decks) {      //     we dont want to constantly reload this when user changes period
             actions.push(createAnkiCardsDueQuery(deck, i));
         }
@@ -96,7 +94,6 @@ function addAppNameToReviewData(data, appName) {
     return data.map(review => ({...review, appName}));
 }
 
-
 function getChartStartTime() { // Start chart at the beginning of the next hour
     return addHours(truncMinutes(new Date()), 1);
 }
@@ -107,7 +104,7 @@ function aggregateData(ankiReviews, bunProReviews, wanikaniReviews, period, unit
         ...(ankiReviews ? addAppNameToReviewData(ankiReviews, AppNames.anki) : []),
         ...(wanikaniReviews ? addAppNameToReviewData(wanikaniReviews, AppNames.wanikani) : []),
     ]
-        .filter(review => review.date >= unit.trunc(Date.now()) && review.date < unit.trunc(Date.now() + daysToMillis(period)))
+        .filter(review => review.date >= unit.trunc(Date.now()) && review.date < unit.trunc(Date.now() + daysToMillis(maxDaysIntoFuture)))
         .sort((a, b) => a.date.getTime() - b.date.getTime());
 
     let data = [];
@@ -215,8 +212,8 @@ function OverviewUpcomingReviewsChart() {
     const wanikaniSeriesName = 'Wanikani';
 
     const [toolTipTargetItem, setToolTipTargetItem] = useState();
-    const [period, setPeriod] = useState(UpcomingReviewUnits.days.default);
-    const [unit, setUnit] = useState(UpcomingReviewUnits.days);
+    const [period, setPeriod] = useState(UpcomingReviewUnits.hours.default);
+    const [unit, setUnit] = useState(UpcomingReviewUnits.hours);
 
     const isAnkiConnected = useAnkiConnection();
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
@@ -233,6 +230,8 @@ function OverviewUpcomingReviewsChart() {
         () => aggregateData(ankiReviews, bunProReviews, wanikaniReviews, period, unit),
         [ankiReviews, bunProReviews, wanikaniReviews, period, unit.key]
     );
+
+    console.log(chartData);
 
     const LabelWithDate = useMemo(() => createUpcomingReviewsChartLabel(unit), [unit]);
 

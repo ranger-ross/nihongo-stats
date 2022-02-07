@@ -4,7 +4,7 @@ import {addHours, truncMinutes} from '../../util/DateUtils.js';
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import {scaleBand} from 'd3-scale';
 import BunProApiService from "../service/BunProApiService.js";
-import {createGrammarPointsLookupMap} from "../service/BunProDataUtil.js";
+import {createGrammarPointsLookupMap, filterDeadGhostReviews} from "../service/BunProDataUtil.js";
 import {ArgumentAxis, Chart, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
 import FilterableLegend from "../../shared/FilterableLegend.jsx";
@@ -16,11 +16,6 @@ import {
 } from "../../util/UpcomingReviewChartUtils.jsx";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
-
-function filterDeadGhostReviews(review) {
-    const fiveYearsFromNow = Date.now() + (1000 * 60 * 60 * 24 * 365 * 5)
-    return new Date(review['next_review']).getTime() < fiveYearsFromNow;
-}
 
 function createEmptyDataPoint(date) {
     let emptyDataPoint = {

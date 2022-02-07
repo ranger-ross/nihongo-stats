@@ -4,9 +4,15 @@ import {addDays, addHours, daysToMillis, truncDate, truncMinutes} from '../../ut
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import {scaleBand} from 'd3-scale';
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
-import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
-import {Animation, ArgumentScale, BarSeries, EventTracker, Stack} from "@devexpress/dx-react-chart";
+import {
+    ArgumentScale,
+    BarSeries,
+    EventTracker,
+    LineSeries,
+    Stack,
+    ValueScale
+} from "@devexpress/dx-react-chart";
 import AnkiApiService from "../../anki/service/AnkiApiService.js";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
@@ -16,7 +22,7 @@ import {AnkiColors, AppNames, BunProColors, WanikaniColors} from "../../Constant
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
 import {
-    addTimeToDate, createUpcomingReviewsChartLabel, formatTimeUnitLabelText,
+    addTimeToDate, createUpcomingReviewsChartBarLabel, createUpcomingReviewsChartLabel, formatTimeUnitLabelText,
     UnitSelector,
     UpcomingReviewPeriods,
     UpcomingReviewUnits
@@ -28,13 +34,17 @@ function filterDeadGhostReviews(review) {
     return new Date(review['next_review']).getTime() < fiveYearsFromNow;
 }
 
-function DataPoint(date, unit) {
+function DataPoint(date, unit, reviews, previousDataPoint) {
     let dp = {
         date: unit.trunc(date).getTime(),
         bunProCount: 0,
         wanikaniCount: 0,
         ankiCount: 0,
+        total: reviews.length,
     };
+
+    if (!!previousDataPoint)
+        dp.total += previousDataPoint.total;
 
     dp.addReview = (appName) => {
         if (appName === AppNames.anki)
@@ -44,6 +54,10 @@ function DataPoint(date, unit) {
         else if (appName === AppNames.wanikani)
             dp.wanikaniCount += 1;
     };
+
+    for (const review of reviews) {
+        dp.addReview(review.appName);
+    }
 
     return dp;
 }
@@ -55,10 +69,10 @@ async function getBunProReviews() {
         .map(review => ({...review, date: new Date(review['next_review'])}));
 }
 
-async function getAnkiReviews(decks, numberOfDays) {
+async function getAnkiReviews(decks) {
     let actions = [];
-    for (let i = 0; i < numberOfDays; i++) {
-        for (const deck of decks) {
+    for (let i = 0; i < 31; i++) {       // <== Use 31 days since it is more that the max,
+        for (const deck of decks) {      //     we dont want to constantly reload this when user changes period
             actions.push(createAnkiCardsDueQuery(deck, i));
         }
     }
@@ -100,12 +114,7 @@ function aggregateData(ankiReviews, bunProReviews, wanikaniReviews, period, unit
     for (let i = 0; i < period; i++) {
         const time = addTimeToDate(getChartStartTime(), unit, i);
         const reviewsInPeriod = reviews.filter(review => unit.isPeriodTheSame(unit.trunc(review.date), time, unit));
-
-        const dp = new DataPoint(time, unit);
-        for (const review of reviewsInPeriod) {
-            dp.addReview(review.appName);
-        }
-        data.push(dp);
+        data.push(new DataPoint(time, unit, reviewsInPeriod, data[i - 1]));
     }
     return data;
 }
@@ -171,7 +180,7 @@ function useBunProReviews(bunProApiKey) {
     return [bunProReviews, isBunProLoading];
 }
 
-function useAnkiReviews(isAnkiConnected, days) {
+function useAnkiReviews(isAnkiConnected) {
     const {selectedDecks: ankiSelectedDecks} = useSelectedAnkiDecks();
     const [ankiReviews, setAnkiReviews] = useState(null);
     const [isAnkiLoading, setIsAnkiLoading] = useState(false);
@@ -183,7 +192,7 @@ function useAnkiReviews(isAnkiConnected, days) {
         }
         setIsAnkiLoading(true);
         let isSubscribed = true;
-        getAnkiReviews(ankiSelectedDecks, days)
+        getAnkiReviews(ankiSelectedDecks)
             .then(reviews => {
                 if (!isSubscribed)
                     return;
@@ -195,7 +204,7 @@ function useAnkiReviews(isAnkiConnected, days) {
                 setIsAnkiLoading(false);
             });
         return () => isSubscribed = false;
-    }, [isAnkiConnected, ankiSelectedDecks, days]);
+    }, [isAnkiConnected, ankiSelectedDecks]);
 
     return [ankiReviews, isAnkiLoading];
 }
@@ -213,7 +222,7 @@ function OverviewUpcomingReviewsChart() {
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
     const {apiKey: bunProApiKey} = useBunProApiKey();
 
-    const [ankiReviews, isAnkiLoading] = useAnkiReviews(isAnkiConnected, period); // todo: convert period to days
+    const [ankiReviews, isAnkiLoading] = useAnkiReviews(isAnkiConnected);
     const [bunProReviews, isBunProLoading] = useBunProReviews(bunProApiKey);
     const [wanikaniReviews, isWanikaniLoading] = useWanikaniReviews(wanikaniApiKey);
 
@@ -230,15 +239,24 @@ function OverviewUpcomingReviewsChart() {
     const ReviewsToolTip = useMemo(() => (
         function ReviewsToolTip({targetItem}) {
             const dp = chartData[targetItem.point];
+
+            const isTotal = targetItem.series.toLowerCase().startsWith('total');
+
             return (
                 <>
                     <ToolTipLabel
                         title={unit.key == UpcomingReviewUnits.hours.key ? 'Time' : 'Date'}
                         value={formatTimeUnitLabelText(unit, dp.date, true)}
                     />
-                    {dp.ankiCount > 0 ? (<ToolTipLabel title="Anki" value={dp.ankiCount}/>) : null}
-                    {dp.bunProCount > 0 ? (<ToolTipLabel title="BunPro" value={dp.bunProCount}/>) : null}
-                    {dp.wanikaniCount > 0 ? (<ToolTipLabel title="Wanikani" value={dp.wanikaniCount}/>) : null}
+                    {isTotal ? (
+                        <ToolTipLabel title="Total" value={dp.total}/>
+                    ) : (
+                        <>
+                            {dp.ankiCount > 0 ? (<ToolTipLabel title="Anki" value={dp.ankiCount}/>) : null}
+                            {dp.bunProCount > 0 ? (<ToolTipLabel title="BunPro" value={dp.bunProCount}/>) : null}
+                            {dp.wanikaniCount > 0 ? (<ToolTipLabel title="Wanikani" value={dp.wanikaniCount}/>) : null}
+                        </>
+                    )}
                 </>
             );
         }
@@ -249,7 +267,7 @@ function OverviewUpcomingReviewsChart() {
     const showWanikaniSeries = !!wanikaniReviews && wanikaniReviews.length > 0;
 
     function onTooltipChange(target) {
-        if (target) {
+        if (target && !target.series.toLowerCase().includes('total')) {
             if (showWanikaniSeries) {
                 target.series = wanikaniSeriesName;
             } else if (showBunProSeries) {
@@ -260,6 +278,28 @@ function OverviewUpcomingReviewsChart() {
         }
         setToolTipTargetItem(target);
     }
+
+    const BarWithLabel = useMemo(() => {
+        return createUpcomingReviewsChartBarLabel((seriesIndex, index) => {
+            const dp = chartData[index];
+
+            if (dp.wanikaniCount > 0)
+                return seriesIndex === 2;
+
+            if (dp.bunProCount > 0)
+                return seriesIndex === 1;
+
+            if (dp.ankiCount > 0)
+                return seriesIndex === 0;
+
+            return false;
+        });
+    }, [chartData]);
+
+    const maxScale = useMemo(() => {
+        const totals = chartData.map(dp => dp.ankiCount + dp.bunProCount + dp.wanikaniCount);
+        return Math.max(5, ...totals) * 1.15;
+    }, [chartData]);
 
     return (
         <Card style={{height: '100%'}}>
@@ -301,7 +341,13 @@ function OverviewUpcomingReviewsChart() {
                     ) : (
                         <div style={{flexGrow: '1'}}>
                             <Chart data={chartData}>
-                                <ValueAxis/>
+                                <ValueScale name="total"
+                                            modifyDomain={() => [0, chartData.length > 0 ? chartData[chartData.length - 1].total : 1]}/>
+
+                                <ValueScale name="daily"
+                                            modifyDomain={() => [0, maxScale]}/>
+
+                                <ValueAxis scaleName="total"/>
                                 <ArgumentScale factory={scaleBand}/>
                                 <ArgumentAxis labelComponent={LabelWithDate}/>
 
@@ -310,7 +356,9 @@ function OverviewUpcomingReviewsChart() {
                                         name={ankiSeriesName}
                                         valueField="ankiCount"
                                         argumentField="date"
+                                        scaleName="daily"
                                         color={AnkiColors.lightGreen}
+                                        pointComponent={BarWithLabel}
                                     />
                                 ) : null}
 
@@ -319,7 +367,9 @@ function OverviewUpcomingReviewsChart() {
                                         name={bunProSeriesName}
                                         valueField="bunProCount"
                                         argumentField="date"
+                                        scaleName="daily"
                                         color={BunProColors.blue}
+                                        pointComponent={BarWithLabel}
                                     />
                                 ) : null}
 
@@ -328,9 +378,19 @@ function OverviewUpcomingReviewsChart() {
                                         name={wanikaniSeriesName}
                                         valueField="wanikaniCount"
                                         argumentField="date"
+                                        scaleName="daily"
                                         color={WanikaniColors.pink}
+                                        pointComponent={BarWithLabel}
                                     />
                                 ) : null}
+
+                                <LineSeries
+                                    name="Total"
+                                    valueField="total"
+                                    argumentField="date"
+                                    color={'#a45bff'}
+                                    scaleName="total"
+                                />
 
                                 <Stack
                                     stacks={[{series: ['Anki', 'BunPro', 'Wanikani']}]}
@@ -342,7 +402,6 @@ function OverviewUpcomingReviewsChart() {
                                          onTargetItemChange={onTooltipChange}
                                          contentComponent={ReviewsToolTip}
                                 />
-                                <Animation/>
                             </Chart>
                         </div>
                     )}

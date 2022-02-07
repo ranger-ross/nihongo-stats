@@ -9,7 +9,7 @@ import {ArgumentAxis, Chart, ScatterSeries, Tooltip, ValueAxis,} from '@devexpre
 import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
 import FilterableLegend from "../../shared/FilterableLegend.jsx";
 import {
-    addTimeToDate,
+    addTimeToDate, createUpcomingReviewsChartBarLabel,
     createUpcomingReviewsChartLabel, formatTimeUnitLabelText,
     UpcomingReviewPeriods,
     UpcomingReviewUnits
@@ -112,55 +112,31 @@ function BunProUpcomingReviewsChart() {
 
     const maxScale = useMemo(() => {
         const totals = chartData.map(dp => JLPTLevels.map(level => dp[level]).reduce((a, c) => a + c))
-        return Math.max(5, ...totals) + 5;
+        return Math.max(5, ...totals) * 1.15;
     }, [chartData]);
 
-    function isLabelVisible(seriesIndex, index) {
-        const dp = chartData[index];
+    const BarWithLabel = useMemo(() => {
+        return createUpcomingReviewsChartBarLabel((seriesIndex, index) => {
+            const dp = chartData[index];
 
-        if (dp.N1 > 0)
-            return seriesIndex === 5;
+            if (dp.N1 > 0)
+                return seriesIndex === 5;
 
-        if (dp.N2 > 0)
-            return seriesIndex === 3;
+            if (dp.N2 > 0)
+                return seriesIndex === 3;
 
-        if (dp.N3 > 0)
-            return seriesIndex === 2;
+            if (dp.N3 > 0)
+                return seriesIndex === 2;
 
-        if (dp.N4 > 0)
-            return seriesIndex === 1;
+            if (dp.N4 > 0)
+                return seriesIndex === 1;
 
-        if (dp.N5 > 0)
-            return seriesIndex === 0;
+            if (dp.N5 > 0)
+                return seriesIndex === 0;
 
-        return false;
-    }
-
-    const BarWithLabel = useMemo(() => (
-        function BarWithLabel(props) {
-            const {arg, val, value, seriesIndex, index} = props;
-
-            if (value === 0)
-                return (<></>);
-
-            return (
-                <>
-                    <BarSeries.Point {...props}/>
-
-                    {isLabelVisible(seriesIndex, index) ? (
-                        <Chart.Label
-                            x={arg}
-                            y={val - 10}
-                            textAnchor={'middle'}
-                            style={{fill: 'white', fontWeight: 'bold'}}
-                        >
-                            {value}
-                        </Chart.Label>
-                    ) : null}
-                </>
-            );
-        }
-    ), [chartData])
+            return false;
+        });
+    }, [chartData])
 
     const getTopSeries = useMemo(() => (targetItem) => {
         return [...JLPTLevels].reverse().find(level => chartData[targetItem.point][level] > 0);

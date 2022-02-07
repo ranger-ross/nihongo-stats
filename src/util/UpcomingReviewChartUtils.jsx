@@ -1,7 +1,8 @@
 import {addDays, addHours, areDatesSameDay, areDatesSameDayAndHour, truncDate, truncMinutes} from "./DateUtils.js";
 import {MenuItem, Select} from "@mui/material";
-import React from "react";
-import {ArgumentAxis} from "@devexpress/dx-react-chart-material-ui";
+import React, {useMemo} from "react";
+import {ArgumentAxis, Chart} from "@devexpress/dx-react-chart-material-ui";
+import {BarSeries} from "@devexpress/dx-react-chart";
 
 export const UpcomingReviewUnits = {
     hours: {
@@ -92,6 +93,32 @@ export function createUpcomingReviewsChartLabel(unit) {
                 {...props}
                 text={label}
             />
+        );
+    }
+}
+
+export function createUpcomingReviewsChartBarLabel(isLabelVisible) {
+    return function BarWithLabel(props) {
+        const {arg, val, value, seriesIndex, index} = props;
+
+        if (value === 0)
+            return (<></>);
+
+        return (
+            <>
+                <BarSeries.Point {...props}/>
+
+                {isLabelVisible(seriesIndex, index) ? (
+                    <Chart.Label
+                        x={arg}
+                        y={val - 10}
+                        textAnchor={'middle'}
+                        style={{fill: 'white', fontWeight: 'bold'}}
+                    >
+                        {value}
+                    </Chart.Label>
+                ) : null}
+            </>
         );
     }
 }

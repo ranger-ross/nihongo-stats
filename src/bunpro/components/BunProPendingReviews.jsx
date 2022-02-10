@@ -1,5 +1,5 @@
 import {useTheme} from "@mui/material";
-import {ColoredButton} from "./ColoredButton";
+import {ColoredButton} from "../../shared/ColoredButton.jsx";
 
 export function BunProPendingReviews({count}) {
     const theme = useTheme();

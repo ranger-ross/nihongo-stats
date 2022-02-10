@@ -1,7 +1,7 @@
 import {Card, CardContent, Typography} from "@mui/material";
 import WanikaniApiService from "../service/WanikaniApiService";
 import {useState, useEffect} from "react";
-import WanikaniPendingLessonsAndReviews from "../../shared/WanikaniPendingLessonAndReviews.jsx";
+import WanikaniPendingLessonsAndReviews from "./WanikaniPendingLessonAndReviews.jsx";
 
 const styles = {
     buttonsContainer: {

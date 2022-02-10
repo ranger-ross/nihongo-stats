@@ -1,52 +1,21 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {Card, CardContent, Checkbox, CircularProgress, Typography} from "@mui/material";
-import {
-    addDays,
-    addHours,
-    areDatesSameDay,
-    areDatesSameDayAndHour,
-    truncDate,
-    truncMinutes
-} from '../../util/DateUtils.js';
+import {addHours, truncMinutes} from '../../util/DateUtils.js';
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import {scaleBand} from 'd3-scale';
 import BunProApiService from "../service/BunProApiService.js";
-import {createGrammarPointsLookupMap} from "../service/BunProDataUtil.js";
+import {createGrammarPointsLookupMap, filterDeadGhostReviews} from "../service/BunProDataUtil.js";
 import {ArgumentAxis, Chart, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
 import FilterableLegend from "../../shared/FilterableLegend.jsx";
+import {
+    addTimeToDate, createUpcomingReviewsChartBarLabel,
+    createUpcomingReviewsChartLabel, formatTimeUnitLabelText,
+    UpcomingReviewPeriods,
+    UpcomingReviewUnits
+} from "../../util/UpcomingReviewChartUtils.jsx";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
-
-const units = {
-    hours: {
-        key: 'hours',
-        text: 'Hours',
-        trunc: truncMinutes
-    },
-    days: {
-        key: 'days',
-        text: 'Days',
-        trunc: truncDate
-    }
-};
-
-const daysOptions = [
-    {value: 7, text: '7'},
-    {value: 14, text: '14'},
-    {value: 30, text: '30'},
-];
-
-const hoursOptions = [
-    {value: 24, text: '24'},
-    {value: 48, text: '48'},
-    {value: 72, text: '72'},
-];
-
-function filterDeadGhostReviews(review) {
-    const fiveYearsFromNow = Date.now() + (1000 * 60 * 60 * 24 * 365 * 5)
-    return new Date(review['next_review']).getTime() < fiveYearsFromNow;
-}
 
 function createEmptyDataPoint(date) {
     let emptyDataPoint = {
@@ -54,39 +23,6 @@ function createEmptyDataPoint(date) {
     };
     JLPTLevels.forEach(level => emptyDataPoint[level] = 0)
     return emptyDataPoint;
-}
-
-function addTimeToDate(date, unit, amount) {
-    if (unit.key === units.days.key) {
-        return addDays(date, amount);
-    } else {
-        return addHours(date, amount);
-    }
-}
-
-function isPeriodTheSame(date1, date2, unit) {
-    if (unit.key === units.days.key) {
-        return areDatesSameDay(date1, date2);
-    } else {
-        return areDatesSameDayAndHour(date1, date2);
-    }
-}
-
-function getHoursLabelText(date, isToolTipLabel) {
-    if (!isToolTipLabel && ![0, 6, 12, 18].includes(date.getHours())) {
-        return '';
-    }
-
-    return date.toLocaleTimeString("en-US", {hour: 'numeric'});
-}
-
-function getLabelText(unit, date, isToolTipLabel) {
-    let _date = new Date(date)
-    if (unit.key === units.days.key) {
-        return `${_date.getMonth() + 1}/${_date.getDate()}`;
-    } else {
-        return getHoursLabelText(_date, isToolTipLabel);
-    }
 }
 
 function getChartStartTime() { // Start chart at the beginning of the next hour
@@ -98,7 +34,7 @@ function aggregateData(reviews, unit, period, pendingReviews) {
 
     for (let i = 0; i < period; i++) {
         const date = addTimeToDate(getChartStartTime(), unit, i);
-        const reviewsInPeriod = reviews.filter(review => isPeriodTheSame(unit.trunc(review['next_review']), date, unit));
+        const reviewsInPeriod = reviews.filter(review => unit.isPeriodTheSame(unit.trunc(review['next_review']), date, unit));
 
         let dp = createEmptyDataPoint(date);
 
@@ -144,8 +80,8 @@ function BunProUpcomingReviewsChart() {
     const [pendingReviews, setPendingReviews] = useState(0);
     const [rawData, setRawData] = useState([]);
     const [targetItem, setTargetItem] = useState();
-    const [period, setPeriod] = useState(48);
-    const [unit, setUnit] = useState(units.hours);
+    const [period, setPeriod] = useState(UpcomingReviewUnits.hours.default);
+    const [unit, setUnit] = useState(UpcomingReviewUnits.hours);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -171,76 +107,37 @@ function BunProUpcomingReviewsChart() {
 
     const maxScale = useMemo(() => {
         const totals = chartData.map(dp => JLPTLevels.map(level => dp[level]).reduce((a, c) => a + c))
-        return Math.max(5, ...totals) + 5;
+        return Math.max(5, ...totals) * 1.15;
     }, [chartData]);
 
-    function isLabelVisible(seriesIndex, index) {
-        const dp = chartData[index];
+    const BarWithLabel = useMemo(() => {
+        return createUpcomingReviewsChartBarLabel((seriesIndex, index) => {
+            const dp = chartData[index];
 
-        if (dp.N1 > 0)
-            return seriesIndex === 5;
+            if (dp.N1 > 0)
+                return seriesIndex === 5;
 
-        if (dp.N2 > 0)
-            return seriesIndex === 3;
+            if (dp.N2 > 0)
+                return seriesIndex === 3;
 
-        if (dp.N3 > 0)
-            return seriesIndex === 2;
+            if (dp.N3 > 0)
+                return seriesIndex === 2;
 
-        if (dp.N4 > 0)
-            return seriesIndex === 1;
+            if (dp.N4 > 0)
+                return seriesIndex === 1;
 
-        if (dp.N5 > 0)
-            return seriesIndex === 0;
+            if (dp.N5 > 0)
+                return seriesIndex === 0;
 
-        return false;
-    }
-
-    const BarWithLabel = useMemo(() => (
-        function BarWithLabel(props) {
-            const {arg, val, value, seriesIndex, index} = props;
-
-            if (value === 0)
-                return (<></>);
-
-            return (
-                <>
-                    <BarSeries.Point {...props}/>
-
-                    {isLabelVisible(seriesIndex, index) ? (
-                        <Chart.Label
-                            x={arg}
-                            y={val - 10}
-                            textAnchor={'middle'}
-                            style={{fill: 'white', fontWeight: 'bold'}}
-                        >
-                            {value}
-                        </Chart.Label>
-                    ) : null}
-                </>
-            );
-        }
-    ), [chartData])
+            return false;
+        });
+    }, [chartData])
 
     const getTopSeries = useMemo(() => (targetItem) => {
         return [...JLPTLevels].reverse().find(level => chartData[targetItem.point][level] > 0);
     }, [chartData]);
 
-    const LabelWithDate = useMemo(() => (
-        function LabelWithDate(props) {
-            const {text} = props;
-            let label = '';
-            if (text) {
-                const rawTimestamp = parseInt(text);
-                label = !!rawTimestamp ? getLabelText(unit, rawTimestamp, false) : '';
-            }
-            return (
-                <ArgumentAxis.Label
-                    {...props}
-                    text={label}
-                />
-            );
-        }
-    ), [unit.key]);
+    const LabelWithDate = useMemo(() => createUpcomingReviewsChartLabel(unit), [unit.key]);
 
     const ReviewsToolTip = useMemo(() => (
         function ReviewsToolTip({targetItem}) {
@@ -251,8 +148,8 @@ function BunProUpcomingReviewsChart() {
             return (
                 <>
                     <div style={rowStyle}>
-                        <div>{unit.key == units.hours.key ? 'Time' : 'Date'}:</div>
-                        <div>{getLabelText(unit, dp.date, true)}</div>
+                        <div>{unit.key == UpcomingReviewUnits.hours.key ? 'Time' : 'Date'}:</div>
+                        <div>{formatTimeUnitLabelText(unit, dp.date, true)}</div>
                     </div>
 
                     {isTotal ? (
@@ -282,14 +179,14 @@ function BunProUpcomingReviewsChart() {
                     <div style={{display: 'flex', justifyContent: 'space-between'}}>
 
                         <div>
-                            <Checkbox value={unit === units.days}
+                            <Checkbox value={unit.key === UpcomingReviewUnits.days.key}
                                       onChange={e => {
                                           if (e.target.checked) {
-                                              setPeriod(14);
-                                              setUnit(units.days);
+                                              setPeriod(UpcomingReviewUnits.days.default);
+                                              setUnit(UpcomingReviewUnits.days);
                                           } else {
-                                              setPeriod(48);
-                                              setUnit(units.hours);
+                                              setPeriod(UpcomingReviewUnits.hours.default);
+                                              setUnit(UpcomingReviewUnits.hours);
                                           }
                                       }}
                             />
@@ -302,7 +199,8 @@ function BunProUpcomingReviewsChart() {
 
                         <DaysSelector days={period}
                                       setDays={setPeriod}
-                                      options={unit === units.days ? daysOptions : hoursOptions}
+                                      options={unit === UpcomingReviewUnits.days ?
+                                          UpcomingReviewPeriods.days : UpcomingReviewPeriods.hours}
                         />
                     </div>
 

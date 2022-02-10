@@ -1,9 +1,9 @@
 import {Card, CardContent, IconButton, Menu, MenuItem, Typography} from "@mui/material";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import React, {useEffect, useState} from "react";
-import AnkiDeckSummaries, {fetchAnkiDeckSummaries} from "../../shared/AnkiDeckSummaries.jsx";
-import WanikaniPendingLessonsAndReviews from "../../shared/WanikaniPendingLessonAndReviews";
-import BunProPendingReviews from "../../shared/BunProPendingReviews.jsx";
+import AnkiDeckSummaries from "../../anki/components/AnkiDeckSummaries.jsx";
+import WanikaniPendingLessonsAndReviews from "../../wanikani/components/WanikaniPendingLessonAndReviews.jsx";
+import BunProPendingReviews from "../../bunpro/components/BunProPendingReviews.jsx";
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
@@ -12,6 +12,7 @@ import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
 import {AppNames} from "../../Constants.js";
 import {useSelectedApp} from "../../hooks/useSelectedApp.jsx";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
+import {fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil.js";
 
 const styles = {
     titleText: {

@@ -9,8 +9,9 @@ import {useNavigate} from "react-router";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {useAppVersion} from "../../hooks/useAppVersion.jsx";
 import {AppUrls} from "../../Constants.js";
-import {Replay} from "@mui/icons-material";
+import {AccountCircle, Replay} from "@mui/icons-material";
 import {ClearCacheDialog} from "./ClearCacheDialog.jsx";
+import UserPreferencesDialog from "./UserPreferencesDialog.jsx";
 
 const iconPaddingRight = '7px';
 
@@ -21,6 +22,10 @@ const styles = {
     },
     refreshOption: {
         color: '#5babf2',
+        marginRight: iconPaddingRight
+    },
+    preferencesOption: {
+        color: '#b0eaff',
         marginRight: iconPaddingRight
     },
     versionText: {
@@ -41,7 +46,8 @@ const styles = {
 
 function HeaderOptionMenu() {
     const [anchorEl, setAnchorEl] = useState(null);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isClearCacheDialogOpen, setIsClearCacheDialogOpen] = useState(false);
+    const [isPreferencesDialogOpen, setIsPreferencesDialogOpen] = useState(false);
     const open = Boolean(anchorEl);
     const wanikaniApiKeyStore = useWanikaniApiKey();
     const bunProApiKeyStore = useBunProApiKey();
@@ -59,7 +65,12 @@ function HeaderOptionMenu() {
     }
 
     const handleForceRefresh = () => {
-        setIsDialogOpen(true);
+        setIsClearCacheDialogOpen(true);
+        setAnchorEl(null);
+    }
+
+    const handleUserPreferences = () => {
+        setIsPreferencesDialogOpen(true);
         setAnchorEl(null);
     }
 
@@ -98,6 +109,11 @@ function HeaderOptionMenu() {
                     Force Refresh
                 </MenuItem>
 
+                <MenuItem onClick={handleUserPreferences}>
+                    <AccountCircle fontSize={'small'} style={styles.preferencesOption}/>
+                    Preferences
+                </MenuItem>
+
                 <MenuItem onClick={goToAboutPage} divider={true}>
                     <InfoIcon fontSize={'small'} style={{marginRight: iconPaddingRight}}/>
                     About
@@ -117,9 +133,14 @@ function HeaderOptionMenu() {
 
             </Menu>
 
-            <ClearCacheDialog isOpen={isDialogOpen}
-                              onClose={() => setIsDialogOpen(false)}
+            <ClearCacheDialog isOpen={isClearCacheDialogOpen}
+                              onClose={() => setIsClearCacheDialogOpen(false)}
             />
+
+            <UserPreferencesDialog isOpen={isPreferencesDialogOpen}
+                                   onClose={() => setIsPreferencesDialogOpen(false)}
+            />
+
         </>
     );
 }

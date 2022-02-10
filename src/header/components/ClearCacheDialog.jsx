@@ -41,7 +41,6 @@ const defaultState = {
 };
 
 export function ClearCacheDialog({isOpen, onClose}) {
-
     const [state, setState] = useState(defaultState);
 
     useEffect(() => {
@@ -66,46 +65,48 @@ export function ClearCacheDialog({isOpen, onClose}) {
     const {anki, bunPro, wanikani} = state;
     const error = [anki, bunPro, wanikani].filter(v => v).length === 0;
 
-    return <Dialog onClose={onClose} open={isOpen}>
-        <DialogTitle>Force Refresh</DialogTitle>
-        <DialogContent>
-            <FormControl
-                required
-                component="fieldset"
-                sx={{m: 3}}
-                variant="standard"
-            >
-                <FormHelperText>Which app should be refreshed?</FormHelperText>
+    return (
+        <Dialog onClose={onClose} open={isOpen}>
+            <DialogTitle>Force Refresh</DialogTitle>
+            <DialogContent>
+                <FormControl
+                    required
+                    component="fieldset"
+                    sx={{m: 3}}
+                    variant="standard"
+                >
+                    <FormHelperText>Which app should be refreshed?</FormHelperText>
 
-                <FormGroup>
+                    <FormGroup>
 
-                    <FormControlLabel
-                        control={
-                            <Checkbox checked={anki} onChange={handleChange} name="anki"/>
-                        }
-                        label="Anki"
-                    />
-                    <FormControlLabel
-                        control={
-                            <Checkbox checked={bunPro} onChange={handleChange} name="bunPro"/>
-                        }
-                        label="BunPro"
-                    />
-                    <FormControlLabel
-                        control={
-                            <Checkbox checked={wanikani} onChange={handleChange} name="wanikani"/>
-                        }
-                        label="Wanikani"
-                    />
+                        <FormControlLabel
+                            control={
+                                <Checkbox checked={anki} onChange={handleChange} name="anki"/>
+                            }
+                            label="Anki"
+                        />
+                        <FormControlLabel
+                            control={
+                                <Checkbox checked={bunPro} onChange={handleChange} name="bunPro"/>
+                            }
+                            label="BunPro"
+                        />
+                        <FormControlLabel
+                            control={
+                                <Checkbox checked={wanikani} onChange={handleChange} name="wanikani"/>
+                            }
+                            label="Wanikani"
+                        />
 
-                </FormGroup>
-            </FormControl>
+                    </FormGroup>
+                </FormControl>
 
-        </DialogContent>
-        <DialogActions>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button onClick={handleClear}
-                    disabled={error}>Clear</Button>
-        </DialogActions>
-    </Dialog>;
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Cancel</Button>
+                <Button onClick={handleClear}
+                        disabled={error}>Clear</Button>
+            </DialogActions>
+        </Dialog>
+    );
 }

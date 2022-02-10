@@ -4,7 +4,7 @@ import {addDays, addHours, daysToMillis, truncDate, truncMinutes} from '../../ut
 import DaysSelector from "../../shared/DaysSelector.jsx";
 import {scaleBand} from 'd3-scale';
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
-import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
+import {ArgumentAxis, Chart, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {
     ArgumentScale,
     BarSeries,
@@ -29,6 +29,7 @@ import {
 } from "../../util/UpcomingReviewChartUtils.jsx";
 import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
 import {filterDeadGhostReviews} from "../../bunpro/service/BunProDataUtil.js";
+import FilterableLegend from "../../shared/FilterableLegend.jsx";
 
 const maxDaysIntoFuture = 31;
 
@@ -206,11 +207,11 @@ function useAnkiReviews(isAnkiConnected) {
     return [ankiReviews, isAnkiLoading];
 }
 
-function OverviewUpcomingReviewsChart() {
-    const ankiSeriesName = 'Anki';
-    const bunProSeriesName = 'BunPro';
-    const wanikaniSeriesName = 'Wanikani';
+const ankiSeriesName = 'Anki';
+const bunProSeriesName = 'BunPro';
+const wanikaniSeriesName = 'Wanikani';
 
+function OverviewUpcomingReviewsChart() {
     const [toolTipTargetItem, setToolTipTargetItem] = useState();
     const [period, setPeriod] = useState(UpcomingReviewUnits.hours.default);
     const [unit, setUnit] = useState(UpcomingReviewUnits.hours);
@@ -230,8 +231,6 @@ function OverviewUpcomingReviewsChart() {
         () => aggregateData(ankiReviews, bunProReviews, wanikaniReviews, period, unit),
         [ankiReviews, bunProReviews, wanikaniReviews, period, unit.key]
     );
-
-    console.log(chartData);
 
     const LabelWithDate = useMemo(() => createUpcomingReviewsChartLabel(unit), [unit]);
 
@@ -266,34 +265,58 @@ function OverviewUpcomingReviewsChart() {
     const showWanikaniSeries = !!wanikaniReviews && wanikaniReviews.length > 0;
 
     function onTooltipChange(target) {
-        if (target && !target.series.toLowerCase().includes('total')) {
-            if (showWanikaniSeries) {
-                target.series = wanikaniSeriesName;
-            } else if (showBunProSeries) {
-                target.series = bunProSeriesName;
-            } else if (showAnkiSeries) {
-                target.series = ankiSeriesName;
+        function getTopSeries(targetItem, chartData) {
+            const dp = chartData[targetItem.point];
+            if (showWanikaniSeries && dp.wanikaniCount > 0)
+                return wanikaniSeriesName;
+            else if (showBunProSeries && dp.bunProCount > 0)
+                return bunProSeriesName;
+            else
+                return ankiSeriesName;
+        }
+
+        if (target) {
+            if (!target.series.toLowerCase().includes('total')) {
+                target.series = getTopSeries(target, chartData);
+            }
+            if (target.series.toLowerCase() == 'total-points') {
+                target.series = 'Total';
             }
         }
         setToolTipTargetItem(target);
     }
 
     const BarWithLabel = useMemo(() => {
+        let series = [];
+
+        if (showAnkiSeries)
+            series.push('anki');
+
+        if (showBunProSeries)
+            series.push('bunpro');
+
+        if (showWanikaniSeries)
+            series.push('wanikani');
+
+        const ankiIndex = series.indexOf('anki');
+        const bunProIndex = series.indexOf('bunpro');
+        const wanikaniIndex = series.indexOf('wanikani');
+
         return createUpcomingReviewsChartBarLabel((seriesIndex, index) => {
             const dp = chartData[index];
 
             if (dp.wanikaniCount > 0)
-                return seriesIndex === 2;
+                return wanikaniIndex === seriesIndex;
 
             if (dp.bunProCount > 0)
-                return seriesIndex === 1;
+                return bunProIndex === seriesIndex;
 
             if (dp.ankiCount > 0)
-                return seriesIndex === 0;
+                return ankiIndex === seriesIndex;
 
             return false;
         });
-    }, [chartData]);
+    }, [chartData, showAnkiSeries, showBunProSeries, showWanikaniSeries]);
 
     const maxScale = useMemo(() => {
         const totals = chartData.map(dp => dp.ankiCount + dp.bunProCount + dp.wanikaniCount);
@@ -304,7 +327,7 @@ function OverviewUpcomingReviewsChart() {
         <Card style={{height: '100%'}}>
             <CardContent style={{height: '100%'}}>
                 <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '15px'}}>
 
                         <UnitSelector
                             unit={unit}
@@ -391,11 +414,23 @@ function OverviewUpcomingReviewsChart() {
                                     scaleName="total"
                                 />
 
+                                <ScatterSeries
+                                    name="total-points"
+                                    valueField="total"
+                                    argumentField="date"
+                                    color={'#a45bff'}
+                                    scaleName="total"
+                                />
+
                                 <Stack
                                     stacks={[{series: ['Anki', 'BunPro', 'Wanikani']}]}
                                 />
 
-                                <Legend/>
+                                <FilterableLegend
+                                    filterItems={[
+                                        'total-points'
+                                    ]}
+                                />
                                 <EventTracker/>
                                 <Tooltip targetItem={toolTipTargetItem}
                                          onTargetItemChange={onTooltipChange}

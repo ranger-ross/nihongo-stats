@@ -10,7 +10,7 @@ import {scaleBand} from 'd3-scale';
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import {truncDate} from "../../util/DateUtils.js";
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
-import DaysSelector from "../../shared/DaysSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {createAnkiCardsDueQuery} from "../service/AnkiDataUtil.js";
 
 function DataPoint(day) {
@@ -120,7 +120,9 @@ function AnkiUpcomingReviewsChart() {
                     </Grid>
 
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
-                        <DaysSelector
+                        <PeriodSelector
+                            period={days}
+                            setPeriod={setDays}
                             options={[
                                 {value: 7, text: '7'},
                                 {value: 14, text: '14'},
@@ -128,8 +130,6 @@ function AnkiUpcomingReviewsChart() {
                                 {value: 60, text: '60'},
                                 {value: 90, text: '90'},
                             ]}
-                            days={days}
-                            setDays={setDays}
                         />
                     </Grid>
 

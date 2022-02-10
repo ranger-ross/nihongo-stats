@@ -1,7 +1,7 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import {RoutePaths} from "../Routes";
 import WanikaniLevelSummaryChart from "./components/WanikaniLevelSummaryChart.jsx";
-import WanikaniFutureReviewsChart from "./components/WanikaniFutureReviewsChart.jsx";
+import WanikaniUpcomingReviewsChart from "./components/WanikaniUpcomingReviewsChart.jsx";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
 import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart.jsx";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
@@ -56,7 +56,7 @@ function WanikaniDashboard() {
                         </div>
 
                         <div style={styles.rightContainer}>
-                            <WanikaniFutureReviewsChart/>
+                            <WanikaniUpcomingReviewsChart/>
                         </div>
                     </div>
                 </div>

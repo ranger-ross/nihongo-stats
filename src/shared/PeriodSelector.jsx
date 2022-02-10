@@ -1,12 +1,12 @@
 import {ToggleButton, ToggleButtonGroup} from "@mui/material";
 
-function DaysSelector({options, days, setDays}) {
+function PeriodSelector({options, period, setPeriod}) {
     return (
         <ToggleButtonGroup
-            value={days}
+            value={period}
             size={'small'}
             exclusive
-            onChange={e => setDays(parseInt(e.target.value))}
+            onChange={e => setPeriod(parseInt(e.target.value))}
         >
             {options
                 .filter(option => !!option)
@@ -21,4 +21,4 @@ function DaysSelector({options, days, setDays}) {
     );
 }
 
-export default DaysSelector;
+export default PeriodSelector;

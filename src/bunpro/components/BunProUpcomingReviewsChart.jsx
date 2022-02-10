@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {Card, CardContent, Checkbox, CircularProgress, Typography} from "@mui/material";
+import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addHours, truncMinutes} from '../../util/DateUtils.js';
-import DaysSelector from "../../shared/DaysSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {scaleBand} from 'd3-scale';
 import BunProApiService from "../service/BunProApiService.js";
 import {createGrammarPointsLookupMap, filterDeadGhostReviews} from "../service/BunProDataUtil.js";
@@ -10,7 +10,7 @@ import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack, ValueScale} f
 import FilterableLegend from "../../shared/FilterableLegend.jsx";
 import {
     addTimeToDate, createUpcomingReviewsChartBarLabel,
-    createUpcomingReviewsChartLabel, formatTimeUnitLabelText,
+    createUpcomingReviewsChartLabel, formatTimeUnitLabelText, UnitSelector,
     UpcomingReviewPeriods,
     UpcomingReviewUnits
 } from "../../util/UpcomingReviewChartUtils.jsx";
@@ -178,29 +178,26 @@ function BunProUpcomingReviewsChart() {
                 <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
                     <div style={{display: 'flex', justifyContent: 'space-between'}}>
 
-                        <div>
-                            <Checkbox value={unit.key === UpcomingReviewUnits.days.key}
-                                      onChange={e => {
-                                          if (e.target.checked) {
-                                              setPeriod(UpcomingReviewUnits.days.default);
-                                              setUnit(UpcomingReviewUnits.days);
-                                          } else {
-                                              setPeriod(UpcomingReviewUnits.hours.default);
-                                              setUnit(UpcomingReviewUnits.hours);
-                                          }
-                                      }}
-                            />
-                            Show Days
-                        </div>
+                        <UnitSelector
+                            unit={unit}
+                            onChange={unit => {
+                                setPeriod(unit.default);
+                                setUnit(unit);
+                            }}
+                            options={[
+                                UpcomingReviewUnits.hours,
+                                UpcomingReviewUnits.days,
+                            ]}
+                        />
 
                         <Typography variant={'h5'}>
                             Upcoming Reviews
                         </Typography>
 
-                        <DaysSelector days={period}
-                                      setDays={setPeriod}
-                                      options={unit === UpcomingReviewUnits.days ?
-                                          UpcomingReviewPeriods.days : UpcomingReviewPeriods.hours}
+                        <PeriodSelector period={period}
+                                        setPeriod={setPeriod}
+                                        options={unit === UpcomingReviewUnits.days ?
+                                            UpcomingReviewPeriods.days : UpcomingReviewPeriods.hours}
                         />
                     </div>
 

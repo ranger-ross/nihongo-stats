@@ -6,7 +6,7 @@ import {WanikaniColors} from '../../Constants.js';
 import {Card, CardContent, Grid, Typography} from "@mui/material";
 import _ from 'lodash';
 import {scaleLinear} from 'd3-scale';
-import DaysSelector from "../../shared/DaysSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 
 const scale = () => scaleLinear();
@@ -117,17 +117,17 @@ function WanikaniAccuracyHistoryChart() {
                         </Grid>
 
                         <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
-                            <DaysSelector days={daysToLookBack}
-                                          setDays={setDaysToLookBack}
-                                          options={[
-                                              {value: 7, text: '7'},
-                                              {value: 14, text: '14'},
-                                              {value: 30, text: '30'},
-                                              {value: 90, text: '3 Mon'},
-                                              {value: 180, text: '6 Mon'},
-                                              {value: 365, text: '1 Yr'},
-                                              {value: totalDays, text: 'All'},
-                                          ]}
+                            <PeriodSelector period={daysToLookBack}
+                                            setPeriod={setDaysToLookBack}
+                                            options={[
+                                                {value: 7, text: '7'},
+                                                {value: 14, text: '14'},
+                                                {value: 30, text: '30'},
+                                                {value: 90, text: '3 Mon'},
+                                                {value: 180, text: '6 Mon'},
+                                                {value: 365, text: '1 Yr'},
+                                                {value: totalDays, text: 'All'},
+                                            ]}
                             />
                         </Grid>
 

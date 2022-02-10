@@ -9,60 +9,17 @@ import {
 import React, {useState, useEffect, useMemo} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {ArgumentScale, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
-import {Card, CardContent, Typography, Checkbox} from "@mui/material";
-import {addDays, addHours, areDatesSameDay, areDatesSameDayAndHour, truncMinutes} from '../../util/DateUtils.js';
+import {Card, CardContent, Typography} from "@mui/material";
+import {addHours, truncMinutes} from '../../util/DateUtils.js';
 import {WanikaniColors} from '../../Constants.js';
-import DaysSelector from "../../shared/DaysSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {scaleBand} from 'd3-scale';
-
-const units = {
-    days: 'days',
-    hours: 'hours',
-}
-
-const daysOptions = [
-    {value: 7, text: '7'},
-    {value: 14, text: '14'},
-    {value: 30, text: '30'},
-];
-const hoursOptions = [
-    {value: 24, text: '24'},
-    {value: 48, text: '48'},
-    {value: 72, text: '72'},
-];
-
-function addTimeToDate(date, unit, amount) {
-    if (unit === units.days) {
-        return addDays(date, amount);
-    } else {
-        return addHours(date, amount);
-    }
-}
-
-function isPeriodTheSame(date1, date2, unit) {
-    if (unit === units.days) {
-        return areDatesSameDay(date1, date2);
-    } else {
-        return areDatesSameDayAndHour(date1, date2);
-    }
-}
-
-function getHoursLabelText(date, isToolTipLabel) {
-    if (!isToolTipLabel && ![0, 6, 12, 18].includes(date.getHours())) {
-        return '';
-    }
-
-    return date.toLocaleTimeString("en-US", {hour: 'numeric'});
-}
-
-function getLabelText(unit, date, isToolTipLabel) {
-    let _date = new Date(date)
-    if (unit === units.days) {
-        return `${_date.getMonth() + 1}/${_date.getDate()}`;
-    } else {
-        return getHoursLabelText(_date, isToolTipLabel);
-    }
-}
+import {
+    addTimeToDate, createUpcomingReviewsChartBarLabel, createUpcomingReviewsChartLabel, formatTimeUnitLabelText,
+    UnitSelector,
+    UpcomingReviewPeriods,
+    UpcomingReviewUnits
+} from "../../util/UpcomingReviewChartUtils.jsx";
 
 function getChartStartTime() { // Start chart at the beginning of the next hour
     return addHours(truncMinutes(new Date()), 1);
@@ -77,7 +34,7 @@ function formatChartData(rawData, unit, period, initialReviewCount) {
     let daysData = []
     for (let i = 0; i < period; i++) {
         const date = addTimeToDate(getChartStartTime(), unit, i);
-        const assignmentsOnDay = data.filter(assignment => isPeriodTheSame(new Date(assignment.data['available_at']), date, unit));
+        const assignmentsOnDay = data.filter(assignment => unit.isPeriodTheSame(new Date(assignment.data['available_at']), date, unit));
         totalReviewCount += assignmentsOnDay.length;
 
         daysData.push({
@@ -107,11 +64,11 @@ function getTopSeries(targetItem, chartData) {
         return 'radicals'
 }
 
-function WanikaniFutureReviewsChart() {
+function WanikaniUpcomingReviewsChart() {
     const [rawData, setRawData] = useState([]);
     const [initialReviewCount, setInitialReviewCount] = useState(0);
     const [targetItem, setTargetItem] = useState();
-    const [unit, setUnit] = useState(units.hours);
+    const [unit, setUnit] = useState(UpcomingReviewUnits.hours);
     const [period, setPeriod] = useState(48);
 
     useEffect(() => {
@@ -131,126 +88,94 @@ function WanikaniFutureReviewsChart() {
         return () => isSubscribed = false;
     }, []);
 
-    const chartData = useMemo(() => !rawData || rawData.length == 0 ? [] : formatChartData(rawData, unit, period, initialReviewCount), [rawData, unit, period, initialReviewCount]);
+    const chartData = useMemo(
+        () => !rawData || rawData.length == 0 ? [] : formatChartData(rawData, unit, period, initialReviewCount),
+        [rawData, unit.key, period, initialReviewCount]
+    );
 
     const maxScale = useMemo(() => {
         const totals = chartData.map(dp => dp.radicals + dp.kanji + dp.vocabulary)
         return Math.max(5, ...totals) + 5;
     }, [chartData]);
 
-    function ReviewsToolTip({targetItem}) {
-        const {radicals, kanji, vocabulary, total, time} = chartData[targetItem.point];
-        const rowStyle = {display: 'flex', justifyContent: 'space-between', gap: '10px'};
-        return (
-            <div>
-                <div style={rowStyle}>
-                    <div>{unit == units.hours ? 'Time' : 'Date'}:</div>
-                    <div>{getLabelText(unit, time, true)}</div>
-                </div>
-                {targetItem.series.includes('total') ? (
+    const ReviewsToolTip = useMemo(() => (
+        function ReviewsToolTip({targetItem}) {
+            const {radicals, kanji, vocabulary, total, time} = chartData[targetItem.point];
+            const rowStyle = {display: 'flex', justifyContent: 'space-between', gap: '10px'};
+            return (
+                <div>
                     <div style={rowStyle}>
-                        <div>Total:</div>
-                        <div>{total}</div>
+                        <div>{unit.key === UpcomingReviewUnits.hours.key ? 'Time' : 'Date'}:</div>
+                        <div>{formatTimeUnitLabelText(unit, time, true)}</div>
                     </div>
-                ) : (
-                    <>
+                    {targetItem.series.includes('total') ? (
                         <div style={rowStyle}>
-                            <div>Radicals:</div>
-                            <div>{radicals}</div>
+                            <div>Total:</div>
+                            <div>{total}</div>
                         </div>
-                        <div style={rowStyle}>
-                            <div>Kanji:</div>
-                            <div>{kanji}</div>
-                        </div>
-                        <div style={rowStyle}>
-                            <div>Vocabulary:</div>
-                            <div>{vocabulary}</div>
-                        </div>
-                    </>
-                )}
-            </div>
-        );
-    }
-
-    function LabelWithDate(props) {
-        const {text} = props;
-        let label = '';
-        if (text) {
-            const rawTimestamp = parseInt(text);
-            label = !!rawTimestamp ? getLabelText(unit, rawTimestamp, false) : '';
+                    ) : (
+                        <>
+                            <div style={rowStyle}>
+                                <div>Radicals:</div>
+                                <div>{radicals}</div>
+                            </div>
+                            <div style={rowStyle}>
+                                <div>Kanji:</div>
+                                <div>{kanji}</div>
+                            </div>
+                            <div style={rowStyle}>
+                                <div>Vocabulary:</div>
+                                <div>{vocabulary}</div>
+                            </div>
+                        </>
+                    )}
+                </div>
+            );
         }
-        return (
-            <ArgumentAxis.Label
-                {...props}
-                text={label}
-            />
-        );
-    }
+    ), [chartData]);
 
-    function isLabelVisible(seriesIndex, index) {
-        if (seriesIndex === 2)
-            return true;
+    const LabelWithDate = useMemo(() => createUpcomingReviewsChartLabel(unit), [unit.key]);
 
-        if (seriesIndex === 1)
-            return chartData[index].vocabulary === 0;
+    const BarWithLabel = useMemo(() => {
+        return createUpcomingReviewsChartBarLabel((seriesIndex, index) => {
+            if (seriesIndex === 2)
+                return true;
 
-        if (seriesIndex === 0)
-            return chartData[index].kanji === 0 && chartData[index].vocabulary === 0;
-        return false;
-    }
+            if (seriesIndex === 1)
+                return chartData[index].vocabulary === 0;
 
-    function BarWithLabel(props) {
-        const {arg, val, value, seriesIndex, index} = props;
-
-        if (value === 0)
-            return (<></>);
-
-        return (
-            <>
-                <BarSeries.Point {...props}/>
-
-                {isLabelVisible(seriesIndex, index) ? (
-                    <Chart.Label
-                        x={arg}
-                        y={val - 10}
-                        textAnchor={'middle'}
-                        style={{fill: 'white', fontWeight: 'bold'}}
-                    >
-                        {value}
-                    </Chart.Label>
-                ) : null}
-            </>
-        );
-    }
+            if (seriesIndex === 0)
+                return chartData[index].kanji === 0 && chartData[index].vocabulary === 0;
+            return false;
+        });
+    }, [chartData]);
 
     return (
         <Card style={{height: '100%'}}>
             <CardContent style={{height: '100%'}}>
                 <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '15px'}}>
 
-                        <div>
-                            <Checkbox value={unit === units.days}
-                                      onChange={e => {
-                                          if (e.target.checked) {
-                                              setPeriod(14);
-                                              setUnit(units.days);
-                                          } else {
-                                              setPeriod(48);
-                                              setUnit(units.hours);
-                                          }
-                                      }}
-                            />
-                            Show Days
-                        </div>
+                        <UnitSelector
+                            unit={unit}
+                            onChange={unit => {
+                                setPeriod(unit.default);
+                                setUnit(unit);
+                            }}
+                            options={[
+                                UpcomingReviewUnits.hours,
+                                UpcomingReviewUnits.days,
+                            ]}
+                        />
 
                         <Typography variant={'h5'}>
                             Upcoming Reviews
                         </Typography>
 
-                        <DaysSelector days={period}
-                                      setDays={setPeriod}
-                                      options={unit === units.days ? daysOptions : hoursOptions}
+                        <PeriodSelector period={period}
+                                        setPeriod={setPeriod}
+                                        options={unit === UpcomingReviewUnits.days ?
+                                            UpcomingReviewPeriods.days : UpcomingReviewPeriods.hours}
                         />
                     </div>
 
@@ -330,4 +255,4 @@ function WanikaniFutureReviewsChart() {
     );
 }
 
-export default WanikaniFutureReviewsChart;
+export default WanikaniUpcomingReviewsChart;

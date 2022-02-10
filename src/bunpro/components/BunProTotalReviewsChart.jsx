@@ -6,7 +6,7 @@ import {ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-char
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.js";
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
-import DaysSelector from "../../shared/DaysSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {fetchAllBunProReviews} from "../service/BunProDataUtil.js";
 import useWindowDimensions from "../../hooks/useWindowDimensions.jsx";
 
@@ -139,19 +139,19 @@ function BunProTotalReviewsChart() {
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
-                        <DaysSelector days={daysToLookBack}
-                                      setDays={setDaysToLookBack}
-                                      options={[
-                                          {value: 30, text: '1 Mon'},
-                                          {value: 60, text: '2 Mon'},
-                                          {value: 90, text: '3 Mon'},
-                                          {value: 180, text: '6 Mon'},
-                                          {value: 365, text: '1 Yr'},
-                                          !!rawData ? {
-                                              value: millisToDays(Date.now() - rawData[0].date),
-                                              text: 'All'
-                                          } : null
-                                      ]}
+                        <PeriodSelector period={daysToLookBack}
+                                        setPeriod={setDaysToLookBack}
+                                        options={[
+                                            {value: 30, text: '1 Mon'},
+                                            {value: 60, text: '2 Mon'},
+                                            {value: 90, text: '3 Mon'},
+                                            {value: 180, text: '6 Mon'},
+                                            {value: 365, text: '1 Yr'},
+                                            !!rawData ? {
+                                                value: millisToDays(Date.now() - rawData[0].date),
+                                                text: 'All'
+                                            } : null
+                                        ]}
                         />
                     </Grid>
                 </Grid>

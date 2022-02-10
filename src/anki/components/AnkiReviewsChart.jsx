@@ -9,7 +9,7 @@ import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.js";
 import AnkiApiService from "../service/AnkiApiService.js";
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
-import DaysSelector from "../../shared/DaysSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.jsx";
 
 function DataPoint(date, previousDataPoint) {
     let dp = {
@@ -146,9 +146,9 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
-                        <DaysSelector days={daysToLookBack}
-                                      setDays={setDaysToLookBack}
-                                      options={[
+                        <PeriodSelector period={daysToLookBack}
+                                        setPeriod={setDaysToLookBack}
+                                        options={[
                                           {value: 30, text: '1 Mon'},
                                           {value: 60, text: '2 Mon'},
                                           {value: 90, text: '3 Mon'},

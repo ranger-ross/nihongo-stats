@@ -5,7 +5,7 @@ import {LineSeries} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants.js';
 import {Checkbox, Card, CardContent, Typography, Grid, FormControlLabel} from "@mui/material";
 import {EventTracker} from "@devexpress/dx-react-chart";
-import DaysSelector from "../../shared/DaysSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {daysToMillis, millisToDays} from "../../util/DateUtils.js";
 
 function LabelWithDate(props) {
@@ -170,18 +170,18 @@ function WanikaniTotalItemsHistoryChart() {
 
 
                         <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
-                            <DaysSelector days={daysToLookBack}
-                                          setDays={setDaysToLookBack}
-                                          options={[
-                                              {value: 30, text: '1 Mon'},
-                                              {value: 60, text: '2 Mon'},
-                                              {value: 90, text: '3 Mon'},
-                                              {value: 180, text: '6 Mon'},
-                                              !!rawData && rawData.length > 0 ? {
-                                                  value: millisToDays(Date.now() - rawData[0].date),
-                                                  text: 'All'
-                                              } : null
-                                          ]}
+                            <PeriodSelector period={daysToLookBack}
+                                            setPeriod={setDaysToLookBack}
+                                            options={[
+                                                {value: 30, text: '1 Mon'},
+                                                {value: 60, text: '2 Mon'},
+                                                {value: 90, text: '3 Mon'},
+                                                {value: 180, text: '6 Mon'},
+                                                !!rawData && rawData.length > 0 ? {
+                                                    value: millisToDays(Date.now() - rawData[0].date),
+                                                    text: 'All'
+                                                } : null
+                                            ]}
                             />
                         </Grid>
 

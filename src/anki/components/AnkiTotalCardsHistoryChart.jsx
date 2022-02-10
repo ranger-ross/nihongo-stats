@@ -1,5 +1,5 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import DaysSelector from "../../shared/DaysSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.js";
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
@@ -153,19 +153,19 @@ function AnkiTotalCardsHistoryChart({deckNames}) {
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
-                        <DaysSelector days={daysToLookBack}
-                                      setDays={setDaysToLookBack}
-                                      options={[
-                                          {value: 30, text: '1 Mon'},
-                                          {value: 60, text: '2 Mon'},
-                                          {value: 90, text: '3 Mon'},
-                                          {value: 180, text: '6 Mon'},
-                                          {value: 365, text: '1 Yr'},
-                                          !!cardData ? {
-                                              value: millisToDays(Date.now() - cardData[0].date),
-                                              text: 'All'
-                                          } : null
-                                      ]}
+                        <PeriodSelector period={daysToLookBack}
+                                        setPeriod={setDaysToLookBack}
+                                        options={[
+                                            {value: 30, text: '1 Mon'},
+                                            {value: 60, text: '2 Mon'},
+                                            {value: 90, text: '3 Mon'},
+                                            {value: 180, text: '6 Mon'},
+                                            {value: 365, text: '1 Yr'},
+                                            !!cardData ? {
+                                                value: millisToDays(Date.now() - cardData[0].date),
+                                                text: 'All'
+                                            } : null
+                                        ]}
                         />
                     </Grid>
                 </Grid>

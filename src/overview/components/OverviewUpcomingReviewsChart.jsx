@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addDays, addHours, daysToMillis, truncDate, truncMinutes} from '../../util/DateUtils.js';
-import DaysSelector from "../../shared/DaysSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {scaleBand} from 'd3-scale';
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
 import {ArgumentAxis, Chart, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
@@ -255,7 +255,7 @@ function OverviewUpcomingReviewsChart() {
         [ankiReviews, bunProReviews, wanikaniReviews, period, unit.key, ankiInitialReviewCount, bunProInitialReviewCount, wanikaniInitialReviewCount]
     );
 
-    const LabelWithDate = useMemo(() => createUpcomingReviewsChartLabel(unit), [unit]);
+    const LabelWithDate = useMemo(() => createUpcomingReviewsChartLabel(unit), [unit.key]);
 
     const ReviewsToolTip = useMemo(() => (
         function ReviewsToolTip({targetItem}) {
@@ -368,9 +368,9 @@ function OverviewUpcomingReviewsChart() {
                         </Typography>
 
                         {!noAppsConnected && !isLoading ? (
-                            <DaysSelector days={period}
-                                          setDays={setPeriod}
-                                          options={unit === UpcomingReviewUnits.days ? UpcomingReviewPeriods.days : UpcomingReviewPeriods.hours}
+                            <PeriodSelector period={period}
+                                            setPeriod={setPeriod}
+                                            options={unit === UpcomingReviewUnits.days ? UpcomingReviewPeriods.days : UpcomingReviewPeriods.hours}
                             />
                         ) : (<div/>)}
 

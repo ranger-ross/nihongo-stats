@@ -1,17 +1,21 @@
 import * as localForage from "localforage/dist/localforage"
 import InMemoryCache from "../../util/InMemoryCache.js";
 import {AppUrls} from "../../Constants.js";
+import InFlightRequestManager from "../../util/InFlightRequestManager.js";
 
 const memoryCache = new InMemoryCache();
+const inFlightRequests = new InFlightRequestManager();
 
 const wanikaniApiUrl = AppUrls.wanikaniApi;
 const cacheKeys = {
     apiKey: 'wanikani-api-key',
     reviews: 'wanikani-reviews',
+    user: 'wanikani-user',
     subjects: 'wanikani-subjects',
     assignments: 'wanikani-assignments',
     summary: 'wanikani-summary',
     levelProgression: 'wanikani-level-progressions',
+    assignmentsForLevelPrefix: 'wanikani-assignment-for-level-'
 }
 
 const authHeader = (apiKey) => ({'Authorization': `Bearer ${apiKey}`})
@@ -21,16 +25,19 @@ function sleep(ms) {
 }
 
 async function fetchWithAutoRetry(input, init) {
-    let response = await fetch(input, init);
+    return await inFlightRequests
+        .send(input, async function () {
+            let response = await fetch(input, init);
 
-    // Retry logic if rate limit is hit
-    let attempts = 0;
-    while (response.status == 429 && attempts < 10) {
-        await sleep(10_000);
-        response = await fetch(input, init);
-        attempts += 1;
-    }
-    return response;
+            // Retry logic if rate limit is hit
+            let attempts = 0;
+            while (response.status == 429 && attempts < 10) {
+                await sleep(10_000);
+                response = await fetch(input, init);
+                attempts += 1;
+            }
+            return response;
+        })
 }
 
 async function fetchWanikaniApi(path, apiKey, headers) {
@@ -51,18 +58,6 @@ async function fetchWanikaniApi(path, apiKey, headers) {
     return fetchWithAutoRetry(`${wanikaniApiUrl}${path}`, options);
 }
 
-async function getFromMemoryCacheOrFetch(path, _apiKey) {
-    if (memoryCache.includes(path)) {
-        return memoryCache.get(path);
-    }
-    const key = !!_apiKey ? _apiKey : apiKey();
-    const response = await fetchWanikaniApi(path, key);
-    const data = await response.json();
-
-    memoryCache.put(path, data);
-    return data;
-}
-
 function apiKey() {
     return localStorage.getItem(cacheKeys.apiKey)
 }
@@ -75,19 +70,31 @@ function saveApiKey(key) {
     }
 }
 
-async function fetchMultiPageRequest(path, startingId) {
-    const headers = {
-        headers: {...authHeader(apiKey())},
+async function fetchMultiPageRequest(path, startingId, lastUpdatedTs) {
+    let options = {
+        headers: {
+            ...authHeader(apiKey()),
+        },
     };
 
+    if (!!lastUpdatedTs) {
+        options.headers = {
+            ...options.headers,
+            ...ifModifiedSinceHeader(lastUpdatedTs)
+        };
+    }
+
     const startingPageParam = !!startingId ? `?page_after_id=${startingId}` : '';
-    const firstPageResponse = await fetchWithAutoRetry(`${wanikaniApiUrl}${path}${startingPageParam}`, headers);
+    const firstPageResponse = await fetchWithAutoRetry(`${wanikaniApiUrl}${path}${startingPageParam}`, options);
+    if (firstPageResponse.status === 304) {
+        return [];
+    }
     const firstPage = await firstPageResponse.json();
     let data = firstPage.data;
     let nextPage = firstPage.pages['next_url']
 
     while (!!nextPage) {
-        let pageResponse = await fetchWithAutoRetry(nextPage, headers);
+        let pageResponse = await fetchWithAutoRetry(nextPage, options);
         let page = await pageResponse.json();
         data = data.concat(page.data);
         nextPage = page.pages['next_url'];
@@ -134,23 +141,62 @@ async function flushCache() {
     for (const key of Object.keys(cacheKeys)) {
         await localForage.removeItem(cacheKeys[key]);
     }
+
+    for (let i = 0; i < 60; i++) {
+        await localForage.removeItem(cacheKeys.assignmentsForLevelPrefix + (i + 1));
+    }
 }
 
-async function getSummary() {
-    const cachedValue = await localForage.getItem(cacheKeys.summary);
-    if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 5)) {
+function ifModifiedSinceHeader(date) {
+    if (!date)
+        return null;
+    return {
+        'If-Modified-Since': new Date(date).toUTCString()
+    };
+}
+
+async function unwrapResponse(response, fallbackValue) {
+    if (response.status === 304) {
+        return fallbackValue;
+    } else {
+        return await response.json();
+    }
+}
+
+async function fetchWithCache(path, cacheKey, ttl, _apiKey) {
+    const cachedValue = await localForage.getItem(cacheKey);
+    if (!!cachedValue && cachedValue.lastUpdated > Date.now() - ttl) {
         return cachedValue.data;
     }
 
-    const response = await fetchWanikaniApi('/v2/summary', apiKey());
-    const summary = await response.json();
+    const key = !!_apiKey ? _apiKey : apiKey();
+    const response = await fetchWanikaniApi(path, key,
+        ifModifiedSinceHeader(cachedValue?.lastUpdated));
 
-    localForage.setItem(cacheKeys.summary, {
-        data: summary,
+    const data = await unwrapResponse(response, cachedValue?.data);
+
+    localForage.setItem(cacheKey, {
+        data: data,
         lastUpdated: new Date().getTime(),
     });
 
-    return summary;
+    return data;
+}
+
+async function getUser(apiKey) {
+    return await fetchWithCache('/v2/user', cacheKeys.user, 1000, apiKey)
+}
+
+async function getSummary() {
+    return await fetchWithCache('/v2/summary', cacheKeys.summary, 1000 * 60)
+}
+
+async function getAssignmentsForLevel(level) {
+    return await fetchWithCache(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, 1000 * 60)
+}
+
+async function getLevelProgress() {
+    return await fetchWithCache('/v2/level_progressions', cacheKeys.levelProgression, 1000 * 60)
 }
 
 export default {
@@ -160,29 +206,14 @@ export default {
 
 
     login: async (apiKey) => {
-        const user = await getFromMemoryCacheOrFetch('/v2/user', apiKey);
+        const user = await getUser(apiKey);
         saveApiKey(apiKey);
         return user;
     },
-    getUser: async () => getFromMemoryCacheOrFetch('/v2/user'),
+    getUser: getUser,
     getSummary: getSummary,
-    getLevelProgress: async () => {
-        const cachedValue = await localForage.getItem(cacheKeys.levelProgression);
-        if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 60)) {
-            return cachedValue.data;
-        }
-
-        const response = await fetchWanikaniApi('/v2/level_progressions', apiKey());
-        const data = await response.json();
-
-        localForage.setItem(cacheKeys.levelProgression, {
-            data: data,
-            lastUpdated: new Date().getTime(),
-        });
-
-        return data;
-    },
-    getAssignmentsForLevel: (level) => getFromMemoryCacheOrFetch('/v2/assignments?levels=' + level),
+    getLevelProgress: getLevelProgress,
+    getAssignmentsForLevel: getAssignmentsForLevel,
     getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
     getAllAssignments: getAllAssignments,
     getSubjects: async () => {
@@ -219,7 +250,7 @@ export default {
         if (!!cachedValue) {
             reviews = cachedValue.data;
             const lastId = reviews[reviews.length - 1].id;
-            const newData = await fetchMultiPageRequest('/v2/reviews', lastId);
+            const newData = await fetchMultiPageRequest('/v2/reviews', lastId, cachedValue.lastUpdated);
             reviews.push(...newData);
         } else {
             reviews = await fetchMultiPageRequest('/v2/reviews');

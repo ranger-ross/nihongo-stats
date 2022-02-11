@@ -5,6 +5,7 @@ import WanikaniItemTile from "./WanikaniItemTile.jsx";
 import {combineAssignmentAndSubject, isSubjectHidden} from "../service/WanikaniDataUtil.js";
 import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.js";
 import {WanikaniColors} from "../../Constants.js";
+import {useUserPreferences} from "../../hooks/useUserPreferences.jsx";
 
 const defaultState = {
     radicals: [],
@@ -124,22 +125,30 @@ function SubjectTile({subject}) {
 }
 
 function WanikaniLevelItemsChart({level}) {
+    const {wanikaniPreferences} = useUserPreferences();
     const isFirstLoad = useRef(true);
     const [isPreviousLevel, setIsPreviousLevel] = useState(true);
     const [data, setData] = useState(defaultState);
 
     useEffect(() => {
         let isSubscribed = true;
+        const cleanUp = () => isSubscribed = false;
 
         let _isFirstLoad = isFirstLoad.current
         isFirstLoad.current = false;
+
+        if (_isFirstLoad && !wanikaniPreferences.showPreviousLevelByDefault) {
+            setIsPreviousLevel(false);
+            return cleanUp;
+        }
 
         fetchData(level > 1 && isPreviousLevel ? level - 1 : level)
             .then(d => {
                 if (!isSubscribed)
                     return;
 
-                if (_isFirstLoad &&
+                if (wanikaniPreferences.showPreviousLevelByDefault &&
+                    _isFirstLoad &&
                     d.radicalsStarted === d.radicals.length &&
                     d.kanjiStarted === d.kanji.length &&
                     d.vocabularyStarted === d.vocabulary.length) {
@@ -151,7 +160,7 @@ function WanikaniLevelItemsChart({level}) {
             })
             .catch(console.error);
 
-        return () => isSubscribed = false;
+        return cleanUp;
     }, [level, isPreviousLevel]);
 
     return (

@@ -1,23 +1,50 @@
 import {
-    Button,
+    Button, Checkbox,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     Tab,
-    Tabs
+    Tabs, Tooltip, Typography
 } from "@mui/material";
 import React, {useState} from "react";
+import {useUserPreferences} from "../../hooks/useUserPreferences.jsx";
+import {HelpOutline} from "@mui/icons-material";
+
+function WanikaniPreferences() {
+    const {wanikaniPreferences: preferences, updateWanikaniPreferences} = useUserPreferences();
+    return (
+        <>
+            <Typography variant={'h5'}>
+                Dashboard
+            </Typography>
+
+
+            <div style={{display: 'flex', alignItems: 'center'}}>
+                <Checkbox checked={preferences.showPreviousLevelByDefault}
+                          size="small"
+                          onClick={() => updateWanikaniPreferences({showPreviousLevelByDefault: !preferences.showPreviousLevelByDefault})}
+                />
+                Show Previous Level by Default
+                <Tooltip
+                    title={(
+                        <>
+                            If you have not completed all Radicals, Kanji, and Vocabulary on the previous level,
+                            automatically select the 'Show Previous Level' checkbox.
+                        </>
+                    )}
+                >
+                    <HelpOutline style={{paddingLeft: '5px'}} fontSize={'small'}/>
+                </Tooltip>
+            </div>
+
+
+        </>
+    );
+}
 
 function UserPreferencesDialog({isOpen, onClose}) {
-
     const [tab, setTab] = useState(0);
-
-    const onSave = () => {
-        console.warn('TODO: Implement saving');
-        onClose();
-    };
-
     return (
         <Dialog onClose={onClose} open={isOpen} fullWidth={true} maxWidth={'md'}>
             <DialogTitle>Preferences</DialogTitle>
@@ -50,17 +77,14 @@ function UserPreferencesDialog({isOpen, onClose}) {
 
                     {/* WANIKANI */}
                     {tab === 2 ? (
-                        <>
-                            No Wanikani Preferences are available yet
-                        </>
+                        <WanikaniPreferences/>
                     ) : null}
 
                 </div>
 
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color={'warning'}>Cancel</Button>
-                <Button onClick={onSave}>Save</Button>
+                <Button onClick={onClose} color={'primary'}>Close</Button>
             </DialogActions>
         </Dialog>
     );

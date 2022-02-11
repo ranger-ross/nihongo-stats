@@ -14,8 +14,19 @@ function InFlightRequestManager() {
         }
     }
 
+    async function extractResponseJson(response) {
+        if (response.extractedBody) {
+            return response.extractedBody;
+        }
+
+        const body = await response.json();
+        response.extractedBody = body;
+        return body;
+    }
+
     return {
-        send
+        send,
+        extractResponseJson
     };
 }
 

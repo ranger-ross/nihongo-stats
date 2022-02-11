@@ -4,7 +4,7 @@ import {AppUrls} from "../../Constants.js";
 import InFlightRequestManager from "../../util/InFlightRequestManager.js";
 
 const memoryCache = new InMemoryCache();
-const inFlightRequests = new InFlightRequestManager();
+const inFlightRequestManager = new InFlightRequestManager();
 
 const wanikaniApiUrl = AppUrls.wanikaniApi;
 const cacheKeys = {
@@ -25,7 +25,7 @@ function sleep(ms) {
 }
 
 async function fetchWithAutoRetry(input, init) {
-    return await inFlightRequests
+    return await inFlightRequestManager
         .send(input, async function () {
             let response = await fetch(input, init);
 
@@ -89,13 +89,13 @@ async function fetchMultiPageRequest(path, startingId, lastUpdatedTs) {
     if (firstPageResponse.status === 304) {
         return [];
     }
-    const firstPage = await firstPageResponse.json();
+    const firstPage = await inFlightRequestManager.extractResponseJson(firstPageResponse);
     let data = firstPage.data;
     let nextPage = firstPage.pages['next_url']
 
     while (!!nextPage) {
         let pageResponse = await fetchWithAutoRetry(nextPage, options);
-        let page = await pageResponse.json();
+        let page = await inFlightRequestManager.extractResponseJson(pageResponse);
         data = data.concat(page.data);
         nextPage = page.pages['next_url'];
     }
@@ -158,16 +158,15 @@ function ifModifiedSinceHeader(date) {
 async function unwrapResponse(response, fallbackValue) {
     if (response.status === 304) {
         return fallbackValue;
-    } else {
-        return await response.json();
     }
+    return inFlightRequestManager.extractResponseJson(response);
 }
 
 async function fetchWithCache(path, cacheKey, ttl, _apiKey) {
     const cachedValue = await localForage.getItem(cacheKey);
-    if (!!cachedValue && cachedValue.lastUpdated > Date.now() - ttl) {
-        return cachedValue.data;
-    }
+    // if (!!cachedValue && cachedValue.lastUpdated > Date.now() - ttl) {
+    //     return cachedValue.data;
+    // }
 
     const key = !!_apiKey ? _apiKey : apiKey();
     const response = await fetchWanikaniApi(path, key,

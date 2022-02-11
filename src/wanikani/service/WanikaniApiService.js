@@ -1,8 +1,10 @@
 import * as localForage from "localforage/dist/localforage"
 import InMemoryCache from "../../util/InMemoryCache.js";
 import {AppUrls} from "../../Constants.js";
+import InFlightRequestManager from "../../util/InFlightRequestManager.js";
 
 const memoryCache = new InMemoryCache();
+const inFlightRequests = new InFlightRequestManager();
 
 const wanikaniApiUrl = AppUrls.wanikaniApi;
 const cacheKeys = {
@@ -13,7 +15,7 @@ const cacheKeys = {
     assignments: 'wanikani-assignments',
     summary: 'wanikani-summary',
     levelProgression: 'wanikani-level-progressions',
-    assignmentsForLevelPrefix: 'wanikani-assignment-for-level'
+    assignmentsForLevelPrefix: 'wanikani-assignment-for-level-'
 }
 
 const authHeader = (apiKey) => ({'Authorization': `Bearer ${apiKey}`})
@@ -22,30 +24,20 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function xrFetch(input, init) {
-    var requestHeaders = new Headers();
-    requestHeaders.append('Authorization', init.headers['Authorization']);
-    requestHeaders.append('Wanikani-Revision', '20170710');
-    // requestHeaders.append('If-None-Match', '<etag_here>');
-    // requestHeaders.append('If-Modified-Since', formatIfModifiedSinceDate(new Date()));
-    var requestInit = {method: 'GET', headers: requestHeaders};
-    var endpoint = new Request(input, requestInit);
-
-    return await fetch(endpoint)
-}
-
 async function fetchWithAutoRetry(input, init) {
-    let response = await fetch(input, init);
-    // let response = await xrFetch(input, init);
+    return await inFlightRequests
+        .send(input, async function () {
+            let response = await fetch(input, init);
 
-    // Retry logic if rate limit is hit
-    let attempts = 0;
-    while (response.status == 429 && attempts < 10) {
-        await sleep(10_000);
-        response = await fetch(input, init);
-        attempts += 1;
-    }
-    return response;
+            // Retry logic if rate limit is hit
+            let attempts = 0;
+            while (response.status == 429 && attempts < 10) {
+                await sleep(10_000);
+                response = await fetch(input, init);
+                attempts += 1;
+            }
+            return response;
+        })
 }
 
 async function fetchWanikaniApi(path, apiKey, headers) {
@@ -66,18 +58,6 @@ async function fetchWanikaniApi(path, apiKey, headers) {
     return fetchWithAutoRetry(`${wanikaniApiUrl}${path}`, options);
 }
 
-async function getFromMemoryCacheOrFetch(path, _apiKey) {
-    if (memoryCache.includes(path)) {
-        return memoryCache.get(path);
-    }
-    const key = !!_apiKey ? _apiKey : apiKey();
-    const response = await fetchWanikaniApi(path, key);
-    const data = await response.json();
-
-    memoryCache.put(path, data);
-    return data;
-}
-
 function apiKey() {
     return localStorage.getItem(cacheKeys.apiKey)
 }
@@ -90,19 +70,31 @@ function saveApiKey(key) {
     }
 }
 
-async function fetchMultiPageRequest(path, startingId) {
-    const headers = {
-        headers: {...authHeader(apiKey())},
+async function fetchMultiPageRequest(path, startingId, lastUpdatedTs) {
+    let options = {
+        headers: {
+            ...authHeader(apiKey()),
+        },
     };
 
+    if (!!lastUpdatedTs) {
+        options.headers = {
+            ...options.headers,
+            ...ifModifiedSinceHeader(lastUpdatedTs)
+        };
+    }
+
     const startingPageParam = !!startingId ? `?page_after_id=${startingId}` : '';
-    const firstPageResponse = await fetchWithAutoRetry(`${wanikaniApiUrl}${path}${startingPageParam}`, headers);
+    const firstPageResponse = await fetchWithAutoRetry(`${wanikaniApiUrl}${path}${startingPageParam}`, options);
+    if (firstPageResponse.status === 304) {
+        return [];
+    }
     const firstPage = await firstPageResponse.json();
     let data = firstPage.data;
     let nextPage = firstPage.pages['next_url']
 
     while (!!nextPage) {
-        let pageResponse = await fetchWithAutoRetry(nextPage, headers);
+        let pageResponse = await fetchWithAutoRetry(nextPage, options);
         let page = await pageResponse.json();
         data = data.concat(page.data);
         nextPage = page.pages['next_url'];
@@ -148,7 +140,10 @@ async function getAllAssignments() {
 async function flushCache() {
     for (const key of Object.keys(cacheKeys)) {
         await localForage.removeItem(cacheKeys[key]);
-        // todo: flush levels
+    }
+
+    for (let i = 0; i < 60; i++) {
+        await localForage.removeItem(cacheKeys.assignmentsForLevelPrefix + (i + 1));
     }
 }
 
@@ -255,7 +250,7 @@ export default {
         if (!!cachedValue) {
             reviews = cachedValue.data;
             const lastId = reviews[reviews.length - 1].id;
-            const newData = await fetchMultiPageRequest('/v2/reviews', lastId);
+            const newData = await fetchMultiPageRequest('/v2/reviews', lastId, cachedValue.lastUpdated);
             reviews.push(...newData);
         } else {
             reviews = await fetchMultiPageRequest('/v2/reviews');

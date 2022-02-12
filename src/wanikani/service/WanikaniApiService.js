@@ -159,7 +159,7 @@ async function unwrapResponse(response, fallbackValue) {
     if (response.status === 304) {
         return fallbackValue;
     }
-    return inFlightRequestManager.extractResponseJson(response);
+    return await inFlightRequestManager.extractResponseJson(response);
 }
 
 async function fetchWithCache(path, cacheKey, ttl, _apiKey) {

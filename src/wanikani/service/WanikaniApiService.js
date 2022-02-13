@@ -150,9 +150,9 @@ async function unwrapResponse(response, fallbackValue) {
 
 async function fetchWithCache(path, cacheKey, ttl, _apiKey) {
     const cachedValue = await localForage.getItem(cacheKey);
-    // if (!!cachedValue && cachedValue.lastUpdated > Date.now() - ttl) {
-    //     return cachedValue.data;
-    // }
+    if (!!cachedValue && cachedValue.lastUpdated > Date.now() - ttl) {
+        return cachedValue.data;
+    }
 
     const key = !!_apiKey ? _apiKey : apiKey();
     const response = await fetchWanikaniApi(path, key,

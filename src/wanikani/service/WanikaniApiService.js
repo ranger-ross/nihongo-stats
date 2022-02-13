@@ -1,10 +1,8 @@
 import * as localForage from "localforage/dist/localforage"
 import InMemoryCache from "../../util/InMemoryCache.js";
 import {AppUrls} from "../../Constants.js";
-import InFlightRequestManager from "../../util/InFlightRequestManager.js";
 
 const memoryCache = new InMemoryCache();
-const inFlightRequestManager = new InFlightRequestManager();
 
 const wanikaniApiUrl = AppUrls.wanikaniApi;
 const cacheKeys = {
@@ -25,19 +23,16 @@ function sleep(ms) {
 }
 
 async function fetchWithAutoRetry(input, init) {
-    return await inFlightRequestManager
-        .send(input, async function () {
-            let response = await fetch(input, init);
+    let response = await fetch(input, init);
 
-            // Retry logic if rate limit is hit
-            let attempts = 0;
-            while (response.status == 429 && attempts < 10) {
-                await sleep(10_000);
-                response = await fetch(input, init);
-                attempts += 1;
-            }
-            return response;
-        })
+    // Retry logic if rate limit is hit
+    let attempts = 0;
+    while (response.status == 429 && attempts < 10) {
+        await sleep(10_000);
+        response = await fetch(input, init);
+        attempts += 1;
+    }
+    return response;
 }
 
 async function fetchWanikaniApi(path, apiKey, headers) {
@@ -70,32 +65,23 @@ function saveApiKey(key) {
     }
 }
 
-async function fetchMultiPageRequest(path, startingId, lastUpdatedTs) {
+async function fetchMultiPageRequest(path, startingId) {
     let options = {
         headers: {
             ...authHeader(apiKey()),
         },
     };
 
-    if (!!lastUpdatedTs) {
-        options.headers = {
-            ...options.headers,
-            ...ifModifiedSinceHeader(lastUpdatedTs)
-        };
-    }
-
     const startingPageParam = !!startingId ? `?page_after_id=${startingId}` : '';
     const firstPageResponse = await fetchWithAutoRetry(`${wanikaniApiUrl}${path}${startingPageParam}`, options);
-    if (firstPageResponse.status === 304) {
-        return [];
-    }
-    const firstPage = await inFlightRequestManager.extractResponseJson(firstPageResponse);
+
+    const firstPage = await firstPageResponse.json();
     let data = firstPage.data;
     let nextPage = firstPage.pages['next_url']
 
     while (!!nextPage) {
         let pageResponse = await fetchWithAutoRetry(nextPage, options);
-        let page = await inFlightRequestManager.extractResponseJson(pageResponse);
+        let page = await pageResponse.json();
         data = data.concat(page.data);
         nextPage = page.pages['next_url'];
     }
@@ -159,14 +145,14 @@ async function unwrapResponse(response, fallbackValue) {
     if (response.status === 304) {
         return fallbackValue;
     }
-    return await inFlightRequestManager.extractResponseJson(response);
+    return await response.json();
 }
 
 async function fetchWithCache(path, cacheKey, ttl, _apiKey) {
     const cachedValue = await localForage.getItem(cacheKey);
-    // if (!!cachedValue && cachedValue.lastUpdated > Date.now() - ttl) {
-    //     return cachedValue.data;
-    // }
+    if (!!cachedValue && cachedValue.lastUpdated > Date.now() - ttl) {
+        return cachedValue.data;
+    }
 
     const key = !!_apiKey ? _apiKey : apiKey();
     const response = await fetchWanikaniApi(path, key,
@@ -249,7 +235,7 @@ export default {
         if (!!cachedValue) {
             reviews = cachedValue.data;
             const lastId = reviews[reviews.length - 1].id;
-            const newData = await fetchMultiPageRequest('/v2/reviews', lastId, cachedValue.lastUpdated);
+            const newData = await fetchMultiPageRequest('/v2/reviews', lastId);
             reviews.push(...newData);
         } else {
             reviews = await fetchMultiPageRequest('/v2/reviews');

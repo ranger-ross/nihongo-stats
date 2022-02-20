@@ -1,6 +1,6 @@
 import useWindowDimensions from "./useWindowDimensions.jsx";
 
-const mobileMaxWidth = 768;
+const mobileMaxWidth = 600;
 
 export function useDeviceInfo() {
     const {width} = useWindowDimensions();

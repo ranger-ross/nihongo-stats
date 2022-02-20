@@ -6,6 +6,17 @@ import {combineAssignmentAndSubject, isSubjectHidden} from "../service/WanikaniD
 import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.js";
 import {WanikaniColors} from "../../Constants.js";
 import {useUserPreferences} from "../../hooks/useUserPreferences.jsx";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
+
+const styles = {
+    showPreviousLevelMobile: {
+        flexGrow: 1,
+        display: 'flex',
+        justifyContent: 'flex-end',
+        marginTop: '-25px',
+        marginRight: '-17px',
+    }
+};
 
 const defaultState = {
     radicals: [],
@@ -65,12 +76,12 @@ async function fetchData(level) {
     return data;
 }
 
-function PreviousLevelSelector({selected, setSelected}) {
+function PreviousLevelSelector({selected, setSelected, isMobile}) {
     return (
         <FormGroup>
             <FormControlLabel
                 label={
-                    <div style={{color: 'lightgray'}}>Show Previous Level</div>
+                    <div style={{color: 'lightgray', fontSize: isMobile ? '12px' : '15px'}}>Show Previous Level</div>
                 }
                 control={
                     <Switch checked={selected}
@@ -108,7 +119,7 @@ function getTileColor(subject) {
     return WanikaniColors.lockedGray;
 }
 
-function SubjectTile({subject}) {
+function SubjectTile({subject, isMobile}) {
     return (
         <WanikaniItemTile
             text={subject.characters || '?'}
@@ -119,6 +130,7 @@ function SubjectTile({subject}) {
             type={subject.subjectType}
             level={subject.level}
             readings={subject.readings}
+            size={isMobile ? 6 : 10}
             nextReviewDate={!!subject['available_at'] ? new Date(subject['available_at']) : null}
         />
     );
@@ -129,6 +141,7 @@ function WanikaniLevelItemsChart({level}) {
     const isFirstLoad = useRef(true);
     const [isPreviousLevel, setIsPreviousLevel] = useState(true);
     const [data, setData] = useState(defaultState);
+    const {isMobile} = useDeviceInfo();
 
     useEffect(() => {
         let isSubscribed = true;
@@ -169,12 +182,12 @@ function WanikaniLevelItemsChart({level}) {
                 <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     <Typography variant={'h5'}
                                 color={'textPrimary'}
-                                style={{paddingBottom: '10px'}}
+                        // style={{paddingBottom: '10px'}}
                     >
                         Radicals <RatioLabel started={data.radicalsStarted} total={data.radicals.length}/>
                     </Typography>
 
-                    <div style={{flexGrow: 1, textAlign: 'center'}}>
+                    <div style={{flexGrow: 1, textAlign: isMobile ? 'right' : 'center'}}>
                         <Typography variant={'body1'}
                                     style={{color: 'lightgray'}}
                         >
@@ -182,15 +195,21 @@ function WanikaniLevelItemsChart({level}) {
                         </Typography>
                     </div>
 
-                    <PreviousLevelSelector
-                        selected={isPreviousLevel}
-                        setSelected={setIsPreviousLevel}
-                    />
+                    <div style={isMobile ? styles.showPreviousLevelMobile : null}>
+                        <PreviousLevelSelector
+                            selected={isPreviousLevel}
+                            setSelected={setIsPreviousLevel}
+                            isMobile={isMobile}
+                        />
+                    </div>
                 </div>
 
                 <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     {data.radicals.map(subject => (
-                        <SubjectTile key={subject.subjectId + '-radicals'} subject={subject}/>
+                        <SubjectTile key={subject.subjectId + '-radicals'}
+                                     subject={subject}
+                                     isMobile={isMobile}
+                        />
                     ))}
                 </div>
 
@@ -202,7 +221,10 @@ function WanikaniLevelItemsChart({level}) {
                 </Typography>
                 <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     {data.kanji.map(subject => (
-                        <SubjectTile key={subject.subjectId + '-kanji'} subject={subject}/>
+                        <SubjectTile key={subject.subjectId + '-kanji'}
+                                     subject={subject}
+                                     isMobile={isMobile}
+                        />
                     ))}
 
                 </div>
@@ -215,7 +237,10 @@ function WanikaniLevelItemsChart({level}) {
                 </Typography>
                 <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                     {data.vocabulary.map(subject => (
-                        <SubjectTile key={subject.subjectId + '-vocab'} subject={subject}/>
+                        <SubjectTile key={subject.subjectId + '-vocab'}
+                                     subject={subject}
+                                     isMobile={isMobile}
+                        />
                     ))}
                 </div>
 

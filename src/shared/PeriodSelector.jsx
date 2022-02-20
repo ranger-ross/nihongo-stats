@@ -5,6 +5,7 @@ function PeriodSelector({options, period, setPeriod}) {
         <ToggleButtonGroup
             value={period}
             size={'small'}
+            style={{height: '40px'}}
             exclusive
             onChange={e => setPeriod(parseInt(e.target.value))}
         >

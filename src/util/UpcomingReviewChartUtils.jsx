@@ -1,7 +1,8 @@
 import {addDays, addHours, areDatesSameDay, areDatesSameDayAndHour, truncDate, truncMinutes} from "./DateUtils.js";
 import {MenuItem, Select} from "@mui/material";
 import {ArgumentAxis, Chart} from "@devexpress/dx-react-chart-material-ui";
-import {BarSeries} from "@devexpress/dx-react-chart";
+import {BarSeries, ScatterSeries} from "@devexpress/dx-react-chart";
+import {useDeviceInfo} from "../hooks/useDeviceInfo.jsx";
 
 export const UpcomingReviewUnits = {
     hours: {
@@ -46,7 +47,7 @@ export function addTimeToDate(date, unit, amount) {
 export function UnitSelector({options, unit, onChange}) {
     return (
         <Select
-            style={{minWidth: '130px'}}
+            style={{minWidth: '100px', height: '40px'}}
             size={'small'}
             value={unit.key}
             onChange={e => onChange(options.find(o => o.key === e.target.value))}
@@ -62,36 +63,67 @@ export function UnitSelector({options, unit, onChange}) {
     );
 }
 
-function getHoursLabelText(date, isToolTipLabel) {
-    if (!isToolTipLabel && ![0, 6, 12, 18].includes(date.getHours())) {
-        return '';
+function getHoursPrimaryLabelText(date, isToolTipLabel, isMobile) {
+    const hoursToShow = isMobile ? [0, 12] : [0, 6, 12, 18]
+
+    if (!isToolTipLabel && !hoursToShow.includes(date.getHours())) {
+        return null;
     }
 
     return date.toLocaleTimeString("en-US", {hour: 'numeric'});
 }
 
-export function formatTimeUnitLabelText(unit, date, isToolTipLabel) {
+function getHoursSecondaryLabelText(date, isToolTipLabel) {
+    if (!isToolTipLabel && ![0].includes(date.getHours())) {
+        return null;
+    }
+
+    return date.toLocaleDateString("en-US", {month: 'numeric', day: '2-digit'});
+}
+
+export function formatTimeUnitLabelText(unit, date, isToolTipLabel, isMobile) {
     let _date = new Date(date)
     if (unit.key === UpcomingReviewUnits.days.key) {
-        return `${_date.getMonth() + 1}/${_date.getDate()}`;
+        return {primary: `${_date.getMonth() + 1}/${_date.getDate()}`, secondary: null};
     } else {
-        return getHoursLabelText(_date, isToolTipLabel);
+        return {
+            primary: getHoursPrimaryLabelText(_date, isToolTipLabel, isMobile),
+            secondary: getHoursSecondaryLabelText(_date)
+        };
     }
 }
 
-export function createUpcomingReviewsChartLabel(unit) {
+export function createUpcomingReviewsChartLabel(unit, isMobile) {
     return function LabelWithDate(props) {
         const {text} = props;
-        let label = '';
+        let primaryLabel = null;
+        let secondaryLabel = null;
         if (text) {
             const rawTimestamp = parseInt(text);
-            label = !!rawTimestamp ? formatTimeUnitLabelText(unit, rawTimestamp, false) : '';
+            if (!!rawTimestamp) {
+                const formatted = formatTimeUnitLabelText(unit, rawTimestamp, false, isMobile);
+                primaryLabel = formatted.primary;
+                secondaryLabel = formatted.secondary;
+            }
         }
         return (
-            <ArgumentAxis.Label
-                {...props}
-                text={label}
-            />
+            <>
+                {!!primaryLabel ? (
+                    <ArgumentAxis.Label
+                        {...props}
+                        text={primaryLabel}
+                    />
+                ) : null}
+
+                {!!secondaryLabel ? (
+                    <ArgumentAxis.Label
+                        {...props}
+                        style={{fontWeight: 'bold'}}
+                        text={secondaryLabel}
+                        dy={'33'}
+                    />
+                ) : null}
+            </>
         );
     }
 }
@@ -121,3 +153,12 @@ export function createUpcomingReviewsChartBarLabel(isLabelVisible) {
         );
     }
 }
+
+export function UpcomingReviewsScatterPoint(props) {
+    const {isMobile} = useDeviceInfo();
+    const size = isMobile ? 4 : 6;
+    return (
+        <ScatterSeries.Point {...props} point={{size}}/>
+    );
+}
+

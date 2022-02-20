@@ -24,14 +24,29 @@ import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
 import {
     addTimeToDate, createUpcomingReviewsChartBarLabel, createUpcomingReviewsChartLabel, formatTimeUnitLabelText,
     UnitSelector,
-    UpcomingReviewPeriods,
+    UpcomingReviewPeriods, UpcomingReviewsScatterPoint,
     UpcomingReviewUnits
 } from "../../util/UpcomingReviewChartUtils.jsx";
 import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
 import {filterDeadGhostReviews} from "../../bunpro/service/BunProDataUtil.js";
 import FilterableLegend from "../../shared/FilterableLegend.jsx";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
 
 const maxDaysIntoFuture = 31;
+
+const styles = {
+    container: {
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
+    },
+    headerContainer: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: '15px',
+        alignItems: 'center'
+    }
+};
 
 function DataPoint(date, unit, reviews, previousDataPoint) {
     let dp = {
@@ -238,6 +253,7 @@ function OverviewUpcomingReviewsChart() {
     const [toolTipTargetItem, setToolTipTargetItem] = useState();
     const [period, setPeriod] = useState(UpcomingReviewUnits.hours.default);
     const [unit, setUnit] = useState(UpcomingReviewUnits.hours);
+    const {isMobile} = useDeviceInfo();
 
     const isAnkiConnected = useAnkiConnection();
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
@@ -255,7 +271,7 @@ function OverviewUpcomingReviewsChart() {
         [ankiReviews, bunProReviews, wanikaniReviews, period, unit.key, ankiInitialReviewCount, bunProInitialReviewCount, wanikaniInitialReviewCount]
     );
 
-    const LabelWithDate = useMemo(() => createUpcomingReviewsChartLabel(unit), [unit.key]);
+    const LabelWithDate = useMemo(() => createUpcomingReviewsChartLabel(unit, isMobile), [unit.key, isMobile]);
 
     const ReviewsToolTip = useMemo(() => (
         function ReviewsToolTip({targetItem}) {
@@ -267,7 +283,7 @@ function OverviewUpcomingReviewsChart() {
                 <>
                     <ToolTipLabel
                         title={unit.key == UpcomingReviewUnits.hours.key ? 'Time' : 'Date'}
-                        value={formatTimeUnitLabelText(unit, dp.date, true)}
+                        value={formatTimeUnitLabelText(unit, dp.date, true).primary}
                     />
                     {isTotal ? (
                         <ToolTipLabel title="Total" value={dp.total}/>
@@ -349,8 +365,8 @@ function OverviewUpcomingReviewsChart() {
     return (
         <Card style={{height: '100%'}}>
             <CardContent style={{height: '100%'}}>
-                <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '15px'}}>
+                <div style={styles.container}>
+                    <div style={styles.headerContainer}>
 
                         <UnitSelector
                             unit={unit}
@@ -363,7 +379,7 @@ function OverviewUpcomingReviewsChart() {
                                 UpcomingReviewUnits.days,
                             ]}
                         />
-                        <Typography variant={'h5'}>
+                        <Typography variant={'h6'} align={'center'}>
                             Upcoming Reviews
                         </Typography>
 
@@ -385,7 +401,7 @@ function OverviewUpcomingReviewsChart() {
                         </div>
                     ) : (
                         <div style={{flexGrow: '1'}}>
-                            <Chart data={chartData}>
+                            <Chart data={chartData} {...(isMobile ? {height: 400} : {})}>
                                 <ValueScale name="total"
                                             modifyDomain={() => [0, chartData.length > 0 ? chartData[chartData.length - 1].total : 1]}/>
 
@@ -443,6 +459,7 @@ function OverviewUpcomingReviewsChart() {
                                     argumentField="date"
                                     color={'#a45bff'}
                                     scaleName="total"
+                                    pointComponent={UpcomingReviewsScatterPoint}
                                 />
 
                                 <Stack
@@ -453,6 +470,7 @@ function OverviewUpcomingReviewsChart() {
                                     filterItems={[
                                         'total-points'
                                     ]}
+                                    position={isMobile ? 'bottom' : 'right'}
                                 />
                                 <EventTracker/>
                                 <Tooltip targetItem={toolTipTargetItem}

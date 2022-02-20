@@ -1,5 +1,6 @@
 import OverviewWelcomeTile from "./components/OverviewWelcomeTile.jsx";
 import OverviewUpcomingReviewsChart from "./components/OverviewUpcomingReviewsChart.jsx";
+import {useDeviceInfo} from "../hooks/useDeviceInfo.jsx";
 
 const styles = {
     container: {
@@ -19,7 +20,6 @@ const styles = {
         gap: '10px',
         flexDirection: 'column',
         flexGrow: '1',
-        minWidth: '500px'
     },
     rightPanel: {
         flexGrow: '25'
@@ -27,12 +27,14 @@ const styles = {
 };
 
 function OverviewDashboard() {
+    const {isMobile} = useDeviceInfo();
+
     return (
 
         <div style={styles.container}>
             <div style={styles.innerContainer}>
 
-                <div style={styles.leftPanel}>
+                <div style={{...styles.leftPanel, minWidth: !isMobile ? '500px' : null}}>
                     <OverviewWelcomeTile/>
                 </div>
 

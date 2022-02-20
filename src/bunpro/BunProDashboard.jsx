@@ -5,6 +5,7 @@ import BunProPreloadedData from "./components/BunProPreloadedData.jsx";
 import {BunProJLPTTile} from "./components/BunProJLPTTile";
 import BunProUpcomingReviewsChart from "./components/BunProUpcomingReviewsChart.jsx";
 import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
+import {useDeviceInfo} from "../hooks/useDeviceInfo.jsx";
 
 const styles = {
     container: {
@@ -24,7 +25,6 @@ const styles = {
         gap: '10px',
         flexDirection: 'column',
         flexGrow: '1',
-        minWidth: '500px'
     },
     rightPanel: {
         flexGrow: '25'
@@ -33,6 +33,8 @@ const styles = {
 
 function BunProDashboard() {
     const {apiKey} = useBunProApiKey();
+    const {isMobile} = useDeviceInfo();
+
     return (
         <RequireOrRedirect resource={apiKey}
                            redirectPath={RoutePaths.bunproLogin.path}
@@ -43,7 +45,7 @@ function BunProDashboard() {
 
                         <div style={styles.innerContainer}>
 
-                            <div style={styles.leftPanel}>
+                            <div style={{...styles.leftPanel, minWidth: !isMobile ? '500px' : null}}>
                                 <BunProWelcomeTile/>
 
                                 <BunProJLPTTile/>

@@ -15,11 +15,30 @@ import {WanikaniColors} from '../../Constants.js';
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {scaleBand} from 'd3-scale';
 import {
-    addTimeToDate, createUpcomingReviewsChartBarLabel, createUpcomingReviewsChartLabel, formatTimeUnitLabelText,
+    addTimeToDate,
+    createUpcomingReviewsChartBarLabel,
+    createUpcomingReviewsChartLabel,
+    formatTimeUnitLabelText,
     UnitSelector,
     UpcomingReviewPeriods,
+    UpcomingReviewsScatterPoint,
     UpcomingReviewUnits
 } from "../../util/UpcomingReviewChartUtils.jsx";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
+
+const styles = {
+    container: {
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
+    },
+    headerContainer: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: '15px',
+        alignItems: 'center'
+    }
+};
 
 function getChartStartTime() { // Start chart at the beginning of the next hour
     return addHours(truncMinutes(new Date()), 1);
@@ -70,6 +89,7 @@ function WanikaniUpcomingReviewsChart() {
     const [targetItem, setTargetItem] = useState();
     const [unit, setUnit] = useState(UpcomingReviewUnits.hours);
     const [period, setPeriod] = useState(48);
+    const {isMobile} = useDeviceInfo();
 
     useEffect(() => {
         let isSubscribed = true;
@@ -106,7 +126,7 @@ function WanikaniUpcomingReviewsChart() {
                 <div>
                     <div style={rowStyle}>
                         <div>{unit.key === UpcomingReviewUnits.hours.key ? 'Time' : 'Date'}:</div>
-                        <div>{formatTimeUnitLabelText(unit, time, true)}</div>
+                        <div>{formatTimeUnitLabelText(unit, time, true).primary}</div>
                     </div>
                     {targetItem.series.includes('total') ? (
                         <div style={rowStyle}>
@@ -134,7 +154,7 @@ function WanikaniUpcomingReviewsChart() {
         }
     ), [chartData]);
 
-    const LabelWithDate = useMemo(() => createUpcomingReviewsChartLabel(unit), [unit.key]);
+    const LabelWithDate = useMemo(() => createUpcomingReviewsChartLabel(unit, isMobile), [unit.key, isMobile]);
 
     const BarWithLabel = useMemo(() => {
         return createUpcomingReviewsChartBarLabel((seriesIndex, index) => {
@@ -153,8 +173,8 @@ function WanikaniUpcomingReviewsChart() {
     return (
         <Card style={{height: '100%'}}>
             <CardContent style={{height: '100%'}}>
-                <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '15px'}}>
+                <div style={styles.container}>
+                    <div style={styles.headerContainer}>
 
                         <UnitSelector
                             unit={unit}
@@ -168,7 +188,7 @@ function WanikaniUpcomingReviewsChart() {
                             ]}
                         />
 
-                        <Typography variant={'h5'}>
+                        <Typography variant={'h6'} align={'center'}>
                             Upcoming Reviews
                         </Typography>
 
@@ -180,7 +200,7 @@ function WanikaniUpcomingReviewsChart() {
                     </div>
 
                     <div style={{flexGrow: '1'}}>
-                        <Chart data={chartData}>
+                        <Chart data={chartData} {...(isMobile ? {height: 200} : {})}>
 
                             <ValueScale name="total"
                                         modifyDomain={() => [0, chartData.length > 0 ? chartData[chartData.length - 1].total : 1]}/>
@@ -235,6 +255,7 @@ function WanikaniUpcomingReviewsChart() {
                                 argumentField="time"
                                 color={'#e0b13e'}
                                 scaleName="total"
+                                pointComponent={UpcomingReviewsScatterPoint}
                             />
 
                             <Stack

@@ -30,6 +30,7 @@ import {
 import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
 import {filterDeadGhostReviews} from "../../bunpro/service/BunProDataUtil.js";
 import FilterableLegend from "../../shared/FilterableLegend.jsx";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
 
 const maxDaysIntoFuture = 31;
 
@@ -238,6 +239,7 @@ function OverviewUpcomingReviewsChart() {
     const [toolTipTargetItem, setToolTipTargetItem] = useState();
     const [period, setPeriod] = useState(UpcomingReviewUnits.hours.default);
     const [unit, setUnit] = useState(UpcomingReviewUnits.hours);
+    const {isMobile} = useDeviceInfo();
 
     const isAnkiConnected = useAnkiConnection();
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
@@ -255,7 +257,7 @@ function OverviewUpcomingReviewsChart() {
         [ankiReviews, bunProReviews, wanikaniReviews, period, unit.key, ankiInitialReviewCount, bunProInitialReviewCount, wanikaniInitialReviewCount]
     );
 
-    const LabelWithDate = useMemo(() => createUpcomingReviewsChartLabel(unit), [unit.key]);
+    const LabelWithDate = useMemo(() => createUpcomingReviewsChartLabel(unit, isMobile), [unit.key, isMobile]);
 
     const ReviewsToolTip = useMemo(() => (
         function ReviewsToolTip({targetItem}) {
@@ -267,7 +269,7 @@ function OverviewUpcomingReviewsChart() {
                 <>
                     <ToolTipLabel
                         title={unit.key == UpcomingReviewUnits.hours.key ? 'Time' : 'Date'}
-                        value={formatTimeUnitLabelText(unit, dp.date, true)}
+                        value={formatTimeUnitLabelText(unit, dp.date, true).primary}
                     />
                     {isTotal ? (
                         <ToolTipLabel title="Total" value={dp.total}/>

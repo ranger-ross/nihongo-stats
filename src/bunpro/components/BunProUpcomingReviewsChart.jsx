@@ -11,12 +11,26 @@ import FilterableLegend from "../../shared/FilterableLegend.jsx";
 import {
     addTimeToDate, createUpcomingReviewsChartBarLabel,
     createUpcomingReviewsChartLabel, formatTimeUnitLabelText, UnitSelector,
-    UpcomingReviewPeriods,
+    UpcomingReviewPeriods, UpcomingReviewsScatterPoint,
     UpcomingReviewUnits
 } from "../../util/UpcomingReviewChartUtils.jsx";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
+
+const styles = {
+    container: {
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
+    },
+    headerContainer: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: '15px',
+        alignItems: 'center'
+    }
+};
 
 function createEmptyDataPoint(date) {
     let emptyDataPoint = {
@@ -177,8 +191,8 @@ function BunProUpcomingReviewsChart() {
     return (
         <Card style={{height: '100%'}}>
             <CardContent style={{height: '100%'}}>
-                <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                <div style={styles.container}>
+                    <div style={styles.headerContainer}>
 
                         <UnitSelector
                             unit={unit}
@@ -192,7 +206,7 @@ function BunProUpcomingReviewsChart() {
                             ]}
                         />
 
-                        <Typography variant={'h5'}>
+                        <Typography variant={'h6'} align={'center'}>
                             Upcoming Reviews
                         </Typography>
 
@@ -246,6 +260,7 @@ function BunProUpcomingReviewsChart() {
                                     argumentField="date"
                                     color={'#a45bff'}
                                     scaleName="total"
+                                    pointComponent={UpcomingReviewsScatterPoint}
                                 />
 
                                 <Stack
@@ -256,6 +271,7 @@ function BunProUpcomingReviewsChart() {
                                     filterItems={[
                                         'total-points'
                                     ]}
+                                    position={isMobile ? 'bottom' : 'right'}
                                 />
                                 <EventTracker/>
                                 <Tooltip targetItem={!!targetItem && !targetItem.series.toLowerCase().includes('total')

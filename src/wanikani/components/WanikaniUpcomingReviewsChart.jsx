@@ -9,7 +9,7 @@ import {
 import React, {useState, useEffect, useMemo} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {ArgumentScale, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
-import {Card, CardContent, Typography} from "@mui/material";
+import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addHours, truncMinutes} from '../../util/DateUtils.js';
 import {WanikaniColors} from '../../Constants.js';
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
@@ -199,77 +199,84 @@ function WanikaniUpcomingReviewsChart() {
                         />
                     </div>
 
-                    <div style={{flexGrow: '1'}}>
-                        <Chart data={chartData} {...(isMobile ? {height: 200} : {})}>
+                    {chartData.length === 0 ? (
+                        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90%'}}>
+                            <CircularProgress/>
+                        </div>
+                    ) : (
+                        <div style={{flexGrow: '1'}}>
+                            <Chart data={chartData} {...(isMobile ? {height: 200} : {})}>
 
-                            <ValueScale name="total"
-                                        modifyDomain={() => [0, chartData.length > 0 ? chartData[chartData.length - 1].total : 1]}/>
+                                <ValueScale name="total"
+                                            modifyDomain={() => [0, chartData.length > 0 ? chartData[chartData.length - 1].total : 1]}/>
 
-                            <ValueScale name="daily"
-                                        modifyDomain={() => [0, maxScale]}/>
+                                <ValueScale name="daily"
+                                            modifyDomain={() => [0, maxScale]}/>
 
-                            <ValueAxis position={'left'} scaleName="total"/>
+                                <ValueAxis position={'left'} scaleName="total"/>
 
-                            <ArgumentScale factory={scaleBand}/>
-                            <ArgumentAxis labelComponent={LabelWithDate}/>
+                                <ArgumentScale factory={scaleBand}/>
+                                <ArgumentAxis labelComponent={LabelWithDate}/>
 
-                            <BarSeries
-                                name="radicals"
-                                valueField="radicals"
-                                argumentField="time"
-                                color={WanikaniColors.blue}
-                                pointComponent={BarWithLabel}
-                                scaleName="daily"
-                            />
+                                <BarSeries
+                                    name="radicals"
+                                    valueField="radicals"
+                                    argumentField="time"
+                                    color={WanikaniColors.blue}
+                                    pointComponent={BarWithLabel}
+                                    scaleName="daily"
+                                />
 
-                            <BarSeries
-                                name="kanji"
-                                valueField="kanji"
-                                argumentField="time"
-                                color={WanikaniColors.pink}
-                                pointComponent={BarWithLabel}
-                                scaleName="daily"
-                            />
+                                <BarSeries
+                                    name="kanji"
+                                    valueField="kanji"
+                                    argumentField="time"
+                                    color={WanikaniColors.pink}
+                                    pointComponent={BarWithLabel}
+                                    scaleName="daily"
+                                />
 
-                            <BarSeries
-                                name="vocabulary"
-                                valueField="vocabulary"
-                                argumentField="time"
-                                color={WanikaniColors.purple}
-                                pointComponent={BarWithLabel}
-                                scaleName="daily"
-                            />
+                                <BarSeries
+                                    name="vocabulary"
+                                    valueField="vocabulary"
+                                    argumentField="time"
+                                    color={WanikaniColors.purple}
+                                    pointComponent={BarWithLabel}
+                                    scaleName="daily"
+                                />
 
 
-                            <LineSeries
-                                name="total"
-                                valueField="total"
-                                argumentField="time"
-                                color={'#e0b13e'}
-                                scaleName="total"
-                            />
+                                <LineSeries
+                                    name="total"
+                                    valueField="total"
+                                    argumentField="time"
+                                    color={'#e0b13e'}
+                                    scaleName="total"
+                                />
 
-                            <ScatterSeries
-                                name="total-points"
-                                valueField="total"
-                                argumentField="time"
-                                color={'#e0b13e'}
-                                scaleName="total"
-                                pointComponent={UpcomingReviewsScatterPoint}
-                            />
+                                <ScatterSeries
+                                    name="total-points"
+                                    valueField="total"
+                                    argumentField="time"
+                                    color={'#e0b13e'}
+                                    scaleName="total"
+                                    pointComponent={UpcomingReviewsScatterPoint}
+                                />
 
-                            <Stack
-                                stacks={[{series: ['radicals', 'kanji', 'vocabulary']}]}
-                            />
+                                <Stack
+                                    stacks={[{series: ['radicals', 'kanji', 'vocabulary']}]}
+                                />
 
-                            <EventTracker/>
-                            <Tooltip targetItem={!!targetItem && !targetItem.series.includes('total')
-                                ? {...targetItem, series: getTopSeries(targetItem, chartData)} : targetItem}
-                                     onTargetItemChange={setTargetItem}
-                                     contentComponent={ReviewsToolTip}
-                            />
-                        </Chart>
-                    </div>
+                                <EventTracker/>
+                                <Tooltip targetItem={!!targetItem && !targetItem.series.includes('total')
+                                    ? {...targetItem, series: getTopSeries(targetItem, chartData)} : targetItem}
+                                         onTargetItemChange={setTargetItem}
+                                         contentComponent={ReviewsToolTip}
+                                />
+                            </Chart>
+                        </div>
+                    )}
+
                 </div>
             </CardContent>
         </Card>

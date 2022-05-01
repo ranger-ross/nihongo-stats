@@ -65,14 +65,15 @@ async function sendCacheableRequest(request, cacheKey, timeout = 60_000) {
 }
 
 async function getGrammarPoints() {
-    return await sendCacheableRequest(
+    const response = await sendCacheableRequest(
         {
-            url: `${baseBunProUrl}/v3/grammar_points`,
+            url: `${baseBunProUrl}/v5/grammar_points`,
             options: {headers: bunproHeaders()}
         },
         cacheKeys.grammarPoints,
         1000 * 60 * 60 * 24
     );
+    return response.data;
 }
 
 async function getUserProgress() {

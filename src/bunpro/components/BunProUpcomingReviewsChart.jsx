@@ -54,7 +54,7 @@ function aggregateData(reviews, unit, period, pendingReviews) {
         let dp = createEmptyDataPoint(date);
 
         for (const review of reviewsInPeriod) {
-            const level = review.grammarPoint.level.replace('JLPT', 'N');
+            const level = review.grammarPoint.attributes.level.replace('JLPT', 'N');
             if (!!dp[level]) {
                 dp[level] += 1;
             } else {

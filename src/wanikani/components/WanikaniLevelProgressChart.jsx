@@ -1,7 +1,7 @@
-import {Chart, ValueAxis, BarSeries, ArgumentAxis, Title, Tooltip} from '@devexpress/dx-react-chart-material-ui';
-import {useState, useEffect, useMemo} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.js";
-import {EventTracker, Animation} from "@devexpress/dx-react-chart";
+import {ArgumentAxis, BarSeries, Chart, Title, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
+import {useEffect, useMemo, useState} from "react";
+import {useWanikaniLevelProgress} from "../service/WanikaniApiService.js";
+import {Animation, EventTracker} from "@devexpress/dx-react-chart";
 
 function parseTimestamp(text) {
     const millis = parseFloat(text) * 86400000;
@@ -38,19 +38,9 @@ function formatData(data) {
 }
 
 function WanikaniLevelProgressChart() {
-    const [levelProgress, setLevelProgress] = useState([]);
     const [targetItem, setTargetItem] = useState();
-
-    useEffect(() => {
-        let isSubscribed = true;
-        WanikaniApiService.getLevelProgress()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setLevelProgress(formatData(data));
-            })
-        return () => isSubscribed = false;
-    }, []);
+    const {data} = useWanikaniLevelProgress();
+    const levelProgress = useMemo(() => !!data ? formatData(data) : [], [data]);
 
     function BarWithLabel(props) {
         const {arg, val, index} = props;

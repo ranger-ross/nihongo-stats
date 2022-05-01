@@ -25,6 +25,7 @@
     "lodash-es": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-query": "^3.38.0",
     "react-router-dom": "^6.0.1",
     "react-visibility-sensor": "^5.1.1",
     "styled-components": "^5.3.3",

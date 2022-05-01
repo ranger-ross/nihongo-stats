@@ -1,6 +1,10 @@
 import * as localForage from "localforage/dist/localforage"
 import InMemoryCache from "../../util/InMemoryCache.js";
 import {AppUrls} from "../../Constants.js";
+import {useQuery} from "react-query";
+import create from "zustand";
+import {persist} from "zustand/middleware";
+import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
 
 const memoryCache = new InMemoryCache();
 
@@ -183,6 +187,109 @@ async function getAssignmentsForLevel(level) {
 async function getLevelProgress() {
     return await fetchWithCache('/v2/level_progressions', cacheKeys.levelProgression, 1000 * 60)
 }
+
+const queryErrors = {
+    tooManyRequests: new Error('429')
+};
+
+const defaultQueryOptions = {
+    retry: (failureCount, error) => failureCount <= 10 && error === queryErrors.tooManyRequests,
+    retryDelay: () => 10_000,
+};
+
+async function reactQueryWanikaniRequest(path, apiKey, cache = {
+    data: null,
+    lastUpdated: null,
+    updateCache: () => null
+}) {
+    let headers = {
+        'Authorization': `Bearer ${apiKey}`,
+        'pragma': 'no-cache',
+        'cache-control': 'no-cache',
+    };
+    if (!!cache.lastUpdated) {
+        headers = {
+            ...headers,
+            ...ifModifiedSinceHeader(cache.lastUpdated)
+        };
+    }
+
+    const response = await fetch(`${wanikaniApiUrl}${path}`, {headers: headers});
+
+    if (response.status === 429)
+        throw queryErrors.tooManyRequests;
+    else if ((!response.ok || response.status === 304) && !!cache.data)
+        return cache.data;
+
+    const data = await response.json()
+    cache.updateCache(data);
+    return data;
+}
+
+function createWanikaniCache(name) {
+    return create(persist((set) => ({
+        data: null,
+        updateCache: (data) => set({data: data, lastUpdated: new Date().getTime()}),
+        lastUpdated: null
+    }), {
+        name: name,
+        getStorage: () => localForage
+    }));
+}
+
+const useCachedWanikaniUser = createWanikaniCache('wanikani-user-v2');
+
+export const useWanikaniUser = () => {
+    const cache = useCachedWanikaniUser();
+    const {apiKey} = useWanikaniApiKey();
+
+    return useQuery('wanikaniUser',
+        () => reactQueryWanikaniRequest('/v2/user', apiKey, cache), {
+            ...defaultQueryOptions,
+            cacheTime: 5_000,
+        });
+}
+
+const useCachedLevelProgress = createWanikaniCache('wanikani-level-progress-v2');
+
+export const useWanikaniLevelProgress = () => {
+    const cache = useCachedLevelProgress();
+    const {apiKey} = useWanikaniApiKey();
+
+    return useQuery('wanikaniLevelProgress',
+        () => reactQueryWanikaniRequest('/v2/level_progressions', apiKey, cache), {
+            ...defaultQueryOptions,
+            cacheTime: 60_000,
+        });
+}
+
+
+const useCachedWanikaniSubjects = create(persist((set) => ({
+    data: null,
+    updateCache: (data) => set({data: data, lastUpdated: new Date().getTime()}),
+    lastUpdated: null
+}), {
+    name: "wanikani-subjects-v2",
+    getStorage: () => localForage
+}));
+
+export const useWanikaniSubjects = () => {
+    const {data, updateCache} = useCachedWanikaniSubjects();
+    return useQuery('wanikaniSubjects',
+        async () => {
+            if (!!data && data.length > 0) {
+                return data;
+            }
+
+            const newData = await fetchMultiPageRequest('/v2/subjects');
+            updateCache(newData);
+            return newData;
+        }, {
+            ...defaultQueryOptions,
+            cacheTime: 9_000_000,
+        });
+}
+
 
 export default {
     saveApiKey: saveApiKey,

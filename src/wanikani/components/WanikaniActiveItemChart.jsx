@@ -1,6 +1,6 @@
-import {useState, useEffect, useRef} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.js";
-import {Card, CardContent, Typography, Switch, FormGroup, FormControlLabel} from "@mui/material";
+import {useEffect, useRef, useState} from "react";
+import WanikaniApiService, {useWanikaniUser} from "../service/WanikaniApiService.js";
+import {Card, CardContent, FormControlLabel, FormGroup, Switch, Typography} from "@mui/material";
 import WanikaniItemTile from "./WanikaniItemTile.jsx";
 import {combineAssignmentAndSubject, isSubjectHidden} from "../service/WanikaniDataUtil.js";
 import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.js";
@@ -250,18 +250,7 @@ function WanikaniLevelItemsChart({level}) {
 }
 
 function WanikaniActiveItemsChart() {
-    const [user, setUser] = useState();
-    useEffect(() => {
-        let isSubscribed = true;
-
-        WanikaniApiService.getUser()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setUser(data);
-            })
-        return () => isSubscribed = false;
-    }, [])
+    const {data: user} = useWanikaniUser();
     return (
         <>
             {!!user ? (

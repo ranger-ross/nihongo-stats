@@ -46,7 +46,7 @@ export async function fetchAllBunProReviews(grammarPoints = null) {
 
     for (const review of reviewsData.reviews) {
         const grammarPoint = grammarPointsLookupMap[review['grammar_point_id']];
-        review.level = grammarPoint.level.replace('JLPT', 'N');
+        review.level = grammarPoint.attributes.level.replace('JLPT', 'N');
         reviews.push(...flattenReview(review));
     }
 

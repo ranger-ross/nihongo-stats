@@ -19,7 +19,7 @@ async function fetchCurrentReviewProgress(grammarPoints) {
 
     for (const review of reviewData.reviews) {
         const grammarPoint = grammarPointsMap[review['grammar_point_id']];
-        data[grammarPoint.level] += 1;
+        data[grammarPoint.attributes.level] += 1;
     }
 
     return data;
@@ -36,7 +36,7 @@ function getJLPTTotals(grammarPoints) {
     };
 
     for (const grammarPoint of grammarPoints) {
-        data[grammarPoint.level] += 1;
+        data[grammarPoint.attributes.level] += 1;
     }
 
     return data;

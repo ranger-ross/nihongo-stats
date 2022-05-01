@@ -56,7 +56,7 @@ function aggregateReviewByDay(reviews, grammarPoints) {
             lastDay = days[days.length - 1];
         }
         const gp = grammarPoints[review['grammar_point_id']]
-        lastDay.addReview(gp.level.replace('JLPT', 'N'));
+        lastDay.addReview(gp.attributes.level.replace('JLPT', 'N'));
     }
 
     return days;

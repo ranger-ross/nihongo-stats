@@ -1,10 +1,12 @@
-import {useState, useEffect} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.js";
-import {Box, Card, CardContent, Typography, Grid, Tooltip} from "@mui/material";
+import {
+    useWanikaniAssignmentForLevel,
+    useWanikaniLevelProgress,
+    useWanikaniSubjects,
+    useWanikaniUser
+} from "../service/WanikaniApiService.js";
+import {Box, Card, CardContent, CircularProgress, Grid, Stack, Tooltip, Typography} from "@mui/material";
 import {millisToDays, millisToHours} from '../../util/DateUtils.js';
-import {Stack} from '@mui/material';
 import {WanikaniColors} from "../../Constants.js";
-import {CircularProgress} from '@mui/material'
 
 
 const racialColor = WanikaniColors.blue;
@@ -63,12 +65,34 @@ function FractionText({top, bottom}) {
     );
 }
 
-async function getCurrentLevelProgressData() {
-    const userData = await WanikaniApiService.getUser()
+function useCurrentLevelProgressData() {
+    const userQuery = useWanikaniUser();
+    const progressQuery = useWanikaniLevelProgress();
+    const subjectsQuery = useWanikaniSubjects();
+    const assignmentsQuery = useWanikaniAssignmentForLevel(userQuery.data ? userQuery.data.data.level : 1, {
+        enabled: !!userQuery.data
+    });
 
-    const currentLevel = userData.data.level;
+    const isLoading = userQuery.isLoading || progressQuery.isLoading || subjectsQuery.isLoading || assignmentsQuery.isLoading;
 
-    const levelsProgress = await WanikaniApiService.getLevelProgress(currentLevel);
+    if (isLoading)
+        return defaultData;
+
+    if (userQuery.error)
+        return defaultData;
+    if (progressQuery.error)
+        return defaultData;
+    if (subjectsQuery.error)
+        return defaultData;
+    if (assignmentsQuery.error)
+        return defaultData;
+
+    const user = userQuery.data;
+    const levelsProgress = progressQuery.data;
+    let subjects = subjectsQuery.data;
+    let assignments = assignmentsQuery.data;
+
+    const currentLevel = user.data.level;
     const currentLevelProgress = levelsProgress.data[currentLevel - 1].data;
 
     let start;
@@ -80,10 +104,8 @@ async function getCurrentLevelProgressData() {
     }
 
     const end = !!currentLevelProgress['passed_at'] ? new Date(currentLevelProgress['passed_at']) : new Date();
-    const timeOnLevel = end.getTime() - start.getTime()
+    const timeOnLevel = end.getTime() - start.getTime();
 
-    const assignments = await WanikaniApiService.getAssignmentsForLevel(currentLevel);
-    let subjects = await WanikaniApiService.getSubjects(currentLevel);
     subjects = subjects.filter(subject => subject.data.level === currentLevel);
 
     const radicalsTotal = subjects.filter(s => s.object === 'radical');
@@ -118,6 +140,7 @@ async function getCurrentLevelProgressData() {
     };
 }
 
+
 function SubjectProgressLabel({started, passed, total, name, color}) {
     return (
         <Tooltip title={
@@ -146,20 +169,7 @@ function SubjectProgressLabel({started, passed, total, name, color}) {
 
 
 function WanikaniLevelSummaryChart() {
-    const [progressData, setProgressData] = useState(defaultData);
-
-    useEffect(() => {
-        let isSubscribed = true;
-        getCurrentLevelProgressData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setProgressData(data);
-            })
-            .catch(console.error)
-        return () => isSubscribed = false;
-    }, []);
-
+    const progressData = useCurrentLevelProgressData();
     return (
         <Card style={styles.container}>
             <CardContent style={{height: '100%'}}>

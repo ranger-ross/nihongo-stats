@@ -200,8 +200,12 @@ const defaultQueryOptions = {
 async function reactQueryWanikaniRequest(path, apiKey, cache = {
     data: null,
     lastUpdated: null,
-    updateCache: () => null
+    updateCache: () => null,
+    isExpired: () => true,
 }) {
+    if (!cache.isExpired() && cache.data)
+        return cache.data;
+
     let headers = {
         'Authorization': `Bearer ${apiKey}`,
         'pragma': 'no-cache',
@@ -218,26 +222,37 @@ async function reactQueryWanikaniRequest(path, apiKey, cache = {
 
     if (response.status === 429)
         throw queryErrors.tooManyRequests;
-    else if ((!response.ok || response.status === 304) && !!cache.data)
+    else if ((!response.ok || response.status === 304) && !!cache.data) {
+        cache.updateCache(cache.data);
         return cache.data;
+    }
 
     const data = await response.json()
     cache.updateCache(data);
     return data;
 }
 
-function createWanikaniCache(name) {
-    return create(persist((set) => ({
+function createWanikaniCache(name, ttl) {
+    return create(persist((set, get) => ({
+        isLoaded: true,
         data: null,
-        updateCache: (data) => set({data: data, lastUpdated: new Date().getTime()}),
-        lastUpdated: null
+        updateCache: (data) => {
+            set({data: data, lastUpdated: Date.now()});
+        },
+        lastUpdated: null,
+        isExpired: () => {
+            if (!ttl && !!get().data)
+                return false;
+            const lastUpdated = get().lastUpdated;
+            return lastUpdated && Date.now() - ttl > lastUpdated
+        }
     }), {
         name: name,
         getStorage: () => localForage
     }));
 }
 
-const useCachedWanikaniUser = createWanikaniCache('wanikani-user-v2');
+const useCachedWanikaniUser = createWanikaniCache('wanikani-user-v2', 1_000 * 30);
 
 export const useWanikaniUser = () => {
     const cache = useCachedWanikaniUser();
@@ -246,11 +261,11 @@ export const useWanikaniUser = () => {
     return useQuery('wanikaniUser',
         () => reactQueryWanikaniRequest('/v2/user', apiKey, cache), {
             ...defaultQueryOptions,
-            cacheTime: 5_000,
+            initialData: () => cache.data,
         });
 }
 
-const useCachedLevelProgress = createWanikaniCache('wanikani-level-progress-v2');
+const useCachedLevelProgress = createWanikaniCache('wanikani-level-progress-v2', 1_000 * 60 * 5);
 
 export const useWanikaniLevelProgress = () => {
     const cache = useCachedLevelProgress();
@@ -259,37 +274,137 @@ export const useWanikaniLevelProgress = () => {
     return useQuery('wanikaniLevelProgress',
         () => reactQueryWanikaniRequest('/v2/level_progressions', apiKey, cache), {
             ...defaultQueryOptions,
-            cacheTime: 60_000,
+            initialData: () => cache.data,
         });
 }
 
+const useCachedWanikaniSummary = createWanikaniCache('wanikani-summary-v2', 1_000 * 60);
 
-const useCachedWanikaniSubjects = create(persist((set) => ({
+export const useWanikaniSummary = () => {
+    const cache = useCachedWanikaniSummary();
+    const {apiKey} = useWanikaniApiKey();
+
+    return useQuery('wanikaniSummary',
+        () => reactQueryWanikaniRequest('/v2/summary', apiKey, cache), {
+            ...defaultQueryOptions,
+        });
+}
+
+export const usePendingLessonsAndReviews = () => {
+    const {data} = useWanikaniSummary();
+    let lessons = 0;
+    let reviews = 0;
+
+    if (data) {
+        for (const group of data.data.lessons) {
+            if (new Date(group['available_at']).getTime() < Date.now()) {
+                lessons += group['subject_ids'].length;
+            }
+        }
+
+        for (const group of data.data.reviews) {
+            if (new Date(group['available_at']).getTime() < Date.now()) {
+                reviews += group['subject_ids'].length;
+            }
+        }
+    }
+    return {
+        lessons,
+        reviews
+    };
+}
+
+const useCachedWanikaniSubjects = createWanikaniCache('wanikani-subjects-v2');
+
+
+export const wkSubjects = create(persist((set, get) => ({
     data: null,
-    updateCache: (data) => set({data: data, lastUpdated: new Date().getTime()}),
-    lastUpdated: null
+    lastUpdated: null,
+    updateCache: (data) => {
+        set({data: data, lastUpdated: Date.now()});
+    },
+    subjects: () => {
+        if (!get().data) {
+            fetchMultiPageRequest('/v2/subjects').then(data => {
+                set({data: data, lastUpdated: Date.now()});
+            });
+        }
+        return get().data;
+    }
 }), {
-    name: "wanikani-subjects-v2",
+    name: 'wk-subjs',
     getStorage: () => localForage
 }));
 
-export const useWanikaniSubjects = () => {
-    const {data, updateCache} = useCachedWanikaniSubjects();
+export const useWkSubjects = () => {
+    const x = wkSubjects();
+    return useQuery('wkSubjects', async () => {
+        if (x.data) {
+            return x.data;
+        }
+
+
+        console.log('fetching');
+        const data = await fetchMultiPageRequest('/v2/subjects')
+        x.updateCache(data);
+        return data;
+    }, {}, [])
+}
+
+
+export const useWanikaniSubjects = (queryOptions = {}) => {
+    const cache = useCachedWanikaniSubjects();
+    // console.log(cache.isLoaded, cache.data);
     return useQuery('wanikaniSubjects',
+        async () => {
+
+            // console.log(cache.data);
+
+            // setTimeout(() => console.log(cache.data), 200);
+
+            if (!!cache.data && cache.data.length > 0) {
+                return cache.data;
+            }
+            console.log('fetching');
+            const newData = await fetchMultiPageRequest('/v2/subjects');
+            // cache.updateCache(newData);
+            // console.log('updated cache');
+            return newData;
+        }, {
+            ...defaultQueryOptions,
+            staleTime: 1_000 * 60 * 60 * 24,
+            ...queryOptions,
+        });
+}
+
+const useCachedWanikaniAssignments = createWanikaniCache('wanikani-assignments-v2');
+
+export const useWanikaniAssignments = () => {
+    const {data, updateCache} = useCachedWanikaniAssignments();
+    return useQuery('wanikaniAssignments',
         async () => {
             if (!!data && data.length > 0) {
                 return data;
             }
 
-            const newData = await fetchMultiPageRequest('/v2/subjects');
+            const newData = await fetchMultiPageRequest('/v2/assignments');
             updateCache(newData);
             return newData;
         }, {
             ...defaultQueryOptions,
-            cacheTime: 9_000_000,
         });
 }
 
+export const useWanikaniAssignmentForLevel = (level, queryOptions = {}) => {
+    const {apiKey} = useWanikaniApiKey();
+
+    return useQuery('wanikaniAssignmentsLevel' + level,
+        () => reactQueryWanikaniRequest(`/v2/assignments?levels=${level}`, apiKey), {
+            ...defaultQueryOptions,
+            staleTime: 60_000,
+            ...queryOptions,
+        });
+}
 
 export default {
     saveApiKey: saveApiKey,

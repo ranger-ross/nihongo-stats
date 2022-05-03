@@ -4,7 +4,6 @@ import WanikaniLevelSummaryChart from "./components/WanikaniLevelSummaryChart.js
 import WanikaniUpcomingReviewsChart from "./components/WanikaniUpcomingReviewsChart.jsx";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
 import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart.jsx";
-import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import WanikaniActiveItemsChart from "./components/WanikaniActiveItemChart.jsx";
 import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
 
@@ -44,27 +43,25 @@ function WanikaniDashboard() {
         <RequireOrRedirect resource={apiKey}
                            redirectPath={RoutePaths.wanikaniLogin.path}
         >
-            <WanikaniPreloadedData>
-                <div style={styles.container}>
-                    <div style={styles.topContainer}>
-                        <div style={styles.leftContainer}>
-                            <WanikaniWelcomeTile/>
+            <div style={styles.container}>
+                <div style={styles.topContainer}>
+                    <div style={styles.leftContainer}>
+                        <WanikaniWelcomeTile/>
 
-                            <WanikaniLevelSummaryChart/>
+                        <WanikaniLevelSummaryChart/>
 
-                            <WanikaniItemCountsChart/>
-                        </div>
+                        <WanikaniItemCountsChart/>
+                    </div>
 
-                        <div style={styles.rightContainer}>
-                            <WanikaniUpcomingReviewsChart/>
-                        </div>
+                    <div style={styles.rightContainer}>
+                        <WanikaniUpcomingReviewsChart/>
                     </div>
                 </div>
+            </div>
 
-                <div style={styles.bottomContainer}>
-                    <WanikaniActiveItemsChart/>
-                </div>
-            </WanikaniPreloadedData>
+            <div style={styles.bottomContainer}>
+                <WanikaniActiveItemsChart/>
+            </div>
         </RequireOrRedirect>
     );
 }

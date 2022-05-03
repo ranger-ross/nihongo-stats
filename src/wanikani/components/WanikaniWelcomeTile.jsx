@@ -1,6 +1,5 @@
 import {Card, CardContent, Typography} from "@mui/material";
-import WanikaniApiService from "../service/WanikaniApiService";
-import {useState, useEffect} from "react";
+import {usePendingLessonsAndReviews, useWanikaniUser} from "../service/WanikaniApiService";
 import WanikaniPendingLessonsAndReviews from "./WanikaniPendingLessonAndReviews.jsx";
 
 const styles = {
@@ -13,30 +12,13 @@ const styles = {
 };
 
 function WanikaniWelcomeTile() {
-    const [username, setUsername] = useState('');
-    const [data, setData] = useState();
-
-    useEffect(() => {
-        let isSubscribed = true;
-        WanikaniApiService.getUser()
-            .then(user => {
-                if (!isSubscribed)
-                    return;
-                setUsername(user.data.username);
-            });
-        WanikaniApiService.getPendingLessonsAndReviews()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setData(data);
-            });
-        return () => isSubscribed = false;
-    }, []);
+    const {data: user} = useWanikaniUser();
+    const data = usePendingLessonsAndReviews();
     return (
         <Card>
             <CardContent>
                 <Typography variant={'h5'} style={{textShadow: '4px 4px 6px #000000bb'}}>
-                    {username?.length > 0 ? `Welcome ${username}` : null}
+                    {user?.data?.username?.length > 0 ? `Welcome ${user.data.username}` : null}
                 </Typography>
 
                 <div style={styles.buttonsContainer}>

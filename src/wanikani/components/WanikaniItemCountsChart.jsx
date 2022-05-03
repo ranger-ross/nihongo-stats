@@ -1,5 +1,4 @@
-import {useState, useEffect} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.js";
+import {useWanikaniAssignments} from "../service/WanikaniApiService.js";
 import {Card, CardContent, CircularProgress, Tooltip, Typography} from "@mui/material";
 import {WanikaniColors} from "../../Constants.js";
 
@@ -68,8 +67,10 @@ function CountTile({label, data, color}) {
     );
 }
 
-async function fetchData() {
-    const assignments = await WanikaniApiService.getAllAssignments();
+function useData() {
+    const {data: assignments, isLoading, error} = useWanikaniAssignments();
+    if (isLoading || error)
+        return null;
 
     const available = assignments.filter(assignment => assignment.data['srs_stage'] == 0);
     const apprentice = assignments.filter(assignment => assignment.data['srs_stage'] > 0 && assignment.data['srs_stage'] < 5);
@@ -77,7 +78,6 @@ async function fetchData() {
     const master = assignments.filter(assignment => assignment.data['srs_stage'] >= 7 && assignment.data['srs_stage'] < 8);
     const enlightened = assignments.filter(assignment => assignment.data['srs_stage'] >= 8 && assignment.data['srs_stage'] < 9);
     const burned = assignments.filter(assignment => assignment.data['srs_stage'] >= 9);
-
 
     return {
         available: assignmentsToCounts(available),
@@ -90,24 +90,10 @@ async function fetchData() {
 }
 
 function WanikaniItemCountsChart() {
-    const [data, setData] = useState();
-
-    useEffect(() => {
-        let isSubscribed = true;
-        fetchData()
-            .then(d => {
-                if (!isSubscribed)
-                    return;
-                setData(d);
-            })
-            .catch(console.error);
-        return () => isSubscribed = false;
-    }, []);
-
+    const data = useData();
     return (
         <Card>
             <CardContent>
-
                 {!data ? (
                     <div style={styles.loadingContainer}>
                         <CircularProgress/>

@@ -38,7 +38,7 @@ function WanikaniPreloadedData({children}) {
     const [isUserLoaded, setIsUserLoaded] = useState(false);
     const [isAssignmentsLoaded, setIsAssignmentsLoaded] = useState(false);
     const [isReviewsLoaded, setIsReviewsLoaded] = useState(false);
-    const [isSummaryLoaded, setIsSummaryLoaded] = useState(false);
+    // const [isSummaryLoaded, setIsSummaryLoaded] = useState(false);
     const {status, setStatus} = useWanikaniPreloadStatus();
 
     useEffect(() => {
@@ -54,8 +54,8 @@ function WanikaniPreloadedData({children}) {
                 .then(() => setIsUserLoaded(true)),
             WanikaniApiService.getAllAssignments()
                 .then(() => setIsAssignmentsLoaded(true)),
-            WanikaniApiService.getSummary()
-                .then(() => setIsSummaryLoaded(true)),
+            // WanikaniApiService.getSummary()
+            //     .then(() => setIsSummaryLoaded(true)),
             WanikaniApiService.getReviews()
                 .then(() => setIsReviewsLoaded(true)),
         ])
@@ -65,7 +65,7 @@ function WanikaniPreloadedData({children}) {
             });
     }, []);
 
-    const isLoaded = status || (isSubjectsLoaded && isUserLoaded && isAssignmentsLoaded && isSummaryLoaded && isReviewsLoaded);
+    const isLoaded = status || (isSubjectsLoaded && isUserLoaded && isAssignmentsLoaded && isReviewsLoaded);
 
     return (
         <>
@@ -79,7 +79,7 @@ function WanikaniPreloadedData({children}) {
                             <br/>
                             <LoadingItem text={'Wanikani Items'} isLoading={!isSubjectsLoaded}/>
                             <LoadingItem text={'User Data'} isLoading={!isUserLoaded}/>
-                            <LoadingItem text={'User Summary'} isLoading={!isSummaryLoaded}/>
+                            {/*<LoadingItem text={'User Summary'} isLoading={!isSummaryLoaded}/>*/}
                             <LoadingItem text={'User Assignments'} isLoading={!isAssignmentsLoaded}/>
                             <LoadingItem text={'User Reviews'} isLoading={!isReviewsLoaded}/>
                         </div>

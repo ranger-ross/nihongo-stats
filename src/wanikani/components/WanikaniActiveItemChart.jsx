@@ -1,5 +1,10 @@
 import {useEffect, useRef, useState} from "react";
-import WanikaniApiService, {useWanikaniUser} from "../service/WanikaniApiService.js";
+import {
+    useWanikaniAssignmentForLevel,
+    useWanikaniSubjects,
+    useWanikaniUser, useWkSubjects,
+    wkSubjects
+} from "../service/WanikaniApiService.js";
 import {Card, CardContent, FormControlLabel, FormGroup, Switch, Typography} from "@mui/material";
 import WanikaniItemTile from "./WanikaniItemTile.jsx";
 import {combineAssignmentAndSubject, isSubjectHidden} from "../service/WanikaniDataUtil.js";
@@ -27,8 +32,6 @@ const defaultState = {
     vocabularyStarted: 0,
 };
 
-let memCache = {};
-
 function createAssignmentMap(subjects) {
     let map = {};
 
@@ -39,15 +42,26 @@ function createAssignmentMap(subjects) {
     return map;
 }
 
-async function fetchData(level) {
-    if (memCache[level]) {
-        return memCache[level];
+function useData(level, isFirstLoad) {
+    const isInitialLoad = useRef(true);
+
+    let {data: subjects, isLoading: isSubjectsLoading} = useWanikaniSubjects({
+        enabled: !isFirstLoad
+    });
+    let {data: assignments, isLoading: isAssignmentsLoading} = useWanikaniAssignmentForLevel(level, {
+        enabled: !isFirstLoad
+    });
+
+    if (isFirstLoad || isAssignmentsLoading || isSubjectsLoading) {
+        return {
+            data: defaultState,
+            isLoaded: false
+        };
     }
 
-    const subjects = (await WanikaniApiService.getSubjects())
-        .filter(subject => subject.data.level === level);
+    subjects = subjects.filter(subject => subject.data.level === level);
+    assignments = assignments.data;
 
-    let assignments = (await WanikaniApiService.getAssignmentsForLevel(level)).data;
     const radicalsStarted = assignments.filter(s => s.data['subject_type'] === 'radical' && !!s.data['started_at']).length;
     const kanjiStarted = assignments.filter(s => s.data['subject_type'] === 'kanji' && !!s.data['started_at']).length;
     const vocabularyStarted = assignments.filter(s => s.data['subject_type'] === 'vocabulary' && !!s.data['started_at']).length;
@@ -64,16 +78,21 @@ async function fetchData(level) {
         .filter(subject => subject.object === 'vocabulary' && !isSubjectHidden(subject))
         .map(s => combineAssignmentAndSubject(assignments[s.id], s));
 
-    const data = {
-        radicals,
-        kanji,
-        vocabulary,
-        radicalsStarted,
-        kanjiStarted,
-        vocabularyStarted,
+    const _isInitialLoad = isInitialLoad.current;
+    isInitialLoad.current = false;
+
+    return {
+        data: {
+            radicals,
+            kanji,
+            vocabulary,
+            radicalsStarted,
+            kanjiStarted,
+            vocabularyStarted,
+        },
+        isLoaded: true,
+        isInitialLoad: _isInitialLoad
     };
-    memCache[level] = data;
-    return data;
 }
 
 function PreviousLevelSelector({selected, setSelected, isMobile}) {
@@ -140,40 +159,30 @@ function WanikaniLevelItemsChart({level}) {
     const {wanikaniPreferences} = useUserPreferences();
     const isFirstLoad = useRef(true);
     const [isPreviousLevel, setIsPreviousLevel] = useState(true);
-    const [data, setData] = useState(defaultState);
     const {isMobile} = useDeviceInfo();
 
-    useEffect(() => {
-        let isSubscribed = true;
-        const cleanUp = () => isSubscribed = false;
+    const levelToFetch = level > 1 && isPreviousLevel ? level - 1 : level;
+    const {data, isLoaded, isInitialLoad} = useData(levelToFetch, isFirstLoad.current);
 
+    const x = useWkSubjects();
+    console.log(x);
+
+    if (isLoaded && isInitialLoad) {
+        if (wanikaniPreferences.showPreviousLevelByDefault &&
+            data.radicalsStarted === data.radicals.length &&
+            data.kanjiStarted === data.kanji.length &&
+            data.vocabularyStarted === data.vocabulary.length) {
+            setIsPreviousLevel(false);
+        }
+    }
+
+    useEffect(() => {
         let _isFirstLoad = isFirstLoad.current
         isFirstLoad.current = false;
 
         if (_isFirstLoad && !wanikaniPreferences.showPreviousLevelByDefault) {
             setIsPreviousLevel(false);
-            return cleanUp;
         }
-
-        fetchData(level > 1 && isPreviousLevel ? level - 1 : level)
-            .then(d => {
-                if (!isSubscribed)
-                    return;
-
-                if (wanikaniPreferences.showPreviousLevelByDefault &&
-                    _isFirstLoad &&
-                    d.radicalsStarted === d.radicals.length &&
-                    d.kanjiStarted === d.kanji.length &&
-                    d.vocabularyStarted === d.vocabulary.length) {
-                    setIsPreviousLevel(false);
-                    return;
-                }
-
-                setData(d);
-            })
-            .catch(console.error);
-
-        return cleanUp;
     }, [level, isPreviousLevel]);
 
     return (

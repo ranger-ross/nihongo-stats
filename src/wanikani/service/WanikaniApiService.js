@@ -111,7 +111,9 @@ async function getAllAssignments() {
         return cachedValue.data;
     }
 
-    const assignments = await getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments');
+    let assignments = await getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments');
+
+    assignments = sortAndDeduplicateAssignments(assignments);
 
     const cacheObject = {
         data: assignments,
@@ -121,6 +123,39 @@ async function getAllAssignments() {
     memoryCache.put(cacheKeys.assignments, cacheObject);
 
     return assignments;
+}
+
+function sortAndDeduplicateAssignments(assignments) {
+    let map = {};
+
+    for (const assignment of assignments) {
+        map[assignment.id] = assignment;
+    }
+
+    let result = [];
+
+    for (const key of Object.keys(map)) {
+        result.push(map[key]);
+    }
+
+    return result.sort((a, b) => a.id - b.id);
+}
+
+
+function sortAndDeduplicateReviews(reviews) {
+    let map = {};
+
+    for (const review of reviews) {
+        map[review.id] = review;
+    }
+
+    let result = [];
+
+    for (const key of Object.keys(map)) {
+        result.push(map[key]);
+    }
+
+    return result.sort((a, b) => a.id - b.id);
 }
 
 async function flushCache() {
@@ -154,18 +189,26 @@ async function fetchWithCache(path, cacheKey, ttl, _apiKey) {
         return cachedValue.data;
     }
 
-    const key = !!_apiKey ? _apiKey : apiKey();
-    const response = await fetchWanikaniApi(path, key,
-        ifModifiedSinceHeader(cachedValue?.lastUpdated));
+    try {
+        const key = !!_apiKey ? _apiKey : apiKey();
+        const response = await fetchWanikaniApi(path, key,
+            ifModifiedSinceHeader(cachedValue?.lastUpdated));
 
-    const data = await unwrapResponse(response, cachedValue?.data);
+        const data = await unwrapResponse(response, cachedValue?.data);
 
-    localForage.setItem(cacheKey, {
-        data: data,
-        lastUpdated: new Date().getTime(),
-    });
-
-    return data;
+        localForage.setItem(cacheKey, {
+            data: data,
+            lastUpdated: new Date().getTime(),
+        });
+        return data;
+    } catch (error) {
+        if (!!cachedValue && !!cachedValue.data) {
+            console.error('failed to fetch new data for ' + path + ', falling back to cached data...');
+            return cachedValue.data;
+        } else {
+            throw error;
+        }
+    }
 }
 
 async function getUser(apiKey) {
@@ -233,13 +276,18 @@ export default {
         const cachedValue = await localForage.getItem(cacheKeys.reviews);
         let reviews;
         if (!!cachedValue) {
-            reviews = cachedValue.data;
+            reviews = sortAndDeduplicateReviews(cachedValue.data);
             const lastId = reviews[reviews.length - 1].id;
-            const newData = await fetchMultiPageRequest('/v2/reviews', lastId);
-            reviews.push(...newData);
+            try {
+                const newData = await fetchMultiPageRequest('/v2/reviews', lastId);
+                reviews.push(...newData);
+            } catch (error) {
+                console.error('Failed to update reviews, possibly using stale data', error);
+            }
         } else {
             reviews = await fetchMultiPageRequest('/v2/reviews');
         }
+        reviews = sortAndDeduplicateReviews(reviews);
 
         const cacheObject = {
             data: reviews,

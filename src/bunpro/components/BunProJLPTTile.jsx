@@ -107,7 +107,7 @@ export function BunProJLPTTile() {
     }, []);
 
     return (
-        <Card>
+        <Card style={{minHeight: '465px'}}>
             <CardContent>
 
                 <Typography variant={'h6'}>

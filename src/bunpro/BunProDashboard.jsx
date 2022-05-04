@@ -6,6 +6,7 @@ import {BunProJLPTTile} from "./components/BunProJLPTTile";
 import BunProUpcomingReviewsChart from "./components/BunProUpcomingReviewsChart.jsx";
 import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
 import {useDeviceInfo} from "../hooks/useDeviceInfo.jsx";
+import BunProActiveItemsChart from "./components/BunProActiveItemsChart.jsx";
 
 const styles = {
     container: {
@@ -55,6 +56,10 @@ function BunProDashboard() {
                                 <BunProUpcomingReviewsChart/>
                             </div>
 
+                        </div>
+
+                        <div>
+                            <BunProActiveItemsChart/>
                         </div>
                     </div>
                 </BunProPreloadedData>

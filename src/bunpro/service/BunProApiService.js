@@ -42,7 +42,7 @@ function bunproHeaders(token) {
 
 function getRawBunProUser(token) {
     const _apiKey = !token ? apiKey() : token;
-    return fetch(`${baseBunProUrl}/v3/user`, {headers: bunproHeaders(_apiKey)});
+    return fetch(`${baseBunProUrl}/v4/user`, {headers: bunproHeaders(_apiKey)});
 }
 
 // Default timeout is 10 minutes
@@ -53,15 +53,24 @@ async function sendCacheableRequest(request, cacheKey, timeout = 60_000) {
         return cachedValue.data;
     }
 
-    const response = await fetch(request.url, request.options);
-    const data = await response.json();
+    try {
+        const response = await fetch(request.url, request.options);
+        const data = await response.json();
 
-    localForage.setItem(cacheKey, {
-        lastUpdated: Date.now(),
-        data: data
-    });
+        localForage.setItem(cacheKey, {
+            lastUpdated: Date.now(),
+            data: data
+        });
 
-    return data;
+        return data;
+    } catch (error) {
+        if (!!cachedValue && !!cachedValue.data) {
+            console.error('failed to fetch new data for ' + request.url + ', falling back to cached data...');
+            return cachedValue.data;
+        } else {
+            throw error;
+        }
+    }
 }
 
 async function getGrammarPoints() {
@@ -71,7 +80,7 @@ async function getGrammarPoints() {
             options: {headers: bunproHeaders()}
         },
         cacheKeys.grammarPoints,
-        1000 * 60 * 60 * 24
+        1000 * 60 * 60 * 24 * 3
     );
     return response.data;
 }
@@ -90,7 +99,7 @@ async function getUserProgress() {
 async function getAllReviews() {
     return await sendCacheableRequest(
         {
-            url: `${baseBunProUrl}/v3/reviews/all_reviews_total`,
+            url: `${baseBunProUrl}/v5/reviews/all_reviews_total`,
             options: {headers: bunproHeaders()}
         },
         cacheKeys.allReviews,
@@ -101,7 +110,7 @@ async function getAllReviews() {
 async function getPendingReviews() {
     return await sendCacheableRequest(
         {
-            url: `${baseBunProUrl}/v3/reviews/current_reviews`,
+            url: `${baseBunProUrl}/v4/reviews/current_reviews`,
             options: {headers: bunproHeaders()}
         },
         cacheKeys.pendingReviews,
@@ -112,7 +121,7 @@ async function getPendingReviews() {
 async function getBunProUser() {
     return await sendCacheableRequest(
         {
-            url: `${baseBunProUrl}/v3/user`,
+            url: `${baseBunProUrl}/v5/user`,
             options: {headers: bunproHeaders()}
         },
         cacheKeys.user,

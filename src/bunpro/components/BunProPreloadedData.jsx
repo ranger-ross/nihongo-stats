@@ -69,7 +69,7 @@ function BunProPreloadedData({children}) {
                             <strong>Loading BunPro Data...</strong>
                             <br/>
                             <LoadingItem text={'Grammar Points'} isLoading={!grammarPoints}/>
-                            <LoadingItem text={'Reviews'} isLoading={!grammarPoints}/>
+                            <LoadingItem text={'Reviews'} isLoading={!allReviews}/>
                         </div>
                     </div>
 

@@ -25,6 +25,12 @@ export function BunProWelcomeTile() {
                 setUser(user);
             });
 
+
+        BunProApiService.getUser()
+        BunProApiService.getUser()
+        BunProApiService.getUser()
+
+
         BunProApiService.getPendingReviews()
             .then(data => {
                 if (!isSubscribed)

@@ -1,7 +1,10 @@
 import * as localForage from "localforage/dist/localforage"
 import {AppUrls} from "../../Constants.js";
+import {PromiseCache} from "../../util/PromiseCache.js";
 
 const {apiProxy, bunproApi} = AppUrls;
+
+const promiseCache = new PromiseCache();
 
 
 // API Notes
@@ -73,8 +76,21 @@ async function sendCacheableRequest(request, cacheKey, timeout = 60_000) {
     }
 }
 
+
+// Join meaning when multiple requests for the same endpoint come in at the same time,
+// only send one request and return the data to all requests
+function joinAndSendCacheableRequest(request, cacheKey, timeout = 60_000) {
+    const name = request.url;
+    let promise = promiseCache.get(name);
+    if (!promise) {
+        promise = sendCacheableRequest(request, cacheKey, timeout);
+        promiseCache.put(name, promise, 1000)
+    }
+    return promise
+}
+
 async function getGrammarPoints() {
-    const response = await sendCacheableRequest(
+    const response = await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v5/grammar_points`,
             options: {headers: bunproHeaders()}
@@ -86,7 +102,7 @@ async function getGrammarPoints() {
 }
 
 async function getUserProgress() {
-    return await sendCacheableRequest(
+    return await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v3/user/progress`,
             options: {headers: bunproHeaders()}
@@ -97,7 +113,7 @@ async function getUserProgress() {
 }
 
 async function getAllReviews() {
-    return await sendCacheableRequest(
+    return await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v5/reviews/all_reviews_total`,
             options: {headers: bunproHeaders()}
@@ -108,7 +124,7 @@ async function getAllReviews() {
 }
 
 async function getPendingReviews() {
-    return await sendCacheableRequest(
+    return await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v4/reviews/current_reviews`,
             options: {headers: bunproHeaders()}
@@ -119,7 +135,7 @@ async function getPendingReviews() {
 }
 
 async function getBunProUser() {
-    return await sendCacheableRequest(
+    return await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v5/user`,
             options: {headers: bunproHeaders()}

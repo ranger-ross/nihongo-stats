@@ -1,6 +1,6 @@
-import {useState, useEffect, useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import {Card, CardContent, Typography, Switch, FormGroup, FormControlLabel} from "@mui/material";
+import {Card, CardContent, CircularProgress, FormControlLabel, FormGroup, Switch, Typography} from "@mui/material";
 import WanikaniItemTile from "./WanikaniItemTile.jsx";
 import {combineAssignmentAndSubject, isSubjectHidden} from "../service/WanikaniDataUtil.js";
 import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.js";
@@ -19,6 +19,7 @@ const styles = {
 };
 
 const defaultState = {
+    isLoading: true,
     radicals: [],
     kanji: [],
     vocabulary: [],
@@ -179,70 +180,77 @@ function WanikaniLevelItemsChart({level}) {
     return (
         <Card>
             <CardContent>
-                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                    <Typography variant={'h5'}
-                                color={'textPrimary'}
-                        // style={{paddingBottom: '10px'}}
-                    >
-                        Radicals <RatioLabel started={data.radicalsStarted} total={data.radicals.length}/>
-                    </Typography>
+                {data.isLoading ? (
+                    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90%'}}>
+                        <CircularProgress/>
+                    </div>
+                ) : (
+                    <>
+                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                            <Typography variant={'h5'}
+                                        color={'textPrimary'}
+                            >
+                                Radicals <RatioLabel started={data.radicalsStarted} total={data.radicals.length}/>
+                            </Typography>
 
-                    <div style={{flexGrow: 1, textAlign: isMobile ? 'right' : 'center'}}>
-                        <Typography variant={'body1'}
-                                    style={{color: 'lightgray'}}
+                            <div style={{flexGrow: 1, textAlign: isMobile ? 'right' : 'center'}}>
+                                <Typography variant={'body1'}
+                                            style={{color: 'lightgray'}}
+                                >
+                                    Level {isPreviousLevel ? level - 1 : level}
+                                </Typography>
+                            </div>
+
+                            <div style={isMobile ? styles.showPreviousLevelMobile : null}>
+                                <PreviousLevelSelector
+                                    selected={isPreviousLevel}
+                                    setSelected={setIsPreviousLevel}
+                                    isMobile={isMobile}
+                                />
+                            </div>
+                        </div>
+
+                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                            {data.radicals.map(subject => (
+                                <SubjectTile key={subject.subjectId + '-radicals'}
+                                             subject={subject}
+                                             isMobile={isMobile}
+                                />
+                            ))}
+                        </div>
+
+                        <Typography variant={'h5'}
+                                    color={'textPrimary'}
+                                    style={{paddingBottom: '10px', paddingTop: '15px'}}
                         >
-                            Level {isPreviousLevel ? level - 1 : level}
+                            Kanji <RatioLabel started={data.kanjiStarted} total={data.kanji.length}/>
                         </Typography>
-                    </div>
+                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                            {data.kanji.map(subject => (
+                                <SubjectTile key={subject.subjectId + '-kanji'}
+                                             subject={subject}
+                                             isMobile={isMobile}
+                                />
+                            ))}
 
-                    <div style={isMobile ? styles.showPreviousLevelMobile : null}>
-                        <PreviousLevelSelector
-                            selected={isPreviousLevel}
-                            setSelected={setIsPreviousLevel}
-                            isMobile={isMobile}
-                        />
-                    </div>
-                </div>
+                        </div>
 
-                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                    {data.radicals.map(subject => (
-                        <SubjectTile key={subject.subjectId + '-radicals'}
-                                     subject={subject}
-                                     isMobile={isMobile}
-                        />
-                    ))}
-                </div>
-
-                <Typography variant={'h5'}
-                            color={'textPrimary'}
-                            style={{paddingBottom: '10px', paddingTop: '15px'}}
-                >
-                    Kanji <RatioLabel started={data.kanjiStarted} total={data.kanji.length}/>
-                </Typography>
-                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                    {data.kanji.map(subject => (
-                        <SubjectTile key={subject.subjectId + '-kanji'}
-                                     subject={subject}
-                                     isMobile={isMobile}
-                        />
-                    ))}
-
-                </div>
-
-                <Typography variant={'h5'}
-                            color={'textPrimary'}
-                            style={{paddingBottom: '10px', paddingTop: '15px'}}
-                >
-                    Vocabulary <RatioLabel started={data.vocabularyStarted} total={data.vocabulary.length}/>
-                </Typography>
-                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                    {data.vocabulary.map(subject => (
-                        <SubjectTile key={subject.subjectId + '-vocab'}
-                                     subject={subject}
-                                     isMobile={isMobile}
-                        />
-                    ))}
-                </div>
+                        <Typography variant={'h5'}
+                                    color={'textPrimary'}
+                                    style={{paddingBottom: '10px', paddingTop: '15px'}}
+                        >
+                            Vocabulary <RatioLabel started={data.vocabularyStarted} total={data.vocabulary.length}/>
+                        </Typography>
+                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                            {data.vocabulary.map(subject => (
+                                <SubjectTile key={subject.subjectId + '-vocab'}
+                                             subject={subject}
+                                             isMobile={isMobile}
+                                />
+                            ))}
+                        </div>
+                    </>
+                )}
 
             </CardContent>
         </Card>

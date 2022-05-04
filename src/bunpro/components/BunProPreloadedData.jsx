@@ -1,8 +1,8 @@
 import {useEffect, useState} from "react";
 import {CircularProgress} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
-import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.jsx";
 import BunProApiService from "../service/BunProApiService.js";
+import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus.jsx";
 
 const styles = {
     loadingItem: {
@@ -36,7 +36,7 @@ function LoadingItem({text, isLoading}) {
 function BunProPreloadedData({children}) {
     const [grammarPoints, setGrammarPoints] = useState(false);
     const [allReviews, setAllReviews] = useState(false);
-    const {status, setStatus} = useWanikaniPreloadStatus();
+    const {status, setStatus} = useBunProPreloadStatus();
 
     useEffect(() => {
         if (status) {

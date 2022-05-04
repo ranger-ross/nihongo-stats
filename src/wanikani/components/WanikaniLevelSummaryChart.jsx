@@ -30,7 +30,8 @@ const styles = {
     spinnerContainer: {
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        minHeight: '240px'
     }
 };
 

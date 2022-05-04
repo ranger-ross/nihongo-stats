@@ -15,7 +15,7 @@ const styles = {
         margin: '5px'
     },
     groupTitle: {
-        paddingBottom: '10px'
+        paddingBottom: '4px'
     },
     subGroupTitle: {
         paddingTop: '12px',
@@ -54,7 +54,7 @@ function ItemGroupingData({subjects, secondaryGroupBy, sortBy, colorBy, sortReve
                     <div style={styles.subGroupTitle}>
                         {group.title === 'All Items' ? null : group.title}
                     </div>
-                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                    <div style={{display: 'flex', gap: '5px', flexWrap: 'wrap'}}>
                         {group.subjects?.map(subject => (
                             <SubjectTile key={subject.subjectId + '-subject'}
                                          subject={subject}
@@ -80,7 +80,7 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortR
         <Card style={{margin: '5px'}}>
             <CardContent>
 
-                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                <div style={{display: 'flex', gap: '5px', flexWrap: 'wrap'}}>
                     <Typography variant={'h6'}
                                 color={'textPrimary'}
                                 style={styles.groupTitle}

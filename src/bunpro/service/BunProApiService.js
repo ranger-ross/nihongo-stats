@@ -79,12 +79,12 @@ async function sendCacheableRequest(request, cacheKey, timeout = 60_000) {
 
 // Join meaning when multiple requests for the same endpoint come in at the same time,
 // only send one request and return the data to all requests
-function joinAndSendCacheableRequest(request, cacheKey, timeout = 60_000) {
+function joinAndSendCacheableRequest(request, cacheKey, timeout = 60_000, ttl = 1000) {
     const name = request.url;
     let promise = promiseCache.get(name);
     if (!promise) {
         promise = sendCacheableRequest(request, cacheKey, timeout);
-        promiseCache.put(name, promise, 1000)
+        promiseCache.put(name, promise, ttl)
     }
     return promise
 }

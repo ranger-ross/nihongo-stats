@@ -1,8 +1,10 @@
 import * as localForage from "localforage/dist/localforage"
 import InMemoryCache from "../../util/InMemoryCache.js";
 import {AppUrls} from "../../Constants.js";
+import {PromiseCache} from "../../util/PromiseCache.js";
 
 const memoryCache = new InMemoryCache();
+const promiseCache = new PromiseCache();
 
 const wanikaniApiUrl = AppUrls.wanikaniApi;
 const cacheKeys = {
@@ -211,40 +213,38 @@ async function fetchWithCache(path, cacheKey, ttl, _apiKey) {
     }
 }
 
-async function getUser(apiKey) {
-    return await fetchWithCache('/v2/user', cacheKeys.user, 1000, apiKey)
+// Join meaning when multiple requests for the same endpoint come in at the same time,
+// only send one request and return the data to all requests
+function joinAndSendCacheableRequest(request, cacheKey, factory, ttl = 1000, _apiKey) {
+    const name = request;
+    let promise = promiseCache.get(name);
+    if (!promise) {
+        promise = factory(request, cacheKey, _apiKey);
+        promiseCache.put(name, promise, ttl)
+    } else {
+        console.debug('joined promise', request)
+    }
+    return promise
 }
 
-async function getSummary() {
-    return await fetchWithCache('/v2/summary', cacheKeys.summary, 1000 * 60)
+function getUser(apiKey) {
+    return joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000, apiKey);
 }
 
-async function getAssignmentsForLevel(level) {
-    return await fetchWithCache(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, 1000 * 60)
+function getSummary() {
+    return joinAndSendCacheableRequest('/v2/summary', cacheKeys.summary, fetchWithCache, 1000 * 60);
 }
 
-async function getLevelProgress() {
-    return await fetchWithCache('/v2/level_progressions', cacheKeys.levelProgression, 1000 * 60)
+function getAssignmentsForLevel(level) {
+    return joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
 }
 
-export default {
-    saveApiKey: saveApiKey,
-    apiKey: apiKey,
-    flushCache: flushCache,
+function getLevelProgress() {
+    return joinAndSendCacheableRequest('/v2/level_progressions', cacheKeys.levelProgression, fetchWithCache, 1000 * 60);
+}
 
-
-    login: async (apiKey) => {
-        const user = await getUser(apiKey);
-        saveApiKey(apiKey);
-        return user;
-    },
-    getUser: getUser,
-    getSummary: getSummary,
-    getLevelProgress: getLevelProgress,
-    getAssignmentsForLevel: getAssignmentsForLevel,
-    getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
-    getAllAssignments: getAllAssignments,
-    getSubjects: async () => {
+function getSubjects() {
+    const fetchSubjects = async () => {
         if (memoryCache.includes(cacheKeys.subjects)) {
             return memoryCache.get(cacheKeys.subjects);
         }
@@ -263,8 +263,22 @@ export default {
         });
         memoryCache.put(cacheKeys.subjects, subjects);
         return subjects;
-    },
-    getReviews: async () => {
+    }
+
+
+    const name = 'getSubjects';
+    let promise = promiseCache.get(name);
+    if (!promise) {
+        promise = fetchSubjects()
+        promiseCache.put(name, promise, 60_000)
+    } else {
+        console.debug('joined promise', name)
+    }
+    return promise
+}
+
+function getReviews() {
+    const fetchReviews = async () => {
         if (memoryCache.includes(cacheKeys.reviews)) {
             const cachedValue = memoryCache.get(cacheKeys.reviews);
             // Only check for new reviews every 60 seconds
@@ -297,7 +311,39 @@ export default {
         memoryCache.put(cacheKeys.reviews, cacheObject);
 
         return reviews;
+    }
+
+    const name = 'getReviews';
+    let promise = promiseCache.get(name);
+    if (!promise) {
+        promise = fetchReviews()
+        promiseCache.put(name, promise, 60_000)
+    } else {
+        console.debug('joined promise', name)
+    }
+    return promise
+
+}
+
+export default {
+    saveApiKey: saveApiKey,
+    apiKey: apiKey,
+    flushCache: flushCache,
+
+
+    login: async (apiKey) => {
+        const user = await getUser(apiKey);
+        saveApiKey(apiKey);
+        return user;
     },
+    getUser: getUser,
+    getSummary: getSummary,
+    getLevelProgress: getLevelProgress,
+    getAssignmentsForLevel: getAssignmentsForLevel,
+    getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
+    getAllAssignments: getAllAssignments,
+    getSubjects: getSubjects,
+    getReviews: getReviews,
     getPendingLessonsAndReviews: async () => {
         const summary = await getSummary();
         let lessons = 0;

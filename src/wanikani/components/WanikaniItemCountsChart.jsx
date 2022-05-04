@@ -19,7 +19,7 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '120px'
+        height: '135px'
     },
 };
 

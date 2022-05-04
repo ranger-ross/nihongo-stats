@@ -14,24 +14,35 @@ import {
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
 import AnkiApiService from "../../anki/service/AnkiApiService.js";
+import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.jsx";
+import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus.jsx";
 
-async function purgeLocalData(options) {
-    console.log('Purging local data', options);
+function usePurgeLocalData() {
+    const {setStatus: setWanikaniPreloadStatus} = useWanikaniPreloadStatus();
+    const {setStatus: setBunProPreloadStatus} = useBunProPreloadStatus();
 
-    let jobs = [];
+    return {
+        purgeLocalData: async function (options) {
+            console.log('Purging local data', options);
 
-    if (options.anki) {
-        jobs.push(AnkiApiService.flushCache());
-    }
+            let jobs = [];
 
-    if (options.bunPro) {
-        jobs.push(BunProApiService.flushCache());
-    }
+            if (options.anki) {
+                jobs.push(AnkiApiService.flushCache());
+            }
 
-    if (options.wanikani) {
-        jobs.push(WanikaniApiService.flushCache());
-    }
-    return Promise.all(jobs);
+            if (options.bunPro) {
+                jobs.push(BunProApiService.flushCache());
+                setBunProPreloadStatus(false);
+            }
+
+            if (options.wanikani) {
+                jobs.push(WanikaniApiService.flushCache());
+                setWanikaniPreloadStatus(false);
+            }
+            return Promise.all(jobs);
+        }
+    };
 }
 
 const defaultState = {
@@ -42,6 +53,7 @@ const defaultState = {
 
 export function ClearCacheDialog({isOpen, onClose}) {
     const [state, setState] = useState(defaultState);
+    const {purgeLocalData} = usePurgeLocalData();
 
     useEffect(() => {
         if (!isOpen)

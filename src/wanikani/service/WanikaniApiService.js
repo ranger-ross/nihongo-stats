@@ -1,8 +1,10 @@
 import * as localForage from "localforage/dist/localforage"
 import InMemoryCache from "../../util/InMemoryCache.js";
 import {AppUrls} from "../../Constants.js";
+import {PromiseCache} from "../../util/PromiseCache.js";
 
 const memoryCache = new InMemoryCache();
+const promiseCache = new PromiseCache();
 
 const wanikaniApiUrl = AppUrls.wanikaniApi;
 const cacheKeys = {
@@ -111,7 +113,9 @@ async function getAllAssignments() {
         return cachedValue.data;
     }
 
-    const assignments = await getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments');
+    let assignments = await getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments');
+
+    assignments = sortAndDeduplicateAssignments(assignments);
 
     const cacheObject = {
         data: assignments,
@@ -121,6 +125,39 @@ async function getAllAssignments() {
     memoryCache.put(cacheKeys.assignments, cacheObject);
 
     return assignments;
+}
+
+function sortAndDeduplicateAssignments(assignments) {
+    let map = {};
+
+    for (const assignment of assignments) {
+        map[assignment.id] = assignment;
+    }
+
+    let result = [];
+
+    for (const key of Object.keys(map)) {
+        result.push(map[key]);
+    }
+
+    return result.sort((a, b) => a.id - b.id);
+}
+
+
+function sortAndDeduplicateReviews(reviews) {
+    let map = {};
+
+    for (const review of reviews) {
+        map[review.id] = review;
+    }
+
+    let result = [];
+
+    for (const key of Object.keys(map)) {
+        result.push(map[key]);
+    }
+
+    return result.sort((a, b) => a.id - b.id);
 }
 
 async function flushCache() {
@@ -154,34 +191,138 @@ async function fetchWithCache(path, cacheKey, ttl, _apiKey) {
         return cachedValue.data;
     }
 
-    const key = !!_apiKey ? _apiKey : apiKey();
-    const response = await fetchWanikaniApi(path, key,
-        ifModifiedSinceHeader(cachedValue?.lastUpdated));
+    try {
+        const key = !!_apiKey ? _apiKey : apiKey();
+        const response = await fetchWanikaniApi(path, key,
+            ifModifiedSinceHeader(cachedValue?.lastUpdated));
 
-    const data = await unwrapResponse(response, cachedValue?.data);
+        const data = await unwrapResponse(response, cachedValue?.data);
 
-    localForage.setItem(cacheKey, {
-        data: data,
-        lastUpdated: new Date().getTime(),
-    });
-
-    return data;
+        localForage.setItem(cacheKey, {
+            data: data,
+            lastUpdated: new Date().getTime(),
+        });
+        return data;
+    } catch (error) {
+        if (!!cachedValue && !!cachedValue.data) {
+            console.error('failed to fetch new data for ' + path + ', falling back to cached data...');
+            return cachedValue.data;
+        } else {
+            throw error;
+        }
+    }
 }
 
-async function getUser(apiKey) {
-    return await fetchWithCache('/v2/user', cacheKeys.user, 1000, apiKey)
+// Join meaning when multiple requests for the same endpoint come in at the same time,
+// only send one request and return the data to all requests
+function joinAndSendCacheableRequest(request, cacheKey, factory, ttl = 1000, _apiKey) {
+    const name = request;
+    let promise = promiseCache.get(name);
+    if (!promise) {
+        promise = factory(request, cacheKey, _apiKey);
+        promiseCache.put(name, promise, ttl)
+    } else {
+        console.debug('joined promise', request)
+    }
+    return promise
 }
 
-async function getSummary() {
-    return await fetchWithCache('/v2/summary', cacheKeys.summary, 1000 * 60)
+function getUser(apiKey) {
+    return joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000, apiKey);
 }
 
-async function getAssignmentsForLevel(level) {
-    return await fetchWithCache(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, 1000 * 60)
+function getSummary() {
+    return joinAndSendCacheableRequest('/v2/summary', cacheKeys.summary, fetchWithCache, 1000 * 60);
 }
 
-async function getLevelProgress() {
-    return await fetchWithCache('/v2/level_progressions', cacheKeys.levelProgression, 1000 * 60)
+function getAssignmentsForLevel(level) {
+    return joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
+}
+
+function getLevelProgress() {
+    return joinAndSendCacheableRequest('/v2/level_progressions', cacheKeys.levelProgression, fetchWithCache, 1000 * 60);
+}
+
+function getSubjects() {
+    const fetchSubjects = async () => {
+        if (memoryCache.includes(cacheKeys.subjects)) {
+            return memoryCache.get(cacheKeys.subjects);
+        }
+
+        const cachedValue = await localForage.getItem(cacheKeys.subjects);
+        if (!!cachedValue) {
+            memoryCache.put(cacheKeys.subjects, cachedValue.data);
+            return cachedValue.data;
+        }
+
+        const subjects = await fetchMultiPageRequest('/v2/subjects');
+
+        localForage.setItem(cacheKeys.subjects, {
+            data: subjects,
+            lastUpdated: new Date().getTime(),
+        });
+        memoryCache.put(cacheKeys.subjects, subjects);
+        return subjects;
+    }
+
+
+    const name = 'getSubjects';
+    let promise = promiseCache.get(name);
+    if (!promise) {
+        promise = fetchSubjects()
+        promiseCache.put(name, promise, 60_000)
+    } else {
+        console.debug('joined promise', name)
+    }
+    return promise
+}
+
+function getReviews() {
+    const fetchReviews = async () => {
+        if (memoryCache.includes(cacheKeys.reviews)) {
+            const cachedValue = memoryCache.get(cacheKeys.reviews);
+            // Only check for new reviews every 60 seconds
+            if (cachedValue.lastUpdated > (Date.now() - 1000 * 60)) {
+                return cachedValue.data;
+            }
+        }
+
+        const cachedValue = await localForage.getItem(cacheKeys.reviews);
+        let reviews;
+        if (!!cachedValue) {
+            reviews = sortAndDeduplicateReviews(cachedValue.data);
+            const lastId = reviews[reviews.length - 1].id;
+            try {
+                const newData = await fetchMultiPageRequest('/v2/reviews', lastId);
+                reviews.push(...newData);
+            } catch (error) {
+                console.error('Failed to update reviews, possibly using stale data', error);
+            }
+        } else {
+            reviews = await fetchMultiPageRequest('/v2/reviews');
+        }
+        reviews = sortAndDeduplicateReviews(reviews);
+
+        const cacheObject = {
+            data: reviews,
+            lastUpdated: new Date().getTime(),
+        };
+        localForage.setItem(cacheKeys.reviews, cacheObject);
+        memoryCache.put(cacheKeys.reviews, cacheObject);
+
+        return reviews;
+    }
+
+    const name = 'getReviews';
+    let promise = promiseCache.get(name);
+    if (!promise) {
+        promise = fetchReviews()
+        promiseCache.put(name, promise, 60_000)
+    } else {
+        console.debug('joined promise', name)
+    }
+    return promise
+
 }
 
 export default {
@@ -201,55 +342,8 @@ export default {
     getAssignmentsForLevel: getAssignmentsForLevel,
     getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
     getAllAssignments: getAllAssignments,
-    getSubjects: async () => {
-        if (memoryCache.includes(cacheKeys.subjects)) {
-            return memoryCache.get(cacheKeys.subjects);
-        }
-
-        const cachedValue = await localForage.getItem(cacheKeys.subjects);
-        if (!!cachedValue) {
-            memoryCache.put(cacheKeys.subjects, cachedValue.data);
-            return cachedValue.data;
-        }
-
-        const subjects = await fetchMultiPageRequest('/v2/subjects');
-
-        localForage.setItem(cacheKeys.subjects, {
-            data: subjects,
-            lastUpdated: new Date().getTime(),
-        });
-        memoryCache.put(cacheKeys.subjects, subjects);
-        return subjects;
-    },
-    getReviews: async () => {
-        if (memoryCache.includes(cacheKeys.reviews)) {
-            const cachedValue = memoryCache.get(cacheKeys.reviews);
-            // Only check for new reviews every 60 seconds
-            if (cachedValue.lastUpdated > (Date.now() - 1000 * 60)) {
-                return cachedValue.data;
-            }
-        }
-
-        const cachedValue = await localForage.getItem(cacheKeys.reviews);
-        let reviews;
-        if (!!cachedValue) {
-            reviews = cachedValue.data;
-            const lastId = reviews[reviews.length - 1].id;
-            const newData = await fetchMultiPageRequest('/v2/reviews', lastId);
-            reviews.push(...newData);
-        } else {
-            reviews = await fetchMultiPageRequest('/v2/reviews');
-        }
-
-        const cacheObject = {
-            data: reviews,
-            lastUpdated: new Date().getTime(),
-        };
-        localForage.setItem(cacheKeys.reviews, cacheObject);
-        memoryCache.put(cacheKeys.reviews, cacheObject);
-
-        return reviews;
-    },
+    getSubjects: getSubjects,
+    getReviews: getReviews,
     getPendingLessonsAndReviews: async () => {
         const summary = await getSummary();
         let lessons = 0;

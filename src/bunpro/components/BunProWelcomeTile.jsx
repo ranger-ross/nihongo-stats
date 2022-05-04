@@ -25,6 +25,12 @@ export function BunProWelcomeTile() {
                 setUser(user);
             });
 
+
+        BunProApiService.getUser()
+        BunProApiService.getUser()
+        BunProApiService.getUser()
+
+
         BunProApiService.getPendingReviews()
             .then(data => {
                 if (!isSubscribed)
@@ -39,11 +45,11 @@ export function BunProWelcomeTile() {
         <Card>
             <CardContent>
                 <Typography variant={'h5'} style={styles.welcomeText}>
-                    Welcome {user?.username}
+                    Welcome {user?.data?.attributes?.username}
                 </Typography>
 
                 <div style={{display: 'flex', gap: '10px', marginTop: '10px', width: '260px'}}>
-                    <BunProPendingReviews count={pendingReviews} />
+                    <BunProPendingReviews count={pendingReviews}/>
                 </div>
             </CardContent>
         </Card>

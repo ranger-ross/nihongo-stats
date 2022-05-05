@@ -263,7 +263,7 @@ export const sortByOptions = {
         sort: (subjects) => {
 
             function getFrequency(subject) {
-                return kanjiFrequencyLookupMap[subject.slug];
+                return kanjiFrequencyLookupMap[subject.slug] ?? 1_000_000;
             }
 
             return subjects.sort((a, b) => getFrequency(a) - getFrequency(b));

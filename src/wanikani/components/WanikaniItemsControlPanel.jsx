@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import * as React from "react";
 import {useMemo, useState} from "react";
-import {groupByOptions, sortByOptions, colorByOptions} from "../service/WanikaniDataUtil.js";
+import {colorByOptions, groupByOptions, sortByOptions} from "../service/WanikaniDataUtil.js";
 import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
 
 const styles = {
@@ -188,6 +188,11 @@ export function useWanikaniItemControls() {
             changes.colorBy = colorByOptions.srsStage;
         }
 
+        if (!isKanjiOnly && prev.sortBy.key === sortByOptions.frequency.key) {
+            changes.sortBy = sortByOptions.level;
+            changes.sortReverse = false;
+        }
+
         return {...prev, ...changes};
     });
 
@@ -293,7 +298,7 @@ function WanikaniItemsControlPanel({control, set}) {
 
     const secondaryGroupDisabled = useMemo(() => {
         if (primaryGroupBy.key === groupByOptions.none.key)
-            return [groupByOptions.none, groupByOptions.srsStage, groupByOptions.level];
+            return [groupByOptions.srsStage, groupByOptions.level, groupByOptions.jlpt, groupByOptions.itemType];
         else
             return [primaryGroupBy];
     }, [primaryGroupBy.key]);

@@ -98,13 +98,13 @@ function GrammarPointTile({grammarPoint, review}) {
     return (
         <a
             style={{
-                background: 'rgb(45 45 45)',
+                background: isStarted ? 'rgb(32 32 32)' : 'rgb(45 45 45)',
                 fontSize: 26,
                 fontWeight: 'bold',
                 padding: '10px',
                 borderRadius: '10px',
                 border: `solid ${softWhite}`,
-                color: isStarted ? 'white' : softWhite,
+                color: isStarted ? 'white' : 'rgb(115 114 114)',
                 textDecoration: 'none',
             }}
             href={'https://www.bunpro.jp/grammar_points/' + grammarPoint.id}

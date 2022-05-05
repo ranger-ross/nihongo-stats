@@ -113,7 +113,7 @@ function GrammarPointTile({grammarPoint, review}) {
     )
 }
 
-function BunProActiveItemsChart() {
+function BunProActiveItemsChart({showBunProHeader = false}) {
     const [data, setData] = useState(defaultData);
 
     useEffect(() => {
@@ -130,6 +130,15 @@ function BunProActiveItemsChart() {
     return (
         <Card>
             <CardContent>
+                {showBunProHeader ? (
+                    <Typography variant={'h5'}
+                                color={'textPrimary'}
+                                style={{marginBottom: '15px'}}
+                    >
+                        BunPro Items
+                    </Typography>
+                ) : null}
+
                 {data.isLoading ? (
                     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90%'}}>
                         <CircularProgress/>

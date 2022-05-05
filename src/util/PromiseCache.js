@@ -8,9 +8,9 @@ export function PromiseCache() {
 
     function put(name, promise, ttl) {
         cache[name] = promise;
-        promise.finally(() => setTimeout(() => {
-            cache[name] = null;
-        }, ttl));
+        const removeFromCache = () => cache[name] = null;
+        promise.catch(removeFromCache)
+        promise.finally(() => setTimeout(removeFromCache, ttl));
     }
 
     return {

@@ -137,7 +137,7 @@ function SubjectTile({subject, isMobile}) {
     );
 }
 
-function WanikaniLevelItemsChart({level}) {
+function WanikaniLevelItemsChart({level, showWanikaniHeader = false}) {
     const {wanikaniPreferences} = useUserPreferences();
     const isFirstLoad = useRef(true);
     const [isPreviousLevel, setIsPreviousLevel] = useState(true);
@@ -180,6 +180,15 @@ function WanikaniLevelItemsChart({level}) {
     return (
         <Card>
             <CardContent>
+                {showWanikaniHeader ? (
+                    <Typography variant={'h5'}
+                                color={'textPrimary'}
+                                style={{marginBottom: '15px'}}
+                    >
+                        Wanikani Items
+                    </Typography>
+                ) : null}
+
                 {data.isLoading ? (
                     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90%'}}>
                         <CircularProgress/>
@@ -257,7 +266,7 @@ function WanikaniLevelItemsChart({level}) {
     );
 }
 
-function WanikaniActiveItemsChart() {
+function WanikaniActiveItemsChart({showWanikaniHeader = false}) {
     const [user, setUser] = useState();
     useEffect(() => {
         let isSubscribed = true;
@@ -275,6 +284,7 @@ function WanikaniActiveItemsChart() {
             {!!user ? (
                 <WanikaniLevelItemsChart
                     level={user.data.level}
+                    showWanikaniHeader={showWanikaniHeader}
                 />
             ) : null}
         </>

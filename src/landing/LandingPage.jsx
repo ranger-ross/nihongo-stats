@@ -1,9 +1,10 @@
 import {Button, Card, CardContent, Container, Typography} from "@mui/material";
 import {Navigate} from "react-router";
-import {RoutePaths} from "../Routes.jsx";
 import {useSelectedApp} from "../hooks/useSelectedApp.jsx";
 import {AppNames} from "../Constants.js";
 import create from "zustand";
+import {useUserPreferences} from "../hooks/useUserPreferences.jsx";
+import {convertAppNameToDashboardRoute} from "../Routes.jsx";
 
 const styles = {
     container: {
@@ -31,12 +32,16 @@ export const useIsLandingPageRead = create(set => ({
 function LandingPage() {
     const {selectedApp, setSelectedApp} = useSelectedApp();
     const {isLandingPageRead, markAsRead} = useIsLandingPageRead();
+    const {globalPreferences} = useUserPreferences();
 
     if (isLandingPageRead) {
-        if (selectedApp === AppNames.overview) {
-            return (<Navigate to={RoutePaths.overviewDashboard.path} replace={true}/>);
+        const defaultDashboard = globalPreferences.defaultDashboard ?? AppNames.overview;
+
+        if (selectedApp === defaultDashboard) {
+            const dashboardRoute = convertAppNameToDashboardRoute(defaultDashboard);
+            return (<Navigate to={dashboardRoute.path} replace={true}/>);
         } else {
-            setSelectedApp(AppNames.overview);
+            setSelectedApp(defaultDashboard);
         }
         return null;
     }

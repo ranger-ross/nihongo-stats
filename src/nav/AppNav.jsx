@@ -1,7 +1,7 @@
 import {Box, Grid} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router";
-import {AllRoutes, RoutePaths} from '../Routes';
+import {AllRoutes, convertAppNameToDashboardRoute} from '../Routes';
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import AppSelector from "./components/AppSelector";
 import WanikaniNav from "./navbars/WanikaniNav.jsx";
@@ -55,20 +55,8 @@ function AppNav() {
             return;
         }
 
-        switch (selectedApp) {
-            case AppNames.overview:
-                navigate(RoutePaths.overviewDashboard.path);
-                break;
-            case AppNames.wanikani:
-                navigate(RoutePaths.wanikaniDashboard.path);
-                break;
-            case AppNames.anki:
-                navigate(RoutePaths.ankiDashboard.path);
-                break;
-            case AppNames.bunpro:
-                navigate(RoutePaths.bunproDashboard.path);
-                break;
-        }
+        const dashboardRoute = convertAppNameToDashboardRoute(selectedApp);
+        navigate(dashboardRoute.path);
     }, [selectedApp])
 
     const hideNav = !!route && route.hideNav;

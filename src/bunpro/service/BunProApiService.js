@@ -148,7 +148,7 @@ async function getBunProUser() {
 async function login(apiKey) {
     const response = await getRawBunProUser(apiKey);
 
-    if (response.status === 200) {
+    if (response.ok) {
         const user = await response.json();
         saveApiKey(apiKey);
         return user;

@@ -342,11 +342,7 @@ export default {
     flushCache: flushCache,
 
 
-    login: async (apiKey) => {
-        const user = await attemptLogin(apiKey);
-        saveApiKey(apiKey);
-        return user;
-    },
+    login: attemptLogin,
     getUser: getUser,
     getSummary: getSummary,
     getLevelProgress: getLevelProgress,

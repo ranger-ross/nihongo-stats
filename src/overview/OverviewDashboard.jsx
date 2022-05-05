@@ -46,7 +46,7 @@ function OverviewDashboard() {
         <div style={styles.container}>
             <div style={styles.innerContainer}>
 
-                <div style={{...styles.leftPanel, minWidth: !isMobile ? '500px' : null}}>
+                <div style={{...styles.leftPanel, minWidth: !isMobile ? '200px' : null}}>
                     <OverviewWelcomeTile/>
                 </div>
 

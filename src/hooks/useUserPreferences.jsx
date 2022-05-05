@@ -1,7 +1,10 @@
 import create from 'zustand'
 import {persist} from "zustand/middleware";
+import {AppNames} from "../Constants.js";
 
-const globalDefaultPreferences = {};
+const globalDefaultPreferences = {
+    defaultDashboard: AppNames.overview
+};
 const ankiDefaultPreferences = {};
 const bunProDefaultPreferences = {};
 const wanikaniDefaultPreferences = {
@@ -26,4 +29,5 @@ export const useUserPreferences = create(persist(
     }),
     {
         name: 'user-preferences'
-    }));
+    })
+);

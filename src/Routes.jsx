@@ -86,3 +86,16 @@ export function AppRoutes() {
         </Routes>
     );
 }
+
+export function convertAppNameToDashboardRoute(appName) {
+    switch (appName) {
+        case AppNames.overview:
+            return RoutePaths.overviewDashboard
+        case AppNames.wanikani:
+            return RoutePaths.wanikaniDashboard;
+        case AppNames.anki:
+            return RoutePaths.ankiDashboard
+        case AppNames.bunpro:
+            return RoutePaths.bunproDashboard
+    }
+}

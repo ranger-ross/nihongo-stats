@@ -1,4 +1,4 @@
-import {Button, Grid, Link, TextField, Typography} from "@mui/material";
+import {Alert, Button, Grid, Link, Snackbar, TextField, Typography} from "@mui/material";
 import {useState} from "react";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
@@ -23,6 +23,7 @@ function EnterBunProApiKeyPage() {
     const navigate = useNavigate();
     const {setApiKey} = useBunProApiKey();
     const [textfieldValue, setTextfieldValue] = useState('');
+    const [isFailure, setIsFailure] = useState(false);
 
     const verifyAndSetApiKey = (key) => {
         BunProApiService.login(key)
@@ -31,7 +32,10 @@ function EnterBunProApiKeyPage() {
                 setApiKey(key);
                 navigate(RoutePaths.bunproDashboard.path);
             })
-            .catch(console.error);
+            .catch(e => {
+                console.error('BunPro login error', e);
+                setIsFailure(true);
+            });
     };
 
     return (
@@ -41,6 +45,20 @@ function EnterBunProApiKeyPage() {
               justifyContent="center"
               spacing={0}
         >
+            <Snackbar
+                open={isFailure}
+                anchorOrigin={{vertical: 'top', horizontal: 'right'}}
+                autoHideDuration={6000}
+                onClose={() => setIsFailure(false)}
+            >
+                <Alert
+                    severity="error"
+                    sx={{width: '100%'}}
+                >
+                    Failed to login
+                </Alert>
+            </Snackbar>
+
             <Grid item xs={12}>
                 <Typography style={styles.text}>
                     Please enter your <Link href="https://www.bunpro.jp/settings/api"

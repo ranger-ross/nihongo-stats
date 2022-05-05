@@ -39,7 +39,7 @@ function EnterWanikaniApiKeyPage() {
                 navigate(RoutePaths.wanikaniDashboard.path);
             })
             .catch(e => {
-                console.error('login error', e);
+                console.error('Wanikani login error', e);
                 setIsFailure(true);
             });
     };
@@ -61,7 +61,7 @@ function EnterWanikaniApiKeyPage() {
                     severity="error"
                     sx={{width: '100%'}}
                 >
-                    Failed to Login
+                    Failed to login
                 </Alert>
             </Snackbar>
 

@@ -1,6 +1,8 @@
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import BunProApiService from "../service/BunProApiService.js";
+import {lightenDarkenColor} from "../../util/CssUtils.js";
+import {BunProColors} from "../../Constants.js";
 
 function getBunProGrammarPointsGroupedByLesson(grammarPoints) {
     let map = {};
@@ -113,7 +115,7 @@ function GrammarPointTile({grammarPoint, review}) {
     )
 }
 
-function BunProActiveItemsChart() {
+function BunProActiveItemsChart({showBunProHeader = false}) {
     const [data, setData] = useState(defaultData);
 
     useEffect(() => {
@@ -127,9 +129,38 @@ function BunProActiveItemsChart() {
         return () => isSubscribed = false;
     }, [])
 
+    const percentage = data.isLoading ? 0.0 : (
+        (data.data.filter(gp => !!gp.review).length) / (data.data.length)
+    );
+
     return (
         <Card>
             <CardContent>
+
+                <div style={{
+                    position: 'relative',
+                    top: -16,
+                    left: -16,
+                    background: 'linear-gradient(to right, ' +
+                        lightenDarkenColor(BunProColors.blue, 30) + ' , ' +
+                        lightenDarkenColor(BunProColors.blue, -30) + ')',
+                    height: '5px',
+                    width: `${percentage * 110}%`,
+                    borderRadius: '10px',
+                    transition: 'width 1s',
+                    transitionTimingFunction: 'ease-out',
+                    transitionDelay: '350ms'
+                }}/>
+
+                {showBunProHeader ? (
+                    <Typography variant={'h5'}
+                                color={'textPrimary'}
+                                style={{marginBottom: '15px'}}
+                    >
+                        BunPro Items
+                    </Typography>
+                ) : null}
+
                 {data.isLoading ? (
                     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90%'}}>
                         <CircularProgress/>

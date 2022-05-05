@@ -163,7 +163,7 @@ function OverviewWelcomeTile() {
     const showNotSignedIn = !isAnkiConnected && !bunProApiKey && !wanikaniApiKey;
 
     return (
-        <Card>
+        <Card style={{minHeight: '595px'}}>
             <CardContent>
 
                 <div style={styles.titleContainer}>

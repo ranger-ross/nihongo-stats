@@ -11,6 +11,7 @@ const cacheKeys = {
     apiKey: 'wanikani-api-key',
     reviews: 'wanikani-reviews',
     user: 'wanikani-user',
+    login: 'wanikani-login',
     subjects: 'wanikani-subjects',
     assignments: 'wanikani-assignments',
     summary: 'wanikani-summary',
@@ -196,7 +197,13 @@ async function fetchWithCache(path, cacheKey, ttl, _apiKey) {
         const response = await fetchWanikaniApi(path, key,
             ifModifiedSinceHeader(cachedValue?.lastUpdated));
 
+        if (response.status >= 400)
+            throw new Error(`Failed load data, Path: ${path}, Response: ${response.status}`);
+
         const data = await unwrapResponse(response, cachedValue?.data);
+
+        if (data?.code === 401)
+            throw new Error('Failed to authenticate');
 
         localForage.setItem(cacheKey, {
             data: data,
@@ -227,8 +234,8 @@ function joinAndSendCacheableRequest(request, cacheKey, factory, ttl = 1000, _ap
     return promise
 }
 
-function getUser(apiKey) {
-    return joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000, apiKey);
+function getUser() {
+    return joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000);
 }
 
 function getSummary() {
@@ -275,6 +282,10 @@ function getSubjects() {
         console.debug('joined promise', name)
     }
     return promise
+}
+
+function attemptLogin(apiKey) {
+    return fetchWanikaniApi('/v2/user', apiKey);
 }
 
 function getReviews() {
@@ -332,7 +343,7 @@ export default {
 
 
     login: async (apiKey) => {
-        const user = await getUser(apiKey);
+        const user = await attemptLogin(apiKey);
         saveApiKey(apiKey);
         return user;
     },

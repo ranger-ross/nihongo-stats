@@ -7,6 +7,7 @@ import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.js";
 import {WanikaniColors} from "../../Constants.js";
 import {useUserPreferences} from "../../hooks/useUserPreferences.jsx";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
+import {lightenDarkenColor} from "../../util/CssUtils.js";
 
 const styles = {
     showPreviousLevelMobile: {
@@ -137,7 +138,7 @@ function SubjectTile({subject, isMobile}) {
     );
 }
 
-function WanikaniLevelItemsChart({level}) {
+function WanikaniLevelItemsChart({level, showWanikaniHeader = false}) {
     const {wanikaniPreferences} = useUserPreferences();
     const isFirstLoad = useRef(true);
     const [isPreviousLevel, setIsPreviousLevel] = useState(true);
@@ -177,9 +178,38 @@ function WanikaniLevelItemsChart({level}) {
         return cleanUp;
     }, [level, isPreviousLevel]);
 
+    const percentage = data.isLoading ? 0.0 : (
+        (data.radicalsStarted + data.kanjiStarted + data.vocabularyStarted) / (data.radicals.length + data.kanji.length + data.vocabulary.length)
+    );
+
     return (
         <Card>
             <CardContent>
+
+                <div style={{
+                    position: 'relative',
+                    top: -16,
+                    left: -16,
+                    background: 'linear-gradient(to right, ' +
+                        lightenDarkenColor(WanikaniColors.pink, 30) + ' , ' +
+                        lightenDarkenColor(WanikaniColors.pink, -30) + ')',
+                    height: '5px',
+                    width: `${percentage * 111}%`,
+                    borderRadius: '10px',
+                    transition: 'width 1s',
+                    transitionTimingFunction: 'ease-out',
+                    transitionDelay: '350ms'
+                }}/>
+
+                {showWanikaniHeader ? (
+                    <Typography variant={'h5'}
+                                color={'textPrimary'}
+                                style={{marginBottom: '15px'}}
+                    >
+                        Wanikani Items
+                    </Typography>
+                ) : null}
+
                 {data.isLoading ? (
                     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90%'}}>
                         <CircularProgress/>
@@ -257,7 +287,7 @@ function WanikaniLevelItemsChart({level}) {
     );
 }
 
-function WanikaniActiveItemsChart() {
+function WanikaniActiveItemsChart({showWanikaniHeader = false}) {
     const [user, setUser] = useState();
     useEffect(() => {
         let isSubscribed = true;
@@ -275,6 +305,7 @@ function WanikaniActiveItemsChart() {
             {!!user ? (
                 <WanikaniLevelItemsChart
                     level={user.data.level}
+                    showWanikaniHeader={showWanikaniHeader}
                 />
             ) : null}
         </>

@@ -1,4 +1,4 @@
-import {Button, Grid, Link, TextField, Typography} from "@mui/material";
+import {Alert, Button, Grid, Link, Snackbar, TextField, Typography} from "@mui/material";
 import {useState} from "react";
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import WanikaniApiService from "./service/WanikaniApiService";
@@ -23,16 +23,25 @@ function EnterWanikaniApiKeyPage() {
     const navigate = useNavigate();
     const {setApiKey} = useWanikaniApiKey();
     const [textfieldValue, setTextfieldValue] = useState('');
+    const [isFailure, setIsFailure] = useState(false);
 
     const verifyAndSetApiKey = (key) => {
         console.log(key);
         WanikaniApiService.login(key)
-            .then(user => {
-                console.log(user)
+            .then(async (response) => {
+                if (!response.ok)
+                    throw new Error("Login failed");
+
+                const user = await response.json();
+                console.log('Wanikani user logged in', user);
+
                 setApiKey(key);
                 navigate(RoutePaths.wanikaniDashboard.path);
             })
-            .catch(console.error);
+            .catch(e => {
+                console.error('login error', e);
+                setIsFailure(true);
+            });
     };
 
     return (
@@ -42,6 +51,20 @@ function EnterWanikaniApiKeyPage() {
               justifyContent="center"
               spacing={0}
         >
+            <Snackbar
+                open={isFailure}
+                anchorOrigin={{vertical: 'top', horizontal: 'right'}}
+                autoHideDuration={6000}
+                onClose={() => setIsFailure(false)}
+            >
+                <Alert
+                    severity="error"
+                    sx={{width: '100%'}}
+                >
+                    Failed to Login
+                </Alert>
+            </Snackbar>
+
             <Grid item xs={12}>
                 <Typography style={styles.text}>
                     Please enter your <Link href="https://www.wanikani.com/settings/personal_access_tokens"

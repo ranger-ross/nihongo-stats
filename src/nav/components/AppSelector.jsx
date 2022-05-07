@@ -10,13 +10,28 @@ function AppSelector({options, selectedApp, setSelectedApp}) {
                 label="Selected App"
                 onChange={e => setSelectedApp(e.target.value)}
             >
-                {options.map(({appName, displayName}) => (
-                    <MenuItem key={appName}
-                              value={appName}
-                    >
-                        {displayName}
-                    </MenuItem>
-                ))}
+                {options.map(({appName, displayName, icon, iconStyle}) => {
+                    const IconAsComponent = icon;
+                    return (
+                        <MenuItem key={appName}
+                                  value={appName}
+                        >
+                            <div style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
+                                {!icon ? null : typeof icon === 'string' ? (
+                                    <img style={iconStyle}
+                                         src={icon}
+                                         height={23}
+                                         alt=""
+                                         data-testid="app-selector-icon-img"
+                                    />
+                                ) : (
+                                    <IconAsComponent style={iconStyle}/>
+                                )}
+                                <span>{displayName}</span>
+                            </div>
+                        </MenuItem>
+                    )
+                })}
             </Select>
         </FormControl>
     );

@@ -18,7 +18,12 @@ function AppSelector({options, selectedApp, setSelectedApp}) {
                         >
                             <div style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
                                 {!icon ? null : typeof icon === 'string' ? (
-                                    <img style={iconStyle} src={icon} height={23} alt=""/>
+                                    <img style={iconStyle}
+                                         src={icon}
+                                         height={23}
+                                         alt=""
+                                         data-testid="app-selector-icon-img"
+                                    />
                                 ) : (
                                     <IconAsComponent style={iconStyle}/>
                                 )}

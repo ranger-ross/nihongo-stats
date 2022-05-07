@@ -12,6 +12,11 @@ import OverviewNav from "./navbars/OverviewNav.jsx";
 import {AppNames} from "../Constants";
 import {useSelectedApp} from "../hooks/useSelectedApp.jsx";
 
+import ankiIcon from '../../assets/icons/anki-icon.png';
+import bunProIcon from '../../assets/icons/bunpro-icon.png';
+import wanikaniIcon from '../../assets/icons/wanikani-icon.png';
+import {BarChart} from "@mui/icons-material";
+
 const styles = {
     container: {
         padding: '5px',
@@ -24,10 +29,10 @@ const styles = {
 };
 
 const appOptions = [
-    {appName: AppNames.overview, displayName: 'Overview'},
-    {appName: AppNames.anki, displayName: 'Anki'},
-    {appName: AppNames.bunpro, displayName: 'BunPro'},
-    {appName: AppNames.wanikani, displayName: 'Wanikani'},
+    {appName: AppNames.overview, displayName: 'Overview', icon: BarChart, iconStyle: {color: '#21bcff'}},
+    {appName: AppNames.anki, displayName: 'Anki', icon: ankiIcon},
+    {appName: AppNames.bunpro, displayName: 'BunPro', icon: bunProIcon, iconStyle: {marginLeft: '-4px'}},
+    {appName: AppNames.wanikani, displayName: 'Wanikani', icon: wanikaniIcon},
 ]
 
 function AppNav() {

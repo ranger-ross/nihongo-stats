@@ -11,14 +11,13 @@ function AppSelector({options, selectedApp, setSelectedApp}) {
                 onChange={e => setSelectedApp(e.target.value)}
             >
                 {options.map(({appName, displayName, icon, iconStyle}) => {
-                    const isImage = typeof icon === 'string';
                     const IconAsComponent = icon;
                     return (
                         <MenuItem key={appName}
                                   value={appName}
                         >
                             <div style={{display: 'flex', alignItems: 'center', gap: '5px'}}>
-                                {isImage ? (
+                                {!icon ? null : typeof icon === 'string' ? (
                                     <img style={iconStyle} src={icon} height={23} alt=""/>
                                 ) : (
                                     <IconAsComponent style={iconStyle}/>

@@ -1,7 +1,7 @@
-import {ArgumentAxis, Chart, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
-import React, {useEffect, useState} from "react";
+import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
+import React, {useEffect, useMemo, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import {EventTracker, LineSeries, ValueScale} from "@devexpress/dx-react-chart";
+import {EventTracker, ScatterSeries, SplineSeries, ValueScale} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants.js';
 import {Card, CardContent, Grid, Typography} from "@mui/material";
 import _ from 'lodash';
@@ -37,6 +37,18 @@ function truncDate(date) {
     return new Date(new Date(date).toDateString());
 }
 
+function calculateRollingAverageOfDaysInQueue(queue) {
+    let total = 0;
+    let incorrectCount = 0;
+
+    for (const day of queue) {
+        total += day.total;
+        incorrectCount += day.incorrectCount;
+    }
+
+    return Number((((total - incorrectCount) / total) * 100).toFixed(2));
+}
+
 async function fetchData() {
     const reviews = await WanikaniApiService.getReviews();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
@@ -49,7 +61,7 @@ async function fetchData() {
     }
     const groupedData = _.groupBy(data, v => truncDate(v.review.data['created_at']));
     const groupedDataAsMap = new Map(Object.entries(groupedData));
-    return Array.from(groupedDataAsMap, ([date, data]) => {
+    let result = Array.from(groupedDataAsMap, ([date, data]) => {
         const total = data.length;
         let incorrectCount = 0;
         for (const {review} of data) {
@@ -65,13 +77,26 @@ async function fetchData() {
             incorrectCount: incorrectCount,
         };
     });
+
+    // Calculate 7 day rolling average
+    let queue = [];
+    for (const day of result) {
+        queue.push(day);
+
+        if (queue.length > 6)
+            queue.shift();
+
+        day.movingAverage = calculateRollingAverageOfDaysInQueue(queue);
+    }
+
+    return result;
 }
 
+const ROLLING_AVERAGE_LINE_COLOR = '#ffd500';
 
 function WanikaniAccuracyHistoryChart() {
     const [rawData, setRawData] = useState([]);
-    const [data, setData] = useState([]);
-    const [daysToLookBack, setDaysToLookBack] = useState(30);
+    const [daysToLookBack, setDaysToLookBack] = useState(90);
     const [totalDays, setTotalDays] = useState(5000);
 
     useEffect(() => {
@@ -90,16 +115,20 @@ function WanikaniAccuracyHistoryChart() {
     }, []);
 
 
-    useEffect(() => {
-        setData(rawData.filter(dp => dp.date.getTime() > (Date.now() - (1000 * 3600 * 24 * daysToLookBack))));
-    }, [rawData, daysToLookBack]);
+    const data = useMemo(() => rawData.filter(dp => dp.date.getTime() > (Date.now() - (1000 * 3600 * 24 * daysToLookBack))),
+        [rawData, daysToLookBack]);
 
-    function AccuracyToolTip(props) {
-        const dataPoint = data[props.targetItem.point];
+    function AccuracyToolTip({targetItem}) {
+        const isAverageSeries = targetItem.series.toLowerCase().includes('average');
+        const dataPoint = data[targetItem.point];
         return (
             <>
                 <p>{new Date(dataPoint.date).toLocaleDateString()}</p>
-                <p>Accuracy: {dataPoint.ratio}%</p>
+                {isAverageSeries ? (
+                    <p>7 Day Rolling Average: {dataPoint.movingAverage}%</p>
+                ) : (
+                    <p>Accuracy: {dataPoint.ratio}%</p>
+                )}
             </>
         );
     }
@@ -138,11 +167,21 @@ function WanikaniAccuracyHistoryChart() {
                             <ValueScale factory={scale} modifyDomain={modifyDomain}/>
                             <ValueAxis labelComponent={PercentageLabel}/>
                             <ArgumentAxis labelComponent={LabelWithDate}/>
-                            <LineSeries
+                            <ScatterSeries
+                                name="Daily Accuracy"
                                 valueField="ratio"
                                 argumentField="date"
                                 color={WanikaniColors.blue}
                             />
+
+                            <SplineSeries
+                                name="7 Day Rolling Average"
+                                valueField="movingAverage"
+                                argumentField="date"
+                                color={ROLLING_AVERAGE_LINE_COLOR}
+                            />
+
+                            <Legend/>
 
                             <EventTracker/>
                             <Tooltip contentComponent={AccuracyToolTip}/>

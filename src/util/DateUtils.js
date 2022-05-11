@@ -16,13 +16,13 @@ export function hoursToMillis(hours) {
 
 export function addDays(date, days) {
     let _date = new Date(date);
-    _date.setDate(date.getDate() + days);
+    _date.setDate(_date.getDate() + days);
     return _date;
 }
 
 export function addHours(date, hours) {
     let _date = new Date(date);
-    _date.setTime(date.getTime() + hoursToMillis(hours));
+    _date.setTime(_date.getTime() + hoursToMillis(hours));
     return _date;
 }
 

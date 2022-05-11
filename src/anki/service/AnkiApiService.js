@@ -151,6 +151,13 @@ async function flushCache() {
     }
 }
 
+function getCardInfo(cardIds) {
+    if (!Array.isArray(cardIds))
+        cardIds = [cardIds];
+
+    return invoke("cardsInfo", 6, {"cards": cardIds});
+}
+
 export default {
     connect: () => connect(),
     getDecks: getDeckNames,
@@ -164,5 +171,6 @@ export default {
     getDeckConfig: (deck) => invoke("getDeckConfig", 6, {"deck": deck}),
     requestPermission: requestPermission,
     sendMultiRequest: (requests) => invoke("multi", 6, {"actions": requests}),
-
+    getCardInfo: getCardInfo,
+    getAllCardIdsByDeck: deck => findCards(`deck:"${deck}"`)
 }

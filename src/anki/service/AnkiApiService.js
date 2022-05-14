@@ -166,7 +166,7 @@ async function getCardInfo(cardIds) {
             if (cachedEntry && cachedEntry.lastUpdate > Date.now() - 1000 * 60 * 60 * 3) {
                 results.push(cachedEntry.card)
             } else {
-                cardsToQuery.push(cardIds);
+                cardsToQuery.push(cardId);
             }
         }
     } else {

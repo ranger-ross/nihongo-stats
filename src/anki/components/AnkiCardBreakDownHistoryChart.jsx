@@ -13,42 +13,6 @@ import {AreaSeries, ArgumentScale, EventTracker, Stack} from "@devexpress/dx-rea
 import {AnkiColors} from "../../Constants.js";
 import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
 
-function DataPoint(date, previousDataPoint) {
-    let dp = {
-        date: truncDate(date),
-        cards: {},
-        totalCount: previousDataPoint?.totalCount ?? 0
-    };
-
-    if (!!previousDataPoint) {
-        const totalKeys = Object.keys(previousDataPoint).filter(key => key.includes('total_'));
-        for (const key of totalKeys) {
-            dp[key] = previousDataPoint[key] ?? 0;
-        }
-    }
-    dp.addCard = (deck, review) => {
-        if (!dp.cards[deck]) {
-            dp.cards[deck] = [review];
-        } else {
-            dp.cards[deck].push(review);
-        }
-
-        if (!!previousDataPoint && !previousDataPoint[`total_${deck}`]) {
-            previousDataPoint[`count_${deck}`] = 0;
-            previousDataPoint[`total_${deck}`] = 0;
-        }
-
-        dp[`count_${deck}`] = dp.cards[deck].length;
-        dp[`total_${deck}`] = (dp[`total_${deck}`] ?? 0) + 1;
-        dp.totalCount = (previousDataPoint?.totalCount ?? 0) + Object.keys(dp)
-            .filter(key => key.includes('count_'))
-            .map(key => key.replace('count_', ''))
-            .map(x => dp.cards[x])
-            .reduce((a, c) => a + c.length, 0);
-    };
-    return dp;
-}
-
 function createCardTimestampMap(cards) {
     let map = {};
     for (const card of cards) {
@@ -75,12 +39,17 @@ function createReviewTimestampMap(reviews) {
     return map;
 }
 
-// TODO: refactor variables names
-async function getCounts(deck) {
-    const cardIds = await AnkiApiService.getAllCardIdsByDeck(deck);
+async function getBreakDownHistoryData(decks) {
+    // Fetch all the cards
+    const cardIdPromises = decks.map(deck =>  AnkiApiService.getAllCardIdsByDeck(deck));
+    const cardIdResults = await Promise.all(cardIdPromises);
+    const cardIds = cardIdResults.flat();
     const cards = await AnkiApiService.getCardInfo(Array.from(new Set(cardIds)));
 
-    let reviews = await AnkiApiService.getAllReviewsByDeck(deck);
+    // Fetch all the reviews
+    const reviewPromises = decks.map(deck =>  AnkiApiService.getAllReviewsByDeck(deck));
+    const reviewResults = await Promise.all(reviewPromises);
+    let reviews = reviewResults.flat();
     reviews = reviews.sort((a, b) => a.reviewTime - b.reviewTime);
 
     const reviewsMap = createReviewTimestampMap(reviews);
@@ -203,15 +172,16 @@ function Area(props) {
 function AnkiCardBreakDownHistoryChart({deckNames}) {
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
     const [isLoading, setIsLoading] = useState(true);
-    const [decksToDisplay, setDecksToDisplay] = useState([]);
     const [historyData, setHistoryData] = useState(null);
+
+    console.log(deckNames)
 
 
     useEffect(async () => {
         let isSubscribed = true;
 
         setIsLoading(true);
-        getCounts(deckNames[0]) // TODO: add multi deck support
+        getBreakDownHistoryData(deckNames)
             .then(data => {
                 if (!isSubscribed)
                     return;
@@ -298,7 +268,7 @@ function AnkiCardBreakDownHistoryChart({deckNames}) {
                         <CircularProgress style={{margin: '100px'}}/>
                     </div>
                 ) : (
-                    !!decksToDisplay && chartData ? (
+                    !!deckNames && chartData ? (
                         <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

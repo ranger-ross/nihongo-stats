@@ -49,7 +49,7 @@ function BunProDashboard() {
                             <div style={{...styles.leftPanel, minWidth: !isMobile ? '500px' : null}}>
                                 <BunProWelcomeTile/>
 
-                                <BunProJLPTTile/>
+                                <BunProJLPTTile showXpProgress={true}/>
                             </div>
 
                             <div style={styles.rightPanel}>

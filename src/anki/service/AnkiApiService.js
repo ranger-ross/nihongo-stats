@@ -5,6 +5,7 @@ const ankiConnectApiUrl = AppUrls.ankiApi;
 
 const cacheKeys = {
     decks: 'anki-deck-names-and-ids',
+    cardInfo: 'anki-card-info',
     reviewsPrefix: 'anki-reviews-'
 }
 
@@ -151,6 +152,45 @@ async function flushCache() {
     }
 }
 
+async function getCardInfo(cardIds) {
+    if (!Array.isArray(cardIds))
+        cardIds = [cardIds];
+
+    let results = []
+    let cardsToQuery = [];
+
+    let cachedValue = await localForage.getItem(cacheKeys.cardInfo);
+    if (!!cachedValue) {
+        for (const cardId of cardIds) {
+            const cachedEntry = cachedValue[cardId];
+            if (cachedEntry && cachedEntry.lastUpdate > Date.now() - 1000 * 60 * 60 * 3) {
+                results.push(cachedEntry.card)
+            } else {
+                cardsToQuery.push(cardId);
+            }
+        }
+    } else {
+        cachedValue = {};
+        cardsToQuery = cardIds;
+    }
+    let data = [];
+    if (cardsToQuery.length > 0) {
+        data = await invoke("cardsInfo", 6, {"cards": cardsToQuery});
+    }
+
+    results.push(...data)
+
+    for (const card of data) {
+        cachedValue[card.cardId] = {
+            card: card,
+            lastUpdate: Date.now()
+        }
+    }
+    await localForage.setItem(cacheKeys.cardInfo, cachedValue);
+
+    return results;
+}
+
 export default {
     connect: () => connect(),
     getDecks: getDeckNames,
@@ -164,5 +204,6 @@ export default {
     getDeckConfig: (deck) => invoke("getDeckConfig", 6, {"deck": deck}),
     requestPermission: requestPermission,
     sendMultiRequest: (requests) => invoke("multi", 6, {"actions": requests}),
-
+    getCardInfo: getCardInfo,
+    getAllCardIdsByDeck: deck => findCards(`deck:"${deck}"`)
 }

@@ -174,9 +174,6 @@ function AnkiCardBreakDownHistoryChart({deckNames}) {
     const [isLoading, setIsLoading] = useState(true);
     const [historyData, setHistoryData] = useState(null);
 
-    console.log(deckNames)
-
-
     useEffect(async () => {
         let isSubscribed = true;
 

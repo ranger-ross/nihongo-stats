@@ -2,7 +2,7 @@ import AnkiReviewsChart from "./components/AnkiReviewsChart.jsx";
 import {useSelectedAnkiDecks} from "../hooks/useSelectedAnkiDecks.jsx";
 import AnkiApiProvider from "./components/AnkiApiProvider.jsx";
 import AnkiTotalCardsHistoryChart from "./components/AnkiTotalCardsHistoryChart.jsx";
-import AnkiCardCountHistoryChart from "./components/AnkiCardCountHistoryChart.jsx";
+import AnkiCardBreakDownHistoryChart from "./components/AnkiCardBreakDownHistoryChart.jsx";
 
 const styles = {
     container: {
@@ -27,7 +27,7 @@ function AnkiHistory() {
                             showTotals={true}
                         />
 
-                        <AnkiCardCountHistoryChart
+                        <AnkiCardBreakDownHistoryChart
                             deckNames={selectedDecks}
                             showTotals={true}
                         />

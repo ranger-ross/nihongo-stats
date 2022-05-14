@@ -75,7 +75,7 @@ function createReviewTimestampMap(reviews) {
     return map;
 }
 
-// TODO: memo/cache data + refactor variables names
+// TODO: refactor variables names
 async function getCounts(deck) {
     const cardIds = await AnkiApiService.getAllCardIdsByDeck(deck);
     const cards = await AnkiApiService.getCardInfo(Array.from(new Set(cardIds)));
@@ -200,8 +200,7 @@ function Area(props) {
     );
 }
 
-// TODO: Rename component
-function AnkiCardCountHistoryChart({deckNames}) {
+function AnkiCardBreakDownHistoryChart({deckNames}) {
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
     const [isLoading, setIsLoading] = useState(true);
     const [decksToDisplay, setDecksToDisplay] = useState([]);
@@ -363,4 +362,4 @@ function AnkiCardCountHistoryChart({deckNames}) {
     );
 }
 
-export default AnkiCardCountHistoryChart;
+export default AnkiCardBreakDownHistoryChart;

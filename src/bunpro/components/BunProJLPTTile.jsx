@@ -1,5 +1,5 @@
 import {Card, CardContent, CircularProgress, LinearProgress, Typography} from "@mui/material";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useState} from "react";
 import BunProApiService from "../service/BunProApiService.js";
 import {createGrammarPointsLookupMap} from "../service/BunProDataUtil.js";
 

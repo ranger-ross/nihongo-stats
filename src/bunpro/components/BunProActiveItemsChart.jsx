@@ -3,6 +3,7 @@ import React, {useEffect, useState} from "react";
 import BunProApiService from "../service/BunProApiService.js";
 import {lightenDarkenColor} from "../../util/CssUtils.js";
 import {BunProColors} from "../../Constants.js";
+import GradientLinearProgress from "../../shared/GradientLinearProgress.jsx";
 
 function getBunProGrammarPointsGroupedByLesson(grammarPoints) {
     let map = {};
@@ -137,20 +138,14 @@ function BunProActiveItemsChart({showBunProHeader = false}) {
         <Card>
             <CardContent>
 
-                <div style={{
-                    position: 'relative',
-                    top: -16,
-                    left: -16,
-                    background: 'linear-gradient(to right, ' +
-                        lightenDarkenColor(BunProColors.blue, 30) + ' , ' +
-                        lightenDarkenColor(BunProColors.blue, -30) + ')',
-                    height: '5px',
-                    width: `${percentage * 110}%`,
-                    borderRadius: '10px',
-                    transition: 'width 1s',
-                    transitionTimingFunction: 'ease-out',
-                    transitionDelay: '350ms'
-                }}/>
+                <div style={{position: 'relative', top: -16, left: -16, width: `calc(100% + 32px)`}}>
+                    <GradientLinearProgress variant="determinate"
+                                            value={percentage * 100}
+                                            lineStartColor={lightenDarkenColor(BunProColors.blue, 30)}
+                                            lineEndColor={lightenDarkenColor(BunProColors.blue, -30)}
+                                            backgroundLineColor={lightenDarkenColor(BunProColors.blue, -120)}
+                    />
+                </div>
 
                 {showBunProHeader ? (
                     <Typography variant={'h5'}

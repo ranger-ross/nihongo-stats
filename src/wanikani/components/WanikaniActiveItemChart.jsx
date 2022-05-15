@@ -4,10 +4,11 @@ import {Card, CardContent, CircularProgress, FormControlLabel, FormGroup, Switch
 import WanikaniItemTile from "./WanikaniItemTile.jsx";
 import {combineAssignmentAndSubject, isSubjectHidden} from "../service/WanikaniDataUtil.js";
 import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.js";
-import {WanikaniColors} from "../../Constants.js";
+import {BunProColors, WanikaniColors} from "../../Constants.js";
 import {useUserPreferences} from "../../hooks/useUserPreferences.jsx";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
 import {lightenDarkenColor} from "../../util/CssUtils.js";
+import GradientLinearProgress from "../../shared/GradientLinearProgress.jsx";
 
 const styles = {
     showPreviousLevelMobile: {
@@ -186,20 +187,14 @@ function WanikaniLevelItemsChart({level, showWanikaniHeader = false}) {
         <Card>
             <CardContent>
 
-                <div style={{
-                    position: 'relative',
-                    top: -16,
-                    left: -16,
-                    background: 'linear-gradient(to right, ' +
-                        lightenDarkenColor(WanikaniColors.pink, 30) + ' , ' +
-                        lightenDarkenColor(WanikaniColors.pink, -30) + ')',
-                    height: '5px',
-                    width: `${percentage * 111}%`,
-                    borderRadius: '10px',
-                    transition: 'width 1s',
-                    transitionTimingFunction: 'ease-out',
-                    transitionDelay: '350ms'
-                }}/>
+                <div style={{position: 'relative', top: -16, left: -16, width: `calc(100% + 32px)`}}>
+                    <GradientLinearProgress variant="determinate"
+                                            value={percentage * 100}
+                                            lineStartColor={lightenDarkenColor(WanikaniColors.pink, 30)}
+                                            lineEndColor={lightenDarkenColor(WanikaniColors.pink, -30)}
+                                            backgroundLineColor={lightenDarkenColor(WanikaniColors.pink, -120)}
+                    />
+                </div>
 
                 {showWanikaniHeader ? (
                     <Typography variant={'h5'}

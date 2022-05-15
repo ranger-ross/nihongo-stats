@@ -21,10 +21,10 @@ function GradientLinearProgress({lineStartColor, lineEndColor, backgroundLineCol
 }
 
 GradientLinearProgress.propTypes = {
+    ...LinearProgress.propTypes,
     lineStartColor: PropTypes.string,
     lineEndColor: PropTypes.string,
     backgroundLineColor: PropTypes.string,
-    ...LinearProgress.propTypes
 };
 
 export default GradientLinearProgress;

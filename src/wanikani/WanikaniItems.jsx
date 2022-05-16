@@ -139,7 +139,9 @@ function WanikaniItems() {
 
     const subjectsToShow = useMemo(() => filterSubjectsByType(subjects, control.typesToShow), [subjects, control.typesToShow]);
 
-    const groups = useMemo(() => control.primaryGroupBy.group(subjectsToShow), [control.primaryGroupBy, subjectsToShow]);
+    const groups = useMemo(() => control.primaryGroupBy.group(subjectsToShow, {
+        frequencyGroupingSize: control.frequencyGroupingSize,
+    }), [control.primaryGroupBy, subjectsToShow, control.frequencyGroupingSize]);
 
     return (
         <RequireOrRedirect resource={apiKey}

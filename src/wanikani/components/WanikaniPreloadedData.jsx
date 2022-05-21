@@ -3,6 +3,7 @@ import WanikaniApiService from "../service/WanikaniApiService";
 import {CircularProgress} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
 import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.jsx";
+import QuestionToolTip from "../../shared/QuestionToolTip.jsx";
 
 const styles = {
     loadingItem: {
@@ -20,6 +21,11 @@ const styles = {
     loadingItemsColumn: {
         display: 'flex',
         flexDirection: 'column'
+    },
+    infoContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
     }
 };
 
@@ -85,10 +91,20 @@ function WanikaniPreloadedData({children}) {
                         </div>
                     </div>
 
-                    <p style={{textAlign: 'center'}}>
-                        This may take a few minutes if you have a long history on Wanikani.
-                    </p>
-
+                    <div style={styles.infoContainer}>
+                        <p style={{textAlign: 'center'}}>
+                            This may take a few minutes if you have a long history on Wanikani.
+                        </p>
+                        <QuestionToolTip text={
+                            <>
+                                Wanikani's API limits the number of requests we can make per minute. <br/>
+                                If you have a long history, we will have to
+                                wait a minute to continue fetching data. <br/> <br/>
+                                Once the loaded, we will save your save data (on your computer)
+                                so it will load quicker next time
+                            </>
+                        }/>
+                    </div>
                 </>
             )}
         </>

@@ -199,6 +199,28 @@ export const groupByOptions = {
                 .filter(group => group.subjects.length > 0);
         },
     },
+    frequency: {
+        key: 'frequency',
+        displayText: 'Frequency',
+        group: (subjects, params) => {
+            const size = params.frequencyGroupingSize;
+            const temp = [...sortByOptions.frequency.sort(subjects)];
+
+            let groups = [];
+            let nextGroup = temp.splice(0, size);
+            let i = 1;
+            while (nextGroup.length > 0) {
+                const start = size * i - size;
+                groups.push({
+                    title: `${start + 1}-${size * i}`,
+                    subjects: nextGroup
+                });
+                nextGroup = temp.splice(0, size);
+                i += 1;
+            }
+            return groups;
+        },
+    },
 };
 
 export const sortByOptions = {

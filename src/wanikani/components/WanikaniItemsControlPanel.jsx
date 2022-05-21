@@ -5,6 +5,7 @@ import {
     MenuItem,
     Paper,
     Select,
+    TextField,
     ToggleButton,
     ToggleButtonGroup,
     Typography
@@ -43,6 +44,7 @@ const presetOptions = {
             colorBy: colorByOptions.itemType,
             typesToShow: ['radical', 'kanji', 'vocabulary'],
             sortReverse: false,
+            frequencyGroupingSize: 500,
         }
     },
     jlpt: {
@@ -51,10 +53,24 @@ const presetOptions = {
         controls: {
             primaryGroupBy: groupByOptions.jlpt,
             secondaryGroupBy: groupByOptions.none,
-            sortBy: sortByOptions.srsStage,
+            sortBy: sortByOptions.level,
             colorBy: colorByOptions.srsStage,
             typesToShow: ['kanji'],
             sortReverse: false,
+            frequencyGroupingSize: 500,
+        }
+    },
+    frequency: {
+        key: 'frequency',
+        text: 'Frequency',
+        controls: {
+            primaryGroupBy: groupByOptions.frequency,
+            secondaryGroupBy: groupByOptions.none,
+            sortBy: sortByOptions.level,
+            colorBy: colorByOptions.srsStage,
+            typesToShow: ['kanji'],
+            sortReverse: false,
+            frequencyGroupingSize: 500,
         }
     },
 };
@@ -193,6 +209,11 @@ export function useWanikaniItemControls() {
             changes.sortReverse = false;
         }
 
+        if (!isKanjiOnly && prev.primaryGroupBy.key === groupByOptions.frequency.key) {
+            changes.primaryGroupBy = groupByOptions.level;
+            changes.secondaryGroupBy = groupByOptions.none;
+        }
+
         return {...prev, ...changes};
     });
 
@@ -205,6 +226,7 @@ export function useWanikaniItemControls() {
             sortBy: onSortByChange,
             colorBy: (colorBy) => setControl(prev => ({...prev, colorBy: colorBy})),
             typesToShow: onTypesToShowChange,
+            frequencyGroupingSize: (size) => setControl(prev => ({...prev, frequencyGroupingSize: size})),
         }
     ];
 }
@@ -219,6 +241,7 @@ function getGroupByOptions(typesToShow) {
     ];
     if (isKanjiOnly) {
         groupByOptionsList.push(groupByOptions.jlpt);
+        groupByOptionsList.push(groupByOptions.frequency);
     } else {
         groupByOptionsList.push(groupByOptions.itemType);
     }
@@ -286,6 +309,29 @@ function PresetSelector({options, onChange}) {
     );
 }
 
+function FrequencyGroupSizeTextField({onChange, initialSize}) {
+    const [text, setText] = useState(`${initialSize}`);
+    const triggerChange = () => onChange && text.length > 0 ? onChange(parseInt(text)) : null;
+    return (
+        <div>
+            <TextField
+                size={'small'}
+                label={'Group Size'}
+                value={text}
+                onChange={e => {
+                    if (!!e.target.value && (isNaN(Number(e.target.value)) || e.target.value.includes('.')))
+                        return;
+                    setText(e.target.value);
+                }}
+                onKeyUp={e => {
+                    if (e.code === 'Enter')
+                        triggerChange();
+                }}
+            />
+        </div>
+    );
+}
+
 function WanikaniItemsControlPanel({control, set}) {
     const {
         primaryGroupBy,
@@ -293,7 +339,8 @@ function WanikaniItemsControlPanel({control, set}) {
         sortBy,
         colorBy,
         typesToShow,
-        sortReverse
+        sortReverse,
+        frequencyGroupingSize,
     } = control;
 
     const secondaryGroupDisabled = useMemo(() => {
@@ -323,6 +370,7 @@ function WanikaniItemsControlPanel({control, set}) {
                         options={[
                             presetOptions.levels,
                             presetOptions.jlpt,
+                            presetOptions.frequency,
                         ]}
                         onChange={preset => set.control(preset)}
                     />
@@ -331,14 +379,22 @@ function WanikaniItemsControlPanel({control, set}) {
                 <ControlContainer>
                     <strong>Group By</strong>
 
-                    <GroupByToggle title={'Primary'}
-                                   options={groupByOptionsList}
-                                   groupBy={primaryGroupBy}
-                                   setGroupBy={set.primaryGroupBy}
-                    />
+                    <div style={{display: 'flex', alignItems: 'center'}}>
+                        <GroupByToggle title={'Primary'}
+                                       options={groupByOptionsList}
+                                       groupBy={primaryGroupBy}
+                                       setGroupBy={set.primaryGroupBy}
+                        />
+                        {primaryGroupBy.key === 'frequency' ? (
+                            <FrequencyGroupSizeTextField
+                                initialSize={frequencyGroupingSize}
+                                onChange={set.frequencyGroupingSize}
+                            />
+                        ) : null}
+                    </div>
 
                     <GroupByToggle title={'Secondary'}
-                                   options={groupByOptionsList}
+                                   options={groupByOptionsList.filter(group => group.key != 'frequency')}
                                    groupBy={secondaryGroupBy}
                                    setGroupBy={set.secondaryGroupBy}
                                    disableOptions={secondaryGroupDisabled}

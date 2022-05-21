@@ -4,6 +4,7 @@ import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import {useState} from "react";
 import AnkiHowToInstall from "./components/AnkiHowToInstall.jsx";
+import QuestionToolTip from "../shared/QuestionToolTip.jsx";
 
 const styles = {
     container: {
@@ -35,6 +36,7 @@ function AnkiConnectLogin() {
             Please make sure you have <Link
             href={'https://ankiweb.net/shared/info/2055492159'}
             target={'_blank'}>Anki Connect</Link> installed and Anki open.
+            <QuestionToolTip text={'Currently Anki is not not supported on mobile devices'}/>
 
             <br/>
             <br/>

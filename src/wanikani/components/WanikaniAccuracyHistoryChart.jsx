@@ -8,6 +8,7 @@ import _ from 'lodash';
 import {scaleLinear} from 'd3-scale';
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
+import {millisToDays} from "../../util/DateUtils.js";
 
 const scale = () => scaleLinear();
 const modifyDomain = () => [0, 100];
@@ -94,10 +95,18 @@ async function fetchData() {
 
 const ROLLING_AVERAGE_LINE_COLOR = '#ffd500';
 
+function getTotalDays() {
+    const firstDate = truncDate(new Date(2000,0,1));
+    const today = truncDate(Date.now());
+    const difference = today.getTime() - firstDate.getTime();
+    return millisToDays(difference);
+}
+
+const totalDays = getTotalDays();
+
 function WanikaniAccuracyHistoryChart() {
     const [rawData, setRawData] = useState([]);
     const [daysToLookBack, setDaysToLookBack] = useState(90);
-    const [totalDays, setTotalDays] = useState(5000);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -106,9 +115,6 @@ function WanikaniAccuracyHistoryChart() {
                 if (!isSubscribed)
                     return;
                 setRawData(data);
-                const difference = Date.now() - data[0].date.getTime();
-                const days = Math.ceil(difference / (1000 * 3600 * 24));
-                setTotalDays(days);
             })
             .catch(console.error);
         return () => isSubscribed = false;

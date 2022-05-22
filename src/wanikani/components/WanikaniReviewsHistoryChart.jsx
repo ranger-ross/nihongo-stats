@@ -9,7 +9,7 @@ import {scaleBand} from 'd3-scale';
 import React from 'react';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
-import {getMonthName, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.js";
+import {getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.js";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
 
@@ -78,22 +78,25 @@ async function fetchData() {
 function aggregateDate(rawData, daysToLookBack, unit) {
     const areDatesDifferent = (date1, date2) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
     const startDate = unit.trunc(Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1))).getTime();
+    const dataForTimeRange = rawData.filter(data => new Date(data.review.data['created_at']).getTime() > startDate);
 
-    let dataForTimeRange = rawData;
-    if (daysToLookBack != -1) {
-        dataForTimeRange = rawData.filter(data => new Date(data.review['data_updated_at']).getTime() > startDate);
-    }
-
-    let aggregatedDate = [new DataPoint(truncDate(dataForTimeRange[0].review['data_updated_at']))];
+    let aggregatedDate = [new DataPoint(truncDate(dataForTimeRange[0].review.data['created_at']))];
     for (const data of dataForTimeRange) {
-        if (areDatesDifferent(aggregatedDate[aggregatedDate.length - 1].date, data.review['data_updated_at'])) {
-            aggregatedDate.push(new DataPoint(unit.trunc(data.review['data_updated_at'])));
+        if (areDatesDifferent(aggregatedDate[aggregatedDate.length - 1].date, data.review.data['created_at'])) {
+            aggregatedDate.push(new DataPoint(unit.trunc(data.review.data['created_at'])));
         }
 
         aggregatedDate[aggregatedDate.length - 1].push(data);
     }
 
     return aggregatedDate;
+}
+
+function getTotalDays() {
+    const firstDate = truncDate(new Date(2000,0,1));
+    const today = truncDate(Date.now());
+    const difference = today.getTime() - firstDate.getTime();
+    return millisToDays(difference);
 }
 
 function calculateLabelPositions(data) {
@@ -120,6 +123,8 @@ function UnitSelector({options, unit, onChange}) {
     );
 }
 
+const totalDays = getTotalDays();
+
 function WanikaniReviewsHistoryChart() {
     const [rawData, setRawData] = useState([]);
     const [daysToLookBack, setDaysToLookBack] = useState(30);
@@ -140,8 +145,6 @@ function WanikaniReviewsHistoryChart() {
             .catch(console.error);
         return () => isSubscribed = false;
     }, []);
-
-    const totalDays = useMemo(() => rawData.length === 0 ? 5000 : aggregateDate(rawData, -1, units.days).length, [rawData, unit]);
 
     const chartData = useMemo(() => rawData.length == 0 ? [] :
         aggregateDate(rawData, daysToLookBack, unit), [rawData, daysToLookBack, unit])

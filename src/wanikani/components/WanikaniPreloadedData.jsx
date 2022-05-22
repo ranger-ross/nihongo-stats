@@ -61,7 +61,6 @@ function WanikaniPreloadedData({children}) {
         const reviewsPromise = new Promise(resolve => {
             WanikaniApiService.getReviewAsObservable()
                 .subscribe(event => {
-                    console.log(event);
                     if (event.status === EVENT_STATUS.IN_PROGRESS) {
                         setReviewsProgress(event.progress / event.size);
                     }

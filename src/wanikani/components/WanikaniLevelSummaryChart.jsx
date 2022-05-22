@@ -64,17 +64,22 @@ function FractionText({top, bottom}) {
     );
 }
 
+function getLevelProgress(levelsProgress, currentLevel) {
+    const currentLevelAttempts = levelsProgress.filter(lvl => lvl.data.level === currentLevel);
+    return currentLevelAttempts[currentLevelAttempts.length - 1].data
+}
+
 async function getCurrentLevelProgressData() {
-    const userData = await WanikaniApiService.getUser()
+    const userData = await WanikaniApiService.getUser();
 
     const currentLevel = userData.data.level;
 
-    const levelsProgress = await WanikaniApiService.getLevelProgress(currentLevel);
-    const currentLevelProgress = levelsProgress.data[currentLevel - 1].data;
+    const levelsProgress = await WanikaniApiService.getLevelProgress();
+    const currentLevelProgress = getLevelProgress(levelsProgress.data, currentLevel);
 
     let start;
     if (currentLevel > 1) {
-        const previousLevelProgress = levelsProgress.data[currentLevel - 2].data;
+        const previousLevelProgress = getLevelProgress(levelsProgress.data, currentLevel - 1);
         start = new Date(previousLevelProgress['passed_at']);
     } else {
         start = new Date(currentLevelProgress['started_at']);

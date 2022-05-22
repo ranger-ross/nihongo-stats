@@ -20,6 +20,7 @@
     "@emotion/styled": "^11.3.0",
     "@mui/icons-material": "^5.6.2",
     "@mui/material": "^5.6.4",
+    "@reactivex/rxjs": "^6.6.7",
     "kanji": "^0.3.1",
     "localforage": "^1.10.0",
     "lodash-es": "^4.17.21",
@@ -28,6 +29,7 @@
     "react-dom": "^17.0.2",
     "react-router-dom": "^6.0.2",
     "react-visibility-sensor": "^5.1.1",
+    "rxjs": "^7.5.5",
     "styled-components": "^5.3.5",
     "zustand": "^3.7.2"
   },

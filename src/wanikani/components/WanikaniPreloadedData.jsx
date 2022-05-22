@@ -1,9 +1,11 @@
 import {useEffect, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import {CircularProgress} from "@mui/material";
+import {CircularProgress, Typography} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
 import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.jsx";
 import QuestionToolTip from "../../shared/QuestionToolTip.jsx";
+import {EVENT_STATUS} from "../service/WanikaniApiServiceRxJs.js";
+import LinearProgressWithLabel from "../../shared/LinearProgressWithLabel.jsx";
 
 const styles = {
     loadingItem: {
@@ -16,7 +18,7 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: '20%'
+        padding: '20vh'
     },
     loadingItemsColumn: {
         display: 'flex',
@@ -44,6 +46,9 @@ function WanikaniPreloadedData({children}) {
     const [isUserLoaded, setIsUserLoaded] = useState(false);
     const [isAssignmentsLoaded, setIsAssignmentsLoaded] = useState(false);
     const [isReviewsLoaded, setIsReviewsLoaded] = useState(false);
+    const [reviewsProgress, setReviewsProgress] = useState(0.0);
+    const [reviewsIsRateLimited, setReviewsIsRateLimited] = useState(false);
+
     const [isSummaryLoaded, setIsSummaryLoaded] = useState(false);
     const {status, setStatus} = useWanikaniPreloadStatus();
 
@@ -52,6 +57,21 @@ function WanikaniPreloadedData({children}) {
             return;
         }
         console.log('Preloading Wanikani Data');
+
+        const reviewsPromise = new Promise(resolve => {
+            WanikaniApiService.getReviewAsObservable()
+                .subscribe(event => {
+                    console.log(event);
+                    if (event.status === EVENT_STATUS.IN_PROGRESS) {
+                        setReviewsProgress(event.progress / event.size);
+                    }
+                    if (event.status === EVENT_STATUS.COMPLETE) {
+                        setReviewsProgress(1.0);
+                        resolve();
+                    }
+                    setReviewsIsRateLimited(event.status === EVENT_STATUS.RATE_LIMITED);
+                });
+        });
 
         Promise.all([
             WanikaniApiService.getSubjects()
@@ -62,7 +82,7 @@ function WanikaniPreloadedData({children}) {
                 .then(() => setIsAssignmentsLoaded(true)),
             WanikaniApiService.getSummary()
                 .then(() => setIsSummaryLoaded(true)),
-            WanikaniApiService.getReviews()
+            reviewsPromise
                 .then(() => setIsReviewsLoaded(true)),
         ])
             .then(() => {
@@ -87,7 +107,17 @@ function WanikaniPreloadedData({children}) {
                             <LoadingItem text={'User Data'} isLoading={!isUserLoaded}/>
                             <LoadingItem text={'User Summary'} isLoading={!isSummaryLoaded}/>
                             <LoadingItem text={'User Assignments'} isLoading={!isAssignmentsLoaded}/>
+                            <br/>
                             <LoadingItem text={'User Reviews'} isLoading={!isReviewsLoaded}/>
+
+                            <LinearProgressWithLabel value={reviewsProgress * 100}/>
+
+                            {reviewsIsRateLimited && (
+                                <Typography variant="body2" color="text.secondary">
+                                    Rate Limited. Continuing in a minute
+                                </Typography>
+                            )}
+
                         </div>
                     </div>
 

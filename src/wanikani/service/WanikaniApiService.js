@@ -2,6 +2,7 @@ import * as localForage from "localforage/dist/localforage"
 import InMemoryCache from "../../util/InMemoryCache.js";
 import {AppUrls} from "../../Constants.js";
 import {PromiseCache} from "../../util/PromiseCache.js";
+import WanikaniApiServiceRxJs, {EVENT_STATUS} from "./WanikaniApiServiceRxJs.js";
 
 const memoryCache = new InMemoryCache();
 const promiseCache = new PromiseCache();
@@ -144,23 +145,6 @@ function sortAndDeduplicateAssignments(assignments) {
     return result.sort((a, b) => a.id - b.id);
 }
 
-
-function sortAndDeduplicateReviews(reviews) {
-    let map = {};
-
-    for (const review of reviews) {
-        map[review.id] = review;
-    }
-
-    let result = [];
-
-    for (const key of Object.keys(map)) {
-        result.push(map[key]);
-    }
-
-    return result.sort((a, b) => a.id - b.id);
-}
-
 async function flushCache() {
     for (const key of Object.keys(cacheKeys)) {
         await localForage.removeItem(cacheKeys[key]);
@@ -289,39 +273,18 @@ function attemptLogin(apiKey) {
 }
 
 function getReviews() {
-    const fetchReviews = async () => {
-        if (memoryCache.includes(cacheKeys.reviews)) {
-            const cachedValue = memoryCache.get(cacheKeys.reviews);
-            // Only check for new reviews every 60 seconds
-            if (cachedValue.lastUpdated > (Date.now() - 1000 * 60)) {
-                return cachedValue.data;
-            }
-        }
-
-        const cachedValue = await localForage.getItem(cacheKeys.reviews);
-        let reviews;
-        if (!!cachedValue) {
-            reviews = sortAndDeduplicateReviews(cachedValue.data);
-            const lastId = reviews[reviews.length - 1].id;
-            try {
-                const newData = await fetchMultiPageRequest('/v2/reviews', lastId);
-                reviews.push(...newData);
-            } catch (error) {
-                console.error('Failed to update reviews, possibly using stale data', error);
-            }
-        } else {
-            reviews = await fetchMultiPageRequest('/v2/reviews');
-        }
-        reviews = sortAndDeduplicateReviews(reviews);
-
-        const cacheObject = {
-            data: reviews,
-            lastUpdated: new Date().getTime(),
-        };
-        localForage.setItem(cacheKeys.reviews, cacheObject);
-        memoryCache.put(cacheKeys.reviews, cacheObject);
-
-        return reviews;
+    const fetchReviews = () => {
+        return new Promise((resolve, reject) => {
+            WanikaniApiServiceRxJs.getReviewAsObservable()
+                .subscribe({
+                    next: event => {
+                        if (event.status === EVENT_STATUS.COMPLETE) {
+                            resolve(event.data);
+                        }
+                    },
+                    error: err => reject(err)
+                });
+        })
     }
 
     const name = 'getReviews';
@@ -332,8 +295,7 @@ function getReviews() {
     } else {
         console.debug('joined promise', name)
     }
-    return promise
-
+    return promise;
 }
 
 export default {
@@ -351,6 +313,7 @@ export default {
     getAllAssignments: getAllAssignments,
     getSubjects: getSubjects,
     getReviews: getReviews,
+    getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,
     getPendingLessonsAndReviews: async () => {
         const summary = await getSummary();
         let lessons = 0;

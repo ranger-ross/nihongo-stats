@@ -1,7 +1,7 @@
-import {Chart, ValueAxis, BarSeries, ArgumentAxis, Title, Tooltip} from '@devexpress/dx-react-chart-material-ui';
-import {useState, useEffect, useMemo} from "react";
+import {ArgumentAxis, BarSeries, Chart, Title, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
+import {useEffect, useMemo, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import {EventTracker, Animation} from "@devexpress/dx-react-chart";
+import {Animation, EventTracker} from "@devexpress/dx-react-chart";
 
 function parseTimestamp(text) {
     const millis = parseFloat(text) * 86400000;
@@ -25,16 +25,33 @@ function LevelToolTip({text}) {
 }
 
 function formatData(data) {
-    return data.data
+    const rawData = data.data
         .map(level => level.data)
-        .map(level => {
-            const passedAt = !!level['passed_at'] ? new Date(level['passed_at']).getTime() : Date.now();
-            const startedAt = new Date(level['created_at']).getTime();
-            return {
-                level: level.level.toString(),
-                days: (passedAt - startedAt) / (86400000)
+        .filter(level => !level['abandoned_at']);
+
+    let map = {};
+
+    for (const level of rawData) {
+        const passedAt = !!level['passed_at'] ? new Date(level['passed_at']).getTime() : Date.now();
+        const startedAt = new Date(level['created_at']).getTime();
+
+        const add = () => map[level.level] = {
+            level: level.level.toString(),
+            days: (passedAt - startedAt) / (86400000),
+            startedAt,
+        };
+
+        if (!!map[level.level]) {
+            if (map[level.level].startedAt < startedAt) {
+                add();
             }
-        });
+        } else {
+            add();
+        }
+    }
+
+    return Object.values(map)
+        .sort((a, b) => parseInt(a.level) - parseInt(b.level));
 }
 
 function WanikaniLevelProgressChart() {

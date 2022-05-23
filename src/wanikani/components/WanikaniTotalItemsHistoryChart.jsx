@@ -1,10 +1,9 @@
-import {Chart, ValueAxis, ArgumentAxis, Tooltip} from '@devexpress/dx-react-chart-material-ui';
-import React, {useState, useEffect} from "react";
+import {ArgumentAxis, Chart, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
+import React, {useEffect, useMemo, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import {LineSeries} from "@devexpress/dx-react-chart";
+import {EventTracker, LineSeries} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants.js';
-import {Checkbox, Card, CardContent, Typography, Grid, FormControlLabel} from "@mui/material";
-import {EventTracker} from "@devexpress/dx-react-chart";
+import {Card, CardContent, Checkbox, FormControlLabel, Grid, Typography} from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {daysToMillis, millisToDays} from "../../util/DateUtils.js";
 
@@ -85,7 +84,6 @@ async function fetchData() {
 
 function WanikaniTotalItemsHistoryChart() {
     const [rawData, setRawData] = useState([]);
-    const [chartData, setChartData] = useState([]);
     const [daysToLookBack, setDaysToLookBack] = useState(10000);
     const [showRadicals, setShowRadicals] = useState(true);
     const [showKanji, setShowKanji] = useState(true);
@@ -104,16 +102,16 @@ function WanikaniTotalItemsHistoryChart() {
         return () => isSubscribed = false;
     }, []);
 
-    useEffect(() => {
-        setChartData(rawData
+    const chartData = useMemo(() => rawData ? (
+        rawData
             .filter(dp => new Date(dp.date).getTime() > Date.now() - daysToMillis(daysToLookBack))
             .map(dp => ({
                 ...dp,
                 radicals: showRadicals ? dp.radicals : null,
                 kanji: showKanji ? dp.kanji : null,
                 vocabulary: showVocabulary ? dp.vocabulary : null,
-            })));
-    }, [rawData, showRadicals, showKanji, showVocabulary, daysToLookBack]);
+            }))
+    ) : [], [rawData, showRadicals, showKanji, showVocabulary, daysToLookBack]);
 
     function ItemToolTip(props) {
         const dataPoint = chartData[props.targetItem.point];

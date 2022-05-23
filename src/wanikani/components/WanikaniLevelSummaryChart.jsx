@@ -1,10 +1,8 @@
-import {useState, useEffect} from "react";
+import {useEffect, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
-import {Box, Card, CardContent, Typography, Grid, Tooltip} from "@mui/material";
+import {Box, Card, CardContent, CircularProgress, Grid, Stack, Tooltip, Typography} from "@mui/material";
 import {millisToDays, millisToHours} from '../../util/DateUtils.js';
-import {Stack} from '@mui/material';
 import {WanikaniColors} from "../../Constants.js";
-import {CircularProgress} from '@mui/material'
 
 
 const racialColor = WanikaniColors.blue;
@@ -70,11 +68,14 @@ function getLevelProgress(levelsProgress, currentLevel) {
 }
 
 async function getCurrentLevelProgressData() {
-    const userData = await WanikaniApiService.getUser();
+    const [userData, levelsProgress, allSubjects] = await Promise.all([
+        WanikaniApiService.getUser(),
+        WanikaniApiService.getLevelProgress(),
+        WanikaniApiService.getSubjects(),
+    ]);
 
     const currentLevel = userData.data.level;
 
-    const levelsProgress = await WanikaniApiService.getLevelProgress();
     const currentLevelProgress = getLevelProgress(levelsProgress.data, currentLevel);
 
     let start;
@@ -89,8 +90,7 @@ async function getCurrentLevelProgressData() {
     const timeOnLevel = end.getTime() - start.getTime()
 
     const assignments = await WanikaniApiService.getAssignmentsForLevel(currentLevel);
-    let subjects = await WanikaniApiService.getSubjects(currentLevel);
-    subjects = subjects.filter(subject => subject.data.level === currentLevel);
+    const subjects = allSubjects.filter(subject => subject.data.level === currentLevel);
 
     const radicalsTotal = subjects.filter(s => s.object === 'radical');
     const radicals = assignments.data.filter(s => s.data['subject_type'] === 'radical' && !!s.data['passed_at']);

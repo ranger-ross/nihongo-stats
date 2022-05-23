@@ -17,7 +17,8 @@ const cacheKeys = {
     assignments: 'wanikani-assignments',
     summary: 'wanikani-summary',
     levelProgression: 'wanikani-level-progressions',
-    assignmentsForLevelPrefix: 'wanikani-assignment-for-level-'
+    assignmentsForLevelPrefix: 'wanikani-assignment-for-level-',
+    resets: 'wanikani-level-resets',
 }
 
 const authHeader = (apiKey) => ({'Authorization': `Bearer ${apiKey}`})
@@ -226,6 +227,10 @@ function getSummary() {
     return joinAndSendCacheableRequest('/v2/summary', cacheKeys.summary, fetchWithCache, 1000 * 60);
 }
 
+function getResets() {
+    return joinAndSendCacheableRequest('/v2/resets', cacheKeys.resets, fetchWithCache, 1000 * 60 * 10);
+}
+
 function getAssignmentsForLevel(level) {
     return joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
 }
@@ -307,6 +312,7 @@ export default {
     login: attemptLogin,
     getUser: getUser,
     getSummary: getSummary,
+    getResets: getResets,
     getLevelProgress: getLevelProgress,
     getAssignmentsForLevel: getAssignmentsForLevel,
     getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),

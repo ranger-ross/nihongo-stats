@@ -47,10 +47,14 @@ async function fetchData(level) {
         return memCache[level];
     }
 
-    const subjects = (await WanikaniApiService.getSubjects())
-        .filter(subject => subject.data.level === level);
+    const [allSubjects, rawAssignments] = await Promise.all([
+        WanikaniApiService.getSubjects(),
+        WanikaniApiService.getAssignmentsForLevel(level),
+    ]);
 
-    let assignments = (await WanikaniApiService.getAssignmentsForLevel(level)).data;
+    const subjects = allSubjects.filter(subject => subject.data.level === level);
+
+    let assignments = rawAssignments.data;
     const radicalsStarted = assignments.filter(s => s.data['subject_type'] === 'radical' && !!s.data['started_at']).length;
     const kanjiStarted = assignments.filter(s => s.data['subject_type'] === 'kanji' && !!s.data['started_at']).length;
     const vocabularyStarted = assignments.filter(s => s.data['subject_type'] === 'vocabulary' && !!s.data['started_at']).length;

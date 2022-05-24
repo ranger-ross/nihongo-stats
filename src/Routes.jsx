@@ -10,6 +10,7 @@ const LandingPage = React.lazy(() => import("./landing/LandingPage"));
 const EnterWanikaniApiKeyPage = React.lazy(() => import("./wanikani/EnterWanikaniApiKeyPage"));
 const WanikaniDashboard = React.lazy(() => import("./wanikani/WanikaniDashboard"));
 const WanikaniHistory = React.lazy(() => import("./wanikani/WanikaniHistory"));
+const WanikaniProjections = React.lazy(() => import("./wanikani/WanikaniProjections"));
 const WanikaniItems = React.lazy(() => import("./wanikani/WanikaniItems"));
 const BunProDashboard = React.lazy(() => import("./bunpro/BunProDashboard"));
 const EnterBunProApiKeyPage = React.lazy(() => import("./bunpro/EnterBunProApiKeyPage.jsx"));
@@ -39,6 +40,7 @@ export const RoutePaths = {
     wanikaniDashboard: new AppRoute('/wanikani-dashboard', AppNames.wanikani),
     wanikaniLogin: new AppRoute('/wanikani-login', AppNames.wanikani),
     wanikaniHistory: new AppRoute('/wanikani-history', AppNames.wanikani),
+    wanikaniProjections: new AppRoute('/wanikani-projections', AppNames.wanikani),
     wanikaniItems: new AppRoute('/wanikani-items', AppNames.wanikani),
 
     // Anki
@@ -76,6 +78,7 @@ export function AppRoutes() {
             {lazyRoute(RoutePaths.wanikaniDashboard, <WanikaniDashboard/>)}
             {lazyRoute(RoutePaths.wanikaniLogin, <EnterWanikaniApiKeyPage/>)}
             {lazyRoute(RoutePaths.wanikaniHistory, <WanikaniHistory/>)}
+            {lazyRoute(RoutePaths.wanikaniProjections, <WanikaniProjections/>)}
             {lazyRoute(RoutePaths.wanikaniItems, <WanikaniItems/>)}
             {lazyRoute(RoutePaths.bunproDashboard, <BunProDashboard/>)}
             {lazyRoute(RoutePaths.bunproLogin, <EnterBunProApiKeyPage/>)}

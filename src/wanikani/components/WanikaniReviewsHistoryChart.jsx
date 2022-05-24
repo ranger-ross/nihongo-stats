@@ -9,7 +9,7 @@ import {scaleBand} from 'd3-scale';
 import React from 'react';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
-import {getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.js";
+import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.js";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
 
@@ -80,9 +80,20 @@ function aggregateDate(rawData, daysToLookBack, unit) {
     const startDate = unit.trunc(Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1))).getTime();
     const dataForTimeRange = rawData.filter(data => new Date(data.review.data['created_at']).getTime() > startDate);
 
+    // Make sure to DataPoints for days with no reviews, so there is a gap in the graph
+    function fillInEmptyDaysIfNeeded(aggregatedDate, reviewDate) {
+        const dayBeforeReview = addDays(truncDate(reviewDate), -1);
+        let lastDataPoint = aggregatedDate[aggregatedDate.length - 1];
+        while (lastDataPoint.date.getTime() < dayBeforeReview.getTime()) {
+            aggregatedDate.push(new DataPoint(addDays(lastDataPoint.date, 1)));
+            lastDataPoint = aggregatedDate[aggregatedDate.length - 1];
+        }
+    }
+
     let aggregatedDate = [new DataPoint(truncDate(dataForTimeRange[0].review.data['created_at']))];
     for (const data of dataForTimeRange) {
         if (areDatesDifferent(aggregatedDate[aggregatedDate.length - 1].date, data.review.data['created_at'])) {
+            fillInEmptyDaysIfNeeded(aggregatedDate, data.review.data['created_at']);
             aggregatedDate.push(new DataPoint(unit.trunc(data.review.data['created_at'])));
         }
 

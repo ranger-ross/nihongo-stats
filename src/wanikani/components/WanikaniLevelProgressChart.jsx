@@ -9,7 +9,7 @@ function parseTimestamp(text) {
     const days = Math.floor(parseFloat(text));
     return {
         hours,
-        days
+        days,
     };
 }
 
@@ -24,10 +24,10 @@ function LevelToolTip({text}) {
     );
 }
 
-function formatData(data) {
+function formatData(data, currentLevel) {
     const rawData = data.data
         .map(level => level.data)
-        .filter(level => !level['abandoned_at']);
+        .filter(level => !level['abandoned_at'] && level['level'] <= currentLevel);
 
     let map = {};
 
@@ -54,20 +54,34 @@ function formatData(data) {
         .sort((a, b) => parseInt(a.level) - parseInt(b.level));
 }
 
-function WanikaniLevelProgressChart() {
+async function fetchData() {
+    const [levelProgress, user] = await Promise.all([
+        WanikaniApiService.getLevelProgress(),
+        WanikaniApiService.getUser(),
+    ]);
+    return formatData(levelProgress, user.data.level);
+}
+
+function useData() {
     const [levelProgress, setLevelProgress] = useState([]);
-    const [targetItem, setTargetItem] = useState();
 
     useEffect(() => {
         let isSubscribed = true;
-        WanikaniApiService.getLevelProgress()
+        fetchData()
             .then(data => {
                 if (!isSubscribed)
                     return;
-                setLevelProgress(formatData(data));
+                setLevelProgress(data);
             })
         return () => isSubscribed = false;
     }, []);
+
+    return levelProgress;
+}
+
+function WanikaniLevelProgressChart() {
+    const levelProgress = useData();
+    const [targetItem, setTargetItem] = useState();
 
     function BarWithLabel(props) {
         const {arg, val, index} = props;

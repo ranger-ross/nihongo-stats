@@ -10,6 +10,7 @@ import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import ReactVisibilitySensor from "react-visibility-sensor";
 import {useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
+import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart.jsx";
 
 
 function LoadableChart({placeholderTitle, children}) {
@@ -38,6 +39,11 @@ function WanikaniHistory() {
             <WanikaniPreloadedData>
                 <div>
 
+                    <LoadableChart placeholderTitle="Stages">
+                        <WanikaniStagesHistoryChart/>
+                    </LoadableChart>
+
+
                     <Card variant={'outlined'} style={{margin: '15px'}}>
                         <WanikaniHistorySummaryChart/>
                     </Card>
@@ -57,6 +63,7 @@ function WanikaniHistory() {
                     <LoadableChart placeholderTitle="Review Accuracy">
                         <WanikaniAccuracyHistoryChart/>
                     </LoadableChart>
+
 
                 </div>
             </WanikaniPreloadedData>

@@ -19,6 +19,7 @@ const cacheKeys = {
     levelProgression: 'wanikani-level-progressions',
     assignmentsForLevelPrefix: 'wanikani-assignment-for-level-',
     resets: 'wanikani-level-resets',
+    srsSystems: 'wanikani-srs-systems',
 }
 
 const authHeader = (apiKey) => ({'Authorization': `Bearer ${apiKey}`})
@@ -227,6 +228,10 @@ function getSummary() {
     return joinAndSendCacheableRequest('/v2/summary', cacheKeys.summary, fetchWithCache, 1000 * 60);
 }
 
+function getSrsSystems() {
+    return joinAndSendCacheableRequest('/v2/spaced_repetition_systems', cacheKeys.srsSystems, fetchWithCache, 1000 * 60 * 60 * 24 * 7);
+}
+
 function getResets() {
     return joinAndSendCacheableRequest('/v2/resets', cacheKeys.resets, fetchWithCache, 1000 * 60 * 10);
 }
@@ -312,6 +317,7 @@ export default {
     login: attemptLogin,
     getUser: getUser,
     getSummary: getSummary,
+    getSrsSystems: getSrsSystems,
     getResets: getResets,
     getLevelProgress: getLevelProgress,
     getAssignmentsForLevel: getAssignmentsForLevel,

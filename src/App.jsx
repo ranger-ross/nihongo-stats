@@ -1,19 +1,37 @@
-import React from "react";
+import React, {useEffect} from "react";
 import {BrowserRouter} from "react-router-dom";
 import AppNav from './nav/AppNav'
 import AppHeader from './header/AppHeader'
 import {AppRoutes} from './Routes'
 import {AppThemeProvider} from './Theme'
+import {useTheme} from "@mui/material";
+
+function AppContainer({children}) {
+    const theme = useTheme();
+
+    useEffect(() => {
+        // Properly set color-scheme.
+        // If this is not set, the scrollbar on some devices will not match the rest of the app.
+        const isDark = theme.palette.mode === 'dark';
+        document.documentElement.style.setProperty('color-scheme', isDark ? 'dark' : 'light');
+    }, [theme]);
+    
+    return (
+        <div>
+            {children}
+        </div>
+    );
+}
 
 function App() {
     return (
         <AppThemeProvider>
             <BrowserRouter>
-                <div>
+                <AppContainer>
                     <AppHeader/>
                     <AppNav/>
                     <AppRoutes/>
-                </div>
+                </AppContainer>
             </BrowserRouter>
         </AppThemeProvider>
     );

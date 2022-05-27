@@ -79,11 +79,12 @@ async function fetchData() {
 
 
     const path = user.attributes['primary-textbook'];
-    const allowOtherPaths = false; // TODO: Remove when support is added for other paths like Genki,Tai Kim, ect
-    if (!path || path === 'none' || allowOtherPaths) {
+    if (path?.toLowerCase() === 'none') {
         return getBunProOrderActiveItems(user, grammarPoints, reviews);
     } else {
-        console.error('Unknown path', path);
+        // Unknown path, default to default BunPro order
+        console.error('BunPro learning path not supported:', path);
+        return getBunProOrderActiveItems(user, grammarPoints, reviews);
     }
 }
 

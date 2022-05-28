@@ -32,13 +32,22 @@ const units = {
 
 function DataPoint(date, previousDataPoint = {}) {
     let data = {
+        // Keep Track of what subjects in what stage
+        apprenticeItems: {},
+        guruItems: {},
+        masterItems: {},
+        enlightenedItems: {},
+        burnedItems: {},
+
+        // Counts, used to keep runtime low.
+        // Calling Object.keys().length on the lists above is slow
         apprentice: 0,
         guru: 0,
         master: 0,
         enlightened: 0,
         burned: 0,
 
-        ...previousDataPoint,
+        ...previousDataPoint, // Continue counts from previous day
         date: date,
     };
 
@@ -62,35 +71,65 @@ function DataPoint(date, previousDataPoint = {}) {
         return [9].includes(stage);
     }
 
-    function decrement(stage) {
+    function decrement(stage, subject) {
         if (stage === 0) {
             return;
         }
 
         if (isApprentice(stage)) {
-            data['apprentice'] -= 1;
+            if (data.apprenticeItems[subject.id]) {
+                data['apprentice'] -= 1;
+                delete data.apprenticeItems[subject.id];
+            }
         } else if (isGuru(stage)) {
-            data['guru'] -= 1;
+            if (data.guruItems[subject.id]) {
+                data['guru'] -= 1;
+                delete data.guruItems[subject.id];
+            }
         } else if (isMaster(stage)) {
-            data['master'] -= 1;
+            if (data.masterItems[subject.id]) {
+                data['master'] -= 1;
+                delete data.masterItems[subject.id];
+            }
         } else if (isEnlightened(stage)) {
-            data['enlightened'] -= 1;
+            if (data.enlightenedItems[subject.id]) {
+                data['enlightened'] -= 1;
+                delete data.enlightenedItems[subject.id];
+            }
         } else if (isBurned(stage)) {
-            data['burned'] -= 1;
+            if (data.burnedItems[subject.id]) {
+                data['burned'] -= 1;
+                delete data.burnedItems[subject.id];
+            }
         }
     }
 
-    function increment(stage) {
+    function increment(stage, subject) {
         if (isApprentice(stage)) {
-            data['apprentice'] += 1;
+            if (!data.apprenticeItems[subject.id]) {
+                data['apprentice'] += 1;
+                data.apprenticeItems[subject.id] = subject;
+            }
         } else if (isGuru(stage)) {
-            data['guru'] += 1;
+            if (!data.guruItems[subject.id]) {
+                data['guru'] += 1;
+                data.guruItems[subject.id] = subject;
+            }
         } else if (isMaster(stage)) {
-            data['master'] += 1;
+            if (!data.masterItems[subject.id]) {
+                data['master'] += 1;
+                data.masterItems[subject.id] = subject;
+            }
         } else if (isEnlightened(stage)) {
-            data['enlightened'] += 1;
+            if (!data.enlightenedItems[subject.id]) {
+                data['enlightened'] += 1;
+                data.enlightenedItems[subject.id] = subject;
+            }
         } else if (isBurned(stage)) {
-            data['burned'] += 1;
+            if (!data.burnedItems[subject.id]) {
+                data['burned'] += 1;
+                data.burnedItems[subject.id] = subject;
+            }
         }
     }
 
@@ -112,15 +151,37 @@ function DataPoint(date, previousDataPoint = {}) {
             return; // Do nothing, the stage didn't change
         }
 
-        decrement(startingStage);
-        increment(endingStage)
+        decrement(startingStage, d.subject);
+        increment(endingStage, d.subject);
+
+    };
+
+    function resetStage(stageKey, stageItemsKey, targetLevel) {
+        for (const [key, subject] of Object.entries(data[stageItemsKey])) {
+            if (subject.data.level >= targetLevel) {
+                delete data[stageItemsKey][key];
+            }
+        }
+        data[stageKey] = Object.keys(data[stageItemsKey]).length;
+    }
+
+    // Remove items and reset counts for levels that have been reset
+    data.reset = (reset) => {
+        resetStage('apprentice', 'apprenticeItems', reset.targetLevel);
+        resetStage('guru', 'guruItems', reset.targetLevel);
+        resetStage('master', 'masterItems', reset.targetLevel);
+        resetStage('enlightened', 'enlightenedItems', reset.targetLevel);
+        resetStage('burned', 'burnedItems', reset.targetLevel);
     };
 
     return data;
 }
 
 async function fetchData() {
-    const reviews = await WanikaniApiService.getReviews();
+    const [reviews, resets] = await Promise.all([
+        WanikaniApiService.getReviews(),
+        WanikaniApiService.getResets(),
+    ]);
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
     let data = [];
     for (const review of reviews) {
@@ -130,13 +191,20 @@ async function fetchData() {
         });
     }
 
-    return data;
+    return [data, resets.data];
 }
 
-function aggregateDate(rawData, unit) {
+function aggregateDate(rawData, resets, unit) {
     if (!rawData)
         return null;
     const areDatesDifferent = (date1, date2) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
+
+    resets = resets.map(r => ({
+        confirmedAt: new Date(r.data['confirmed_at']),
+        createdAt: new Date(r.data['created_at']),
+        originalLevel: r.data['original_level'],
+        targetLevel: r.data['target_level'],
+    }));
 
     // Make sure to DataPoints for days with no reviews, so there is a gap in the graph
     function fillInEmptyDaysIfNeeded(aggregatedDate, reviewDate) {
@@ -149,12 +217,29 @@ function aggregateDate(rawData, unit) {
     }
 
     let aggregatedDate = [new DataPoint(truncDate(rawData[0].review.data['created_at']))];
+    let nextReset = resets[0];
     for (const data of rawData) {
+
+        // Handle Resets by remove items and reset counts for levels higher than the reset target level
+        if (nextReset && nextReset.confirmedAt.getTime() < new Date(data.review.data['created_at']).getTime()) {
+            if (areDatesDifferent(aggregatedDate[aggregatedDate.length - 1].date, nextReset.confirmedAt.getTime())) {
+                fillInEmptyDaysIfNeeded(aggregatedDate, nextReset.confirmedAt);
+                aggregatedDate.push(new DataPoint(unit.trunc(nextReset.confirmedAt), aggregatedDate[aggregatedDate.length - 1]));
+            }
+
+            aggregatedDate[aggregatedDate.length - 1].reset(nextReset);
+
+            resets.splice(0, 1);
+            nextReset = resets[0];
+        }
+
+        // Add new DataPoints for each day
         if (areDatesDifferent(aggregatedDate[aggregatedDate.length - 1].date, data.review.data['created_at'])) {
             fillInEmptyDaysIfNeeded(aggregatedDate, data.review.data['created_at']);
             aggregatedDate.push(new DataPoint(unit.trunc(data.review.data['created_at']), aggregatedDate[aggregatedDate.length - 1]));
         }
 
+        // Add the data to the current day/DataPoint
         aggregatedDate[aggregatedDate.length - 1].push(data);
     }
 
@@ -165,17 +250,19 @@ function useData() {
     const [state, setState] = useState({
         isLoading: true,
         data: null,
+        resets: [],
     });
 
     useEffect(() => {
         let isSubscribed = true;
 
         fetchData()
-            .then(data => {
+            .then(([data, resets]) => {
                 if (!isSubscribed)
                     return;
                 setState({
                     data,
+                    resets,
                     isLoading: false
                 });
             });
@@ -184,7 +271,7 @@ function useData() {
     }, []);
 
 
-    const data = useMemo(() => aggregateDate(state.data, units.days), [state.data]);
+    const data = useMemo(() => aggregateDate(state.data, state.resets, units.days), [state.data, state.resets]);
 
     return [data, state.isLoading];
 }

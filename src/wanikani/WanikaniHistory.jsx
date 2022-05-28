@@ -39,11 +39,6 @@ function WanikaniHistory() {
             <WanikaniPreloadedData>
                 <div>
 
-                    <LoadableChart placeholderTitle="Stages">
-                        <WanikaniStagesHistoryChart/>
-                    </LoadableChart>
-
-
                     <Card variant={'outlined'} style={{margin: '15px'}}>
                         <WanikaniHistorySummaryChart/>
                     </Card>
@@ -60,10 +55,13 @@ function WanikaniHistory() {
                         <WanikaniLevelProgressChart/>
                     </LoadableChart>
 
+                    <LoadableChart placeholderTitle="Stages">
+                        <WanikaniStagesHistoryChart/>
+                    </LoadableChart>
+
                     <LoadableChart placeholderTitle="Review Accuracy">
                         <WanikaniAccuracyHistoryChart/>
                     </LoadableChart>
-
 
                 </div>
             </WanikaniPreloadedData>

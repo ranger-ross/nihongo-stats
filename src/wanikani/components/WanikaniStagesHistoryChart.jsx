@@ -1,13 +1,15 @@
-import {Card, CardContent, CircularProgress, Grid} from "@mui/material";
+import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import React, {useEffect, useMemo, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 import {addDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.js";
-import {Chart, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
-import {AreaSeries, ArgumentScale, Stack} from "@devexpress/dx-react-chart";
+import {ArgumentAxis, Chart, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
+import {AreaSeries, ArgumentScale, EventTracker, Stack} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from "../../Constants.js";
 import {area, curveCatmullRom,} from 'd3-shape';
 import {scaleBand} from 'd3-scale';
+import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
+import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
 
 
 const units = {
@@ -117,16 +119,6 @@ function DataPoint(date, previousDataPoint = {}) {
     return data;
 }
 
-async function getSrsSystemMap() {
-    const srsSystems = await WanikaniApiService.getSrsSystems();
-
-    let srsSystemMap = {};
-    for (const system of srsSystems.data) {
-        srsSystemMap[system.id] = system;
-    }
-    return srsSystemMap;
-}
-
 async function fetchData() {
     const reviews = await WanikaniApiService.getReviews();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
@@ -138,18 +130,12 @@ async function fetchData() {
         });
     }
 
-    const srsSystems = await getSrsSystemMap();
-
-    return {
-        data,
-        srsSystems,
-    };
+    return data;
 }
 
-function aggregateDate(rawData, daysToLookBack, unit) {
+function aggregateDate(rawData, unit) {
     if (!rawData)
         return null;
-    const {data, srsSystems} = rawData;
     const areDatesDifferent = (date1, date2) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
 
     // Make sure to DataPoints for days with no reviews, so there is a gap in the graph
@@ -162,8 +148,8 @@ function aggregateDate(rawData, daysToLookBack, unit) {
         }
     }
 
-    let aggregatedDate = [new DataPoint(truncDate(rawData.data[0].review.data['created_at']))];
-    for (const data of rawData.data) {
+    let aggregatedDate = [new DataPoint(truncDate(rawData[0].review.data['created_at']))];
+    for (const data of rawData) {
         if (areDatesDifferent(aggregatedDate[aggregatedDate.length - 1].date, data.review.data['created_at'])) {
             fillInEmptyDaysIfNeeded(aggregatedDate, data.review.data['created_at']);
             aggregatedDate.push(new DataPoint(unit.trunc(data.review.data['created_at']), aggregatedDate[aggregatedDate.length - 1]));
@@ -174,7 +160,6 @@ function aggregateDate(rawData, daysToLookBack, unit) {
 
     return aggregatedDate;
 }
-
 
 function useData() {
     const [state, setState] = useState({
@@ -199,7 +184,7 @@ function useData() {
     }, []);
 
 
-    const data = useMemo(() => aggregateDate(state.data, 100000, units.days), [state.data]);
+    const data = useMemo(() => aggregateDate(state.data, units.days), [state.data]);
 
     return [data, state.isLoading];
 }
@@ -226,12 +211,62 @@ function Area(props) {
 
 function WanikaniStagesHistoryChart() {
     const [data, isLoading] = useData();
+    const [tooltipTargetItem, setTooltipTargetItem] = useState();
 
-    console.log(data, isLoading);
+    const visibleLabelIndices = useMemo(() => getVisibleLabelIndices(data ?? [], 6), [data]);
+
+    const StageToolTip = useMemo(() => (
+        function StageToolTip(props) {
+            const dp = data[props.targetItem.point];
+            return (
+                <>
+                    {dp.date.toLocaleDateString()}
+                    <ToolTipLabel title="Apprentice" value={dp.apprentice}/>
+                    <ToolTipLabel title="Guru" value={dp.guru}/>
+                    <ToolTipLabel title="Master" value={dp.master}/>
+                    <ToolTipLabel title="Enlightened" value={dp.enlightened}/>
+                    <ToolTipLabel title="Burned" value={dp.burned}/>
+                </>
+            );
+        }
+    ), [data]);
+
+    const LabelWithDate = useMemo(() => (
+        function LabelWithDate(props) {
+            const date = new Date(props.text);
+            if (!date) {
+                return (<></>)
+            }
+
+            const index = data.findIndex(dp => dp.date.getTime() === date.getTime());
+            const isVisible = visibleLabelIndices.includes(index);
+
+            return (
+                <>
+                    {isVisible ? (
+                        <ArgumentAxis.Label
+                            {...props}
+                            text={new Date(date).toLocaleDateString()}
+                        />
+                    ) : null}
+                </>
+            );
+        }
+    ), [visibleLabelIndices]);
 
     return (
         <Card>
             <CardContent>
+
+                <Grid container>
+                    <Grid item xs={12} md={4}/>
+                    <Grid item xs={12} md={4}>
+                        <Typography variant={'h5'} style={{textAlign: 'center'}}>
+                            Stage History
+                        </Typography>
+                    </Grid>
+                </Grid>
+
                 {isLoading ? (
                     <Grid item container xs={12} justifyContent={'center'} style={{padding: '10px'}}>
                         <CircularProgress/>
@@ -240,9 +275,8 @@ function WanikaniStagesHistoryChart() {
                     <div style={{flexGrow: '1'}}>
                         <Chart data={data}>
                             <ArgumentScale factory={scaleBand}/>
-                            {/*<ArgumentAxis labelComponent={LabelWithDate}/>*/}
+                            <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
                             <ValueAxis/>
-
 
                             <AreaSeries
                                 name="Apprentice"
@@ -287,16 +321,16 @@ function WanikaniStagesHistoryChart() {
 
                             <Stack
                                 stacks={[{
-                                    series: ['Apprentice', 'Guru', 'Master', 'Enlightened', 'Burned'],
+                                    series: ['Apprentice', 'Guru', 'Master', 'Enlightened', 'Burned']
                                 }]}
                             />
 
-                            {/*<EventTracker/>*/}
-                            {/*<Tooltip*/}
-                            {/*    targetItem={tooltipTargetItem ? {...tooltipTargetItem, series: 'vocabulary'} : null}*/}
-                            {/*    onTargetItemChange={setTooltipTargetItem}*/}
-                            {/*    contentComponent={ReviewsToolTip}*/}
-                            {/*/>*/}
+                            <EventTracker/>
+                            <Tooltip
+                                targetItem={tooltipTargetItem}
+                                onTargetItemChange={setTooltipTargetItem}
+                                contentComponent={StageToolTip}
+                            />
                         </Chart>
                     </div>
                 )}

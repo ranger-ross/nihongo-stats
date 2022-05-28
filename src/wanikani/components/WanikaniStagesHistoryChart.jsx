@@ -143,6 +143,7 @@ function DataPoint(date, previousDataPoint = {}) {
         );
     }
 
+    // Add a review, check the start/end stages and increment and decrement accordingly
     data.push = (d) => {
         const startingStage = d.review.data['starting_srs_stage'];
         const endingStage = d.review.data['ending_srs_stage'];

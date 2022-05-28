@@ -64,6 +64,21 @@ function AboutPage() {
 
                 </ContentSection>
 
+                <ContentSection title={'Other Helpful Sites'}>
+                    Below are some other great tools created by various community members.
+
+                    <li>
+                        <NewTabLink href={AppUrls.wkStats}>Wanikani Statistics</NewTabLink>&nbsp;
+                        - Original WK Stats website.
+                    </li>
+
+                    <li>
+                        <NewTabLink href={AppUrls.wanikaniHistory}>Wanikani History</NewTabLink>&nbsp;
+                        - An alternative Wanikani Stats visualization tool similar to Nihongo Stats
+                    </li>
+
+                </ContentSection>
+
             </>
         </div>
     );

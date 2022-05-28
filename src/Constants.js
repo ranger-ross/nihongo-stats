@@ -19,6 +19,7 @@ export const AppUrls = {
     githubReleasesPage: 'https://github.com/ranger-ross/nihongo-stats/releases',
 
     wkStats: 'https://www.wkstats.com/',
+    wanikaniHistory: 'https://saraqael-m.github.io/WaniKaniMiscStats',
 
 };
 

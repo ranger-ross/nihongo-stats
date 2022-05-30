@@ -9,7 +9,7 @@ import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.ts";
 import AnkiApiService from "../service/AnkiApiService.js";
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
-import PeriodSelector from "../../shared/PeriodSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.tsx";
 
 function DataPoint(date, previousDataPoint) {
     let dp = {

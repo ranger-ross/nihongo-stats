@@ -1,13 +1,13 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addHours, truncMinutes} from '../../util/DateUtils.ts';
-import PeriodSelector from "../../shared/PeriodSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {scaleBand} from 'd3-scale';
 import BunProApiService from "../service/BunProApiService.js";
 import {createGrammarPointsLookupMap, filterDeadGhostReviews} from "../service/BunProDataUtil.js";
 import {ArgumentAxis, Chart, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
-import FilterableLegend from "../../shared/FilterableLegend.jsx";
+import FilterableLegend from "../../shared/FilterableLegend.tsx";
 import {
     addTimeToDate, createUpcomingReviewsChartBarLabel,
     createUpcomingReviewsChartLabel, formatTimeUnitLabelText, UnitSelector,

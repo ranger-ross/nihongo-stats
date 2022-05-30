@@ -3,9 +3,9 @@ import WanikaniApiService from "../service/WanikaniApiService";
 import {CircularProgress, Typography} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
 import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.jsx";
-import QuestionToolTip from "../../shared/QuestionToolTip.jsx";
+import QuestionToolTip from "../../shared/QuestionToolTip.tsx";
 import {EVENT_STATUS} from "../service/WanikaniApiServiceRxJs.js";
-import LinearProgressWithLabel from "../../shared/LinearProgressWithLabel.jsx";
+import LinearProgressWithLabel from "../../shared/LinearProgressWithLabel.tsx";
 
 const styles = {
     loadingItem: {

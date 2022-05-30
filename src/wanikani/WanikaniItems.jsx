@@ -2,7 +2,7 @@ import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import {RoutePaths} from "../Routes";
 import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
-import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
+import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
 import {Card, CardContent, Typography} from "@mui/material";
 import WanikaniItemTile from "./components/WanikaniItemTile.jsx";
 import WanikaniApiService from "./service/WanikaniApiService.js";

@@ -8,10 +8,10 @@ import {EventTracker} from "@devexpress/dx-react-chart";
 import {scaleBand} from 'd3-scale';
 import React from 'react';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
-import PeriodSelector from "../../shared/PeriodSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.ts";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
-import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
+import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
 
 const units = {
     days: {

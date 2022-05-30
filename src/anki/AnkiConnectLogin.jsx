@@ -4,7 +4,7 @@ import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import {useState} from "react";
 import AnkiHowToInstall from "./components/AnkiHowToInstall.jsx";
-import QuestionToolTip from "../shared/QuestionToolTip.jsx";
+import QuestionToolTip from "../shared/QuestionToolTip.tsx";
 
 const styles = {
     container: {

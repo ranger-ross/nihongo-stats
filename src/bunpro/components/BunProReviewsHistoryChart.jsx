@@ -5,10 +5,10 @@ import {ArgumentScale, BarSeries, EventTracker, Stack} from "@devexpress/dx-reac
 import {daysToMillis, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.ts";
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
-import PeriodSelector from "../../shared/PeriodSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {fetchAllBunProReviews} from "../service/BunProDataUtil.js";
 import useWindowDimensions from "../../hooks/useWindowDimensions.jsx";
-import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
+import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 

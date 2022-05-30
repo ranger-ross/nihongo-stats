@@ -8,7 +8,7 @@ import {WanikaniColors} from "../../Constants.js";
 import {useUserPreferences} from "../../hooks/useUserPreferences.jsx";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
 import {lightenDarkenColor} from "../../util/CssUtils.ts";
-import GradientLinearProgress from "../../shared/GradientLinearProgress.jsx";
+import GradientLinearProgress from "../../shared/GradientLinearProgress.tsx";
 
 const styles = {
     showPreviousLevelMobile: {

@@ -11,8 +11,12 @@ const styles = {
     }
 };
 
+type Props = {
+    title: string,
+    value: string | number
+};
 
-function ToolTipLabel({title, value}) {
+function ToolTipLabel({title, value}: Props) {
     return (
         <div style={styles.labelContainer}>
             <div style={styles.label}>{title}</div>

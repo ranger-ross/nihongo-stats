@@ -8,7 +8,7 @@ import {AreaSeries, ArgumentScale, EventTracker, Stack} from "@devexpress/dx-rea
 import {WanikaniColors} from "../../Constants.js";
 import {area, curveCatmullRom,} from 'd3-shape';
 import {scaleBand} from 'd3-scale';
-import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
+import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 
 

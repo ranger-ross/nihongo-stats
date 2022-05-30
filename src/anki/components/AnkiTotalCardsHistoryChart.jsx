@@ -1,5 +1,5 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import PeriodSelector from "../../shared/PeriodSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.ts";
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";

@@ -9,7 +9,7 @@ import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChar
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import ReactVisibilitySensor from "react-visibility-sensor";
 import {useState} from "react";
-import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
+import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
 import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart.jsx";
 
 

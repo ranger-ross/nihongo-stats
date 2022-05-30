@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addDays, addHours, daysToMillis, truncDate, truncMinutes} from '../../util/DateUtils.ts';
-import PeriodSelector from "../../shared/PeriodSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {scaleBand} from 'd3-scale';
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
 import {ArgumentAxis, Chart, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
@@ -27,9 +27,9 @@ import {
     UpcomingReviewPeriods, UpcomingReviewsScatterPoint,
     UpcomingReviewUnits
 } from "../../util/UpcomingReviewChartUtils.jsx";
-import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
+import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
 import {filterDeadGhostReviews} from "../../bunpro/service/BunProDataUtil.js";
-import FilterableLegend from "../../shared/FilterableLegend.jsx";
+import FilterableLegend from "../../shared/FilterableLegend.tsx";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
 
 const maxDaysIntoFuture = 31;

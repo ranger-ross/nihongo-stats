@@ -6,7 +6,7 @@ import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
 import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart.jsx";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import WanikaniActiveItemsChart from "./components/WanikaniActiveItemChart.jsx";
-import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
+import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
 
 const styles = {
     container: {

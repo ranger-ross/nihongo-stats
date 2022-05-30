@@ -1,6 +1,6 @@
 import {Card, CardContent, Typography} from "@mui/material";
 import {AppUrls} from "../Constants.js";
-import NewTabLink from "../shared/NewTabLink.jsx";
+import NewTabLink from "../shared/NewTabLink.tsx";
 
 const styles = {
     container: {

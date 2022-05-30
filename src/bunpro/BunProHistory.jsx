@@ -3,7 +3,7 @@ import BunProPreloadedData from "./components/BunProPreloadedData.jsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 import BunProReviewsHistoryChart from "./components/BunProReviewsHistoryChart.jsx";
 import BunProTotalReviewsChart from "./components/BunProTotalReviewsChart.jsx";
-import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
+import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
 import BunProTotalGrammarPointsChart from "./components/BunProTotalGrammarPointsChart.jsx";
 
 

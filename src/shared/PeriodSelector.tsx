@@ -1,13 +1,20 @@
 import {ToggleButton, ToggleButtonGroup} from "@mui/material";
+import React from "react";
 
-function PeriodSelector({options, period, setPeriod}) {
+type Props = {
+    options: { text: string, value: number }[],
+    period: number,
+    setPeriod: (v: number) => void
+};
+
+function PeriodSelector({options, period, setPeriod}: Props) {
     return (
         <ToggleButtonGroup
             value={period}
             size={'small'}
             style={{height: '40px'}}
             exclusive
-            onChange={e => setPeriod(parseInt(e.target.value))}
+            onChange={(e: React.MouseEvent<any>) => setPeriod(parseInt(e.currentTarget.value))}
         >
             {options
                 .filter(option => !!option)

@@ -4,7 +4,7 @@ import {BunProWelcomeTile} from "./components/BunProWelcomeTile.jsx";
 import BunProPreloadedData from "./components/BunProPreloadedData.jsx";
 import {BunProJLPTTile} from "./components/BunProJLPTTile";
 import BunProUpcomingReviewsChart from "./components/BunProUpcomingReviewsChart.jsx";
-import RequireOrRedirect from "../shared/RequireOrRedirect.jsx";
+import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
 import {useDeviceInfo} from "../hooks/useDeviceInfo.jsx";
 import BunProActiveItemsChart from "./components/BunProActiveItemsChart.jsx";
 

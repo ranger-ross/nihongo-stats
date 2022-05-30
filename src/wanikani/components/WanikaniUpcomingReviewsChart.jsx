@@ -12,7 +12,7 @@ import {ArgumentScale, EventTracker, LineSeries, Stack, ValueScale} from "@devex
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addHours, truncMinutes} from '../../util/DateUtils.ts';
 import {WanikaniColors} from '../../Constants.js';
-import PeriodSelector from "../../shared/PeriodSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {scaleBand} from 'd3-scale';
 import {
     addTimeToDate,

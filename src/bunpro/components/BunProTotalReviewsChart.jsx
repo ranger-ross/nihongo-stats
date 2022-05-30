@@ -6,7 +6,7 @@ import {ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-char
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.ts";
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
-import PeriodSelector from "../../shared/PeriodSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {fetchAllBunProReviews} from "../service/BunProDataUtil.js";
 import useWindowDimensions from "../../hooks/useWindowDimensions.jsx";
 

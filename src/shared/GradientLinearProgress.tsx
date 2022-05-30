@@ -1,9 +1,14 @@
 import {styled} from "@mui/material/styles";
-import {LinearProgress, linearProgressClasses} from "@mui/material";
-import PropTypes from "prop-types";
+import {LinearProgress, linearProgressClasses, LinearProgressProps} from "@mui/material";
 import {useMemo} from "react";
 
-function GradientLinearProgress({lineStartColor, lineEndColor, backgroundLineColor, ...otherProps}) {
+type Props = {
+    lineStartColor: string,
+    lineEndColor: string,
+    backgroundLineColor: string,
+} & LinearProgressProps;
+
+function GradientLinearProgress({lineStartColor, lineEndColor, backgroundLineColor, ...otherProps}: Props) {
     const GradientLinearProgressInner = useMemo(() => styled(LinearProgress)(() => {
         return {
             [`&.${linearProgressClasses.root}`]: {
@@ -19,12 +24,5 @@ function GradientLinearProgress({lineStartColor, lineEndColor, backgroundLineCol
     }), [lineStartColor, lineEndColor, backgroundLineColor]);
     return <GradientLinearProgressInner {...otherProps}/>
 }
-
-GradientLinearProgress.propTypes = {
-    ...LinearProgress.propTypes,
-    lineStartColor: PropTypes.string,
-    lineEndColor: PropTypes.string,
-    backgroundLineColor: PropTypes.string,
-};
 
 export default GradientLinearProgress;

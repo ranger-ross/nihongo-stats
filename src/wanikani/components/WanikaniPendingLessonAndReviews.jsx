@@ -1,5 +1,5 @@
 import {WanikaniColors} from "../../Constants.js";
-import {ColoredButton} from "../../shared/ColoredButton.jsx";
+import {ColoredButton} from "../../shared/ColoredButton.tsx";
 
 function WanikaniCountButton(props) {
     const color = props.count === 0 && !!props.emptyColor ? props.emptyColor : props.color

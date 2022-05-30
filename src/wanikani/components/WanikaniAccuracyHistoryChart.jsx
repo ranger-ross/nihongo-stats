@@ -6,7 +6,7 @@ import {WanikaniColors} from '../../Constants.js';
 import {Card, CardContent, Grid, Typography} from "@mui/material";
 import _ from 'lodash';
 import {scaleLinear} from 'd3-scale';
-import PeriodSelector from "../../shared/PeriodSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 import {millisToDays} from "../../util/DateUtils.ts";
 

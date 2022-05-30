@@ -1,5 +1,5 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import PeriodSelector from "../../shared/PeriodSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {addDays, daysToMillis, truncDate} from "../../util/DateUtils.ts";
 import * as React from "react";
 import {useEffect, useState, useMemo} from "react";
@@ -11,7 +11,7 @@ import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-re
 import {AreaSeries, ArgumentScale, EventTracker, Stack} from "@devexpress/dx-react-chart";
 
 import {AnkiColors} from "../../Constants.js";
-import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
+import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
 
 function createCardTimestampMap(cards) {
     let map = {};

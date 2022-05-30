@@ -10,7 +10,7 @@ import {scaleBand} from 'd3-scale';
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
 import {truncDate} from "../../util/DateUtils.ts";
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
-import PeriodSelector from "../../shared/PeriodSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {createAnkiCardsDueQuery} from "../service/AnkiDataUtil.js";
 
 function DataPoint(day) {

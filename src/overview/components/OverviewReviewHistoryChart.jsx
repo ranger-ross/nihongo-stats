@@ -12,7 +12,7 @@ import {EventTracker} from "@devexpress/dx-react-chart";
 import {scaleBand} from 'd3-scale';
 import React from 'react';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
-import PeriodSelector from "../../shared/PeriodSelector.jsx";
+import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
 import {daysToMillis, truncDate} from "../../util/DateUtils.ts";
 import AnkiApiService from "../../anki/service/AnkiApiService.js";

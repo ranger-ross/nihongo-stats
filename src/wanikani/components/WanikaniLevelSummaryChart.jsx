@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {Box, Card, CardContent, CircularProgress, Grid, Stack, Tooltip, Typography} from "@mui/material";
-import {millisToDays, millisToHours} from '../../util/DateUtils.js';
+import {millisToDays, millisToHours} from '../../util/DateUtils.ts';
 import {WanikaniColors} from "../../Constants.js";
 
 

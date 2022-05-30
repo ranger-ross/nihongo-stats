@@ -2,9 +2,9 @@ import {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {WanikaniColors} from '../../Constants.js';
 import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/material";
-import {sortAndGetMedian} from "../../util/MathUtils.js";
+import {sortAndGetMedian} from "../../util/MathUtils.ts";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
-import {millisToDays, millisToHours} from "../../util/DateUtils.js";
+import {millisToDays, millisToHours} from "../../util/DateUtils.ts";
 import {distinct} from "../../util/ArrayUtils.ts";
 
 const styles = {

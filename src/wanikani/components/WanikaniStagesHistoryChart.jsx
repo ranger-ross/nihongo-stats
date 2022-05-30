@@ -2,14 +2,14 @@ import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/materi
 import React, {useEffect, useMemo, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
-import {addDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.js";
+import {addDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.ts";
 import {ArgumentAxis, Chart, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {AreaSeries, ArgumentScale, EventTracker, Stack} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from "../../Constants.js";
 import {area, curveCatmullRom,} from 'd3-shape';
 import {scaleBand} from 'd3-scale';
 import ToolTipLabel from "../../shared/ToolTipLabel.jsx";
-import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
+import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 
 
 const units = {

@@ -5,10 +5,10 @@ import {
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack} from "@devexpress/dx-react-chart";
-import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.js";
+import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.ts";
 import AnkiApiService from "../service/AnkiApiService.js";
 import {scaleBand} from 'd3-scale';
-import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
+import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
 
 function DataPoint(date, previousDataPoint) {

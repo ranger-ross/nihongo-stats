@@ -1,4 +1,4 @@
-import {addDays, addHours, areDatesSameDay, areDatesSameDayAndHour, truncDate, truncMinutes} from "./DateUtils.js";
+import {addDays, addHours, areDatesSameDay, areDatesSameDayAndHour, truncDate, truncMinutes} from "./DateUtils.ts";
 import {MenuItem, Select} from "@mui/material";
 import {ArgumentAxis, Chart} from "@devexpress/dx-react-chart-material-ui";
 import {BarSeries, ScatterSeries} from "@devexpress/dx-react-chart";

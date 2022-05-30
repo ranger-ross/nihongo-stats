@@ -11,10 +11,10 @@ import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/materi
 import {EventTracker} from "@devexpress/dx-react-chart";
 import {scaleBand} from 'd3-scale';
 import React from 'react';
-import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
+import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
-import {daysToMillis, truncDate} from "../../util/DateUtils.js";
+import {daysToMillis, truncDate} from "../../util/DateUtils.ts";
 import AnkiApiService from "../../anki/service/AnkiApiService.js";
 import {useAnkiDecks} from "../../hooks/useAnkiDecks.jsx";
 import {fetchAllBunProReviews} from "../../bunpro/service/BunProDataUtil.js";

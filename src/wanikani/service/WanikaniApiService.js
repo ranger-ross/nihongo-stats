@@ -1,7 +1,7 @@
 import * as localForage from "localforage/dist/localforage"
 import InMemoryCache from "../../util/InMemoryCache.js";
 import {AppUrls} from "../../Constants.js";
-import {PromiseCache} from "../../util/PromiseCache.js";
+import {PromiseCache} from "../../util/PromiseCache.ts";
 import WanikaniApiServiceRxJs, {EVENT_STATUS} from "./WanikaniApiServiceRxJs.js";
 
 const memoryCache = new InMemoryCache();

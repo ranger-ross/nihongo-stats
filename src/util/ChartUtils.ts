@@ -1,4 +1,4 @@
-export function getVisibleLabelIndices(data, maxNumberOfLabels) {
+export function getVisibleLabelIndices(data: never[], maxNumberOfLabels: number) {
     if (data.length <= maxNumberOfLabels) {
         return data.map((_, i) => i);
     }
@@ -28,11 +28,11 @@ function specialCase3Or4Labels5Length() {
     return [0, 2, 4];
 }
 
-function getVisibleLabelIndicesOdd(min, max, count) {
+function getVisibleLabelIndicesOdd(min: number, max: number, count: number) {
     const spacing = (max + 1) / (count - 1);
 
     let index = min;
-    let indices = [index];
+    const indices = [index];
 
     while (indices.length < count) {
         index += spacing;
@@ -43,10 +43,10 @@ function getVisibleLabelIndicesOdd(min, max, count) {
 }
 
 
-function getVisibleLabelIndicesEven(min, max, count) {
+function getVisibleLabelIndicesEven(min: number, max: number, count: number) {
     const spacing = Math.ceil(max / count);
 
-    let data = [max];
+    const data = [max];
     let current = max - spacing;
     while (current > min) {
         data.unshift(current);

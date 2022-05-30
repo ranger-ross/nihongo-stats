@@ -5,7 +5,7 @@ import {EventTracker, LineSeries} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants.js';
 import {Card, CardContent, Checkbox, FormControlLabel, Grid, Typography} from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
-import {daysToMillis, millisToDays} from "../../util/DateUtils.js";
+import {daysToMillis, millisToDays} from "../../util/DateUtils.ts";
 
 function LabelWithDate(props) {
     const {text} = props;

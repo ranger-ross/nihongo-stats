@@ -1,6 +1,6 @@
 import * as localForage from "localforage/dist/localforage"
 import {AppUrls} from "../../Constants.js";
-import {PromiseCache} from "../../util/PromiseCache.js";
+import {PromiseCache} from "../../util/PromiseCache.ts";
 
 const {apiProxy, bunproApi} = AppUrls;
 

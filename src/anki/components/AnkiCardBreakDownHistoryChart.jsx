@@ -1,10 +1,10 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
-import {addDays, daysToMillis, truncDate} from "../../util/DateUtils.js";
+import {addDays, daysToMillis, truncDate} from "../../util/DateUtils.ts";
 import * as React from "react";
 import {useEffect, useState, useMemo} from "react";
 import AnkiApiService from "../service/AnkiApiService.js";
-import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
+import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 import {scaleBand} from 'd3-scale';
 import {area, curveCatmullRom,} from 'd3-shape';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";

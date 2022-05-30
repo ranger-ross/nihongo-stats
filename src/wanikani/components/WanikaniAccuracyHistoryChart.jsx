@@ -8,7 +8,7 @@ import _ from 'lodash';
 import {scaleLinear} from 'd3-scale';
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
-import {millisToDays} from "../../util/DateUtils.js";
+import {millisToDays} from "../../util/DateUtils.ts";
 
 const scale = () => scaleLinear();
 const modifyDomain = () => [0, 100];

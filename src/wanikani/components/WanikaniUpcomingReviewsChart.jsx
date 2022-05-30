@@ -10,7 +10,7 @@ import React, {useState, useEffect, useMemo} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {ArgumentScale, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
-import {addHours, truncMinutes} from '../../util/DateUtils.js';
+import {addHours, truncMinutes} from '../../util/DateUtils.ts';
 import {WanikaniColors} from '../../Constants.js';
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {scaleBand} from 'd3-scale';

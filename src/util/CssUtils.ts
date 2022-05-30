@@ -1,5 +1,5 @@
 // https://css-tricks.com/snippets/javascript/lighten-darken-color/
-export function lightenDarkenColor(col, amt) {
+export function lightenDarkenColor(col: string, amt: number): string {
     let usePound = false;
 
     if (col[0] == "#") {
@@ -25,5 +25,4 @@ export function lightenDarkenColor(col, amt) {
     else if (g < 0) g = 0;
 
     return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
-
 }

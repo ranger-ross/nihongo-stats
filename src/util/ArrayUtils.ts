@@ -1,4 +1,4 @@
-export function distinct<T>(array: T[], compareFn: (entry: T) => string | number) {
+export function distinct<T>(array: T[], compareFn: (entry: T) => string | number): T[] {
     if (!compareFn) {
         throw new Error("compareFn was missing when calling distinct(array, compareFn)");
     }

@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from "react";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
-import {addDays, addHours, daysToMillis, truncDate, truncMinutes} from '../../util/DateUtils.js';
+import {addDays, addHours, daysToMillis, truncDate, truncMinutes} from '../../util/DateUtils.ts';
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
 import {scaleBand} from 'd3-scale';
 import BunProApiService from "../../bunpro/service/BunProApiService.js";

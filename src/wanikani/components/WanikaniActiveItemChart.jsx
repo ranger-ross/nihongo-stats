@@ -7,7 +7,7 @@ import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.js";
 import {WanikaniColors} from "../../Constants.js";
 import {useUserPreferences} from "../../hooks/useUserPreferences.jsx";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
-import {lightenDarkenColor} from "../../util/CssUtils.js";
+import {lightenDarkenColor} from "../../util/CssUtils.ts";
 import GradientLinearProgress from "../../shared/GradientLinearProgress.jsx";
 
 const styles = {

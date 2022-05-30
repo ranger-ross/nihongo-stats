@@ -1,13 +1,13 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector.jsx";
-import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.js";
+import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.ts";
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
 import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
 import AnkiApiService from "../service/AnkiApiService.js";
 import {scaleBand} from 'd3-scale';
-import {getVisibleLabelIndices} from "../../util/ChartUtils.js";
+import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 
 function DataPoint(date, previousDataPoint) {
     let dp = {

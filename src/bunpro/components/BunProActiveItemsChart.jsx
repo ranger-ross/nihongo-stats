@@ -1,7 +1,7 @@
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import BunProApiService from "../service/BunProApiService.js";
-import {lightenDarkenColor} from "../../util/CssUtils.js";
+import {lightenDarkenColor} from "../../util/CssUtils.ts";
 import {BunProColors} from "../../Constants.js";
 import GradientLinearProgress from "../../shared/GradientLinearProgress.jsx";
 

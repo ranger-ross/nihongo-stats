@@ -1,12 +1,16 @@
+type CacheObject = {
+    [key: string]: Promise<never> | null
+};
+
 export function PromiseCache() {
 
-    let cache = {};
+    const cache: CacheObject = {};
 
-    function get(name) {
+    function get(name: string) {
         return cache[name];
     }
 
-    function put(name, promise, ttl) {
+    function put(name: string, promise: Promise<never>, ttl: number) {
         cache[name] = promise;
         const removeFromCache = () => cache[name] = null;
         promise.catch(removeFromCache)

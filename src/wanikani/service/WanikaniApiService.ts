@@ -6,6 +6,9 @@ import WanikaniApiServiceRxJs, {EVENT_STATUS} from "./WanikaniApiServiceRxJs";
 import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
 import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
+import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelProgress";
+import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
+import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -239,7 +242,7 @@ function getSrsSystems() {
     return joinAndSendCacheableRequest('/v2/spaced_repetition_systems', cacheKeys.srsSystems, fetchWithCache, 1000 * 60 * 60 * 24 * 7);
 }
 
-function getResets() {
+function getResets(): Promise<RawWanikaniResetPage> {
     return joinAndSendCacheableRequest('/v2/resets', cacheKeys.resets, fetchWithCache, 1000 * 60 * 10);
 }
 
@@ -247,7 +250,7 @@ function getAssignmentsForLevel(level: number) {
     return joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
 }
 
-function getLevelProgress() {
+function getLevelProgress(): Promise<RawWanikaniLevelProgressionPage> {
     return joinAndSendCacheableRequest('/v2/level_progressions', cacheKeys.levelProgression, fetchWithCache, 1000 * 60);
 }
 
@@ -289,7 +292,7 @@ function attemptLogin(apiKey: string) {
     return fetchWanikaniApi('/v2/user', apiKey);
 }
 
-function getReviews() {
+function getReviews(): Promise<RawWanikaniReview[]> {
     const fetchReviews = () => {
         return new Promise((resolve, reject) => {
             WanikaniApiServiceRxJs.getReviewAsObservable()

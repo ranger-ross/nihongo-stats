@@ -1,7 +1,8 @@
 import * as localForage from "localforage";
 import InMemoryCache from "../../util/InMemoryCache";
 import {AppUrls} from "../../Constants";
-import {Subject} from "rxjs";
+import {Observable, Subject} from "rxjs";
+import {RawWanikaniReviewPage} from "../models/raw/RawWanikaniReview";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -76,19 +77,19 @@ function sortAndDeduplicateReviews(reviews: any[]) {
     return result.sort((a, b) => a.id - b.id);
 }
 
-export type MultiPageObservableEvent = {
+export type MultiPageObservableEvent<T> = {
     status: string,
     size?: number,
     progress?: number,
-    partialData?: any,
-    data?: any,
+    partialData?: T[],
+    data?: T[],
 };
 
 /**
  * NOTE: progress will not take into account any data before the startingId
  */
 function fetchMultiPageRequestObservable(path: string, startingId?: number) {
-    const subject = new Subject<MultiPageObservableEvent>();
+    const subject = new Subject<MultiPageObservableEvent<RawWanikaniReviewPage>>();
 
     const options = {
         headers: {
@@ -165,8 +166,8 @@ function fetchMultiPageRequestObservable(path: string, startingId?: number) {
     return subject.asObservable();
 }
 
-function getReviews() {
-    const subject = new Subject<MultiPageObservableEvent>();
+function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReviewPage>> {
+    const subject = new Subject<MultiPageObservableEvent<RawWanikaniReviewPage>>();
 
     const complete = (data: any) => subject.next({
         status: EVENT_STATUS.COMPLETE,
@@ -181,7 +182,7 @@ function getReviews() {
 
     const rateLimited = () => subject.next({status: EVENT_STATUS.RATE_LIMITED});
 
-    function handleEvent(event: MultiPageObservableEvent, reviews: any[] = []) {
+    function handleEvent(event: MultiPageObservableEvent<RawWanikaniReviewPage>, reviews: any[] = []) {
         function save(partialData: any, saveToMemCache = false) {
             const reviewsToSave = sortAndDeduplicateReviews([...reviews, ...partialData]);
 

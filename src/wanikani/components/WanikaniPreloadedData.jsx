@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.js";
+import WanikaniApiService from "../service/WanikaniApiService.ts";
 import {CircularProgress, Typography} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
 import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.tsx";

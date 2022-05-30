@@ -13,7 +13,7 @@ import {scaleBand} from 'd3-scale';
 import React from 'react';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
+import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
 import {daysToMillis, truncDate} from "../../util/DateUtils.ts";
 import AnkiApiService from "../../anki/service/AnkiApiService.js";
 import {useAnkiDecks} from "../../hooks/useAnkiDecks.jsx";

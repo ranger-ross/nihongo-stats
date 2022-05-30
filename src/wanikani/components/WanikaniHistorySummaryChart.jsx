@@ -1,5 +1,5 @@
 import {useState, useEffect} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.js";
+import WanikaniApiService from "../service/WanikaniApiService.ts";
 import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/material";
 import {sortAndGetMedian} from "../../util/MathUtils.ts";

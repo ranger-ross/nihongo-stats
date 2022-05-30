@@ -76,7 +76,7 @@ function sortAndDeduplicateReviews(reviews: any[]) {
     return result.sort((a, b) => a.id - b.id);
 }
 
-type MultiPageObservableEvent = {
+export type MultiPageObservableEvent = {
     status: string,
     size?: number,
     progress?: number,
@@ -166,7 +166,7 @@ function fetchMultiPageRequestObservable(path: string, startingId?: number) {
 }
 
 function getReviews() {
-    const subject = new Subject();
+    const subject = new Subject<MultiPageObservableEvent>();
 
     const complete = (data: any) => subject.next({
         status: EVENT_STATUS.COMPLETE,

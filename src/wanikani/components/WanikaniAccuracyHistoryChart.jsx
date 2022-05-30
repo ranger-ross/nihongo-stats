@@ -1,6 +1,6 @@
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
 import React, {useEffect, useMemo, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.js";
+import WanikaniApiService from "../service/WanikaniApiService.ts";
 import {EventTracker, ScatterSeries, SplineSeries, ValueScale} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, Grid, Typography} from "@mui/material";

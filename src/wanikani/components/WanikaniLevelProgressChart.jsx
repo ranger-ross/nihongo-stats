@@ -1,6 +1,6 @@
 import {ArgumentAxis, BarSeries, Chart, Title, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
 import {useEffect, useMemo, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.js";
+import WanikaniApiService from "../service/WanikaniApiService.ts";
 import {Animation, EventTracker} from "@devexpress/dx-react-chart";
 
 function parseTimestamp(text) {

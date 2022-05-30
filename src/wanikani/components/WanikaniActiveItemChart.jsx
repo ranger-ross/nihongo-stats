@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.js";
+import WanikaniApiService from "../service/WanikaniApiService.ts";
 import {Card, CardContent, CircularProgress, FormControlLabel, FormGroup, Switch, Typography} from "@mui/material";
 import WanikaniItemTile from "./WanikaniItemTile.jsx";
 import {combineAssignmentAndSubject, isSubjectHidden} from "../service/WanikaniDataUtil.js";

@@ -1,5 +1,5 @@
 import create from 'zustand'
-import WanikaniApiService from '../wanikani/service/WanikaniApiService.js';
+import WanikaniApiService from '../wanikani/service/WanikaniApiService.ts';
 
 export const useWanikaniApiKey = create(set => ({
     apiKey: WanikaniApiService.apiKey() || null,

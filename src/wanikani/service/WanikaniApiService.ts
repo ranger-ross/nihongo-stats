@@ -1,14 +1,16 @@
-import * as localForage from "localforage/dist/localforage"
+import * as localForage from "localforage";
 import InMemoryCache from "../../util/InMemoryCache";
 import {AppUrls} from "../../Constants";
 import {PromiseCache} from "../../util/PromiseCache";
 import WanikaniApiServiceRxJs, {EVENT_STATUS} from "./WanikaniApiServiceRxJs";
 
-const memoryCache = new InMemoryCache();
+// @ts-ignore
+const memoryCache = new InMemoryCache<any>();
+// @ts-ignore
 const promiseCache = new PromiseCache();
 
 const wanikaniApiUrl = AppUrls.wanikaniApi;
-const cacheKeys = {
+const cacheKeys: { [key: string]: string } = {
     apiKey: 'wanikani-api-key',
     reviews: 'wanikani-reviews',
     user: 'wanikani-user',
@@ -22,13 +24,13 @@ const cacheKeys = {
     srsSystems: 'wanikani-srs-systems',
 }
 
-const authHeader = (apiKey) => ({'Authorization': `Bearer ${apiKey}`})
+const authHeader = (apiKey: string) => ({'Authorization': `Bearer ${apiKey}`})
 
-function sleep(ms) {
+function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function fetchWithAutoRetry(input, init) {
+async function fetchWithAutoRetry(input: string, init: RequestInit) {
     let response = await fetch(input, init);
 
     // Retry logic if rate limit is hit
@@ -41,8 +43,8 @@ async function fetchWithAutoRetry(input, init) {
     return response;
 }
 
-async function fetchWanikaniApi(path, apiKey, headers) {
-    let options = {
+async function fetchWanikaniApi(path: string, apiKey: string, headers?: { [key: string]: any } | null) {
+    const options = {
         headers: {
             ...authHeader(apiKey),
             'pragma': 'no-cache',
@@ -60,10 +62,10 @@ async function fetchWanikaniApi(path, apiKey, headers) {
 }
 
 function apiKey() {
-    return localStorage.getItem(cacheKeys.apiKey)
+    return localStorage.getItem(cacheKeys.apiKey) as string;
 }
 
-function saveApiKey(key) {
+function saveApiKey(key: string | null) {
     if (!key) {
         localStorage.removeItem(cacheKeys.apiKey);
     } else {
@@ -71,8 +73,8 @@ function saveApiKey(key) {
     }
 }
 
-async function fetchMultiPageRequest(path, startingId) {
-    let options = {
+async function fetchMultiPageRequest(path: string, startingId?: number) {
+    const options = {
         headers: {
             ...authHeader(apiKey()),
         },
@@ -86,15 +88,15 @@ async function fetchMultiPageRequest(path, startingId) {
     let nextPage = firstPage.pages['next_url']
 
     while (!!nextPage) {
-        let pageResponse = await fetchWithAutoRetry(nextPage, options);
-        let page = await pageResponse.json();
+        const pageResponse = await fetchWithAutoRetry(nextPage, options);
+        const page = await pageResponse.json();
         data = data.concat(page.data);
         nextPage = page.pages['next_url'];
     }
     return data;
 }
 
-async function getFromMemoryCacheOrFetchMultiPageRequest(path) {
+async function getFromMemoryCacheOrFetchMultiPageRequest(path: string) {
     if (memoryCache.includes(path)) {
         return memoryCache.get(path);
     }
@@ -112,7 +114,7 @@ async function getAllAssignments() {
         }
     }
 
-    const cachedValue = await localForage.getItem(cacheKeys.assignments);
+    const cachedValue = await localForage.getItem<any>(cacheKeys.assignments);
     if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 10)) {
         return cachedValue.data;
     }
@@ -131,14 +133,14 @@ async function getAllAssignments() {
     return assignments;
 }
 
-function sortAndDeduplicateAssignments(assignments) {
-    let map = {};
+function sortAndDeduplicateAssignments(assignments: any[]) {
+    const map: { [id: string]: any } = {};
 
     for (const assignment of assignments) {
         map[assignment.id] = assignment;
     }
 
-    let result = [];
+    const result = [];
 
     for (const key of Object.keys(map)) {
         result.push(map[key]);
@@ -157,7 +159,7 @@ async function flushCache() {
     }
 }
 
-function ifModifiedSinceHeader(date) {
+function ifModifiedSinceHeader(date: Date | number) {
     if (!date)
         return null;
     return {
@@ -165,15 +167,15 @@ function ifModifiedSinceHeader(date) {
     };
 }
 
-async function unwrapResponse(response, fallbackValue) {
+async function unwrapResponse(response: Response, fallbackValue: any) {
     if (response.status === 304) {
         return fallbackValue;
     }
     return await response.json();
 }
 
-async function fetchWithCache(path, cacheKey, ttl, _apiKey) {
-    const cachedValue = await localForage.getItem(cacheKey);
+async function fetchWithCache(path: string, cacheKey: string, ttl: number, _apiKey?: string) {
+    const cachedValue = await localForage.getItem<any>(cacheKey);
     if (!!cachedValue && cachedValue.lastUpdated > Date.now() - ttl) {
         return cachedValue.data;
     }
@@ -208,11 +210,13 @@ async function fetchWithCache(path, cacheKey, ttl, _apiKey) {
 
 // Join meaning when multiple requests for the same endpoint come in at the same time,
 // only send one request and return the data to all requests
-function joinAndSendCacheableRequest(request, cacheKey, factory, ttl = 1000, _apiKey) {
+type FetchFactory = typeof fetchWithCache;
+
+function joinAndSendCacheableRequest(request: string, cacheKey: string, factory: FetchFactory, ttl = 1000, _apiKey?: string) {
     const name = request;
     let promise = promiseCache.get(name);
     if (!promise) {
-        promise = factory(request, cacheKey, _apiKey);
+        promise = factory(request, cacheKey, ttl, _apiKey);
         promiseCache.put(name, promise, ttl)
     } else {
         console.debug('joined promise', request)
@@ -236,7 +240,7 @@ function getResets() {
     return joinAndSendCacheableRequest('/v2/resets', cacheKeys.resets, fetchWithCache, 1000 * 60 * 10);
 }
 
-function getAssignmentsForLevel(level) {
+function getAssignmentsForLevel(level: number) {
     return joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
 }
 
@@ -250,7 +254,7 @@ function getSubjects() {
             return memoryCache.get(cacheKeys.subjects);
         }
 
-        const cachedValue = await localForage.getItem(cacheKeys.subjects);
+        const cachedValue = await localForage.getItem<any>(cacheKeys.subjects);
         if (!!cachedValue) {
             memoryCache.put(cacheKeys.subjects, cachedValue.data);
             return cachedValue.data;
@@ -278,7 +282,7 @@ function getSubjects() {
     return promise
 }
 
-function attemptLogin(apiKey) {
+function attemptLogin(apiKey: string) {
     return fetchWanikaniApi('/v2/user', apiKey);
 }
 

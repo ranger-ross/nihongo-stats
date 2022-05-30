@@ -1,6 +1,6 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import React, {useEffect, useMemo, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.js";
+import WanikaniApiService from "../service/WanikaniApiService.ts";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 import {addDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.ts";
 import {ArgumentAxis, Chart, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";

@@ -1,6 +1,6 @@
 import {Chart, ValueAxis, ArgumentAxis, Tooltip} from '@devexpress/dx-react-chart-material-ui';
 import {useState, useEffect, useMemo} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.js";
+import WanikaniApiService from "../service/WanikaniApiService.ts";
 import {ArgumentScale, BarSeries, Stack} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, Typography, Grid, CircularProgress, Select, MenuItem} from "@mui/material";

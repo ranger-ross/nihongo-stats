@@ -19,7 +19,7 @@ import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {createAnkiCardsDueQuery, fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil.js";
 import {AnkiColors, AppNames, BunProColors, WanikaniColors} from "../../Constants";
-import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
+import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
 import {
     addTimeToDate, createUpcomingReviewsChartBarLabel, createUpcomingReviewsChartLabel, formatTimeUnitLabelText,

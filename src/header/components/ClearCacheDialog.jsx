@@ -12,7 +12,7 @@ import {
     FormHelperText,
 } from "@mui/material";
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
-import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
+import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
 import AnkiApiService from "../../anki/service/AnkiApiService.js";
 import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.tsx";
 import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus.jsx";

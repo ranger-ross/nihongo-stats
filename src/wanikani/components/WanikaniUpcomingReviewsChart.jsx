@@ -7,7 +7,7 @@ import {
     Tooltip
 } from '@devexpress/dx-react-chart-material-ui';
 import React, {useState, useEffect, useMemo} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.js";
+import WanikaniApiService from "../service/WanikaniApiService.ts";
 import {ArgumentScale, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addHours, truncMinutes} from '../../util/DateUtils.ts';

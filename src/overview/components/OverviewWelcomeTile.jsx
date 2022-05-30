@@ -11,7 +11,7 @@ import {Add} from "@mui/icons-material";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
 import {AppNames} from "../../Constants";
 import {useSelectedApp} from "../../hooks/useSelectedApp.tsx";
-import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
+import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
 import {fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil.js";
 
 const styles = {

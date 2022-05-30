@@ -9,6 +9,8 @@ import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelProgress";
 import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
+import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
+import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -67,7 +69,7 @@ async function fetchWanikaniApi(path: string, apiKey: string, headers?: { [key: 
     return fetchWithAutoRetry(`${wanikaniApiUrl}${path}`, options);
 }
 
-function apiKey() {
+function apiKey(): string {
     return localStorage.getItem(cacheKeys.apiKey) as string;
 }
 
@@ -111,7 +113,7 @@ async function getFromMemoryCacheOrFetchMultiPageRequest(path: string) {
     return data;
 }
 
-async function getAllAssignments() {
+async function getAllAssignments(): Promise<RawWanikaniAssignment[]> {
     if (memoryCache.includes(cacheKeys.assignments)) {
         const cachedValue = memoryCache.get(cacheKeys.assignments);
         // Assignments ttl is 5 mins in Mem Cache
@@ -139,8 +141,8 @@ async function getAllAssignments() {
     return assignments;
 }
 
-function sortAndDeduplicateAssignments(assignments: any[]) {
-    const map: { [id: string]: any } = {};
+function sortAndDeduplicateAssignments(assignments: RawWanikaniAssignment[]) {
+    const map: { [id: string]: RawWanikaniAssignment } = {};
 
     for (const assignment of assignments) {
         map[assignment.id] = assignment;
@@ -238,7 +240,7 @@ function getSummary(): Promise<RawWanikaniSummary> {
     return joinAndSendCacheableRequest('/v2/summary', cacheKeys.summary, fetchWithCache, 1000 * 60);
 }
 
-function getSrsSystems() {
+function getSrsSystems(): Promise<RawWanikaniSrsSystemPage> {
     return joinAndSendCacheableRequest('/v2/spaced_repetition_systems', cacheKeys.srsSystems, fetchWithCache, 1000 * 60 * 60 * 24 * 7);
 }
 
@@ -246,7 +248,7 @@ function getResets(): Promise<RawWanikaniResetPage> {
     return joinAndSendCacheableRequest('/v2/resets', cacheKeys.resets, fetchWithCache, 1000 * 60 * 10);
 }
 
-function getAssignmentsForLevel(level: number) {
+function getAssignmentsForLevel(level: number): Promise<RawWanikaniAssignmentPage> {
     return joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
 }
 

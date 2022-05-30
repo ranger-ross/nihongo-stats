@@ -5,7 +5,7 @@ import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/materi
 import {sortAndGetMedian} from "../../util/MathUtils.js";
 import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 import {millisToDays, millisToHours} from "../../util/DateUtils.js";
-import {distinct} from "../../util/ArrayUtils.js";
+import {distinct} from "../../util/ArrayUtils.ts";
 
 const styles = {
     loadingContainer: {

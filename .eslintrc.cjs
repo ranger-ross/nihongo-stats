@@ -5,7 +5,8 @@ module.exports = {
     },
     "extends": [
         "eslint:recommended",
-        "plugin:react/recommended"
+        "plugin:react/recommended",
+        'plugin:@typescript-eslint/recommended',
     ],
     'parserOptions': {
         'ecmaFeatures': {
@@ -16,6 +17,7 @@ module.exports = {
     },
     'plugins': [
         'react',
+        '@typescript-eslint',
     ],
     'rules': {
         'react/function-component-definition': 'error',

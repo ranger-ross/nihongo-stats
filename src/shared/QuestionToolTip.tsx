@@ -3,8 +3,8 @@ import {HelpOutline} from "@mui/icons-material";
 import React from "react";
 
 type Props = {
-    size: 'large' | 'medium' | 'small',
-    text: string,
+    size?: 'large' | 'medium' | 'small',
+    text: NonNullable<React.ReactNode>,
 };
 
 function QuestionToolTip({size = 'small', text}: Props) {

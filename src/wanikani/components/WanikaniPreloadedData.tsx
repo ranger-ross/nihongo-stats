@@ -1,13 +1,14 @@
-import {useEffect, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.ts";
+import {CSSProperties, useEffect, useState} from "react";
+import WanikaniApiService from "../service/WanikaniApiService";
 import {CircularProgress, Typography} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
-import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.tsx";
-import QuestionToolTip from "../../shared/QuestionToolTip.tsx";
-import {EVENT_STATUS} from "../service/WanikaniApiServiceRxJs.ts";
-import LinearProgressWithLabel from "../../shared/LinearProgressWithLabel.tsx";
+import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus";
+import QuestionToolTip from "../../shared/QuestionToolTip";
+import {EVENT_STATUS, MultiPageObservableEvent} from "../service/WanikaniApiServiceRxJs";
+import LinearProgressWithLabel from "../../shared/LinearProgressWithLabel";
+import {RawWanikaniReviewPage} from "../models/raw/RawWanikaniReview";
 
-const styles = {
+const styles: { [key: string]: CSSProperties } = {
     loadingItem: {
         display: 'flex',
         alignItems: 'center',
@@ -32,16 +33,23 @@ const styles = {
 };
 
 
-function LoadingItem({text, isLoading}) {
+type LoadingItemProps = {
+    text: string | Element,
+    isLoading: boolean,
+}
+
+function LoadingItem({text, isLoading}: LoadingItemProps) {
     return (
         <div style={styles.loadingItem}>
-            {text}
-            {isLoading ? <CircularProgress size={15}/> : <CheckIcon style={{color: 'lime'}}/>}
+            <>
+                {text}
+                {isLoading ? <CircularProgress size={15}/> : <CheckIcon style={{color: 'lime'}}/>}
+            </>
         </div>
     );
 }
 
-function WanikaniPreloadedData({children}) {
+function WanikaniPreloadedData({children}: React.PropsWithChildren<never>) {
     const [isSubjectsLoaded, setIsSubjectsLoaded] = useState(false);
     const [isUserLoaded, setIsUserLoaded] = useState(false);
     const [isAssignmentsLoaded, setIsAssignmentsLoaded] = useState(false);
@@ -58,11 +66,11 @@ function WanikaniPreloadedData({children}) {
         }
         console.log('Preloading Wanikani Data');
 
-        const reviewsPromise = new Promise(resolve => {
+        const reviewsPromise = new Promise<void>(resolve => {
             WanikaniApiService.getReviewAsObservable()
-                .subscribe(event => {
+                .subscribe((event: MultiPageObservableEvent<RawWanikaniReviewPage>) => {
                     if (event.status === EVENT_STATUS.IN_PROGRESS) {
-                        setReviewsProgress(event.progress / event.size);
+                        setReviewsProgress((event.progress as number) / (event.size as number));
                     }
                     if (event.status === EVENT_STATUS.COMPLETE) {
                         setReviewsProgress(1.0);

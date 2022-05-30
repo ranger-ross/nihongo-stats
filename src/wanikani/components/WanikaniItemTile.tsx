@@ -52,7 +52,7 @@ type WanikaniItemTile = {
     type: string,
     level: number,
     readings: RawWanikaniSubjectReading[],
-    nextReviewDate: Date,
+    nextReviewDate: Date | null,
     size: number,
 };
 

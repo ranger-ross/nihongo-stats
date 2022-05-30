@@ -24,7 +24,7 @@ export function createAssignmentMap(assignments: RawWanikaniAssignment[]) {
     return map;
 }
 
-type JoinedRawWKAssignmentAndSubject = RawWanikaniAssignmentData & RawWanikaniSubjectData & {
+export type JoinedRawWKAssignmentAndSubject = RawWanikaniAssignmentData & RawWanikaniSubjectData & {
     hasAssignment: boolean,
     subjectId: number,
     subjectType: 'radical' | 'kanji' | 'vocabulary',

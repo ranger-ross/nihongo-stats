@@ -1,14 +1,22 @@
 import React, {useEffect, useRef, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.ts";
+import WanikaniApiService from "../service/WanikaniApiService";
 import {Card, CardContent, CircularProgress, FormControlLabel, FormGroup, Switch, Typography} from "@mui/material";
-import WanikaniItemTile from "./WanikaniItemTile.tsx";
-import {combineAssignmentAndSubject, isSubjectHidden} from "../service/WanikaniDataUtil.ts";
-import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.ts";
+import WanikaniItemTile from "./WanikaniItemTile";
+import {
+    combineAssignmentAndSubject,
+    createAssignmentMap,
+    isSubjectHidden,
+    JoinedRawWKAssignmentAndSubject
+} from "../service/WanikaniDataUtil";
+import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil";
 import {WanikaniColors} from "../../Constants";
-import {useUserPreferences} from "../../hooks/useUserPreferences.tsx";
-import {useDeviceInfo} from "../../hooks/useDeviceInfo.tsx";
-import {lightenDarkenColor} from "../../util/CssUtils.ts";
-import GradientLinearProgress from "../../shared/GradientLinearProgress.tsx";
+import {useUserPreferences} from "../../hooks/useUserPreferences";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo";
+import {lightenDarkenColor} from "../../util/CssUtils";
+import GradientLinearProgress from "../../shared/GradientLinearProgress";
+import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
+import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
+import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 
 const styles = {
     showPreviousLevelMobile: {
@@ -20,7 +28,17 @@ const styles = {
     }
 };
 
-const defaultState = {
+type ActiveItemChartState = {
+    isLoading: boolean,
+    radicals: JoinedRawWKAssignmentAndSubject[],
+    kanji: JoinedRawWKAssignmentAndSubject[],
+    vocabulary: JoinedRawWKAssignmentAndSubject[],
+    radicalsStarted: number,
+    kanjiStarted: number,
+    vocabularyStarted: number,
+};
+
+const defaultState: ActiveItemChartState = {
     isLoading: true,
     radicals: [],
     kanji: [],
@@ -30,19 +48,9 @@ const defaultState = {
     vocabularyStarted: 0,
 };
 
-let memCache = {};
+const memCache: { [level: number]: ActiveItemChartState } = {};
 
-function createAssignmentMap(subjects) {
-    let map = {};
-
-    for (const subject of subjects) {
-        map[subject.data['subject_id']] = subject;
-    }
-
-    return map;
-}
-
-async function fetchData(level) {
+async function fetchData(level: number) {
     if (memCache[level]) {
         return memCache[level];
     }
@@ -52,26 +60,27 @@ async function fetchData(level) {
         WanikaniApiService.getAssignmentsForLevel(level),
     ]);
 
-    const subjects = allSubjects.filter(subject => subject.data.level === level);
+    const subjects: RawWanikaniSubject[] = allSubjects.filter((subject: RawWanikaniSubject) => subject.data.level === level);
 
-    let assignments = rawAssignments.data;
-    const radicalsStarted = assignments.filter(s => s.data['subject_type'] === 'radical' && !!s.data['started_at']).length;
-    const kanjiStarted = assignments.filter(s => s.data['subject_type'] === 'kanji' && !!s.data['started_at']).length;
-    const vocabularyStarted = assignments.filter(s => s.data['subject_type'] === 'vocabulary' && !!s.data['started_at']).length;
+    const assignments = rawAssignments.data;
+    const radicalsStarted = assignments.filter((s: RawWanikaniAssignment) => s.data['subject_type'] === 'radical' && !!s.data['started_at']).length;
+    const kanjiStarted = assignments.filter((s: RawWanikaniAssignment) => s.data['subject_type'] === 'kanji' && !!s.data['started_at']).length;
+    const vocabularyStarted = assignments.filter((s: RawWanikaniAssignment) => s.data['subject_type'] === 'vocabulary' && !!s.data['started_at']).length;
 
-    assignments = createAssignmentMap(assignments);
+    const assignmentMap = createAssignmentMap(assignments);
 
     const radicals = subjects
         .filter(subject => subject.object === 'radical' && !isSubjectHidden(subject))
-        .map(s => combineAssignmentAndSubject(assignments[s.id], s));
+        .map(s => combineAssignmentAndSubject(assignmentMap[s.id], s));
     const kanji = subjects
         .filter(subject => subject.object === 'kanji' && !isSubjectHidden(subject))
-        .map(s => combineAssignmentAndSubject(assignments[s.id], s));
+        .map(s => combineAssignmentAndSubject(assignmentMap[s.id], s));
     const vocabulary = subjects
         .filter(subject => subject.object === 'vocabulary' && !isSubjectHidden(subject))
-        .map(s => combineAssignmentAndSubject(assignments[s.id], s));
+        .map(s => combineAssignmentAndSubject(assignmentMap[s.id], s));
 
-    const data = {
+    const data: ActiveItemChartState = {
+        isLoading: false,
         radicals,
         kanji,
         vocabulary,
@@ -83,7 +92,13 @@ async function fetchData(level) {
     return data;
 }
 
-function PreviousLevelSelector({selected, setSelected, isMobile}) {
+type PreviousLevelSelectorProps = {
+    selected: boolean,
+    setSelected: (value: boolean) => void,
+    isMobile: boolean
+};
+
+function PreviousLevelSelector({selected, setSelected, isMobile}: PreviousLevelSelectorProps) {
     return (
         <FormGroup>
             <FormControlLabel
@@ -100,7 +115,7 @@ function PreviousLevelSelector({selected, setSelected, isMobile}) {
     );
 }
 
-function RatioLabel({started, total}) {
+function RatioLabel({started, total}: { started: number, total: number }) {
     const percent = (started / total) * 100;
     const percentAsString = Number(percent.toFixed(1)).toString();
     return (
@@ -117,7 +132,7 @@ function RatioLabel({started, total}) {
     );
 }
 
-function getTileColor(subject) {
+function getTileColor(subject: JoinedRawWKAssignmentAndSubject) {
     if (subject['started_at']) {
         return getColorByWanikaniSubjectType(subject.subjectType);
     } else if (subject.hasAssignment) {
@@ -126,7 +141,7 @@ function getTileColor(subject) {
     return WanikaniColors.lockedGray;
 }
 
-function SubjectTile({subject, isMobile}) {
+function SubjectTile({subject, isMobile}: { subject: JoinedRawWKAssignmentAndSubject, isMobile: boolean }) {
     return (
         <WanikaniItemTile
             text={subject.characters || '?'}
@@ -143,7 +158,12 @@ function SubjectTile({subject, isMobile}) {
     );
 }
 
-function WanikaniLevelItemsChart({level, showWanikaniHeader = false}) {
+type WanikaniLevelItemsChartProps = {
+    level: number,
+    showWanikaniHeader: boolean,
+};
+
+function WanikaniLevelItemsChart({level, showWanikaniHeader = false}: WanikaniLevelItemsChartProps) {
     const {wanikaniPreferences} = useUserPreferences();
     const isFirstLoad = useRef(true);
     const [isPreviousLevel, setIsPreviousLevel] = useState(true);
@@ -152,9 +172,11 @@ function WanikaniLevelItemsChart({level, showWanikaniHeader = false}) {
 
     useEffect(() => {
         let isSubscribed = true;
-        const cleanUp = () => isSubscribed = false;
+        const cleanUp = () => {
+            isSubscribed = false;
+        };
 
-        let _isFirstLoad = isFirstLoad.current
+        const _isFirstLoad = isFirstLoad.current
         isFirstLoad.current = false;
 
         if (_isFirstLoad && !wanikaniPreferences.showPreviousLevelByDefault) {
@@ -230,7 +252,7 @@ function WanikaniLevelItemsChart({level, showWanikaniHeader = false}) {
                                 </Typography>
                             </div>
 
-                            <div style={isMobile ? styles.showPreviousLevelMobile : null}>
+                            <div style={isMobile ? styles.showPreviousLevelMobile : {}}>
                                 <PreviousLevelSelector
                                     selected={isPreviousLevel}
                                     setSelected={setIsPreviousLevel}
@@ -287,7 +309,7 @@ function WanikaniLevelItemsChart({level, showWanikaniHeader = false}) {
 }
 
 function WanikaniActiveItemsChart({showWanikaniHeader = false}) {
-    const [user, setUser] = useState();
+    const [user, setUser] = useState<RawWanikaniUser>();
     useEffect(() => {
         let isSubscribed = true;
 
@@ -297,7 +319,9 @@ function WanikaniActiveItemsChart({showWanikaniHeader = false}) {
                     return;
                 setUser(data);
             })
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, [])
     return (
         <>

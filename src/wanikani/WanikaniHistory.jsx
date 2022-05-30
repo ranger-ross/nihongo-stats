@@ -1,6 +1,6 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import {RoutePaths} from "../Routes";
-import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart.jsx";
+import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart.tsx";
 import {Card, CircularProgress, Typography} from "@mui/material";
 import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart.jsx";
 import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart.jsx";

@@ -1,21 +1,31 @@
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
 import React, {useEffect, useMemo, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.ts";
-import {EventTracker, ScatterSeries, SplineSeries, ValueScale} from "@devexpress/dx-react-chart";
+import WanikaniApiService from "../service/WanikaniApiService";
+import {
+    ArgumentAxis as ArgumentAxisBase,
+    EventTracker,
+    ScatterSeries,
+    SplineSeries,
+    ValueScale
+} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, Grid, Typography} from "@mui/material";
+// @ts-ignore
 import _ from 'lodash';
+// @ts-ignore
 import {scaleLinear} from 'd3-scale';
-import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import {createSubjectMap} from "../service/WanikaniDataUtil.ts";
-import {millisToDays} from "../../util/DateUtils.ts";
+import PeriodSelector from "../../shared/PeriodSelector";
+import {createSubjectMap} from "../service/WanikaniDataUtil";
+import {millisToDays, truncDate} from "../../util/DateUtils";
+import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
+import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 
 const scale = () => scaleLinear();
 const modifyDomain = () => [0, 100];
 
-function LabelWithDate(props) {
+function LabelWithDate(props: ArgumentAxisBase.LabelProps) {
     const {text} = props;
-    const rawTimestamp = parseInt(text.split(',').join(''));
+    const rawTimestamp = parseInt((text as string).split(',').join(''));
     return (
         <ArgumentAxis.Label
             {...props}
@@ -24,7 +34,9 @@ function LabelWithDate(props) {
     );
 }
 
-function PercentageLabel(props) {
+type PercentageLabelProps = ValueAxis.LabelProps
+
+function PercentageLabel(props: PercentageLabelProps) {
     const {text} = props;
     return (
         <ValueAxis.Label
@@ -34,11 +46,7 @@ function PercentageLabel(props) {
     );
 }
 
-function truncDate(date) {
-    return new Date(new Date(date).toDateString());
-}
-
-function calculateRollingAverageOfDaysInQueue(queue) {
+function calculateRollingAverageOfDaysInQueue(queue: any[]) {
     let total = 0;
     let incorrectCount = 0;
 
@@ -50,19 +58,32 @@ function calculateRollingAverageOfDaysInQueue(queue) {
     return Number((((total - incorrectCount) / total) * 100).toFixed(2));
 }
 
+type JoinedReviewAndSubject = {
+    review: RawWanikaniReview,
+    subject: RawWanikaniSubject,
+}
+
+type DayDataPoint = {
+    date: Date,
+    ratio: number,
+    total: number,
+    incorrectCount: number,
+    movingAverage?: number,
+};
+
 async function fetchData() {
     const reviews = await WanikaniApiService.getReviews();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    let data = [];
+    const data: JoinedReviewAndSubject[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
             subject: subjects[review.data['subject_id']]
         });
     }
-    const groupedData = _.groupBy(data, v => truncDate(v.review.data['created_at']));
+    const groupedData = _.groupBy(data, (v: JoinedReviewAndSubject) => truncDate(new Date(v.review.data['created_at'])));
     const groupedDataAsMap = new Map(Object.entries(groupedData));
-    let result = Array.from(groupedDataAsMap, ([date, data]) => {
+    const result: DayDataPoint[] = Array.from(groupedDataAsMap, ([date, data]: any) => {
         const total = data.length;
         let incorrectCount = 0;
         for (const {review} of data) {
@@ -80,7 +101,7 @@ async function fetchData() {
     });
 
     // Calculate 7 day rolling average
-    let queue = [];
+    const queue = [];
     for (const day of result) {
         queue.push(day);
 
@@ -96,7 +117,7 @@ async function fetchData() {
 const ROLLING_AVERAGE_LINE_COLOR = '#ffd500';
 
 function getTotalDays() {
-    const firstDate = truncDate(new Date(2000,0,1));
+    const firstDate = truncDate(new Date(2000, 0, 1));
     const today = truncDate(Date.now());
     const difference = today.getTime() - firstDate.getTime();
     return millisToDays(difference);
@@ -104,9 +125,8 @@ function getTotalDays() {
 
 const totalDays = getTotalDays();
 
-function WanikaniAccuracyHistoryChart() {
-    const [rawData, setRawData] = useState([]);
-    const [daysToLookBack, setDaysToLookBack] = useState(90);
+function useData(daysToLookBack: number) {
+    const [rawData, setRawData] = useState<DayDataPoint[]>([]);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -117,14 +137,41 @@ function WanikaniAccuracyHistoryChart() {
                 setRawData(data);
             })
             .catch(console.error);
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, []);
 
-
-    const data = useMemo(() => rawData.filter(dp => dp.date.getTime() > (Date.now() - (1000 * 3600 * 24 * daysToLookBack))),
+    return useMemo(() => rawData.filter(dp => dp.date.getTime() > (Date.now() - (1000 * 3600 * 24 * daysToLookBack))),
         [rawData, daysToLookBack]);
+}
 
-    function AccuracyToolTip({targetItem}) {
+function WanikaniAccuracyHistoryChart() {
+    const [daysToLookBack, setDaysToLookBack] = useState(90);
+    const data = useData(daysToLookBack);
+
+    // const [rawData, setRawData] = useState<DayDataPoint[]>([]);
+    // const [daysToLookBack, setDaysToLookBack] = useState(90);
+    //
+    // useEffect(() => {
+    //     let isSubscribed = true;
+    //     fetchData()
+    //         .then(data => {
+    //             if (!isSubscribed)
+    //                 return;
+    //             setRawData(data);
+    //         })
+    //         .catch(console.error);
+    //     return () => {
+    //         isSubscribed = false;
+    //     };
+    // }, []);
+    //
+    //
+    // const data = useMemo(() => rawData.filter(dp => dp.date.getTime() > (Date.now() - (1000 * 3600 * 24 * daysToLookBack))),
+    //     [rawData, daysToLookBack]);
+
+    function AccuracyToolTip({targetItem}: Tooltip.ContentProps) {
         const isAverageSeries = targetItem.series.toLowerCase().includes('average');
         const dataPoint = data[targetItem.point];
         return (
@@ -169,6 +216,7 @@ function WanikaniAccuracyHistoryChart() {
                     </Grid>
 
                     <div style={{flexGrow: '1'}}>
+                        {/* @ts-ignore */}
                         <Chart data={data}>
                             <ValueScale factory={scale} modifyDomain={modifyDomain}/>
                             <ValueAxis labelComponent={PercentageLabel}/>

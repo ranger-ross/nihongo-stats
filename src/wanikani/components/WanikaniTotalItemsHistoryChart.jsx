@@ -5,7 +5,7 @@ import {EventTracker, LineSeries} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, Checkbox, FormControlLabel, Grid, Typography} from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import {daysToMillis, millisToDays} from "../../util/DateUtils.ts";
+import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.ts";
 
 function LabelWithDate(props) {
     const {text} = props;
@@ -45,10 +45,6 @@ function DataPoint(date, previousDataPoint) {
     data.total = () => data.radicals + data.kanji + data.vocabulary;
 
     return data;
-}
-
-function truncDate(date) {
-    return new Date(new Date(date).toDateString());
 }
 
 async function fetchData() {

@@ -4,7 +4,7 @@ import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart.
 import {Card, CircularProgress, Typography} from "@mui/material";
 import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart.jsx";
 import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart.jsx";
-import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart.jsx";
+import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart.tsx";
 import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart.jsx";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import ReactVisibilitySensor from "react-visibility-sensor";

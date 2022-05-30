@@ -3,6 +3,9 @@ import InMemoryCache from "../../util/InMemoryCache";
 import {AppUrls} from "../../Constants";
 import {PromiseCache} from "../../util/PromiseCache";
 import WanikaniApiServiceRxJs, {EVENT_STATUS} from "./WanikaniApiServiceRxJs";
+import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
+import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
+import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -224,11 +227,11 @@ function joinAndSendCacheableRequest(request: string, cacheKey: string, factory:
     return promise
 }
 
-function getUser() {
+function getUser(): Promise<RawWanikaniUser> {
     return joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000);
 }
 
-function getSummary() {
+function getSummary(): Promise<RawWanikaniSummary> {
     return joinAndSendCacheableRequest('/v2/summary', cacheKeys.summary, fetchWithCache, 1000 * 60);
 }
 
@@ -248,7 +251,7 @@ function getLevelProgress() {
     return joinAndSendCacheableRequest('/v2/level_progressions', cacheKeys.levelProgression, fetchWithCache, 1000 * 60);
 }
 
-function getSubjects() {
+function getSubjects(): Promise<RawWanikaniSubject[]> {
     const fetchSubjects = async () => {
         if (memoryCache.includes(cacheKeys.subjects)) {
             return memoryCache.get(cacheKeys.subjects);

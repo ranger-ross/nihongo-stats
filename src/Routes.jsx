@@ -16,7 +16,7 @@ const EnterBunProApiKeyPage = React.lazy(() => import("./bunpro/EnterBunProApiKe
 const BunProHistory = React.lazy(() => import("./bunpro/BunProHistory.jsx"));
 const OverviewDashboard = React.lazy(() => import("./overview/OverviewDashboard.jsx"));
 const OverviewHistory = React.lazy(() => import("./overview/OverviewHistory.jsx"));
-const NotFoundPage = React.lazy(() => import("./landing/NotFoundPage.jsx"));
+const NotFoundPage = React.lazy(() => import("./landing/NotFoundPage"));
 
 function AppRoute(path, appName, hideNav = false) {
     return {

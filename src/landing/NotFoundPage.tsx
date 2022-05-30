@@ -2,10 +2,6 @@ import {Button, Typography} from "@mui/material";
 import {useNavigate} from "react-router";
 
 const styles = {
-    container: {
-        textAlign: 'center',
-        marginTop: '15vh'
-    },
     topTitle: {
         marginBottom: '50px'
     },
@@ -14,7 +10,10 @@ const styles = {
 function NotFoundPage() {
     const navigate = useNavigate();
     return (
-        <div style={styles.container}>
+        <div style={{
+            textAlign: 'center',
+            marginTop: '15vh'
+        }} >
             <Typography variant={'h4'} style={styles.topTitle}>
                 Page Not Found :(
             </Typography>

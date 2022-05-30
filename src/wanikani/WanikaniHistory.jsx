@@ -5,7 +5,7 @@ import {Card, CircularProgress, Typography} from "@mui/material";
 import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart.jsx";
 import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart.jsx";
 import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart.tsx";
-import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart.jsx";
+import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart.tsx";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import ReactVisibilitySensor from "react-visibility-sensor";
 import {useState} from "react";

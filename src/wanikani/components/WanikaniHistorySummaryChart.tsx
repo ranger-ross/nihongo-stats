@@ -1,13 +1,16 @@
-import {useState, useEffect} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.ts";
+import {useEffect, useState} from "react";
+import WanikaniApiService from "../service/WanikaniApiService";
 import {WanikaniColors} from '../../Constants';
-import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/material";
-import {sortAndGetMedian} from "../../util/MathUtils.ts";
-import {createSubjectMap} from "../service/WanikaniDataUtil.ts";
-import {millisToDays, millisToHours} from "../../util/DateUtils.ts";
-import {distinct} from "../../util/ArrayUtils.ts";
+import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
+import {sortAndGetMedian} from "../../util/MathUtils";
+import {createSubjectMap} from "../service/WanikaniDataUtil";
+import {millisToDays, millisToHours} from "../../util/DateUtils";
+import {distinct} from "../../util/ArrayUtils";
+import {AppStyles} from "../../util/TypeUtils";
+import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
+import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 
-const styles = {
+const styles: AppStyles = {
     loadingContainer: {
         display: 'flex',
         justifyContent: 'center',
@@ -21,15 +24,28 @@ const styles = {
     },
 };
 
-function getBurnedItems(allReviewsByType) {
+function getBurnedItems(allReviewsByType: { review: RawWanikaniReview, subject: RawWanikaniSubject }[]) {
     const burned = allReviewsByType.filter(review => review.review.data['ending_srs_stage'] == 9);
     return distinct(burned, review => review.subject.id);
 }
 
-async function fetchTotalsData() {
+type FormattedData = {
+    total: number,
+    radicals: number,
+    radicalsDistinct: number,
+    radicalsBurned: number,
+    kanji: number,
+    kanjiDistinct: number,
+    kanjiBurned: number,
+    vocabulary: number,
+    vocabularyDistinct: number,
+    vocabularyBurned: number,
+};
+
+async function fetchTotalsData(): Promise<FormattedData> {
     const reviews = await WanikaniApiService.getReviews();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    let data = [];
+    const data: { review: RawWanikaniReview, subject: RawWanikaniSubject }[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
@@ -63,7 +79,13 @@ async function fetchTotalsData() {
     };
 }
 
-async function fetchLevelData() {
+type FormattedLevelData = {
+    average: number,
+    median: number,
+    timeSinceStart: number
+};
+
+async function fetchLevelData(): Promise<FormattedLevelData> {
     const [user, levelProgressData] = await Promise.all([
         WanikaniApiService.getUser(),
         WanikaniApiService.getLevelProgress()
@@ -71,7 +93,7 @@ async function fetchLevelData() {
 
     const timeSinceStart = Date.now() - new Date(user.data['started_at']).getTime();
 
-    let levelTimes = [];
+    const levelTimes = [];
     for (const level of levelProgressData.data) {
         const start = new Date(level.data['unlocked_at']).getTime();
         const end = !!level.data['passed_at'] ? new Date(level.data['passed_at']).getTime() : null;
@@ -91,13 +113,19 @@ async function fetchLevelData() {
     };
 }
 
-function numberWithCommas(x) {
-    if (isNaN(x) || x === '')
+function numberWithCommas(x: string | number) {
+    if (isNaN(x as number) || x === '')
         return '';
-    return parseFloat(x).toLocaleString();
+    return parseFloat(x as string).toLocaleString();
 }
 
-function TotalLabel({label, count, color}) {
+type TotalLabelProps = {
+    label: string,
+    count: number,
+    color?: string,
+};
+
+function TotalLabel({label, count, color}: TotalLabelProps) {
     return (
         <>
             <Grid item xs={6}>{label}: </Grid>
@@ -110,7 +138,12 @@ function TotalLabel({label, count, color}) {
     );
 }
 
-function DaysAndHoursLabel({label, milliseconds}) {
+type DaysAndHoursLabelProps = {
+    label: string,
+    milliseconds: number,
+};
+
+function DaysAndHoursLabel({label, milliseconds}: DaysAndHoursLabelProps) {
     const days = millisToDays(milliseconds);
     const hours = millisToHours(milliseconds - (days * 1000 * 3600 * 24));
     return (
@@ -127,8 +160,8 @@ function DaysAndHoursLabel({label, milliseconds}) {
 
 
 function WanikaniHistorySummaryChart() {
-    const [totalsData, setTotalsData] = useState();
-    const [levelData, setLevelData] = useState();
+    const [totalsData, setTotalsData] = useState<FormattedData>();
+    const [levelData, setLevelData] = useState<FormattedLevelData>();
 
     const isLoading = !totalsData || !levelData;
 
@@ -149,7 +182,9 @@ function WanikaniHistorySummaryChart() {
                 setLevelData(data);
             });
 
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, []);
 
     return (

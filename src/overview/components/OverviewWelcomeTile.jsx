@@ -2,7 +2,7 @@ import {Card, CardContent, IconButton, Menu, MenuItem, Typography} from "@mui/ma
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
 import React, {useEffect, useState} from "react";
 import AnkiDeckSummaries from "../../anki/components/AnkiDeckSummaries.jsx";
-import WanikaniPendingLessonsAndReviews from "../../wanikani/components/WanikaniPendingLessonAndReviews.jsx";
+import WanikaniPendingLessonsAndReviews from "../../wanikani/components/WanikaniPendingLessonAndReviews.tsx";
 import BunProPendingReviews from "../../bunpro/components/BunProPendingReviews.jsx";
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";

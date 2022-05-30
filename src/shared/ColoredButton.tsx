@@ -2,7 +2,7 @@ import {Button, createTheme, ThemeProvider} from "@mui/material";
 import {ButtonProps} from "@mui/material/Button/Button";
 import {OverwriteType} from "../util/TypeUtils";
 
-type Props = OverwriteType<ButtonProps, { color: string }>
+export type ColoredButtonProps = OverwriteType<ButtonProps, { color: string }>
 
 const createButtonTheme = ({darkMode, color}: { darkMode: boolean, color: string }) =>
     createTheme({
@@ -14,7 +14,7 @@ const createButtonTheme = ({darkMode, color}: { darkMode: boolean, color: string
         }
     });
 
-export function ColoredButton(props: Props) {
+export function ColoredButton(props: ColoredButtonProps) {
     if (!props.color) {
         console.warn('ColoredButton requires "color" prop');
         props.color = 'lightblue';

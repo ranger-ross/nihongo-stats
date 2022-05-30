@@ -338,7 +338,7 @@ export default {
     getSubjects: getSubjects,
     getReviews: getReviews,
     getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,
-    getPendingLessonsAndReviews: async () => {
+    getPendingLessonsAndReviews: async (): Promise<{ lessons: number, reviews: number }> => {
         const summary = await getSummary();
         let lessons = 0;
         for (const group of summary.data.lessons) {

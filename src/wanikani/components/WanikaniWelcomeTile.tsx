@@ -1,7 +1,8 @@
 import {Card, CardContent, Typography} from "@mui/material";
-import WanikaniApiService from "../service/WanikaniApiService.ts";
-import {useState, useEffect} from "react";
-import WanikaniPendingLessonsAndReviews from "./WanikaniPendingLessonAndReviews.jsx";
+import WanikaniApiService from "../service/WanikaniApiService";
+import {useEffect, useState} from "react";
+import WanikaniPendingLessonsAndReviews from "./WanikaniPendingLessonAndReviews";
+import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 
 const styles = {
     buttonsContainer: {
@@ -14,23 +15,25 @@ const styles = {
 
 function WanikaniWelcomeTile() {
     const [username, setUsername] = useState('');
-    const [data, setData] = useState();
+    const [data, setData] = useState<{ lessons: number, reviews: number }>();
 
     useEffect(() => {
         let isSubscribed = true;
         WanikaniApiService.getUser()
-            .then(user => {
+            .then((user: RawWanikaniUser) => {
                 if (!isSubscribed)
                     return;
                 setUsername(user.data.username);
             });
         WanikaniApiService.getPendingLessonsAndReviews()
-            .then(data => {
+            .then((data: { lessons: number, reviews: number }) => {
                 if (!isSubscribed)
                     return;
                 setData(data);
             });
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, []);
     return (
         <Card>

@@ -1,10 +1,16 @@
 import {WanikaniColors} from "../../Constants";
-import {ColoredButton} from "../../shared/ColoredButton.tsx";
+import {ColoredButton, ColoredButtonProps} from "../../shared/ColoredButton";
 
-function WanikaniCountButton(props) {
+type WanikaniCountButtonProps = {
+    count: number,
+    emptyColor?: string,
+    label: string,
+} & ColoredButtonProps;
+
+function WanikaniCountButton(props: WanikaniCountButtonProps) {
     const color = props.count === 0 && !!props.emptyColor ? props.emptyColor : props.color
 
-    let _props = {
+    const _props = {
         ...props
     };
 
@@ -17,7 +23,12 @@ function WanikaniCountButton(props) {
     );
 }
 
-function WanikaniPendingLessonsAndReviews({lessons, reviews}) {
+type WanikaniPendingLessonsAndReviewsProps = {
+    lessons: number,
+    reviews: number
+};
+
+function WanikaniPendingLessonsAndReviews({lessons, reviews}: WanikaniPendingLessonsAndReviewsProps) {
     return (
         <>
             <WanikaniCountButton variant={'contained'}

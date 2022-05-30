@@ -1,6 +1,7 @@
 import {Card, CardContent, Typography} from "@mui/material";
 import {AppUrls} from "../Constants";
-import NewTabLink from "../shared/NewTabLink.tsx";
+import NewTabLink from "../shared/NewTabLink";
+import {ReactNode} from "react";
 
 const styles = {
     container: {
@@ -11,7 +12,12 @@ const styles = {
     },
 }
 
-function ContentSection({title, children}) {
+type Props = {
+    title: string,
+    children: ReactNode,
+};
+
+function ContentSection({title, children}: Props) {
     return (
         <>
             <Typography variant={'h5'}>

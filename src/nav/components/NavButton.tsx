@@ -8,7 +8,18 @@ const styles = {
     }
 };
 
-function NavButton({text, route}) {
+type AppRoute = { // TODO: Use AppRoute from Routes in src dir once its migrated to typescript
+    path: string,
+    appName: string,
+    hideNav: boolean,
+}
+
+type Props = {
+    text: string,
+    route: AppRoute,
+};
+
+function NavButton({text, route}: Props) {
     const navigate = useNavigate();
     const location = useLocation();
     const isSelected = route.path === location.pathname;

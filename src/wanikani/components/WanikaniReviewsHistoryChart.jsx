@@ -10,7 +10,7 @@ import React from 'react';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.ts";
-import {createSubjectMap} from "../service/WanikaniDataUtil.js";
+import {createSubjectMap} from "../service/WanikaniDataUtil.ts";
 import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
 
 const units = {

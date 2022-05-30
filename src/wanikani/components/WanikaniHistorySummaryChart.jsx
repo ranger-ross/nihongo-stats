@@ -3,7 +3,7 @@ import WanikaniApiService from "../service/WanikaniApiService.ts";
 import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/material";
 import {sortAndGetMedian} from "../../util/MathUtils.ts";
-import {createSubjectMap} from "../service/WanikaniDataUtil.js";
+import {createSubjectMap} from "../service/WanikaniDataUtil.ts";
 import {millisToDays, millisToHours} from "../../util/DateUtils.ts";
 import {distinct} from "../../util/ArrayUtils.ts";
 

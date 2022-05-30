@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.ts";
 import {Card, CardContent, CircularProgress, FormControlLabel, FormGroup, Switch, Typography} from "@mui/material";
 import WanikaniItemTile from "./WanikaniItemTile.jsx";
-import {combineAssignmentAndSubject, isSubjectHidden} from "../service/WanikaniDataUtil.js";
+import {combineAssignmentAndSubject, isSubjectHidden} from "../service/WanikaniDataUtil.ts";
 import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.ts";
 import {WanikaniColors} from "../../Constants";
 import {useUserPreferences} from "../../hooks/useUserPreferences.tsx";

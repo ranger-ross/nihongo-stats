@@ -1,6 +1,6 @@
 import {Tooltip} from "@mui/material";
-import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil.js";
-import {getWanikaniSrsStageDescription} from "../service/WanikaniDataUtil.js";
+import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil.ts";
+import {getWanikaniSrsStageDescription} from "../service/WanikaniDataUtil.ts";
 
 function useTileStyle(color, size) { // 10 is base
     const topPadding = (size / 2) + 'px';

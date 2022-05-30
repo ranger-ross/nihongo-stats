@@ -19,7 +19,7 @@ import AnkiApiService from "../../anki/service/AnkiApiService.js";
 import {useAnkiDecks} from "../../hooks/useAnkiDecks.jsx";
 import {fetchAllBunProReviews} from "../../bunpro/service/BunProDataUtil.js";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
-import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil.js";
+import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil.ts";
 
 function DataPoint(date) {
     let data = {

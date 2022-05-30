@@ -7,7 +7,7 @@ import {Card, CardContent, Grid, Typography} from "@mui/material";
 import _ from 'lodash';
 import {scaleLinear} from 'd3-scale';
 import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import {createSubjectMap} from "../service/WanikaniDataUtil.js";
+import {createSubjectMap} from "../service/WanikaniDataUtil.ts";
 import {millisToDays} from "../../util/DateUtils.ts";
 
 const scale = () => scaleLinear();

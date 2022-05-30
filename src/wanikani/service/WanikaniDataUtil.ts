@@ -1,27 +1,36 @@
+// @ts-ignore
 import kanji from "kanji";
-import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil.js";
-import {getColorByJLPTLevel, getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "./WanikaniStyleUtil.ts";
+import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil";
+import {getColorByJLPTLevel, getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "./WanikaniStyleUtil";
 import {WanikaniColors} from "../../Constants";
+import {RawWanikaniSubject, RawWanikaniSubjectData} from "../models/raw/RawWanikaniSubject";
+import {RawWanikaniAssignment, RawWanikaniAssignmentData} from "../models/raw/RawWanikaniAssignment";
 
-export function createSubjectMap(subjects) {
-    let map = {};
+export function createSubjectMap(subjects: RawWanikaniSubject[]) {
+    const map: { [id: number]: RawWanikaniSubject } = {};
     for (const subject of subjects) {
         map[subject.id] = subject;
     }
     return map;
 }
 
-export function createAssignmentMap(subjects) {
-    let map = {};
+export function createAssignmentMap(assignments: RawWanikaniAssignment[]) {
+    const map: { [id: number]: RawWanikaniAssignment } = {};
 
-    for (const subject of subjects) {
-        map[subject.data['subject_id']] = subject;
+    for (const assignment of assignments) {
+        map[assignment.data['subject_id']] = assignment;
     }
 
     return map;
 }
 
-export function combineAssignmentAndSubject(assignment, subject) {
+type JoinedRawWKAssignmentAndSubject = RawWanikaniAssignmentData & RawWanikaniSubjectData & {
+    hasAssignment: boolean,
+    subjectId: number,
+    subjectType: 'radical' | 'kanji' | 'vocabulary',
+};
+
+export function combineAssignmentAndSubject(assignment: RawWanikaniAssignment, subject: RawWanikaniSubject): JoinedRawWKAssignmentAndSubject {
     return {
         ...subject.data,
         ...assignment?.data,
@@ -30,15 +39,15 @@ export function combineAssignmentAndSubject(assignment, subject) {
 
         // prefer this over 'subject_type'
         // if a subject has not been assigned it will not have a subject_type
-        subjectType: subject.object,
+        subjectType: subject.object as 'radical' | 'kanji' | 'vocabulary',
     };
 }
 
-export function isSubjectHidden(subject) {
+export function isSubjectHidden(subject: RawWanikaniSubject) {
     return !!subject && !!subject.data && subject.data['hidden_at'];
 }
 
-export function getWanikaniSrsStageDescription(stage) {
+export function getWanikaniSrsStageDescription(stage: number) {
     if (!stage && stage !== 0) {
         return 'Locked';
     }
@@ -89,7 +98,7 @@ export const groupByOptions = {
     none: {
         key: 'none',
         displayText: 'None',
-        group: (subjects) => [
+        group: (subjects: RawWanikaniSubject[]) => [
             {
                 title: 'All Items',
                 subjects: subjects,
@@ -99,10 +108,10 @@ export const groupByOptions = {
     level: {
         key: 'level',
         displayText: 'Level',
-        group: (subjects) => {
-            let levelsData = {};
+        group: (subjects: JoinedRawWKAssignmentAndSubject[]) => {
+            const levelsData: { [level: number]: JoinedRawWKAssignmentAndSubject[] } = {};
 
-            for (let subject of subjects) {
+            for (const subject of subjects) {
                 if (!levelsData[subject.level]) {
                     levelsData[subject.level] = [];
                 }
@@ -124,11 +133,11 @@ export const groupByOptions = {
     srsStage: {
         key: 'srsStage',
         displayText: 'SRS Stage',
-        group: (subjects) => {
-            let stageMap = {};
+        group: (subjects: JoinedRawWKAssignmentAndSubject[]) => {
+            const stageMap: { [stage: number | string]: JoinedRawWKAssignmentAndSubject[] } = {};
 
-            for (let subject of subjects) {
-                let srsStage = subject['srs_stage'] != 0 && !subject['srs_stage'] ? 'locked' : subject['srs_stage'];
+            for (const subject of subjects) {
+                const srsStage: string | number = subject['srs_stage'] != 0 && !subject['srs_stage'] ? 'locked' : subject['srs_stage'];
                 if (!stageMap[srsStage]) {
                     stageMap[srsStage] = [];
                 }
@@ -147,10 +156,10 @@ export const groupByOptions = {
     jlpt: {
         key: 'jlpt',
         displayText: 'JLPT',
-        group: (subjects) => {
+        group: (subjects: JoinedRawWKAssignmentAndSubject[]) => {
 
-            function toMap(array) {
-                let map = {};
+            function toMap(array: string[]) {
+                const map: { [key: string]: boolean } = {};
                 for (const value of array) {
                     map[value] = true;
                 }
@@ -165,10 +174,10 @@ export const groupByOptions = {
                 toMap(kanji.jlpt.n1),
             ];
 
-            let map = {};
+            const map: { [idx: number]: any[] } = {};
 
-            for (let subject of subjects) {
-                let idx = jtlp.findIndex(lvl => lvl[subject['slug']]);
+            for (const subject of subjects) {
+                const idx = jtlp.findIndex(lvl => lvl[subject['slug']]);
                 if (!map[idx]) {
                     map[idx] = [];
                 }
@@ -186,7 +195,7 @@ export const groupByOptions = {
     itemType: {
         key: 'itemType',
         displayText: 'Item Type',
-        group: (subjects) => {
+        group: (subjects: JoinedRawWKAssignmentAndSubject[]) => {
             return [
                 {text: 'Radicals', type: 'radical'},
                 {text: 'Kanji', type: 'kanji'},
@@ -202,11 +211,11 @@ export const groupByOptions = {
     frequency: {
         key: 'frequency',
         displayText: 'Frequency',
-        group: (subjects, params) => {
+        group: (subjects: JoinedRawWKAssignmentAndSubject[], params: { frequencyGroupingSize: number }) => {
             const size = params.frequencyGroupingSize;
             const temp = [...sortByOptions.frequency.sort(subjects)];
 
-            let groups = [];
+            const groups = [];
             let nextGroup = temp.splice(0, size);
             let i = 1;
             while (nextGroup.length > 0) {
@@ -227,40 +236,41 @@ export const sortByOptions = {
     none: {
         key: 'none',
         displayText: 'None',
-        sort: (subjects) => subjects
+        sort: (subjects: RawWanikaniSubject[]) => subjects
     },
     itemName: {
         key: 'itemName',
         displayText: 'Item Name',
-        sort: (subjects) => subjects.sort((a, b) => a.slug.toLowerCase().localeCompare(b.slug.toLowerCase()))
+        sort: (subjects: JoinedRawWKAssignmentAndSubject[]) => subjects.sort((a, b) => a.slug.toLowerCase().localeCompare(b.slug.toLowerCase()))
     },
     level: {
         key: 'level',
         displayText: 'Level',
-        sort: (subjects) => subjects.sort((a, b) => a.level - b.level)
+        sort: (subjects: JoinedRawWKAssignmentAndSubject[]) => subjects.sort((a, b) => a.level - b.level)
     },
     srsStage: {
         key: 'srsStage',
         displayText: 'SRS Stage',
-        sort: (subjects) => subjects.sort((a, b) => (b['srs_stage'] ?? -1) - (a['srs_stage'] ?? -1))
+        sort: (subjects: JoinedRawWKAssignmentAndSubject[]) => subjects.sort((a, b) => (b['srs_stage'] ?? -1) - (a['srs_stage'] ?? -1))
     },
     itemType: {
         key: 'itemType',
         displayText: 'Item Type',
-        sort: (subjects) => {
+        sort: (subjects: JoinedRawWKAssignmentAndSubject[]) => {
             const typeOrder = {
                 radical: 1,
                 kanji: 2,
                 vocabulary: 3
             };
+            // @ts-ignore
             return subjects.sort((a, b) => typeOrder[a.subjectType] - typeOrder[b.subjectType]);
         }
     },
     jlpt: {
         key: 'jlpt',
         displayText: 'JLPT',
-        sort: (subjects) => {
-            function getJLPTLevel(subject) {
+        sort: (subjects: JoinedRawWKAssignmentAndSubject[]) => {
+            function getJLPTLevel(subject: RawWanikaniSubjectData) {
                 const level = kanjiJLPTLookupMap[subject.slug];
                 if (level === 'N5') {
                     return 1;
@@ -282,9 +292,9 @@ export const sortByOptions = {
     frequency: {
         key: 'frequency',
         displayText: 'Frequency',
-        sort: (subjects) => {
+        sort: (subjects: JoinedRawWKAssignmentAndSubject[]) => {
 
-            function getFrequency(subject) {
+            function getFrequency(subject: RawWanikaniSubjectData) {
                 return kanjiFrequencyLookupMap[subject.slug] ?? 1_000_000;
             }
 
@@ -297,12 +307,12 @@ export const colorByOptions = {
     srsStage: {
         key: 'srsStage',
         displayText: 'SRS Stage',
-        color: (subject) => getColorByWanikaniSrsStage(subject['srs_stage'])
+        color: (subject: JoinedRawWKAssignmentAndSubject) => getColorByWanikaniSrsStage(subject['srs_stage'])
     },
     itemType: {
         key: 'itemType',
         displayText: 'Item Type',
-        color: (subject) => {
+        color: (subject: JoinedRawWKAssignmentAndSubject) => {
             if (!subject['srs_stage'] && subject['srs_stage'] !== 0)
                 return WanikaniColors.lockedGray;
 
@@ -315,6 +325,6 @@ export const colorByOptions = {
     jlpt: {
         key: 'jlpt',
         displayText: 'JLPT',
-        color: (subject) => getColorByJLPTLevel(kanjiJLPTLookupMap[subject.slug])
+        color: (subject: JoinedRawWKAssignmentAndSubject) => getColorByJLPTLevel(kanjiJLPTLookupMap[subject.slug])
     },
 };

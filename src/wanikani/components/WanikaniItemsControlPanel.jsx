@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import * as React from "react";
 import {useMemo, useState} from "react";
-import {colorByOptions, groupByOptions, sortByOptions} from "../service/WanikaniDataUtil.js";
+import {colorByOptions, groupByOptions, sortByOptions} from "../service/WanikaniDataUtil.ts";
 import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
 
 const styles = {

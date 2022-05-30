@@ -1,7 +1,9 @@
+// @ts-ignore
 import kanji from "kanji";
 
+
 function createKanjiFrequencyLookupMap() {
-    let map = {};
+    const map: { [kanji: string]: number } = {};
     for (const [index, value] of kanji.freq.entries()) {
         map[value] = index + 1;
     }
@@ -9,7 +11,7 @@ function createKanjiFrequencyLookupMap() {
 }
 
 function createKanjiJLPTLookupMap() {
-    let map = {};
+    const map: { [kanji: string]: 'N5' | 'N4' | 'N3' | 'N2' | 'N1' } = {};
     for (const value of kanji.jlpt.n5) {
         map[value] = 'N5';
     }
@@ -28,5 +30,6 @@ function createKanjiJLPTLookupMap() {
     return map;
 }
 
-export const kanjiJLPTLookupMap = createKanjiJLPTLookupMap();
-export const kanjiFrequencyLookupMap = createKanjiFrequencyLookupMap();
+export const kanjiJLPTLookupMap: { [kanji: string]: 'N5' | 'N4' | 'N3' | 'N2' | 'N1' } = createKanjiJLPTLookupMap();
+export const kanjiFrequencyLookupMap: { [kanji: string]: number } = createKanjiFrequencyLookupMap();
+

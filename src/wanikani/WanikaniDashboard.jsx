@@ -3,7 +3,7 @@ import {RoutePaths} from "../Routes";
 import WanikaniLevelSummaryChart from "./components/WanikaniLevelSummaryChart.tsx";
 import WanikaniUpcomingReviewsChart from "./components/WanikaniUpcomingReviewsChart.jsx";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
-import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart.jsx";
+import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart.tsx";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import WanikaniActiveItemsChart from "./components/WanikaniActiveItemChart.tsx";
 import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";

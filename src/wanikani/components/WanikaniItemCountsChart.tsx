@@ -1,9 +1,28 @@
-import {useState, useEffect} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.ts";
+import {useEffect, useState} from "react";
+import WanikaniApiService from "../service/WanikaniApiService";
 import {Card, CardContent, CircularProgress, Tooltip, Typography} from "@mui/material";
 import {WanikaniColors} from "../../Constants";
+import {AppStyles} from "../../util/TypeUtils";
+import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
 
-const styles = {
+
+type FormattedDataPoint = {
+    total: number,
+    radicals: number,
+    kanji: number,
+    vocabulary: number,
+};
+
+type FormattedData = {
+    available: FormattedDataPoint,
+    apprentice: FormattedDataPoint,
+    guru: FormattedDataPoint,
+    master: FormattedDataPoint,
+    enlightened: FormattedDataPoint,
+    burned: FormattedDataPoint,
+};
+
+const styles: AppStyles = {
     topContainer: {
         display: 'flex',
         gap: '5px',
@@ -23,7 +42,7 @@ const styles = {
     },
 };
 
-function assignmentsToCounts(assignments) {
+function assignmentsToCounts(assignments: RawWanikaniAssignment[]): FormattedDataPoint {
     return {
         total: assignments.length,
         radicals: assignments.filter(assignment => assignment.data['subject_type'] === 'radical').length,
@@ -32,7 +51,13 @@ function assignmentsToCounts(assignments) {
     };
 }
 
-function CountTile({label, data, color}) {
+type CountTileProps = {
+    label: string,
+    data: FormattedDataPoint,
+    color: string,
+};
+
+function CountTile({label, data, color}: CountTileProps) {
     return (
         <Tooltip title={
             <div>
@@ -68,7 +93,7 @@ function CountTile({label, data, color}) {
     );
 }
 
-async function fetchData() {
+async function fetchData(): Promise<FormattedData> {
     const assignments = await WanikaniApiService.getAllAssignments();
 
     const available = assignments.filter(assignment => assignment.data['srs_stage'] == 0);
@@ -77,7 +102,6 @@ async function fetchData() {
     const master = assignments.filter(assignment => assignment.data['srs_stage'] >= 7 && assignment.data['srs_stage'] < 8);
     const enlightened = assignments.filter(assignment => assignment.data['srs_stage'] >= 8 && assignment.data['srs_stage'] < 9);
     const burned = assignments.filter(assignment => assignment.data['srs_stage'] >= 9);
-
 
     return {
         available: assignmentsToCounts(available),
@@ -90,7 +114,7 @@ async function fetchData() {
 }
 
 function WanikaniItemCountsChart() {
-    const [data, setData] = useState();
+    const [data, setData] = useState<FormattedData>();
 
     useEffect(() => {
         let isSubscribed = true;
@@ -101,7 +125,9 @@ function WanikaniItemCountsChart() {
                 setData(d);
             })
             .catch(console.error);
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, []);
 
     return (

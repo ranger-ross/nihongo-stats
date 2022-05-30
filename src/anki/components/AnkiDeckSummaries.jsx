@@ -1,4 +1,4 @@
-import {AnkiColors} from "../../Constants.js";
+import {AnkiColors} from "../../Constants";
 
 /**
  * Use AnkiDataUtil.fetchAnkiDeckSummaries() to get data

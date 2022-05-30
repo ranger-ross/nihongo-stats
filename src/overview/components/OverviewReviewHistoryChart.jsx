@@ -6,7 +6,7 @@ import {
     AppNames,
     BunProColors,
     WanikaniColors
-} from '../../Constants.js';
+} from '../../Constants';
 import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/material";
 import {EventTracker} from "@devexpress/dx-react-chart";
 import {scaleBand} from 'd3-scale';

@@ -1,8 +1,8 @@
 import React from "react";
-import {ThemeProvider, createTheme} from '@mui/material/styles';
+import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {CssBaseline} from "@mui/material";
 
-export const createAppTheme = ({darkMode}) => {
+export const createAppTheme = ({darkMode}: { darkMode: boolean }) => {
     return createTheme({
         palette: {
             mode: darkMode ? "dark" : "light",
@@ -13,7 +13,7 @@ export const createAppTheme = ({darkMode}) => {
     })
 };
 
-export function AppThemeProvider({children}) {
+export function AppThemeProvider({children}: React.PropsWithChildren<unknown>) {
     const darkMode = true;
     const theme = React.useMemo(() => createAppTheme({darkMode}), [darkMode]);
     return (

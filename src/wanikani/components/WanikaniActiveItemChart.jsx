@@ -4,9 +4,9 @@ import {Card, CardContent, CircularProgress, FormControlLabel, FormGroup, Switch
 import WanikaniItemTile from "./WanikaniItemTile.jsx";
 import {combineAssignmentAndSubject, isSubjectHidden} from "../service/WanikaniDataUtil.js";
 import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.js";
-import {WanikaniColors} from "../../Constants.js";
-import {useUserPreferences} from "../../hooks/useUserPreferences.jsx";
-import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
+import {WanikaniColors} from "../../Constants";
+import {useUserPreferences} from "../../hooks/useUserPreferences.tsx";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo.tsx";
 import {lightenDarkenColor} from "../../util/CssUtils.ts";
 import GradientLinearProgress from "../../shared/GradientLinearProgress.tsx";
 

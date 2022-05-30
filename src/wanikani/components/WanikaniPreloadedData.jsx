@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import {CircularProgress, Typography} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
-import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.jsx";
+import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.tsx";
 import QuestionToolTip from "../../shared/QuestionToolTip.tsx";
 import {EVENT_STATUS} from "../service/WanikaniApiServiceRxJs.js";
 import LinearProgressWithLabel from "../../shared/LinearProgressWithLabel.tsx";

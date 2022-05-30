@@ -1,7 +1,7 @@
 import {useState, useEffect} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {Card, CardContent, CircularProgress, Tooltip, Typography} from "@mui/material";
-import {WanikaniColors} from "../../Constants.js";
+import {WanikaniColors} from "../../Constants";
 
 const styles = {
     topContainer: {

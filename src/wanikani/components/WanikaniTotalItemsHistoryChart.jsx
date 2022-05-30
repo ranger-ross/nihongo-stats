@@ -2,7 +2,7 @@ import {ArgumentAxis, Chart, Tooltip, ValueAxis} from '@devexpress/dx-react-char
 import React, {useEffect, useMemo, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {EventTracker, LineSeries} from "@devexpress/dx-react-chart";
-import {WanikaniColors} from '../../Constants.js';
+import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, Checkbox, FormControlLabel, Grid, Typography} from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {daysToMillis, millisToDays} from "../../util/DateUtils.ts";

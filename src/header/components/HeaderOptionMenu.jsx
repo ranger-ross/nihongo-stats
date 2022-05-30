@@ -8,7 +8,7 @@ import {RoutePaths} from "../../Routes.jsx";
 import {useNavigate} from "react-router";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {useAppVersion} from "../../hooks/useAppVersion.jsx";
-import {AppUrls} from "../../Constants.js";
+import {AppUrls} from "../../Constants";
 import {AccountCircle, Replay} from "@mui/icons-material";
 import {ClearCacheDialog} from "./ClearCacheDialog.jsx";
 import UserPreferencesDialog from "./UserPreferencesDialog.jsx";

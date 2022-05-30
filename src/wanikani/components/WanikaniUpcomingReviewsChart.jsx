@@ -11,7 +11,7 @@ import WanikaniApiService from "../service/WanikaniApiService.js";
 import {ArgumentScale, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addHours, truncMinutes} from '../../util/DateUtils.ts';
-import {WanikaniColors} from '../../Constants.js';
+import {WanikaniColors} from '../../Constants';
 import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {scaleBand} from 'd3-scale';
 import {
@@ -24,7 +24,7 @@ import {
     UpcomingReviewsScatterPoint,
     UpcomingReviewUnits
 } from "../../util/UpcomingReviewChartUtils.jsx";
-import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo.tsx";
 
 const styles = {
     container: {

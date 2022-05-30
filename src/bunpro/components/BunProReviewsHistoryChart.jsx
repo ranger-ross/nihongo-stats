@@ -7,7 +7,7 @@ import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {fetchAllBunProReviews} from "../service/BunProDataUtil.js";
-import useWindowDimensions from "../../hooks/useWindowDimensions.jsx";
+import useWindowDimensions from "../../hooks/useWindowDimensions.tsx";
 import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];

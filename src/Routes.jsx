@@ -1,6 +1,6 @@
 import React from "react";
 import {Route, Routes} from "react-router-dom";
-import {AppNames} from "./Constants.js";
+import {AppNames} from "./Constants";
 
 const AnkiDashboard = React.lazy(() => import("./anki/AnkiDashboard"));
 const AnkiConnectLogin = React.lazy(() => import("./anki/AnkiConnectLogin"));

@@ -1,4 +1,4 @@
-import {WanikaniColors} from "../../Constants.js";
+import {WanikaniColors} from "../../Constants";
 
 export function getColorByWanikaniSrsStage(stage) {
     if (!stage && stage !== 0) {

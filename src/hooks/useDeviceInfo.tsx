@@ -1,4 +1,4 @@
-import useWindowDimensions from "./useWindowDimensions.jsx";
+import useWindowDimensions from "./useWindowDimensions";
 
 const mobileMaxWidth = 600;
 

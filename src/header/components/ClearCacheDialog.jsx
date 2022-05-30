@@ -14,7 +14,7 @@ import {
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
 import AnkiApiService from "../../anki/service/AnkiApiService.js";
-import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.jsx";
+import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.tsx";
 import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus.jsx";
 
 function usePurgeLocalData() {

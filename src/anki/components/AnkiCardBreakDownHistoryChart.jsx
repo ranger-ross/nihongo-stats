@@ -10,7 +10,7 @@ import {area, curveCatmullRom,} from 'd3-shape';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {AreaSeries, ArgumentScale, EventTracker, Stack} from "@devexpress/dx-react-chart";
 
-import {AnkiColors} from "../../Constants.js";
+import {AnkiColors} from "../../Constants";
 import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
 
 function createCardTimestampMap(cards) {

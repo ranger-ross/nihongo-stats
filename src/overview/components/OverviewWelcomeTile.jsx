@@ -1,5 +1,5 @@
 import {Card, CardContent, IconButton, Menu, MenuItem, Typography} from "@mui/material";
-import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
+import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
 import React, {useEffect, useState} from "react";
 import AnkiDeckSummaries from "../../anki/components/AnkiDeckSummaries.jsx";
 import WanikaniPendingLessonsAndReviews from "../../wanikani/components/WanikaniPendingLessonAndReviews.jsx";
@@ -9,8 +9,8 @@ import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {Add} from "@mui/icons-material";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
-import {AppNames} from "../../Constants.js";
-import {useSelectedApp} from "../../hooks/useSelectedApp.jsx";
+import {AppNames} from "../../Constants";
+import {useSelectedApp} from "../../hooks/useSelectedApp.tsx";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
 import {fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil.js";
 

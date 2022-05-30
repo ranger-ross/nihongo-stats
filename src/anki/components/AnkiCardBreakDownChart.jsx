@@ -1,9 +1,9 @@
 import {Card, CardContent} from "@mui/material";
 import {useEffect, useState} from "react";
 import AnkiApiService from "../service/AnkiApiService.js";
-import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
+import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
 import {Chart, PieSeries, Legend, Title} from '@devexpress/dx-react-chart-material-ui';
-import {AnkiColors} from "../../Constants.js";
+import {AnkiColors} from "../../Constants";
 
 async function fetchCardBreakDownData(decks) {
     const query = decks

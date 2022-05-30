@@ -2,7 +2,7 @@ import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import BunProApiService from "../service/BunProApiService.js";
 import {lightenDarkenColor} from "../../util/CssUtils.ts";
-import {BunProColors} from "../../Constants.js";
+import {BunProColors} from "../../Constants";
 import GradientLinearProgress from "../../shared/GradientLinearProgress.tsx";
 
 function getBunProGrammarPointsGroupedByLesson(grammarPoints) {

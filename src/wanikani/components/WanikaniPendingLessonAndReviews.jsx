@@ -1,4 +1,4 @@
-import {WanikaniColors} from "../../Constants.js";
+import {WanikaniColors} from "../../Constants";
 import {ColoredButton} from "../../shared/ColoredButton.tsx";
 
 function WanikaniCountButton(props) {

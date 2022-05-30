@@ -14,7 +14,7 @@ import {
     UpcomingReviewPeriods, UpcomingReviewsScatterPoint,
     UpcomingReviewUnits
 } from "../../util/UpcomingReviewChartUtils.jsx";
-import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo.tsx";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 

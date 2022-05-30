@@ -7,7 +7,7 @@ import {useEffect, useState} from "react";
 import {Animation, ArgumentScale, BarSeries, EventTracker, Stack} from "@devexpress/dx-react-chart";
 import AnkiApiService from "../service/AnkiApiService.js";
 import {scaleBand} from 'd3-scale';
-import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
+import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
 import {truncDate} from "../../util/DateUtils.ts";
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 import PeriodSelector from "../../shared/PeriodSelector.tsx";

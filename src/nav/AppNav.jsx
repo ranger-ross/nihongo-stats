@@ -10,7 +10,7 @@ import BunProNav from "./navbars/BunProNav.jsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 import OverviewNav from "./navbars/OverviewNav.jsx";
 import {AppNames} from "../Constants";
-import {useSelectedApp} from "../hooks/useSelectedApp.jsx";
+import {useSelectedApp} from "../hooks/useSelectedApp.tsx";
 
 import ankiIcon from '../../assets/icons/anki-icon.png';
 import bunProIcon from '../../assets/icons/bunpro-icon.png';

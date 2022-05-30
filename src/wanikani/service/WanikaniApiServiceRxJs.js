@@ -1,6 +1,6 @@
 import * as localForage from "localforage/dist/localforage"
 import InMemoryCache from "../../util/InMemoryCache.js";
-import {AppUrls} from "../../Constants.js";
+import {AppUrls} from "../../Constants";
 import {Subject} from "rxjs";
 
 const memoryCache = new InMemoryCache();

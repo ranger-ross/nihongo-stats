@@ -5,7 +5,7 @@ import {createSubjectMap} from "../service/WanikaniDataUtil.js";
 import {addDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.ts";
 import {ArgumentAxis, Chart, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {AreaSeries, ArgumentScale, EventTracker, Stack} from "@devexpress/dx-react-chart";
-import {WanikaniColors} from "../../Constants.js";
+import {WanikaniColors} from "../../Constants";
 import {area, curveCatmullRom,} from 'd3-shape';
 import {scaleBand} from 'd3-scale';
 import ToolTipLabel from "../../shared/ToolTipLabel.tsx";

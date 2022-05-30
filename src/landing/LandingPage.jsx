@@ -1,9 +1,9 @@
 import {Button, Card, CardContent, Container, Typography} from "@mui/material";
 import {Navigate} from "react-router";
-import {useSelectedApp} from "../hooks/useSelectedApp.jsx";
-import {AppNames} from "../Constants.js";
+import {useSelectedApp} from "../hooks/useSelectedApp.tsx";
+import {AppNames} from "../Constants";
 import create from "zustand";
-import {useUserPreferences} from "../hooks/useUserPreferences.jsx";
+import {useUserPreferences} from "../hooks/useUserPreferences.tsx";
 import {convertAppNameToDashboardRoute} from "../Routes.jsx";
 
 const styles = {

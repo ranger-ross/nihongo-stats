@@ -1,5 +1,5 @@
 import {getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "../WanikaniStyleUtil.js";
-import {WanikaniColors} from "../../../Constants.js";
+import {WanikaniColors} from "../../../Constants";
 
 describe('WanikaniStyleUtil', function () {
 

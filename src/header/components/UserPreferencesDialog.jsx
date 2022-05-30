@@ -15,9 +15,9 @@ import {
     Typography
 } from "@mui/material";
 import React, {useState} from "react";
-import {useUserPreferences} from "../../hooks/useUserPreferences.jsx";
+import {useUserPreferences} from "../../hooks/useUserPreferences.tsx";
 import {HelpOutline} from "@mui/icons-material";
-import {AppNames} from "../../Constants.js";
+import {AppNames} from "../../Constants";
 
 const defaultDashboardOptions = [
     {key: AppNames.overview, text: 'Overview'},

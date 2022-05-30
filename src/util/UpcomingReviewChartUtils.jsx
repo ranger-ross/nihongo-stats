@@ -2,7 +2,7 @@ import {addDays, addHours, areDatesSameDay, areDatesSameDayAndHour, truncDate, t
 import {MenuItem, Select} from "@mui/material";
 import {ArgumentAxis, Chart} from "@devexpress/dx-react-chart-material-ui";
 import {BarSeries, ScatterSeries} from "@devexpress/dx-react-chart";
-import {useDeviceInfo} from "../hooks/useDeviceInfo.jsx";
+import {useDeviceInfo} from "../hooks/useDeviceInfo.tsx";
 
 export const UpcomingReviewUnits = {
     hours: {

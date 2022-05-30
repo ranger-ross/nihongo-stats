@@ -1,5 +1,5 @@
 import {Checkbox, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select} from "@mui/material";
-import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
+import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
 import {useEffect} from "react";
 import {useAnkiDecks} from "../../hooks/useAnkiDecks.jsx";
 

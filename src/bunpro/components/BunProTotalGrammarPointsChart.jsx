@@ -7,7 +7,7 @@ import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.ts";
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import useWindowDimensions from "../../hooks/useWindowDimensions.jsx";
+import useWindowDimensions from "../../hooks/useWindowDimensions.tsx";
 import BunProApiService from "../service/BunProApiService.js";
 import {createGrammarPointsLookupMap} from "../service/BunProDataUtil.js";
 

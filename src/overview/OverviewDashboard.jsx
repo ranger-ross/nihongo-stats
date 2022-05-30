@@ -1,6 +1,6 @@
 import OverviewWelcomeTile from "./components/OverviewWelcomeTile.jsx";
 import OverviewUpcomingReviewsChart from "./components/OverviewUpcomingReviewsChart.jsx";
-import {useDeviceInfo} from "../hooks/useDeviceInfo.jsx";
+import {useDeviceInfo} from "../hooks/useDeviceInfo.tsx";
 import WanikaniActiveItemsChart from "../wanikani/components/WanikaniActiveItemChart.jsx";
 import BunProActiveItemsChart from "../bunpro/components/BunProActiveItemsChart.jsx";
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";

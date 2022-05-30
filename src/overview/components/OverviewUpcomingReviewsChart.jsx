@@ -14,11 +14,11 @@ import {
     ValueScale
 } from "@devexpress/dx-react-chart";
 import AnkiApiService from "../../anki/service/AnkiApiService.js";
-import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.jsx";
+import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {createAnkiCardsDueQuery, fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil.js";
-import {AnkiColors, AppNames, BunProColors, WanikaniColors} from "../../Constants.js";
+import {AnkiColors, AppNames, BunProColors, WanikaniColors} from "../../Constants";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.js";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
 import {
@@ -30,7 +30,7 @@ import {
 import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
 import {filterDeadGhostReviews} from "../../bunpro/service/BunProDataUtil.js";
 import FilterableLegend from "../../shared/FilterableLegend.tsx";
-import {useDeviceInfo} from "../../hooks/useDeviceInfo.jsx";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo.tsx";
 
 const maxDaysIntoFuture = 31;
 

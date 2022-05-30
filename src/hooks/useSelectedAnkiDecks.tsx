@@ -4,7 +4,7 @@ import {persist} from "zustand/middleware"
 export const useSelectedAnkiDecks = create(persist(
     (set) => ({
         selectedDecks: [],
-        setSelectedDecks: (decks) => set(() => {
+        setSelectedDecks: (decks: string[]) => set(() => {
             const sorted = !!decks ? decks.sort() : [];
             return {selectedDecks: sorted};
         }),

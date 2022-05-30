@@ -2,7 +2,7 @@ import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from '@devexpress/dx-re
 import React, {useEffect, useMemo, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService.js";
 import {EventTracker, ScatterSeries, SplineSeries, ValueScale} from "@devexpress/dx-react-chart";
-import {WanikaniColors} from '../../Constants.js';
+import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, Grid, Typography} from "@mui/material";
 import _ from 'lodash';
 import {scaleLinear} from 'd3-scale';

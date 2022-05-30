@@ -4,7 +4,7 @@ import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
 import {Card, CardContent, Typography} from "@mui/material";
-import WanikaniItemTile from "./components/WanikaniItemTile.jsx";
+import WanikaniItemTile from "./components/WanikaniItemTile.tsx";
 import WanikaniApiService from "./service/WanikaniApiService.ts";
 import {combineAssignmentAndSubject, createAssignmentMap, isSubjectHidden} from "./service/WanikaniDataUtil.ts";
 import WanikaniItemsControlPanel, {useWanikaniItemControls} from "./components/WanikaniItemsControlPanel.jsx";

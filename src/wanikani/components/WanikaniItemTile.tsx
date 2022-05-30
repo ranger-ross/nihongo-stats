@@ -1,8 +1,10 @@
 import {Tooltip} from "@mui/material";
-import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil.ts";
-import {getWanikaniSrsStageDescription} from "../service/WanikaniDataUtil.ts";
+import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil";
+import {getWanikaniSrsStageDescription} from "../service/WanikaniDataUtil";
+import {RawWanikaniSubjectReading} from "../models/raw/RawWanikaniSubject";
+import {CSSProperties} from "react";
 
-function useTileStyle(color, size) { // 10 is base
+function useTileStyle(color: string, size: number): CSSProperties { // 10 is base
     const topPadding = (size / 2) + 'px';
     const sidePadding = size + 'px';
     return {
@@ -16,11 +18,11 @@ function useTileStyle(color, size) { // 10 is base
         border: 'solid #303030 1px',
         color: 'white',
         textDecoration: 'none',
-        background: color
-    }
+        background: color,
+    };
 }
 
-function ValueLabel({label, value}) {
+function ValueLabel({label, value}: { label: string, value?: string | number | null }) {
     return (
         <div style={{display: 'flex', justifyContent: 'space-between', gap: '10px'}}>
             <div style={{fontSize: 'large'}}>{label}</div>
@@ -29,19 +31,43 @@ function ValueLabel({label, value}) {
     );
 }
 
-function formatReadings(readings) {
+function formatReadings(readings: RawWanikaniSubjectReading[]) {
     if (!readings)
         return null;
     return readings.map(r => r.reading).join(', ');
 }
 
-function formatNextReviewDate(date) {
+function formatNextReviewDate(date: Date) {
     if (!date)
         return null;
     return date.toLocaleDateString() + ', ' + date.toLocaleTimeString('en-US', {hour: 'numeric'});
 }
 
-function WanikaniItemTile({text, link, meaning, srsLevel, color, type, level, readings, nextReviewDate, size = 10}) {
+type WanikaniItemTile = {
+    text: string,
+    link: string,
+    meaning: string,
+    srsLevel: number,
+    color: string,
+    type: string,
+    level: number,
+    readings: RawWanikaniSubjectReading[],
+    nextReviewDate: Date,
+    size: number,
+};
+
+function WanikaniItemTile({
+                              text,
+                              link,
+                              meaning,
+                              srsLevel,
+                              color,
+                              type,
+                              level,
+                              readings,
+                              nextReviewDate,
+                              size = 10
+                          }: WanikaniItemTile) {
     const style = useTileStyle(color, size);
 
     const reading = formatReadings(readings)

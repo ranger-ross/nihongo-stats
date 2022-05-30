@@ -17,6 +17,7 @@ export interface RawWanikaniSubjectData {
     lesson_position: number
     level: number
     meanings: RawWanikaniSubjectMeaning[]
+    readings: RawWanikaniSubjectReading[]
     meaning_mnemonic: string
     slug: string
     spaced_repetition_system_id: number
@@ -41,4 +42,11 @@ export interface RawWanikaniSubjectMeaning {
     meaning: string
     primary: boolean
     accepted_answer: boolean
+}
+
+export interface RawWanikaniSubjectReading {
+    type: string,
+    primary: boolean,
+    accepted_answer: boolean,
+    reading: string
 }

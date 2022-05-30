@@ -1,6 +1,6 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
 import {RoutePaths} from "../Routes";
-import WanikaniLevelSummaryChart from "./components/WanikaniLevelSummaryChart.jsx";
+import WanikaniLevelSummaryChart from "./components/WanikaniLevelSummaryChart.tsx";
 import WanikaniUpcomingReviewsChart from "./components/WanikaniUpcomingReviewsChart.jsx";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
 import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart.jsx";

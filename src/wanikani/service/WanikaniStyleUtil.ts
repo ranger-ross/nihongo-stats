@@ -1,6 +1,6 @@
 import {WanikaniColors} from "../../Constants";
 
-export function getColorByWanikaniSrsStage(stage) {
+export function getColorByWanikaniSrsStage(stage: number) {
     if (!stage && stage !== 0) {
         return WanikaniColors.lockedGray;
     }
@@ -32,7 +32,7 @@ export function getColorByWanikaniSrsStage(stage) {
 }
 
 
-export function getColorByWanikaniSubjectType(subjectType) {
+export function getColorByWanikaniSubjectType(subjectType: 'radical' | 'kanji' | 'vocabulary') {
     if (subjectType === 'radical')
         return WanikaniColors.blue;
     else if (subjectType === 'kanji')
@@ -41,7 +41,7 @@ export function getColorByWanikaniSubjectType(subjectType) {
         return WanikaniColors.purple;
 }
 
-export function getColorByJLPTLevel(level) {
+export function getColorByJLPTLevel(level: 'N5' | 'N4' | 'N3' | 'N2' | 'N1') {
     if (level === 'N5')
         return '#3261c5'
     else if (level === 'N4')

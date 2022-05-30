@@ -1,9 +1,10 @@
-import * as localForage from "localforage/dist/localforage"
-import InMemoryCache from "../../util/InMemoryCache.js";
+import * as localForage from "localforage";
+import InMemoryCache from "../../util/InMemoryCache";
 import {AppUrls} from "../../Constants";
 import {Subject} from "rxjs";
 
-const memoryCache = new InMemoryCache();
+// @ts-ignore
+const memoryCache = new InMemoryCache<any>();
 
 const wanikaniApiUrl = AppUrls.wanikaniApi;
 const cacheKeys = {
@@ -18,9 +19,9 @@ const cacheKeys = {
     assignmentsForLevelPrefix: 'wanikani-assignment-for-level-'
 }
 
-const authHeader = (apiKey) => ({'Authorization': `Bearer ${apiKey}`})
+const authHeader = (apiKey: string) => ({'Authorization': `Bearer ${apiKey}`})
 
-function sleep(ms) {
+function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -30,10 +31,10 @@ export const EVENT_STATUS = {
     IN_PROGRESS: 'in-progress',
 };
 
-function fetchWithAutoRetry(input, init) {
-    const subject = new Subject();
+function fetchWithAutoRetry(input: string, init: RequestInit) {
+    const subject = new Subject<{ status: string, response?: Response }>();
 
-    async function tryRequest(attempts) {
+    async function tryRequest(attempts: number) {
         const response = await fetch(input, init);
 
         if (response.status == 429 && attempts < 10) {
@@ -56,17 +57,17 @@ function fetchWithAutoRetry(input, init) {
 }
 
 function apiKey() {
-    return localStorage.getItem(cacheKeys.apiKey)
+    return localStorage.getItem(cacheKeys.apiKey) as string
 }
 
-function sortAndDeduplicateReviews(reviews) {
-    let map = {};
+function sortAndDeduplicateReviews(reviews: any[]) {
+    const map: { [id: string]: any } = {};
 
     for (const review of reviews) {
         map[review.id] = review;
     }
 
-    let result = [];
+    const result = [];
 
     for (const key of Object.keys(map)) {
         result.push(map[key]);
@@ -75,14 +76,21 @@ function sortAndDeduplicateReviews(reviews) {
     return result.sort((a, b) => a.id - b.id);
 }
 
+type MultiPageObservableEvent = {
+    status: string,
+    size?: number,
+    progress?: number,
+    partialData?: any,
+    data?: any,
+};
 
 /**
  * NOTE: progress will not take into account any data before the startingId
  */
-function fetchMultiPageRequestObservable(path, startingId) {
-    let subject = new Subject();
+function fetchMultiPageRequestObservable(path: string, startingId?: number) {
+    const subject = new Subject<MultiPageObservableEvent>();
 
-    let options = {
+    const options = {
         headers: {
             ...authHeader(apiKey()),
         },
@@ -98,7 +106,7 @@ function fetchMultiPageRequestObservable(path, startingId) {
                 return;
             }
 
-            const firstPageResponse = event.response;
+            const firstPageResponse = event.response as Response;
 
             const firstPage = await firstPageResponse.json();
 
@@ -115,9 +123,9 @@ function fetchMultiPageRequestObservable(path, startingId) {
                             return;
                         }
 
-                        const pageResponse = event.response;
+                        const pageResponse = event.response as Response;
 
-                        let page = await pageResponse.json();
+                        const page = await pageResponse.json();
                         data = data.concat(page.data);
                         nextPage = page.pages['next_url'];
                         if (!!nextPage) {
@@ -158,14 +166,14 @@ function fetchMultiPageRequestObservable(path, startingId) {
 }
 
 function getReviews() {
-    let subject = new Subject();
+    const subject = new Subject();
 
-    const complete = (data) => subject.next({
+    const complete = (data: any) => subject.next({
         status: EVENT_STATUS.COMPLETE,
         data: data,
     });
 
-    const inProgress = (size, progress) => subject.next({
+    const inProgress = (size: number, progress: number) => subject.next({
         status: EVENT_STATUS.IN_PROGRESS,
         size: size,
         progress: progress
@@ -173,8 +181,8 @@ function getReviews() {
 
     const rateLimited = () => subject.next({status: EVENT_STATUS.RATE_LIMITED});
 
-    function handleEvent(event, reviews = []) {
-        function save(partialData, saveToMemCache = false) {
+    function handleEvent(event: MultiPageObservableEvent, reviews: any[] = []) {
+        function save(partialData: any, saveToMemCache = false) {
             const reviewsToSave = sortAndDeduplicateReviews([...reviews, ...partialData]);
 
             const cacheObject = {
@@ -200,7 +208,7 @@ function getReviews() {
             }
             case EVENT_STATUS.IN_PROGRESS: {
                 save(event.partialData);
-                inProgress(event.size, event.progress + reviews.length);
+                inProgress(event.size as number, event.progress as number + reviews.length);
                 return;
             }
         }
@@ -208,10 +216,10 @@ function getReviews() {
     }
 
     const fetchReviews = async () => {
-        const cachedValue = await localForage.getItem(cacheKeys.reviews);
+        const cachedValue = await localForage.getItem<any>(cacheKeys.reviews);
 
         if (cachedValue?.data?.length > 0) {
-            let reviews = sortAndDeduplicateReviews(cachedValue.data);
+            const reviews: any[] = sortAndDeduplicateReviews(cachedValue.data);
             const lastId = reviews[reviews.length - 1].id;
             fetchMultiPageRequestObservable('/v2/reviews', lastId)
                 .subscribe({

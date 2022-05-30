@@ -3,7 +3,7 @@ import WanikaniApiService from "../service/WanikaniApiService.js";
 import {Card, CardContent, CircularProgress, FormControlLabel, FormGroup, Switch, Typography} from "@mui/material";
 import WanikaniItemTile from "./WanikaniItemTile.jsx";
 import {combineAssignmentAndSubject, isSubjectHidden} from "../service/WanikaniDataUtil.js";
-import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.js";
+import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil.ts";
 import {WanikaniColors} from "../../Constants";
 import {useUserPreferences} from "../../hooks/useUserPreferences.tsx";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo.tsx";

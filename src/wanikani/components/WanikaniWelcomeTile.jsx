@@ -1,5 +1,5 @@
 import {Card, CardContent, Typography} from "@mui/material";
-import WanikaniApiService from "../service/WanikaniApiService";
+import WanikaniApiService from "../service/WanikaniApiService.js";
 import {useState, useEffect} from "react";
 import WanikaniPendingLessonsAndReviews from "./WanikaniPendingLessonAndReviews.jsx";
 

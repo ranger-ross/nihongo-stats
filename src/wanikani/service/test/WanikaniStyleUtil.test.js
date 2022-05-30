@@ -1,4 +1,4 @@
-import {getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "../WanikaniStyleUtil.js";
+import {getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "../WanikaniStyleUtil.ts";
 import {WanikaniColors} from "../../../Constants";
 
 describe('WanikaniStyleUtil', function () {

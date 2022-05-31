@@ -15,7 +15,7 @@ import {
     Typography
 } from "@mui/material";
 import React, {useState} from "react";
-import {useUserPreferences} from "../../hooks/useUserPreferences.tsx";
+import {useUserPreferences} from "../../hooks/useUserPreferences";
 import {HelpOutline} from "@mui/icons-material";
 import {AppNames} from "../../Constants";
 
@@ -97,7 +97,12 @@ function WanikaniPreferences() {
     );
 }
 
-function UserPreferencesDialog({isOpen, onClose}) {
+type UserPreferencesDialogProps = {
+    isOpen: boolean,
+    onClose: () => void,
+};
+
+function UserPreferencesDialog({isOpen, onClose}: UserPreferencesDialogProps) {
     const [tab, setTab] = useState(0);
     return (
         <Dialog onClose={onClose} open={isOpen} fullWidth={true} maxWidth={'md'}>

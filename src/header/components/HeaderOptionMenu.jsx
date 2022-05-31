@@ -11,7 +11,7 @@ import {useAppVersion} from "../../hooks/useAppVersion.jsx";
 import {AppUrls} from "../../Constants";
 import {AccountCircle, Replay} from "@mui/icons-material";
 import {ClearCacheDialog} from "./ClearCacheDialog.jsx";
-import UserPreferencesDialog from "./UserPreferencesDialog.jsx";
+import UserPreferencesDialog from "./UserPreferencesDialog.tsx";
 
 const iconPaddingRight = '7px';
 

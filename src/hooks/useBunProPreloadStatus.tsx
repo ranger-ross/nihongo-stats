@@ -3,7 +3,7 @@ import {persist} from "zustand/middleware";
 
 export const useBunProPreloadStatus = create(persist(set => ({
         status: false,
-        setStatus: (status) => set(() => {
+        setStatus: (status: boolean) => set(() => {
             return {status: status};
         }),
     }),

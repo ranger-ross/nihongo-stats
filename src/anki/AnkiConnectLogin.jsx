@@ -1,5 +1,5 @@
 import {Button, Container, Link} from "@mui/material";
-import AnkiApiService from "./service/AnkiApiService";
+import AnkiApiService from "./service/AnkiApiService.js";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import {useState} from "react";

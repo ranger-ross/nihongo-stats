@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import AnkiApiService from "../service/AnkiApiService.js";
+import AnkiApiService from "../service/AnkiApiService.ts";
 import {RoutePaths} from "../../Routes.jsx";
 import {useNavigate} from "react-router";
 import {CircularProgress} from "@mui/material";

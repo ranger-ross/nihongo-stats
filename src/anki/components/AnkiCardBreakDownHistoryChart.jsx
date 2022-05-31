@@ -3,7 +3,7 @@ import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {addDays, daysToMillis, truncDate} from "../../util/DateUtils.ts";
 import * as React from "react";
 import {useEffect, useState, useMemo} from "react";
-import AnkiApiService from "../service/AnkiApiService.js";
+import AnkiApiService from "../service/AnkiApiService.ts";
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 import {scaleBand} from 'd3-scale';
 import {area, curveCatmullRom,} from 'd3-shape';

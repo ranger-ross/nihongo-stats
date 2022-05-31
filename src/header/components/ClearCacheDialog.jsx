@@ -13,9 +13,9 @@ import {
 } from "@mui/material";
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
-import AnkiApiService from "../../anki/service/AnkiApiService.js";
+import AnkiApiService from "../../anki/service/AnkiApiService.ts";
 import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.tsx";
-import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus.jsx";
+import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus.tsx";
 
 function usePurgeLocalData() {
     const {setStatus: setWanikaniPreloadStatus} = useWanikaniPreloadStatus();

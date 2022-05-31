@@ -1,4 +1,4 @@
-import AnkiApiService from "./AnkiApiService.js";
+import AnkiApiService from "./AnkiApiService.ts";
 
 export function createAnkiCardsDueQuery(deck, day) {
     return {

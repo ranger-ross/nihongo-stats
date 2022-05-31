@@ -15,7 +15,7 @@ import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
 import {daysToMillis, truncDate} from "../../util/DateUtils.ts";
-import AnkiApiService from "../../anki/service/AnkiApiService.js";
+import AnkiApiService from "../../anki/service/AnkiApiService.ts";
 import {useAnkiDecks} from "../../hooks/useAnkiDecks.jsx";
 import {fetchAllBunProReviews} from "../../bunpro/service/BunProDataUtil.js";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";

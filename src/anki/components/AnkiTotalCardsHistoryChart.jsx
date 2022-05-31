@@ -5,7 +5,7 @@ import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-re
 import {ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
 import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
-import AnkiApiService from "../service/AnkiApiService.js";
+import AnkiApiService from "../service/AnkiApiService.ts";
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 

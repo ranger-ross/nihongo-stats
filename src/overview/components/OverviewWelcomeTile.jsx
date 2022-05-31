@@ -5,7 +5,7 @@ import AnkiDeckSummaries from "../../anki/components/AnkiDeckSummaries.jsx";
 import WanikaniPendingLessonsAndReviews from "../../wanikani/components/WanikaniPendingLessonAndReviews.tsx";
 import BunProPendingReviews from "../../bunpro/components/BunProPendingReviews.jsx";
 import BunProApiService from "../../bunpro/service/BunProApiService.js";
-import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
+import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.tsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {Add} from "@mui/icons-material";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";

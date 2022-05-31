@@ -2,7 +2,7 @@ import {Box, Grid} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router";
 import {AllRoutes, convertAppNameToDashboardRoute} from '../Routes';
-import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.jsx";
+import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.tsx";
 import AppSelector from "./components/AppSelector";
 import WanikaniNav from "./navbars/WanikaniNav.jsx";
 import AnkiNav from "./navbars/AnkiNav";

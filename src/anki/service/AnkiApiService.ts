@@ -1,5 +1,6 @@
-import * as localForage from "localforage/dist/localforage"
+import * as localForage from "localforage"
 import {AppUrls} from "../../Constants";
+import {AnkiDeck} from "../models/AnkiDeck";
 
 const ankiConnectApiUrl = AppUrls.ankiApi;
 
@@ -9,8 +10,8 @@ const cacheKeys = {
     reviewsPrefix: 'anki-reviews-'
 }
 
-function invoke(action, version, params = {}) {
-    return new Promise((resolve, reject) => {
+function invoke(action: string, version: number, params = {}) {
+    return new Promise<any>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.addEventListener('error', () => reject('failed to issue request'));
         xhr.addEventListener('load', () => {
@@ -42,8 +43,8 @@ function invoke(action, version, params = {}) {
 }
 
 
-function convertDeckMapToArray(decks) {
-    let arr = [];
+function convertDeckMapToArray(decks: { [name: string]: number }) {
+    const arr = [];
     for (const name of Object.keys(decks)) {
         const id = decks[name];
         arr.push({
@@ -54,7 +55,7 @@ function convertDeckMapToArray(decks) {
     return arr;
 }
 
-function createCardReviewFromTuple(tuple) {
+function createCardReviewFromTuple(tuple: number[]) {
     return {
         reviewTime: tuple[0],
         cardId: tuple[1],
@@ -79,31 +80,31 @@ function connect() {
         });
 }
 
-function getCardReviews(deckName, startTimestamp = new Date(2000, 0, 1).getTime()) {
+function getCardReviews(deckName: string, startTimestamp = new Date(2000, 0, 1).getTime()) {
     return invoke("cardReviews", 6, {
         "deck": deckName,
         "startID": startTimestamp
-    }).then(data => data.map(createCardReviewFromTuple));
+    }).then((data: number[][]) => data.map(createCardReviewFromTuple));
 }
 
-function getReviewsCacheKey(deckName) {
+function getReviewsCacheKey(deckName: string) {
     return `${cacheKeys.reviewsPrefix}${deckName}`;
 }
 
-async function getAllReviewsByDeck(deckName) {
-    let cachedValue = await localForage.getItem(getReviewsCacheKey(deckName));
+async function getAllReviewsByDeck(deckName: string) {
+    const cachedValue: any = await localForage.getItem(getReviewsCacheKey(deckName));
     let reviews;
     if (!!cachedValue && cachedValue.data.length > 0) {
         reviews = cachedValue.data;
         if (cachedValue.lastUpdate > Date.now() - 1000 * 60 * 3) {
             return reviews;
         }
-        let timestamp = reviews[reviews.length - 1].reviewTime + 1;
+        const timestamp = reviews[reviews.length - 1].reviewTime + 1;
         reviews.push(...(await getCardReviews(deckName, timestamp)));
     } else {
         reviews = await getCardReviews(deckName);
     }
-    reviews = reviews.sort((a, b) => a.reviewTime - b.reviewTime);
+    reviews = reviews.sort((a: any, b: any) => a.reviewTime - b.reviewTime);
     localForage.setItem(getReviewsCacheKey(deckName), {
         data: reviews,
         lastUpdate: Date.now()
@@ -111,8 +112,8 @@ async function getAllReviewsByDeck(deckName) {
     return reviews;
 }
 
-async function getDeckNamesAndIds() {
-    let cachedValue = await localForage.getItem(cacheKeys.decks);
+async function getDeckNamesAndIds(): Promise<AnkiDeck[]> {
+    const cachedValue: any = await localForage.getItem(cacheKeys.decks);
     if (!!cachedValue && cachedValue.lastUpdate > Date.now() - 1000 * 60 * 60 * 5) {
         return cachedValue.data;
     }
@@ -127,11 +128,11 @@ async function getDeckNamesAndIds() {
 
 async function getDeckNames() {
     const data = await getDeckNamesAndIds();
-    return data.map(deck => deck.name);
+    return data.map((deck: AnkiDeck) => deck.name);
 }
 
 // See Docs: https://docs.ankiweb.net/searching.html
-function findCards(query) {
+function findCards(query: string) {
     return invoke("findCards", 6, {"query": query})
 }
 
@@ -148,18 +149,18 @@ async function flushCache() {
     });
 
     for (const key of Object.keys(cacheKeys)) {
-        await localForage.removeItem(cacheKeys[key]);
+        await localForage.removeItem((cacheKeys as any)[key]);
     }
 }
 
-async function getCardInfo(cardIds) {
+async function getCardInfo(cardIds: string | string[]) {
     if (!Array.isArray(cardIds))
         cardIds = [cardIds];
 
-    let results = []
+    const results = []
     let cardsToQuery = [];
 
-    let cachedValue = await localForage.getItem(cacheKeys.cardInfo);
+    let cachedValue: any = await localForage.getItem(cacheKeys.cardInfo);
     if (!!cachedValue) {
         for (const cardId of cardIds) {
             const cachedEntry = cachedValue[cardId];
@@ -191,6 +192,13 @@ async function getCardInfo(cardIds) {
     return results;
 }
 
+type AnkiRequest = {
+    action: string,
+    params: {
+        query: string,
+    }
+};
+
 export default {
     connect: () => connect(),
     getDecks: getDeckNames,
@@ -201,9 +209,9 @@ export default {
     getCardReviews: getCardReviews,
     getAllReviewsByDeck: getAllReviewsByDeck,
     findCards: findCards,
-    getDeckConfig: (deck) => invoke("getDeckConfig", 6, {"deck": deck}),
+    getDeckConfig: (deck: string) => invoke("getDeckConfig", 6, {"deck": deck}),
     requestPermission: requestPermission,
-    sendMultiRequest: (requests) => invoke("multi", 6, {"actions": requests}),
+    sendMultiRequest: (requests: AnkiRequest[]) => invoke("multi", 6, {"actions": requests}),
     getCardInfo: getCardInfo,
-    getAllCardIdsByDeck: deck => findCards(`deck:"${deck}"`)
+    getAllCardIdsByDeck: (deck: string) => findCards(`deck:"${deck}"`)
 }

@@ -13,9 +13,9 @@ import {
     Stack,
     ValueScale
 } from "@devexpress/dx-react-chart";
-import AnkiApiService from "../../anki/service/AnkiApiService.js";
+import AnkiApiService from "../../anki/service/AnkiApiService.ts";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
-import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.jsx";
+import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.tsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {createAnkiCardsDueQuery, fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil.js";
 import {AnkiColors, AppNames, BunProColors, WanikaniColors} from "../../Constants";

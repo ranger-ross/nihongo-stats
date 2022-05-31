@@ -5,7 +5,7 @@ import {
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import {Animation, ArgumentScale, BarSeries, EventTracker, Stack} from "@devexpress/dx-react-chart";
-import AnkiApiService from "../service/AnkiApiService.js";
+import AnkiApiService from "../service/AnkiApiService.ts";
 import {scaleBand} from 'd3-scale';
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
 import {truncDate} from "../../util/DateUtils.ts";

@@ -26,7 +26,7 @@ import {
     UnitSelector,
     UpcomingReviewPeriods, UpcomingReviewsScatterPoint,
     UpcomingReviewUnits
-} from "../../util/UpcomingReviewChartUtils.jsx";
+} from "../../util/UpcomingReviewChartUtils.tsx";
 import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
 import {filterDeadGhostReviews} from "../../bunpro/service/BunProDataUtil.js";
 import FilterableLegend from "../../shared/FilterableLegend.tsx";

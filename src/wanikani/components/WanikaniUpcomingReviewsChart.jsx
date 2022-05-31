@@ -23,7 +23,7 @@ import {
     UpcomingReviewPeriods,
     UpcomingReviewsScatterPoint,
     UpcomingReviewUnits
-} from "../../util/UpcomingReviewChartUtils.jsx";
+} from "../../util/UpcomingReviewChartUtils.tsx";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo.tsx";
 
 const styles = {

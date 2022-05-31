@@ -1,10 +1,23 @@
-import {addDays, addHours, areDatesSameDay, areDatesSameDayAndHour, truncDate, truncMinutes} from "./DateUtils.ts";
+import {addDays, addHours, areDatesSameDay, areDatesSameDayAndHour, truncDate, truncMinutes} from "./DateUtils";
 import {MenuItem, Select} from "@mui/material";
 import {ArgumentAxis, Chart} from "@devexpress/dx-react-chart-material-ui";
-import {BarSeries, ScatterSeries} from "@devexpress/dx-react-chart";
-import {useDeviceInfo} from "../hooks/useDeviceInfo.tsx";
+import {
+    ArgumentAxis as ArgumentAxisBase,
+    BarSeries,
+    ScatterSeries,
+    ScatterSeriesProps
+} from "@devexpress/dx-react-chart";
+import {useDeviceInfo} from "../hooks/useDeviceInfo";
 
-export const UpcomingReviewUnits = {
+type UpcomingReviewUnit = {
+    key: string,
+    text: string,
+    default: number,
+    trunc: (date: Date | number) => Date,
+    isPeriodTheSame: (date1: Date, date2: Date) => boolean,
+};
+
+export const UpcomingReviewUnits: { [key: string]: UpcomingReviewUnit } = {
     hours: {
         key: 'hours',
         text: 'Hours',
@@ -35,7 +48,7 @@ export const UpcomingReviewPeriods = {
 }
 
 
-export function addTimeToDate(date, unit, amount) {
+export function addTimeToDate(date: Date, unit: UpcomingReviewUnit, amount: number) {
     if (unit.key === UpcomingReviewUnits.days.key) {
         return addDays(date, amount);
     } else {
@@ -43,14 +56,19 @@ export function addTimeToDate(date, unit, amount) {
     }
 }
 
+type UnitSelectorProps = {
+    options: { key: string, text: string }[],
+    unit: UpcomingReviewUnit,
+    onChange: (unit: UpcomingReviewUnit) => void
+};
 
-export function UnitSelector({options, unit, onChange}) {
+export function UnitSelector({options, unit, onChange}: UnitSelectorProps) {
     return (
         <Select
             style={{minWidth: '100px', height: '40px'}}
             size={'small'}
             value={unit.key}
-            onChange={e => onChange(options.find(o => o.key === e.target.value))}
+            onChange={e => onChange(options.find(o => o.key === e.target.value) as UpcomingReviewUnit)}
         >
             {options.map((option) => (
                 <MenuItem key={option.key}
@@ -63,7 +81,7 @@ export function UnitSelector({options, unit, onChange}) {
     );
 }
 
-function getHoursPrimaryLabelText(date, isToolTipLabel, isMobile) {
+function getHoursPrimaryLabelText(date: Date, isToolTipLabel: boolean, isMobile: boolean) {
     const hoursToShow = isMobile ? [0, 12] : [0, 6, 12, 18]
 
     if (!isToolTipLabel && !hoursToShow.includes(date.getHours())) {
@@ -73,7 +91,7 @@ function getHoursPrimaryLabelText(date, isToolTipLabel, isMobile) {
     return date.toLocaleTimeString("en-US", {hour: 'numeric'});
 }
 
-function getHoursSecondaryLabelText(date, isToolTipLabel) {
+function getHoursSecondaryLabelText(date: Date, isToolTipLabel?: boolean) {
     if (!isToolTipLabel && ![0].includes(date.getHours())) {
         return null;
     }
@@ -81,8 +99,8 @@ function getHoursSecondaryLabelText(date, isToolTipLabel) {
     return date.toLocaleDateString("en-US", {month: 'numeric', day: '2-digit'});
 }
 
-export function formatTimeUnitLabelText(unit, date, isToolTipLabel, isMobile) {
-    let _date = new Date(date)
+export function formatTimeUnitLabelText(unit: UpcomingReviewUnit, date: Date | number, isToolTipLabel: boolean, isMobile: boolean) {
+    const _date = new Date(date)
     if (unit.key === UpcomingReviewUnits.days.key) {
         return {primary: `${_date.getMonth() + 1}/${_date.getDate()}`, secondary: null};
     } else {
@@ -93,13 +111,13 @@ export function formatTimeUnitLabelText(unit, date, isToolTipLabel, isMobile) {
     }
 }
 
-export function createUpcomingReviewsChartLabel(unit, isMobile) {
-    return function LabelWithDate(props) {
+export function createUpcomingReviewsChartLabel(unit: UpcomingReviewUnit, isMobile: boolean) {
+    return function LabelWithDate(props: ArgumentAxisBase.LabelProps) {
         const {text} = props;
         let primaryLabel = null;
         let secondaryLabel = null;
         if (text) {
-            const rawTimestamp = parseInt(text);
+            const rawTimestamp = parseInt(text as string);
             if (!!rawTimestamp) {
                 const formatted = formatTimeUnitLabelText(unit, rawTimestamp, false, isMobile);
                 primaryLabel = formatted.primary;
@@ -128,8 +146,8 @@ export function createUpcomingReviewsChartLabel(unit, isMobile) {
     }
 }
 
-export function createUpcomingReviewsChartBarLabel(isLabelVisible) {
-    return function BarWithLabel(props) {
+export function createUpcomingReviewsChartBarLabel(isLabelVisible: (seriesIndex: number, index: number) => boolean) {
+    return function BarWithLabel(props: BarSeries.PointProps & { seriesIndex: number }) {
         const {arg, val, value, seriesIndex, index} = props;
 
         if (value === 0)
@@ -137,6 +155,7 @@ export function createUpcomingReviewsChartBarLabel(isLabelVisible) {
 
         return (
             <>
+                {/*@ts-ignore*/}
                 <BarSeries.Point {...props}/>
 
                 {isLabelVisible(seriesIndex, index) ? (
@@ -154,10 +173,11 @@ export function createUpcomingReviewsChartBarLabel(isLabelVisible) {
     }
 }
 
-export function UpcomingReviewsScatterPoint(props) {
+export function UpcomingReviewsScatterPoint(props: ScatterSeriesProps) {
     const {isMobile} = useDeviceInfo();
     const size = isMobile ? 4 : 6;
     return (
+        // @ts-ignore
         <ScatterSeries.Point {...props} point={{size}}/>
     );
 }

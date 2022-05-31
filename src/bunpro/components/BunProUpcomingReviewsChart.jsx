@@ -13,7 +13,7 @@ import {
     createUpcomingReviewsChartLabel, formatTimeUnitLabelText, UnitSelector,
     UpcomingReviewPeriods, UpcomingReviewsScatterPoint,
     UpcomingReviewUnits
-} from "../../util/UpcomingReviewChartUtils.jsx";
+} from "../../util/UpcomingReviewChartUtils.tsx";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo.tsx";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];

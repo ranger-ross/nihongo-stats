@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import AnkiApiService from "../anki/service/AnkiApiService.ts";
+import AnkiApiService from "../anki/service/AnkiApiService";
 
 const pollingFrequency = 4_000;
 

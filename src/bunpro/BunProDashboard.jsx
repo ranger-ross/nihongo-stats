@@ -1,5 +1,5 @@
 import {RoutePaths} from "../Routes.jsx";
-import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
+import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
 import {BunProWelcomeTile} from "./components/BunProWelcomeTile.jsx";
 import BunProPreloadedData from "./components/BunProPreloadedData.jsx";
 import {BunProJLPTTile} from "./components/BunProJLPTTile";

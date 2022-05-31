@@ -4,7 +4,7 @@ import {useDeviceInfo} from "../hooks/useDeviceInfo.tsx";
 import WanikaniActiveItemsChart from "../wanikani/components/WanikaniActiveItemChart.tsx";
 import BunProActiveItemsChart from "../bunpro/components/BunProActiveItemsChart.jsx";
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.tsx";
-import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
+import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
 
 const styles = {
     container: {

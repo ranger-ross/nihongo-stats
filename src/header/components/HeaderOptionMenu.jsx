@@ -6,7 +6,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import InfoIcon from '@mui/icons-material/Info';
 import {RoutePaths} from "../../Routes.jsx";
 import {useNavigate} from "react-router";
-import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
+import {useBunProApiKey} from "../../hooks/useBunProApiKey.tsx";
 import {useAppVersion} from "../../hooks/useAppVersion.jsx";
 import {AppUrls} from "../../Constants";
 import {AccountCircle, Replay} from "@mui/icons-material";

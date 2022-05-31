@@ -16,9 +16,9 @@ import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
 import {daysToMillis, truncDate} from "../../util/DateUtils.ts";
 import AnkiApiService from "../../anki/service/AnkiApiService.ts";
-import {useAnkiDecks} from "../../hooks/useAnkiDecks.jsx";
+import {useAnkiDecks} from "../../hooks/useAnkiDecks.tsx";
 import {fetchAllBunProReviews} from "../../bunpro/service/BunProDataUtil.ts";
-import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
+import {useAnkiConnection} from "../../hooks/useAnkiConnection.tsx";
 import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil.ts";
 
 function DataPoint(date) {

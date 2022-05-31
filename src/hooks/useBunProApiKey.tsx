@@ -1,9 +1,10 @@
-import create from 'zustand'
-import BunProApiService from "../bunpro/service/BunProApiService.ts";
+import create, {SetState} from 'zustand'
+import BunProApiService from "../bunpro/service/BunProApiService";
+import {State} from "zustand/vanilla";
 
-export const useBunProApiKey = create(set => ({
+export const useBunProApiKey = create((set: SetState<State>) => ({
     apiKey: BunProApiService.apiKey() || null,
-    setApiKey: (apiKey) => set(() => {
+    setApiKey: (apiKey: string) => set(() => {
         BunProApiService.saveApiKey(apiKey);
         return {apiKey: apiKey};
     }),

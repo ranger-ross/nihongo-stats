@@ -6,9 +6,9 @@ import WanikaniPendingLessonsAndReviews from "../../wanikani/components/Wanikani
 import BunProPendingReviews from "../../bunpro/components/BunProPendingReviews.jsx";
 import BunProApiService from "../../bunpro/service/BunProApiService.ts";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.tsx";
-import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
+import {useBunProApiKey} from "../../hooks/useBunProApiKey.tsx";
 import {Add} from "@mui/icons-material";
-import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
+import {useAnkiConnection} from "../../hooks/useAnkiConnection.tsx";
 import {AppNames} from "../../Constants";
 import {useSelectedApp} from "../../hooks/useSelectedApp.tsx";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";

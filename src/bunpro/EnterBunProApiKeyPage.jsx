@@ -3,7 +3,7 @@ import {useState} from "react";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import BunProApiService from "./service/BunProApiService.ts";
-import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
+import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
 
 
 const styles = {

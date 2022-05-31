@@ -7,7 +7,7 @@ import AppSelector from "./components/AppSelector";
 import WanikaniNav from "./navbars/WanikaniNav.jsx";
 import AnkiNav from "./navbars/AnkiNav";
 import BunProNav from "./navbars/BunProNav.jsx";
-import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
+import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
 import OverviewNav from "./navbars/OverviewNav.jsx";
 import {AppNames} from "../Constants";
 import {useSelectedApp} from "../hooks/useSelectedApp.tsx";

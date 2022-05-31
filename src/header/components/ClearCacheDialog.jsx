@@ -11,7 +11,7 @@ import {
     FormGroup,
     FormHelperText,
 } from "@mui/material";
-import BunProApiService from "../../bunpro/service/BunProApiService.js";
+import BunProApiService from "../../bunpro/service/BunProApiService.ts";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
 import AnkiApiService from "../../anki/service/AnkiApiService.ts";
 import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.tsx";

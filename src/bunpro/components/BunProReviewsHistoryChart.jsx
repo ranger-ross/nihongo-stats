@@ -6,7 +6,7 @@ import {daysToMillis, getMonthName, millisToDays, truncDate, truncMonth, truncWe
 import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
 import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import {fetchAllBunProReviews} from "../service/BunProDataUtil.js";
+import {fetchAllBunProReviews} from "../service/BunProDataUtil.ts";
 import useWindowDimensions from "../../hooks/useWindowDimensions.tsx";
 import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
 

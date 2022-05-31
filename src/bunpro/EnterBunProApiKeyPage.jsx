@@ -2,7 +2,7 @@ import {Alert, Button, Grid, Link, Snackbar, TextField, Typography} from "@mui/m
 import {useState} from "react";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
-import BunProApiService from "./service/BunProApiService.js";
+import BunProApiService from "./service/BunProApiService.ts";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.jsx";
 
 

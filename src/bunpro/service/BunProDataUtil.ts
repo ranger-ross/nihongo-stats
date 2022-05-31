@@ -1,15 +1,17 @@
-import BunProApiService from "./BunProApiService.js";
+import BunProApiService from "./BunProApiService";
+import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
+import {RawBunProReview} from "../models/raw/RawBunProReview";
 
-export function createGrammarPointsLookupMap(grammarPoints) {
-    let map = {};
+export function createGrammarPointsLookupMap(grammarPoints: RawBunProGrammarPoint[]) {
+    const map: { [id: string]: RawBunProGrammarPoint } = {};
     for (const grammarPoint of grammarPoints) {
         map[grammarPoint.id] = grammarPoint;
     }
     return map;
 }
 
-export function flattenReview(review) {
-    let data = [];
+export function flattenReview(review: RawBunProReview) {
+    const data = [];
 
     for (const history of review.history) {
         data.push({
@@ -24,8 +26,8 @@ export function flattenReview(review) {
     return data;
 }
 
-export async function fetchAllBunProReviews(grammarPoints = null) {
-    let needToFetchGrammarPoints = !grammarPoints;
+export async function fetchAllBunProReviews(grammarPoints: RawBunProGrammarPoint[] | null = null) {
+    const needToFetchGrammarPoints = !grammarPoints;
 
     let reviewsData;
     if (needToFetchGrammarPoints) {
@@ -40,20 +42,24 @@ export async function fetchAllBunProReviews(grammarPoints = null) {
         reviewsData = await BunProApiService.getAllReviews();
     }
 
-    const grammarPointsLookupMap = createGrammarPointsLookupMap(grammarPoints);
+    const grammarPointsLookupMap = createGrammarPointsLookupMap(grammarPoints as RawBunProGrammarPoint[]);
 
-    let reviews = [];
+    const reviews = [];
 
     for (const review of reviewsData.reviews) {
         const grammarPoint = grammarPointsLookupMap[review['grammar_point_id']];
-        review.level = grammarPoint.attributes.level.replace('JLPT', 'N');
-        reviews.push(...flattenReview(review));
+        for (const flatReview of flattenReview(review)) {
+            reviews.push({
+                ...flatReview,
+                level: grammarPoint.attributes.level.replace('JLPT', 'N')
+            });
+        }
     }
 
     return reviews;
 }
 
-export function filterDeadGhostReviews(review) {
+export function filterDeadGhostReviews(review: RawBunProReview) {
     const fiveYearsFromNow = Date.now() + (1000 * 60 * 60 * 24 * 365 * 5)
     return new Date(review['next_review']).getTime() < fiveYearsFromNow;
 }

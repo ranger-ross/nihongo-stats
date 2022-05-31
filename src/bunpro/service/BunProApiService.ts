@@ -1,13 +1,22 @@
-import * as localForage from "localforage/dist/localforage"
+import * as localForage from "localforage"
 import {AppUrls} from "../../Constants";
-import {PromiseCache} from "../../util/PromiseCache.ts";
+import {PromiseCache} from "../../util/PromiseCache";
+import {RawBunProReviewsResponse} from "../models/raw/RawBunProReviewsResponse";
+import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
 
 const {apiProxy, bunproApi} = AppUrls;
 
-const promiseCache = new PromiseCache();
+type BunProRequest = {
+    url: string,
+    options: RequestInit
+};
+
+// @ts-ignore
+const promiseCache = new PromiseCache<any>();
 
 
 // API Notes
+// https://www.bunpro.jp/api/v4/docs
 // https://github.com/bunpro-srs/BunPro-iOS/blob/main/BunProKit/Sources/BunProKit/Server.swift#L16
 
 const baseBunProUrl = `${apiProxy}/${bunproApi}`;
@@ -21,11 +30,11 @@ const cacheKeys = {
     user: 'bunpro-user',
 }
 
-function apiKey() {
-    return localStorage.getItem(cacheKeys.apiKey)
+function apiKey(): string {
+    return localStorage.getItem(cacheKeys.apiKey) as string
 }
 
-function saveApiKey(key) {
+function saveApiKey(key: string | null) {
     if (!key) {
         localStorage.removeItem(cacheKeys.apiKey);
     } else {
@@ -35,7 +44,7 @@ function saveApiKey(key) {
 
 // Auth Method
 // Header Authorization: "Token token=<api-key>"
-function bunproHeaders(token) {
+function bunproHeaders(token?: string): { [key: string]: string } {
     const _apiKey = !token ? apiKey() : token;
     return {
         "Authorization": `Token token=${_apiKey}`,
@@ -43,15 +52,15 @@ function bunproHeaders(token) {
     };
 }
 
-function getRawBunProUser(token) {
+function getRawBunProUser(token: string) {
     const _apiKey = !token ? apiKey() : token;
     return fetch(`${baseBunProUrl}/v4/user`, {headers: bunproHeaders(_apiKey)});
 }
 
 // Default timeout is 10 minutes
 // Timeout = -1    =>   never timeout
-async function sendCacheableRequest(request, cacheKey, timeout = 60_000) {
-    const cachedValue = await localForage.getItem(cacheKey);
+async function sendCacheableRequest(request: BunProRequest, cacheKey: string, timeout = 60_000) {
+    const cachedValue = await localForage.getItem<any>(cacheKey);
     if (!!cachedValue && (timeout !== -1 && cachedValue.lastUpdated > Date.now() - timeout)) {
         return cachedValue.data;
     }
@@ -76,10 +85,9 @@ async function sendCacheableRequest(request, cacheKey, timeout = 60_000) {
     }
 }
 
-
 // Join meaning when multiple requests for the same endpoint come in at the same time,
 // only send one request and return the data to all requests
-function joinAndSendCacheableRequest(request, cacheKey, timeout = 60_000, ttl = 1000) {
+function joinAndSendCacheableRequest(request: BunProRequest, cacheKey: string, timeout = 60_000, ttl = 1000) {
     const name = request.url;
     let promise = promiseCache.get(name);
     if (!promise) {
@@ -89,7 +97,7 @@ function joinAndSendCacheableRequest(request, cacheKey, timeout = 60_000, ttl = 
     return promise
 }
 
-async function getGrammarPoints() {
+async function getGrammarPoints(): Promise<RawBunProGrammarPoint[]> {
     const response = await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v5/grammar_points`,
@@ -112,7 +120,7 @@ async function getUserProgress() {
     );
 }
 
-async function getAllReviews() {
+async function getAllReviews(): Promise<RawBunProReviewsResponse> {
     return await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v5/reviews/all_reviews_total`,
@@ -145,7 +153,7 @@ async function getBunProUser() {
     );
 }
 
-async function login(apiKey) {
+async function login(apiKey: string) {
     const response = await getRawBunProUser(apiKey);
 
     if (response.ok) {
@@ -160,6 +168,7 @@ async function login(apiKey) {
 
 async function flushCache() {
     for (const key of Object.keys(cacheKeys)) {
+        // @ts-ignore
         await localForage.removeItem(cacheKeys[key]);
     }
 }
@@ -175,10 +184,10 @@ export default {
     getGrammarPoints: getGrammarPoints,
     getUserProgress: getUserProgress,
     getUser: getBunProUser,
-    getStudyQueue: function (token) {
+    getStudyQueue: function (token: string) {
         return fetch('/api/user/' + token + '/study_queue');
     },
-    getRecentItems: function (token, limit = 50) {
+    getRecentItems: function (token: string, limit = 50) {
         return fetch('/api/user/' + token + '/recent_items/' + limit);
     },
 };

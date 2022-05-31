@@ -1,5 +1,5 @@
 import create from 'zustand'
-import BunProApiService from "../bunpro/service/BunProApiService.js";
+import BunProApiService from "../bunpro/service/BunProApiService.ts";
 
 export const useBunProApiKey = create(set => ({
     apiKey: BunProApiService.apiKey() || null,

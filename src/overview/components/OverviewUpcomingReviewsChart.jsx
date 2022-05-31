@@ -3,7 +3,7 @@ import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addDays, addHours, daysToMillis, truncDate, truncMinutes} from '../../util/DateUtils.ts';
 import PeriodSelector from "../../shared/PeriodSelector.tsx";
 import {scaleBand} from 'd3-scale';
-import BunProApiService from "../../bunpro/service/BunProApiService.js";
+import BunProApiService from "../../bunpro/service/BunProApiService.ts";
 import {ArgumentAxis, Chart, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {
     ArgumentScale,
@@ -28,7 +28,7 @@ import {
     UpcomingReviewUnits
 } from "../../util/UpcomingReviewChartUtils.tsx";
 import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
-import {filterDeadGhostReviews} from "../../bunpro/service/BunProDataUtil.js";
+import {filterDeadGhostReviews} from "../../bunpro/service/BunProDataUtil.ts";
 import FilterableLegend from "../../shared/FilterableLegend.tsx";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo.tsx";
 

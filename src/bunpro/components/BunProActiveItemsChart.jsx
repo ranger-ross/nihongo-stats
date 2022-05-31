@@ -1,6 +1,6 @@
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import React, {useEffect, useState} from "react";
-import BunProApiService from "../service/BunProApiService.js";
+import BunProApiService from "../service/BunProApiService.ts";
 import {lightenDarkenColor} from "../../util/CssUtils.ts";
 import {BunProColors} from "../../Constants";
 import GradientLinearProgress from "../../shared/GradientLinearProgress.tsx";

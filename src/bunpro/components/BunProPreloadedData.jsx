@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {CircularProgress} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
-import BunProApiService from "../service/BunProApiService.js";
+import BunProApiService from "../service/BunProApiService.ts";
 import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus.tsx";
 
 const styles = {

@@ -17,7 +17,7 @@ import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
 import {daysToMillis, truncDate} from "../../util/DateUtils.ts";
 import AnkiApiService from "../../anki/service/AnkiApiService.ts";
 import {useAnkiDecks} from "../../hooks/useAnkiDecks.jsx";
-import {fetchAllBunProReviews} from "../../bunpro/service/BunProDataUtil.js";
+import {fetchAllBunProReviews} from "../../bunpro/service/BunProDataUtil.ts";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.jsx";
 import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil.ts";
 

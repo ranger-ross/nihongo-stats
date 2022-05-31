@@ -1,17 +1,16 @@
 import {Card, CardContent, CircularProgress, LinearProgress, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
-import BunProApiService from "../service/BunProApiService.ts";
-import {createGrammarPointsLookupMap} from "../service/BunProDataUtil.ts";
+import BunProApiService from "../service/BunProApiService";
+import {createGrammarPointsLookupMap} from "../service/BunProDataUtil";
+import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
 
 
-async function fetchCurrentReviewProgress(grammarPoints) {
+async function fetchCurrentReviewProgress(grammarPoints: RawBunProGrammarPoint[]) {
 
     const grammarPointsMap = createGrammarPointsLookupMap(grammarPoints);
     const reviewData = await BunProApiService.getAllReviews();
 
-    console.log(reviewData);
-
-    let data = {
+    const data: { [key: string]: number } = {
         JLPT5: 0,
         JLPT4: 0,
         JLPT3: 0,
@@ -27,9 +26,9 @@ async function fetchCurrentReviewProgress(grammarPoints) {
     return data;
 }
 
-function getJLPTTotals(grammarPoints) {
+function getJLPTTotals(grammarPoints: RawBunProGrammarPoint[]) {
 
-    let data = {
+    const data: { [key: string]: number } = {
         JLPT5: 0,
         JLPT4: 0,
         JLPT3: 0,
@@ -44,29 +43,53 @@ function getJLPTTotals(grammarPoints) {
     return data;
 }
 
+type FormattedJlptLevel = {
+    progress: number,
+    total: number,
+};
+
+type FormattedData = {
+    N5: FormattedJlptLevel,
+    N4: FormattedJlptLevel,
+    N3: FormattedJlptLevel,
+    N2: FormattedJlptLevel,
+    N1: FormattedJlptLevel,
+    all: FormattedJlptLevel,
+    userLevel: {
+        level: number,
+        nextLevelXp: number,
+        prevLevelXp: number,
+        xp: number,
+    }
+};
+
 async function fetchData() {
     const grammarPoints = await BunProApiService.getGrammarPoints();
 
     const currentProgress = await fetchCurrentReviewProgress(grammarPoints);
     const totals = getJLPTTotals(grammarPoints);
 
-    function formatData(level) {
+    function formatData(level: string) {
         return {
             progress: currentProgress[level],
             total: totals[level],
         }
     }
 
-    let data = {
+    const data: FormattedData = {
         N5: formatData('JLPT5'),
         N4: formatData('JLPT4'),
         N3: formatData('JLPT3'),
         N2: formatData('JLPT2'),
         N1: formatData('JLPT1'),
+        all: null as any,
+        userLevel: null as any
     };
 
-    data.all = Object.keys(data)
-        .map(key => data[key])
+    type JLPTLevels = 'N5' | 'N4' | 'N3' | 'N2' | 'N1'
+
+    data.all = ['N5', 'N4', 'N3', 'N2', 'N1']
+        .map(key => data[key as JLPTLevels])
         .reduce((previousValue, currentValue) => {
             previousValue.progress += currentValue.progress;
             previousValue.total += currentValue.total;
@@ -89,7 +112,13 @@ async function fetchData() {
     return data;
 }
 
-function LevelProgress({level, current, total}) {
+type LevelProgressProps = {
+    level: number | string,
+    current: number,
+    total: number,
+};
+
+function LevelProgress({level, current, total}: LevelProgressProps) {
     const [value, setValue] = useState(0);
     const percentage = (current / total) * 100;
 
@@ -109,7 +138,12 @@ function LevelProgress({level, current, total}) {
     );
 }
 
-function XpProgress({current, total}) {
+type XpProgressProps = {
+    current: number,
+    total: number,
+};
+
+function XpProgress({current, total}: XpProgressProps) {
     const [value, setValue] = useState(0);
     const percentage = (current / total) * 100;
 
@@ -126,9 +160,13 @@ function XpProgress({current, total}) {
     );
 }
 
-export function BunProJLPTTile({showXpProgress}) {
+type BunProJLPTTileProps = {
+    showXpProgress: boolean
+};
 
-    const [data, setData] = useState();
+export function BunProJLPTTile({showXpProgress}: BunProJLPTTileProps) {
+
+    const [data, setData] = useState<FormattedData>();
 
     useEffect(() => {
         let isSubscribed = true;
@@ -139,7 +177,9 @@ export function BunProJLPTTile({showXpProgress}) {
                     return;
                 setData(_data);
             });
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, []);
 
     return (

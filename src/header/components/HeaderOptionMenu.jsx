@@ -7,7 +7,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import {RoutePaths} from "../../Routes.jsx";
 import {useNavigate} from "react-router";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.tsx";
-import {useAppVersion} from "../../hooks/useAppVersion.jsx";
+import {useAppVersion} from "../../hooks/useAppVersion.tsx";
 import {AppUrls} from "../../Constants";
 import {AccountCircle, Replay} from "@mui/icons-material";
 import {ClearCacheDialog} from "./ClearCacheDialog.tsx";

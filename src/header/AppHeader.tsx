@@ -1,7 +1,8 @@
 import {Grid, Typography, useTheme} from "@mui/material";
+// @ts-ignore
 import HeaderOptionMenu from './components/HeaderOptionMenu'
 
-const useStyles = (theme) => ({
+const useStyles = (theme: any) => ({
     container: {
         padding: '2px',
         boxShadow: '0 2px 4px rgb(0 0 0 / 50%)',

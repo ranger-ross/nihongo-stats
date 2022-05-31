@@ -1,15 +1,10 @@
 import {addDays, addHours, areDatesSameDay, areDatesSameDayAndHour, truncDate, truncMinutes} from "./DateUtils";
 import {MenuItem, Select} from "@mui/material";
 import {ArgumentAxis, Chart} from "@devexpress/dx-react-chart-material-ui";
-import {
-    ArgumentAxis as ArgumentAxisBase,
-    BarSeries,
-    ScatterSeries,
-    ScatterSeriesProps
-} from "@devexpress/dx-react-chart";
+import {ArgumentAxis as ArgumentAxisBase, BarSeries, ScatterSeries} from "@devexpress/dx-react-chart";
 import {useDeviceInfo} from "../hooks/useDeviceInfo";
 
-type UpcomingReviewUnit = {
+export type UpcomingReviewUnit = {
     key: string,
     text: string,
     default: number,
@@ -99,13 +94,13 @@ function getHoursSecondaryLabelText(date: Date, isToolTipLabel?: boolean) {
     return date.toLocaleDateString("en-US", {month: 'numeric', day: '2-digit'});
 }
 
-export function formatTimeUnitLabelText(unit: UpcomingReviewUnit, date: Date | number, isToolTipLabel: boolean, isMobile: boolean) {
+export function formatTimeUnitLabelText(unit: UpcomingReviewUnit, date: Date | number, isToolTipLabel: boolean, isMobile?: boolean) {
     const _date = new Date(date)
     if (unit.key === UpcomingReviewUnits.days.key) {
         return {primary: `${_date.getMonth() + 1}/${_date.getDate()}`, secondary: null};
     } else {
         return {
-            primary: getHoursPrimaryLabelText(_date, isToolTipLabel, isMobile),
+            primary: getHoursPrimaryLabelText(_date, isToolTipLabel, isMobile as boolean),
             secondary: getHoursSecondaryLabelText(_date)
         };
     }
@@ -147,11 +142,12 @@ export function createUpcomingReviewsChartLabel(unit: UpcomingReviewUnit, isMobi
 }
 
 export function createUpcomingReviewsChartBarLabel(isLabelVisible: (seriesIndex: number, index: number) => boolean) {
-    return function BarWithLabel(props: BarSeries.PointProps & { seriesIndex: number }) {
-        const {arg, val, value, seriesIndex, index} = props;
-
+    return function BarWithLabel(props: BarSeries.PointProps) {
+        const {arg, val, value, index} = props;
         if (value === 0)
             return (<></>);
+
+        const seriesIndex = (props as any).seriesIndex;
 
         return (
             <>
@@ -173,7 +169,7 @@ export function createUpcomingReviewsChartBarLabel(isLabelVisible: (seriesIndex:
     }
 }
 
-export function UpcomingReviewsScatterPoint(props: ScatterSeriesProps) {
+export function UpcomingReviewsScatterPoint(props: ScatterSeries.PointProps) {
     const {isMobile} = useDeviceInfo();
     const size = isMobile ? 4 : 6;
     return (

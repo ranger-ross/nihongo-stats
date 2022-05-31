@@ -1,18 +1,19 @@
 import {
-    Chart,
-    ValueAxis,
-    BarSeries,
-    ScatterSeries,
     ArgumentAxis,
-    Tooltip
+    BarSeries,
+    Chart,
+    ScatterSeries,
+    Tooltip,
+    ValueAxis
 } from '@devexpress/dx-react-chart-material-ui';
-import React, {useState, useEffect, useMemo} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.ts";
-import {ArgumentScale, EventTracker, LineSeries, Stack, ValueScale} from "@devexpress/dx-react-chart";
+import React, {useEffect, useMemo, useState} from "react";
+import WanikaniApiService from "../service/WanikaniApiService";
+import {ArgumentScale, EventTracker, LineSeries, SeriesRef, Stack, ValueScale} from "@devexpress/dx-react-chart";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
-import {addHours, truncMinutes} from '../../util/DateUtils.ts';
+import {addHours, truncMinutes} from '../../util/DateUtils';
 import {WanikaniColors} from '../../Constants';
-import PeriodSelector from "../../shared/PeriodSelector.tsx";
+import PeriodSelector from "../../shared/PeriodSelector";
+// @ts-ignore
 import {scaleBand} from 'd3-scale';
 import {
     addTimeToDate,
@@ -22,11 +23,14 @@ import {
     UnitSelector,
     UpcomingReviewPeriods,
     UpcomingReviewsScatterPoint,
+    UpcomingReviewUnit,
     UpcomingReviewUnits
-} from "../../util/UpcomingReviewChartUtils.tsx";
-import {useDeviceInfo} from "../../hooks/useDeviceInfo.tsx";
+} from "../../util/UpcomingReviewChartUtils";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo";
+import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
+import {AppStyles} from "../../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     container: {
         display: 'flex',
         flexDirection: 'column',
@@ -44,16 +48,25 @@ function getChartStartTime() { // Start chart at the beginning of the next hour
     return addHours(truncMinutes(new Date()), 1);
 }
 
-function formatChartData(rawData, unit, period, initialReviewCount) {
+type FormattedDataPoint = {
+    radicals: number,
+    kanji: number,
+    vocabulary: number,
+    reviews: number,
+    time: number,
+    total: number
+};
+
+function formatChartData(rawData: RawWanikaniAssignment[], unit: UpcomingReviewUnit, period: number, initialReviewCount: number): FormattedDataPoint[] {
     const data = rawData
         .filter(assignment => new Date(assignment.data['available_at']) > addTimeToDate(new Date(), unit, -1))
         .filter(assignment => new Date(assignment.data['available_at']) < addTimeToDate(new Date(), unit, period));
 
     let totalReviewCount = initialReviewCount;
-    let daysData = []
+    const daysData = []
     for (let i = 0; i < period; i++) {
         const date = addTimeToDate(getChartStartTime(), unit, i);
-        const assignmentsOnDay = data.filter(assignment => unit.isPeriodTheSame(new Date(assignment.data['available_at']), date, unit));
+        const assignmentsOnDay = data.filter(assignment => unit.isPeriodTheSame(new Date(assignment.data['available_at']), date));
         totalReviewCount += assignmentsOnDay.length;
 
         daysData.push({
@@ -73,7 +86,7 @@ async function fetchFutureReviews() {
     return data.filter(assignment => !assignment.data['burned_at'] || !assignment.data['available_at']);
 }
 
-function getTopSeries(targetItem, chartData) {
+function getTopSeries(targetItem: SeriesRef, chartData: FormattedDataPoint[]) {
     const dp = chartData[targetItem.point];
     if (dp.vocabulary > 0)
         return 'vocabulary';
@@ -84,9 +97,9 @@ function getTopSeries(targetItem, chartData) {
 }
 
 function WanikaniUpcomingReviewsChart() {
-    const [rawData, setRawData] = useState([]);
+    const [rawData, setRawData] = useState<RawWanikaniAssignment[]>([]);
     const [initialReviewCount, setInitialReviewCount] = useState(0);
-    const [targetItem, setTargetItem] = useState();
+    const [targetItem, setTargetItem] = useState<SeriesRef>();
     const [unit, setUnit] = useState(UpcomingReviewUnits.hours);
     const [period, setPeriod] = useState(48);
     const {isMobile} = useDeviceInfo();
@@ -105,7 +118,9 @@ function WanikaniUpcomingReviewsChart() {
                     return;
                 setInitialReviewCount(data.reviews);
             });
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, []);
 
     const chartData = useMemo(
@@ -119,7 +134,7 @@ function WanikaniUpcomingReviewsChart() {
     }, [chartData]);
 
     const ReviewsToolTip = useMemo(() => (
-        function ReviewsToolTip({targetItem}) {
+        function ReviewsToolTip({targetItem}: { targetItem: SeriesRef }) {
             const {radicals, kanji, vocabulary, total, time} = chartData[targetItem.point];
             const rowStyle = {display: 'flex', justifyContent: 'space-between', gap: '10px'};
             return (
@@ -205,6 +220,7 @@ function WanikaniUpcomingReviewsChart() {
                         </div>
                     ) : (
                         <div style={{flexGrow: '1'}}>
+                            {/*@ts-ignore*/}
                             <Chart data={chartData} {...(isMobile ? {height: 200} : {})}>
 
                                 <ValueScale name="total"

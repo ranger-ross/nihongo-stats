@@ -11,21 +11,27 @@ import {
     FormGroup,
     FormHelperText,
 } from "@mui/material";
-import BunProApiService from "../../bunpro/service/BunProApiService.ts";
-import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
-import AnkiApiService from "../../anki/service/AnkiApiService.ts";
-import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus.tsx";
-import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus.tsx";
+import BunProApiService from "../../bunpro/service/BunProApiService";
+import WanikaniApiService from "../../wanikani/service/WanikaniApiService";
+import AnkiApiService from "../../anki/service/AnkiApiService";
+import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus";
+import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus";
+
+type DialogOptions = {
+    anki: boolean,
+    bunPro: boolean,
+    wanikani: boolean,
+}
 
 function usePurgeLocalData() {
     const {setStatus: setWanikaniPreloadStatus} = useWanikaniPreloadStatus();
     const {setStatus: setBunProPreloadStatus} = useBunProPreloadStatus();
 
     return {
-        purgeLocalData: async function (options) {
+        purgeLocalData: async function (options: DialogOptions) {
             console.log('Purging local data', options);
 
-            let jobs = [];
+            const jobs = [];
 
             if (options.anki) {
                 jobs.push(AnkiApiService.flushCache());
@@ -45,13 +51,18 @@ function usePurgeLocalData() {
     };
 }
 
-const defaultState = {
+const defaultState: DialogOptions = {
     anki: false,
     bunPro: false,
     wanikani: false,
 };
 
-export function ClearCacheDialog({isOpen, onClose}) {
+type ClearCacheDialogProps = {
+    isOpen: boolean,
+    onClose: () => void
+};
+
+export function ClearCacheDialog({isOpen, onClose}: ClearCacheDialogProps) {
     const [state, setState] = useState(defaultState);
     const {purgeLocalData} = usePurgeLocalData();
 
@@ -62,7 +73,7 @@ export function ClearCacheDialog({isOpen, onClose}) {
     }, [isOpen]);
 
 
-    const handleChange = (event) => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setState({
             ...state,
             [event.target.name]: event.target.checked,
@@ -71,7 +82,7 @@ export function ClearCacheDialog({isOpen, onClose}) {
 
     const handleClear = () => {
         purgeLocalData(state)
-            .then(() => window.location.reload(false));
+            .then(() => window.location.reload());
     };
 
     const {anki, bunPro, wanikani} = state;

@@ -10,7 +10,7 @@ import {useBunProApiKey} from "../../hooks/useBunProApiKey.jsx";
 import {useAppVersion} from "../../hooks/useAppVersion.jsx";
 import {AppUrls} from "../../Constants";
 import {AccountCircle, Replay} from "@mui/icons-material";
-import {ClearCacheDialog} from "./ClearCacheDialog.jsx";
+import {ClearCacheDialog} from "./ClearCacheDialog.tsx";
 import UserPreferencesDialog from "./UserPreferencesDialog.tsx";
 
 const iconPaddingRight = '7px';

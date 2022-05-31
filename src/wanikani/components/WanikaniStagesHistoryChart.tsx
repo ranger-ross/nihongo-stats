@@ -1,18 +1,39 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import React, {useEffect, useMemo, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.ts";
-import {createSubjectMap} from "../service/WanikaniDataUtil.ts";
-import {addDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.ts";
+import WanikaniApiService from "../service/WanikaniApiService";
+import {createSubjectMap} from "../service/WanikaniDataUtil";
+import {addDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
 import {ArgumentAxis, Chart, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
-import {AreaSeries, ArgumentScale, EventTracker, Stack} from "@devexpress/dx-react-chart";
+import {
+    AreaSeries,
+    ArgumentAxis as ArgumentAxisBase,
+    ArgumentScale,
+    EventTracker,
+    SeriesRef,
+    Stack,
+    Tooltip as TooltipBase
+} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from "../../Constants";
-import {area, curveCatmullRom,} from 'd3-shape';
+// @ts-ignore
+import {area, curveCatmullRom} from 'd3-shape';
+// @ts-ignore
 import {scaleBand} from 'd3-scale';
-import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
-import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
+import ToolTipLabel from "../../shared/ToolTipLabel";
+import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
+import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
+import {RawWanikaniReset} from "../models/raw/RawWanikaniReset";
+import {mapWanikaniReset} from "../service/WanikaniMappingService";
+import {WanikaniReset} from "../models/WanikaniReset";
 
 
-const units = {
+type StageHistoryUnit = {
+    key: string,
+    text: string,
+    trunc: (date: Date | number) => Date
+};
+
+const units: { [key: string]: StageHistoryUnit } = {
     days: {
         key: 'days',
         text: 'Days',
@@ -30,8 +51,26 @@ const units = {
     },
 };
 
-function DataPoint(date, previousDataPoint = {}) {
-    let data = {
+type SubjectMap = { [id: string]: RawWanikaniSubject };
+
+type DataPoint = {
+    date: Date,
+    apprentice: number,
+    guru: number,
+    master: number,
+    enlightened: number,
+    burned: number,
+    apprenticeItems: SubjectMap,
+    guruItems: SubjectMap,
+    masterItems: SubjectMap,
+    enlightenedItems: SubjectMap,
+    burnedItems: SubjectMap,
+    push: (data: any) => void,
+    reset: (reset: WanikaniReset) => void
+};
+
+function dataPoint(date: Date, previousDataPoint = {}) {
+    const data: DataPoint = {
         // Keep Track of what subjects in what stage
         apprenticeItems: {},
         guruItems: {},
@@ -49,29 +88,33 @@ function DataPoint(date, previousDataPoint = {}) {
 
         ...previousDataPoint, // Continue counts from previous day
         date: date,
+        reset: reset => {// TODO: fix dummy method, this is added to fix typing
+        },
+        push: data => {// TODO: fix dummy method, this is added to fix typing
+        },
     };
 
-    function isApprentice(stage) {
+    function isApprentice(stage: number) {
         return [2, 3, 4].includes(stage);
     }
 
-    function isGuru(stage) {
+    function isGuru(stage: number) {
         return [5, 6].includes(stage);
     }
 
-    function isMaster(stage) {
+    function isMaster(stage: number) {
         return [7].includes(stage);
     }
 
-    function isEnlightened(stage) {
+    function isEnlightened(stage: number) {
         return [8].includes(stage);
     }
 
-    function isBurned(stage) {
+    function isBurned(stage: number) {
         return [9].includes(stage);
     }
 
-    function decrement(stage, subject) {
+    function decrement(stage: number, subject: RawWanikaniSubject) {
         if (stage === 0) {
             return;
         }
@@ -104,7 +147,7 @@ function DataPoint(date, previousDataPoint = {}) {
         }
     }
 
-    function increment(stage, subject) {
+    function increment(stage: number, subject: RawWanikaniSubject) {
         if (isApprentice(stage)) {
             if (!data.apprenticeItems[subject.id]) {
                 data['apprentice'] += 1;
@@ -133,7 +176,7 @@ function DataPoint(date, previousDataPoint = {}) {
         }
     }
 
-    function areSameStage(stage1, stage2) {
+    function areSameStage(stage1: number, stage2: number) {
         return (
             (isApprentice(stage1) && isApprentice(stage2)) ||
             (isGuru(stage1) && isGuru(stage2)) ||
@@ -157,17 +200,20 @@ function DataPoint(date, previousDataPoint = {}) {
 
     };
 
-    function resetStage(stageKey, stageItemsKey, targetLevel) {
+    function resetStage(stageKey: string, stageItemsKey: string, targetLevel: number) {
+        // @ts-ignore
         for (const [key, subject] of Object.entries(data[stageItemsKey])) {
-            if (subject.data.level >= targetLevel) {
+            if ((subject as RawWanikaniSubject).data.level >= targetLevel) {
+                // @ts-ignore
                 delete data[stageItemsKey][key];
             }
         }
+        // @ts-ignore
         data[stageKey] = Object.keys(data[stageItemsKey]).length;
     }
 
     // Remove items and reset counts for levels that have been reset
-    data.reset = (reset) => {
+    data.reset = (reset: WanikaniReset) => {
         resetStage('apprentice', 'apprenticeItems', reset.targetLevel);
         resetStage('guru', 'guruItems', reset.targetLevel);
         resetStage('master', 'masterItems', reset.targetLevel);
@@ -178,13 +224,15 @@ function DataPoint(date, previousDataPoint = {}) {
     return data;
 }
 
+type RawWKReviewSubject = { review: RawWanikaniReview, subject: RawWanikaniSubject };
+
 async function fetchData() {
-    const [reviews, resets] = await Promise.all([
+    const [reviews, rawResets] = await Promise.all([
         WanikaniApiService.getReviews(),
         WanikaniApiService.getResets(),
     ]);
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    let data = [];
+    const data: RawWKReviewSubject[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
@@ -192,63 +240,67 @@ async function fetchData() {
         });
     }
 
-    return [data, resets.data];
+    const resets = (rawResets.data as RawWanikaniReset[]).map(mapWanikaniReset);
+
+    return {
+        data: data,
+        resets: resets
+    };
 }
 
-function aggregateDate(rawData, resets, unit) {
+function aggregateDate(rawData: RawWKReviewSubject[] | null, resets: WanikaniReset[], unit: StageHistoryUnit) {
     if (!rawData)
         return null;
-    const areDatesDifferent = (date1, date2) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
-
-    resets = resets.map(r => ({
-        confirmedAt: new Date(r.data['confirmed_at']),
-        createdAt: new Date(r.data['created_at']),
-        originalLevel: r.data['original_level'],
-        targetLevel: r.data['target_level'],
-    }));
+    const areDatesDifferent = (date1: Date | number, date2: Date | number) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
 
     // Make sure to DataPoints for days with no reviews, so there is a gap in the graph
-    function fillInEmptyDaysIfNeeded(aggregatedDate, reviewDate) {
+    function fillInEmptyDaysIfNeeded(aggregatedData: DataPoint[], reviewDate: Date) {
         const dayBeforeReview = addDays(truncDate(reviewDate), -1);
-        let lastDataPoint = aggregatedDate[aggregatedDate.length - 1];
+        let lastDataPoint = aggregatedData[aggregatedData.length - 1];
         while (lastDataPoint.date.getTime() < dayBeforeReview.getTime()) {
-            aggregatedDate.push(new DataPoint(addDays(lastDataPoint.date, 1), lastDataPoint));
-            lastDataPoint = aggregatedDate[aggregatedDate.length - 1];
+            aggregatedData.push(dataPoint(addDays(lastDataPoint.date, 1), lastDataPoint));
+            lastDataPoint = aggregatedData[aggregatedData.length - 1];
         }
     }
 
-    let aggregatedDate = [new DataPoint(truncDate(rawData[0].review.data['created_at']))];
+    const aggregatedData: DataPoint[] = [dataPoint(truncDate(new Date(rawData[0].review.data['created_at'])))];
     let nextReset = resets[0];
     for (const data of rawData) {
 
         // Handle Resets by remove items and reset counts for levels higher than the reset target level
         if (nextReset && nextReset.confirmedAt.getTime() < new Date(data.review.data['created_at']).getTime()) {
-            if (areDatesDifferent(aggregatedDate[aggregatedDate.length - 1].date, nextReset.confirmedAt.getTime())) {
-                fillInEmptyDaysIfNeeded(aggregatedDate, nextReset.confirmedAt);
-                aggregatedDate.push(new DataPoint(unit.trunc(nextReset.confirmedAt), aggregatedDate[aggregatedDate.length - 1]));
+            if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, nextReset.confirmedAt.getTime())) {
+                fillInEmptyDaysIfNeeded(aggregatedData, nextReset.confirmedAt);
+                aggregatedData.push(dataPoint(unit.trunc(nextReset.confirmedAt), aggregatedData[aggregatedData.length - 1]));
             }
 
-            aggregatedDate[aggregatedDate.length - 1].reset(nextReset);
+            aggregatedData[aggregatedData.length - 1].reset(nextReset);
 
             resets.splice(0, 1);
             nextReset = resets[0];
         }
 
         // Add new DataPoints for each day
-        if (areDatesDifferent(aggregatedDate[aggregatedDate.length - 1].date, data.review.data['created_at'])) {
-            fillInEmptyDaysIfNeeded(aggregatedDate, data.review.data['created_at']);
-            aggregatedDate.push(new DataPoint(unit.trunc(data.review.data['created_at']), aggregatedDate[aggregatedDate.length - 1]));
+        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, new Date(data.review.data['created_at']))) {
+            fillInEmptyDaysIfNeeded(aggregatedData, new Date(data.review.data['created_at']));
+            aggregatedData.push(dataPoint(unit.trunc(new Date(data.review.data['created_at'])), aggregatedData[aggregatedData.length - 1]));
         }
 
         // Add the data to the current day/DataPoint
-        aggregatedDate[aggregatedDate.length - 1].push(data);
+        aggregatedData[aggregatedData.length - 1].push(data);
     }
 
-    return aggregatedDate;
+    return aggregatedData;
 }
 
+type DataState = {
+    isLoading: boolean,
+    data: RawWKReviewSubject[] | null,
+    resets: WanikaniReset[],
+};
+
 function useData() {
-    const [state, setState] = useState({
+    const [state, setState] = useState<DataState>({
         isLoading: true,
         data: null,
         resets: [],
@@ -258,7 +310,7 @@ function useData() {
         let isSubscribed = true;
 
         fetchData()
-            .then(([data, resets]) => {
+            .then(({data, resets}) => {
                 if (!isSubscribed)
                     return;
                 setState({
@@ -268,16 +320,21 @@ function useData() {
                 });
             });
 
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, []);
 
 
     const data = useMemo(() => aggregateDate(state.data, state.resets, units.days), [state.data, state.resets]);
 
-    return [data, state.isLoading];
+    return {
+        data,
+        isLoading: state.isLoading
+    };
 }
 
-function Area(props) {
+function Area(props: any) {
     const {
         coordinates,
         color,
@@ -287,8 +344,11 @@ function Area(props) {
         <path
             fill={color}
             d={area()
+                // @ts-ignore
                 .x(({arg}) => arg)
+                // @ts-ignore
                 .y1(({val}) => val)
+                // @ts-ignore
                 .y0(({startVal}) => startVal)
                 .curve(curveCatmullRom)(coordinates)}
             opacity={0.5}
@@ -298,13 +358,15 @@ function Area(props) {
 
 
 function WanikaniStagesHistoryChart() {
-    const [data, isLoading] = useData();
-    const [tooltipTargetItem, setTooltipTargetItem] = useState();
+    const {data, isLoading} = useData();
+    const [tooltipTargetItem, setTooltipTargetItem] = useState<SeriesRef>();
 
     const visibleLabelIndices = useMemo(() => getVisibleLabelIndices(data ?? [], 6), [data]);
 
     const StageToolTip = useMemo(() => (
-        function StageToolTip(props) {
+        function StageToolTip(props: TooltipBase.ContentProps) {
+            if (!data)
+                return <></>
             const dp = data[props.targetItem.point];
             return (
                 <>
@@ -320,9 +382,9 @@ function WanikaniStagesHistoryChart() {
     ), [data]);
 
     const LabelWithDate = useMemo(() => (
-        function LabelWithDate(props) {
+        function LabelWithDate(props: ArgumentAxisBase.LabelProps) {
             const date = new Date(props.text);
-            if (!date) {
+            if (!date || !data) {
                 return (<></>)
             }
 
@@ -361,6 +423,7 @@ function WanikaniStagesHistoryChart() {
                     </Grid>
                 ) : (
                     <div style={{flexGrow: '1'}}>
+                        {/*@ts-ignore*/}
                         <Chart data={data}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

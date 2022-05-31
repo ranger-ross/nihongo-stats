@@ -1,4 +1,4 @@
-export function getVisibleLabelIndices(data: never[], maxNumberOfLabels: number) {
+export function getVisibleLabelIndices(data: unknown[], maxNumberOfLabels: number) {
     if (data.length <= maxNumberOfLabels) {
         return data.map((_, i) => i);
     }

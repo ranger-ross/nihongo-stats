@@ -10,7 +10,7 @@ import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import ReactVisibilitySensor from "react-visibility-sensor";
 import {useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
-import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart.jsx";
+import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart.tsx";
 
 
 function LoadableChart({placeholderTitle, children}) {

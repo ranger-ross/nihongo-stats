@@ -1,5 +1,7 @@
 import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 import {WanikaniUser} from "../models/WanikaniUser";
+import {RawWanikaniReset} from "../models/raw/RawWanikaniReset";
+import {WanikaniReset} from "../models/WanikaniReset";
 
 function mapWanikaniUser(rawUser: RawWanikaniUser): WanikaniUser {
     return {
@@ -23,5 +25,15 @@ function mapWanikaniUser(rawUser: RawWanikaniUser): WanikaniUser {
             reviewsAutoplayAudio: rawUser.data.preferences.reviews_autoplay_audio,
             reviewsDisplaySrsIndicator: rawUser.data.preferences.reviews_display_srs_indicator,
         },
+    };
+}
+
+
+export function mapWanikaniReset(rawReset: RawWanikaniReset): WanikaniReset {
+    return <WanikaniReset>{
+        originalLevel: rawReset.data.original_level,
+        targetLevel: rawReset.data.target_level,
+        confirmedAt: rawReset.data.confirmed_at ? new Date(rawReset.data.confirmed_at) : null,
+        createdAt: rawReset.data.created_at ? new Date(rawReset.data.created_at) : null
     };
 }

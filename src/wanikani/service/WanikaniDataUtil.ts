@@ -94,11 +94,26 @@ export function getWanikaniSrsStageDescription(stage: number) {
     return null;
 }
 
-export const groupByOptions = {
+type WKGrouping = {
+    title: string,
+    subjects: JoinedRawWKAssignmentAndSubject[]
+};
+
+type WKGroupingParams = {
+    frequencyGroupingSize: number
+};
+
+export type WKGroupByOption = {
+    key: string,
+    displayText: string,
+    group: (subjects: JoinedRawWKAssignmentAndSubject[], params?: WKGroupingParams) => WKGrouping[],
+};
+
+export const groupByOptions: { [key: string]: WKGroupByOption } = {
     none: {
         key: 'none',
         displayText: 'None',
-        group: (subjects: RawWanikaniSubject[]) => [
+        group: (subjects: JoinedRawWKAssignmentAndSubject[]) => [
             {
                 title: 'All Items',
                 subjects: subjects,
@@ -211,11 +226,11 @@ export const groupByOptions = {
     frequency: {
         key: 'frequency',
         displayText: 'Frequency',
-        group: (subjects: JoinedRawWKAssignmentAndSubject[], params: { frequencyGroupingSize: number }) => {
-            const size = params.frequencyGroupingSize;
+        group: (subjects: JoinedRawWKAssignmentAndSubject[], params?: WKGroupingParams) => {
+            const size = params ? params.frequencyGroupingSize : 500;
             const temp = [...sortByOptions.frequency.sort(subjects)];
 
-            const groups = [];
+            const groups: WKGrouping[] = [];
             let nextGroup = temp.splice(0, size);
             let i = 1;
             while (nextGroup.length > 0) {
@@ -232,11 +247,17 @@ export const groupByOptions = {
     },
 };
 
-export const sortByOptions = {
+export type WKSortByOption = {
+    key: string,
+    displayText: string,
+    sort: (subjects: JoinedRawWKAssignmentAndSubject[]) => JoinedRawWKAssignmentAndSubject[]
+};
+
+export const sortByOptions: { [key: string]: WKSortByOption } = {
     none: {
         key: 'none',
         displayText: 'None',
-        sort: (subjects: RawWanikaniSubject[]) => subjects
+        sort: (subjects: JoinedRawWKAssignmentAndSubject[]) => subjects
     },
     itemName: {
         key: 'itemName',
@@ -303,7 +324,13 @@ export const sortByOptions = {
     },
 };
 
-export const colorByOptions = {
+export type WKColorByOption = {
+    key: string,
+    displayText: string,
+    color: (subject: JoinedRawWKAssignmentAndSubject) => string | null
+}
+
+export const colorByOptions: { [key: string]: WKColorByOption } = {
     srsStage: {
         key: 'srsStage',
         displayText: 'SRS Stage',

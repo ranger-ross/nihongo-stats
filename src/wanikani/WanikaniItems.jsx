@@ -7,7 +7,7 @@ import {Card, CardContent, Typography} from "@mui/material";
 import WanikaniItemTile from "./components/WanikaniItemTile.tsx";
 import WanikaniApiService from "./service/WanikaniApiService.ts";
 import {combineAssignmentAndSubject, createAssignmentMap, isSubjectHidden} from "./service/WanikaniDataUtil.ts";
-import WanikaniItemsControlPanel, {useWanikaniItemControls} from "./components/WanikaniItemsControlPanel.jsx";
+import WanikaniItemsControlPanel, {useWanikaniItemControls} from "./components/WanikaniItemsControlPanel.tsx";
 import VisibilitySensor from "react-visibility-sensor";
 
 const styles = {
@@ -130,7 +130,7 @@ function filterSubjectsByType(subjects, typesToShow) {
 function WanikaniItems() {
     const {apiKey} = useWanikaniApiKey();
     const [subjects, setSubjects] = useState([]);
-    const [control, set] = useWanikaniItemControls();
+    const {control, set} = useWanikaniItemControls();
 
     useEffect(() => {
         fetchItems().then(setSubjects)

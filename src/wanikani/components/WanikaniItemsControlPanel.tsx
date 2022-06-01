@@ -12,10 +12,18 @@ import {
 } from "@mui/material";
 import * as React from "react";
 import {useMemo, useState} from "react";
-import {colorByOptions, groupByOptions, sortByOptions} from "../service/WanikaniDataUtil.ts";
+import {
+    colorByOptions,
+    groupByOptions,
+    sortByOptions,
+    WKColorByOption,
+    WKGroupByOption,
+    WKSortByOption
+} from "../service/WanikaniDataUtil";
 import {ArrowDropDown, ArrowDropUp} from "@mui/icons-material";
+import {AppStyles} from "../../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     groupingPaper: {
         margin: '5px',
         padding: '8px',
@@ -33,7 +41,23 @@ const styles = {
     }
 };
 
-const presetOptions = {
+type WKItemControls = {
+    primaryGroupBy: WKGroupByOption,
+    secondaryGroupBy: WKGroupByOption,
+    sortBy: WKSortByOption,
+    colorBy: WKColorByOption,
+    typesToShow: string[],
+    sortReverse: boolean,
+    frequencyGroupingSize: number,
+};
+
+type WKItemPreset = {
+    key: string,
+    text: string,
+    controls: WKItemControls
+};
+
+const presetOptions: { [key: string]: WKItemPreset } = {
     levels: {
         key: 'levels',
         text: 'Wanikani Levels',
@@ -75,7 +99,15 @@ const presetOptions = {
     },
 };
 
-function GroupByToggle({title, options, groupBy, setGroupBy, disableOptions}) {
+type GroupByToggleProps = {
+    title: string,
+    options: WKGroupByOption[],
+    groupBy: WKGroupByOption,
+    setGroupBy: (s: WKGroupByOption) => void,
+    disableOptions?: WKGroupByOption[]
+};
+
+function GroupByToggle({title, options, groupBy, setGroupBy, disableOptions}: GroupByToggleProps) {
     return (
         <div style={styles.optionContainer}>
             <div style={styles.optionLabel}>{title}</div>
@@ -83,7 +115,7 @@ function GroupByToggle({title, options, groupBy, setGroupBy, disableOptions}) {
                 value={groupBy.key}
                 size={'small'}
                 exclusive
-                onChange={e => setGroupBy(options.find(o => o.key === e.target.value))}
+                onChange={(e: React.MouseEvent<any>) => setGroupBy(options.find(o => o.key === e.currentTarget.value) as WKGroupByOption)}
             >
                 {options.map((option) => (
                     <ToggleButton key={option.key}
@@ -98,7 +130,7 @@ function GroupByToggle({title, options, groupBy, setGroupBy, disableOptions}) {
     );
 }
 
-function ControlContainer({children}) {
+function ControlContainer({children}: React.PropsWithChildren<any>) {
     return (
         <Paper elevation={2} style={styles.groupingPaper}>
             {children}
@@ -106,7 +138,20 @@ function ControlContainer({children}) {
     );
 }
 
-function SegmentControl({title, value, setValue, options, sortArrow}) {
+type SegmentOption = {
+    key: string,
+    displayText: string
+};
+
+type SegmentControlProps = {
+    title: string,
+    value: SegmentOption,
+    setValue: (v: SegmentOption) => void,
+    options: SegmentOption[],
+    sortArrow?: (v: SegmentOption) => 'down' | 'up' | 'none'
+};
+
+function SegmentControl({title, value, setValue, options, sortArrow}: SegmentControlProps) {
     return (
         <ControlContainer>
             <div style={styles.optionContainer}>
@@ -115,9 +160,9 @@ function SegmentControl({title, value, setValue, options, sortArrow}) {
                     value={value.key}
                     size={'small'}
                     exclusive
-                    onChange={e => setValue(options.find(o => o.key === e.target.value))}
+                    onChange={(e: React.MouseEvent<any>) => setValue(options.find(o => o.key === e.currentTarget.value) as SegmentOption)}
                 >
-                    {options.map((option) => (
+                    {options.map((option: SegmentOption) => (
                         <ToggleButton key={option.key}
                                       value={option.key}
                         >
@@ -134,9 +179,23 @@ function SegmentControl({title, value, setValue, options, sortArrow}) {
     );
 }
 
-function CheckboxControl({title, subtitle, value, setValue, options}) {
-    function onChange(option) {
-        let removeIndex = value.indexOf(option.toLowerCase());
+type CheckboxControlOption = {
+    key: string,
+    text: string,
+    disabled: boolean,
+};
+
+type CheckboxControlProps = {
+    title: string,
+    subtitle: string,
+    value: string[],
+    setValue: (v: string[]) => void,
+    options: CheckboxControlOption[]
+};
+
+function CheckboxControl({title, subtitle, value, setValue, options}: CheckboxControlProps) {
+    function onChange(option: string) {
+        const removeIndex = value.indexOf(option.toLowerCase());
         if (removeIndex === -1) {
             setValue([...value, option.toLowerCase()]);
         } else {
@@ -168,31 +227,54 @@ function CheckboxControl({title, subtitle, value, setValue, options}) {
     );
 }
 
-export function useWanikaniItemControls() {
-    const [control, setControl] = useState(presetOptions.levels.controls);
+type WanikaniItemControls = {
+    control: WKItemControls,
+    set: {
+        control: (c: WKItemControls) => void,
+        primaryGroupBy: (g: WKGroupByOption) => void,
+        secondaryGroupBy: (g: WKGroupByOption) => void,
+        sortBy: (s: WKSortByOption) => void,
+        colorBy: (c: WKColorByOption) => void,
+        typesToShow: (t: string[]) => void,
+        frequencyGroupingSize: (n: number) => void,
+    }
+};
 
-    const onPrimaryGroupByChange = (value) => setControl(prev => {
-        let changes = {primaryGroupBy: value};
+type WanikaniItemControlChanges = {
+    primaryGroupBy?: WKGroupByOption,
+    secondaryGroupBy?: WKGroupByOption,
+    sortBy?: WKSortByOption,
+    colorBy?: WKColorByOption,
+    typesToShow?: string[],
+    sortReverse?: boolean,
+    frequencyGroupingSize?: number,
+};
+
+export function useWanikaniItemControls(): WanikaniItemControls {
+    const [control, setControl] = useState<WKItemControls>(presetOptions.levels.controls);
+
+    const onPrimaryGroupByChange = (value: WKGroupByOption) => setControl(prev => {
+        const changes: WanikaniItemControlChanges = {primaryGroupBy: value};
         if (value.key === groupByOptions.none.key || value.key === prev.secondaryGroupBy.key) {
             changes.secondaryGroupBy = groupByOptions.none;
         }
         return ({...prev, ...changes});
     });
 
-    const onSortByChange = (sortBy) => setControl(prev => {
+    const onSortByChange = (sortBy: WKSortByOption) => setControl(prev => {
         if (!sortBy)
             return prev;
         const isChange = prev.sortBy.key !== sortBy.key;
-        let sortReverse = isChange ? false : !prev.sortReverse;
+        const sortReverse = isChange ? false : !prev.sortReverse;
         return {...prev, sortBy: sortBy, sortReverse: sortReverse};
     });
 
 
-    const onTypesToShowChange = (typesToShow) => setControl(prev => {
+    const onTypesToShowChange = (typesToShow: string[]) => setControl(prev => {
         if (!typesToShow || typesToShow.length == 0)
             return prev;
 
-        let changes = {
+        const changes: WanikaniItemControlChanges = {
             typesToShow: typesToShow
         };
 
@@ -217,9 +299,9 @@ export function useWanikaniItemControls() {
         return {...prev, ...changes};
     });
 
-    return [
-        control,
-        {
+    return {
+        control: control,
+        set: {
             control: setControl,
             primaryGroupBy: onPrimaryGroupByChange,
             secondaryGroupBy: (groupBy) => setControl(prev => ({...prev, secondaryGroupBy: groupBy})),
@@ -228,13 +310,13 @@ export function useWanikaniItemControls() {
             typesToShow: onTypesToShowChange,
             frequencyGroupingSize: (size) => setControl(prev => ({...prev, frequencyGroupingSize: size})),
         }
-    ];
+    };
 }
 
-function getGroupByOptions(typesToShow) {
-    let isKanjiOnly = typesToShow.length === 1 && typesToShow[0] === 'kanji';
+function getGroupByOptions(typesToShow: string[]) {
+    const isKanjiOnly = typesToShow.length === 1 && typesToShow[0] === 'kanji';
 
-    let groupByOptionsList = [
+    const groupByOptionsList = [
         groupByOptions.none,
         groupByOptions.level,
         groupByOptions.srsStage,
@@ -248,10 +330,10 @@ function getGroupByOptions(typesToShow) {
     return groupByOptionsList;
 }
 
-function getSortByOptions(typesToShow) {
-    let isKanjiOnly = typesToShow.length === 1 && typesToShow[0] === 'kanji';
+function getSortByOptions(typesToShow: string[]) {
+    const isKanjiOnly = typesToShow.length === 1 && typesToShow[0] === 'kanji';
 
-    let sortByOptionsList = [
+    const sortByOptionsList = [
         sortByOptions.itemName,
         sortByOptions.level,
         sortByOptions.srsStage,
@@ -266,10 +348,10 @@ function getSortByOptions(typesToShow) {
     return sortByOptionsList;
 }
 
-function getColorByOptions(typesToShow) {
-    let isKanjiOnly = typesToShow.length === 1 && typesToShow[0] === 'kanji';
+function getColorByOptions(typesToShow: string[]) {
+    const isKanjiOnly = typesToShow.length === 1 && typesToShow[0] === 'kanji';
 
-    let colorByOptionsList = [
+    const colorByOptionsList = [
         colorByOptions.srsStage,
     ];
 
@@ -281,7 +363,12 @@ function getColorByOptions(typesToShow) {
     return colorByOptionsList;
 }
 
-function PresetSelector({options, onChange}) {
+type PresetSelectorProps = {
+    options: WKItemPreset[],
+    onChange: (v: WKItemPreset) => void
+};
+
+function PresetSelector({options, onChange}: PresetSelectorProps) {
     const placeholder = {
         key: 'placeholder',
         text: 'Presets'
@@ -292,13 +379,15 @@ function PresetSelector({options, onChange}) {
             style={{minWidth: '150px'}}
             size={'small'}
             value={placeholder}
-            onChange={e => onChange(e.target.value)}
+            onChange={e => onChange(e.target.value as WKItemPreset)}
         >
+            {/*@ts-ignore*/}
             <MenuItem value={placeholder}>
                 {placeholder.text}
             </MenuItem>
 
             {options.map((option) => (
+                /*@ts-ignore*/
                 <MenuItem key={option.key}
                           value={option.controls}
                 >
@@ -309,7 +398,12 @@ function PresetSelector({options, onChange}) {
     );
 }
 
-function FrequencyGroupSizeTextField({onChange, initialSize}) {
+type FrequencyGroupSizeTextFieldProps = {
+    onChange?: (v: number) => void,
+    initialSize: number
+};
+
+function FrequencyGroupSizeTextField({onChange, initialSize}: FrequencyGroupSizeTextFieldProps) {
     const [text, setText] = useState(`${initialSize}`);
     const triggerChange = () => onChange && text.length > 0 ? onChange(parseInt(text)) : null;
     return (
@@ -332,7 +426,9 @@ function FrequencyGroupSizeTextField({onChange, initialSize}) {
     );
 }
 
-function WanikaniItemsControlPanel({control, set}) {
+type WanikaniItemsControlPanelProps = WanikaniItemControls;
+
+function WanikaniItemsControlPanel({control, set}: WanikaniItemsControlPanelProps) {
     const {
         primaryGroupBy,
         secondaryGroupBy,
@@ -372,6 +468,7 @@ function WanikaniItemsControlPanel({control, set}) {
                             presetOptions.jlpt,
                             presetOptions.frequency,
                         ]}
+                        // @ts-ignore
                         onChange={preset => set.control(preset)}
                     />
                 </div>
@@ -404,14 +501,14 @@ function WanikaniItemsControlPanel({control, set}) {
 
                 <SegmentControl title={'Sort By'}
                                 value={sortBy}
-                                setValue={set.sortBy}
+                                setValue={set.sortBy as unknown as (v: SegmentOption) => void}
                                 options={sortByOptionsList}
                                 sortArrow={option => option.key === sortBy.key ? (sortReverse ? 'down' : 'up') : 'none'}
                 />
 
                 <SegmentControl title={'Color By'}
                                 value={colorBy}
-                                setValue={set.colorBy}
+                                setValue={set.colorBy as unknown as (v: SegmentOption) => void}
                                 options={colorByOptionsList}
                 />
 

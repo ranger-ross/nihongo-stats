@@ -1,13 +1,17 @@
-import create, {SetState} from 'zustand'
+import create from 'zustand'
 import {AppNames} from "../Constants";
-import {State} from "zustand/vanilla";
 
 const storageService = {
     saveSelectedApp: (app: string) => localStorage.setItem('selectedApp', app),
     loadSelectedApp: () => localStorage.getItem('selectedApp'),
 };
 
-export const useSelectedApp = create<State>((set: SetState<State>) => ({
+type SelectedApp = {
+    selectedApp: string,
+    setSelectedApp: (app: string) => void
+};
+
+export const useSelectedApp = create<SelectedApp>(set => ({
     selectedApp: storageService.loadSelectedApp() || AppNames.overview,
     setSelectedApp: (app: string) => set(() => {
         storageService.saveSelectedApp(app);

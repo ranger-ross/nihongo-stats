@@ -1,12 +1,14 @@
 import {Button, Card, CardContent, Container, Typography} from "@mui/material";
 import {Navigate} from "react-router";
-import {useSelectedApp} from "../hooks/useSelectedApp.tsx";
+import {useSelectedApp} from "../hooks/useSelectedApp";
 import {AppNames} from "../Constants";
 import create from "zustand";
-import {useUserPreferences} from "../hooks/useUserPreferences.tsx";
+import {useUserPreferences} from "../hooks/useUserPreferences";
+// @ts-ignore
 import {convertAppNameToDashboardRoute} from "../Routes.jsx";
+import {AppStyles} from "../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     container: {
         textAlign: 'center',
         marginTop: '15vh'
@@ -17,12 +19,17 @@ const styles = {
 }
 
 const storageService = {
-    saveLandingPage: app => localStorage.setItem('landing-page-read', app),
-    loadLandingPage: () => localStorage.getItem('landing-page-read'),
+    saveLandingPage: (value: boolean) => localStorage.setItem('landing-page-read', String(value)),
+    loadLandingPage: () => Boolean(localStorage.getItem('landing-page-read')),
 };
 
-export const useIsLandingPageRead = create(set => ({
-    isLandingPageRead: !!storageService.loadLandingPage(),
+type LandingPageState = {
+    isLandingPageRead: boolean,
+    markAsRead: () => void
+};
+
+export const useIsLandingPageRead = create<LandingPageState>(set => ({
+    isLandingPageRead: storageService.loadLandingPage(),
     markAsRead: () => set(() => {
         storageService.saveLandingPage(true);
         return {isLandingPageRead: true};

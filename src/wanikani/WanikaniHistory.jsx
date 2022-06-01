@@ -2,7 +2,7 @@ import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.tsx";
 import {RoutePaths} from "../Routes";
 import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart.tsx";
 import {Card, CircularProgress, Typography} from "@mui/material";
-import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart.jsx";
+import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart.tsx";
 import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart.jsx";
 import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart.tsx";
 import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart.tsx";

@@ -1,9 +1,14 @@
 import {AnkiColors} from "../../Constants";
+import {AnkiDeckSummary} from "../service/AnkiDataUtil";
+
+type AnkiDeckSummariesProps = {
+    deckData: AnkiDeckSummary[]
+};
 
 /**
  * Use AnkiDataUtil.fetchAnkiDeckSummaries() to get data
  */
-function AnkiDeckSummaries({deckData}) {
+function AnkiDeckSummaries({deckData}: AnkiDeckSummariesProps) {
     return deckData.map(data => (
         <div key={data.deckName}>
             <strong>{data.deckName}</strong>

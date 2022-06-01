@@ -1,6 +1,6 @@
-import AnkiApiService from "./AnkiApiService.ts";
+import AnkiApiService from "./AnkiApiService";
 
-export function createAnkiCardsDueQuery(deck, day) {
+export function createAnkiCardsDueQuery(deck: string, day: number) {
     return {
         "action": "findCards",
         "params": {
@@ -9,8 +9,14 @@ export function createAnkiCardsDueQuery(deck, day) {
     };
 }
 
+export type AnkiDeckSummary = {
+    deckName: string,
+    dueCards: number,
+    newCards: number,
+};
+
 // TODO: Need to find a way to account for Custom Study adding new cards and other funky scenarios
-async function fetchDeckSummary(deckName) {
+async function fetchDeckSummary(deckName: string): Promise<AnkiDeckSummary> {
     const dueCards = await AnkiApiService.findCards(`"deck:${deckName}" prop:due=0`);
     const newCards = await AnkiApiService.findCards(`"deck:${deckName}" is:new`);
     let newCardsToReview = 0;
@@ -32,8 +38,8 @@ async function fetchDeckSummary(deckName) {
     };
 }
 
-export async function fetchAnkiDeckSummaries(decks) {
-    let requests = [];
+export async function fetchAnkiDeckSummaries(decks: string[]) {
+    const requests = [];
     for (const deck of decks) {
         requests.push(fetchDeckSummary(deck));
     }

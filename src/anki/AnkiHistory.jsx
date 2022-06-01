@@ -1,6 +1,6 @@
 import AnkiReviewsChart from "./components/AnkiReviewsChart.jsx";
 import {useSelectedAnkiDecks} from "../hooks/useSelectedAnkiDecks.tsx";
-import AnkiApiProvider from "./components/AnkiApiProvider.jsx";
+import AnkiApiProvider from "./components/AnkiApiProvider.tsx";
 import AnkiTotalCardsHistoryChart from "./components/AnkiTotalCardsHistoryChart.jsx";
 import AnkiCardBreakDownHistoryChart from "./components/AnkiCardBreakDownHistoryChart.jsx";
 

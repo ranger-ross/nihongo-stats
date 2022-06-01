@@ -1,6 +1,6 @@
 import AnkiDeckSummariesTile from "./components/AnkiDeckSummariesTile.jsx";
 import AnkiCardBreakDownChart from "./components/AnkiCardBreakDownChart.jsx";
-import AnkiApiProvider from "./components/AnkiApiProvider.jsx";
+import AnkiApiProvider from "./components/AnkiApiProvider.tsx";
 import AnkiUpcomingReviewsChart from "./components/AnkiUpcomingReviewsChart.jsx";
 
 const styles = {

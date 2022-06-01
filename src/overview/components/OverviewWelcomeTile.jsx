@@ -1,7 +1,7 @@
 import {Card, CardContent, IconButton, Menu, MenuItem, Typography} from "@mui/material";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
 import React, {useEffect, useState} from "react";
-import AnkiDeckSummaries from "../../anki/components/AnkiDeckSummaries.jsx";
+import AnkiDeckSummaries from "../../anki/components/AnkiDeckSummaries.tsx";
 import WanikaniPendingLessonsAndReviews from "../../wanikani/components/WanikaniPendingLessonAndReviews.tsx";
 import BunProPendingReviews from "../../bunpro/components/BunProPendingReviews.jsx";
 import BunProApiService from "../../bunpro/service/BunProApiService.ts";
@@ -12,7 +12,7 @@ import {useAnkiConnection} from "../../hooks/useAnkiConnection.tsx";
 import {AppNames} from "../../Constants";
 import {useSelectedApp} from "../../hooks/useSelectedApp.tsx";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
-import {fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil.js";
+import {fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil.ts";
 
 const styles = {
     titleText: {

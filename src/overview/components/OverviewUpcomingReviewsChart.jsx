@@ -17,7 +17,7 @@ import AnkiApiService from "../../anki/service/AnkiApiService.ts";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.tsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.tsx";
-import {createAnkiCardsDueQuery, fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil.js";
+import {createAnkiCardsDueQuery, fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil.ts";
 import {AnkiColors, AppNames, BunProColors, WanikaniColors} from "../../Constants";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection.tsx";

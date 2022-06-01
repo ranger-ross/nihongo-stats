@@ -1,8 +1,8 @@
 import {Card, CardContent} from "@mui/material";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
 import {useEffect, useState} from "react";
-import AnkiDeckSummaries from "./AnkiDeckSummaries.jsx";
-import {fetchAnkiDeckSummaries} from "../service/AnkiDataUtil.js";
+import AnkiDeckSummaries from "./AnkiDeckSummaries.tsx";
+import {fetchAnkiDeckSummaries} from "../service/AnkiDataUtil.ts";
 
 
 function AnkiDeckSummariesTile() {

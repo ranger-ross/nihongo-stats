@@ -3,6 +3,7 @@ import {AppUrls} from "../../Constants";
 import {PromiseCache} from "../../util/PromiseCache";
 import {RawBunProReviewsResponse} from "../models/raw/RawBunProReviewsResponse";
 import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
+import {RawBunProUser} from "../models/raw/RawBunProUser";
 
 const {apiProxy, bunproApi} = AppUrls;
 
@@ -142,7 +143,7 @@ async function getPendingReviews() {
     );
 }
 
-async function getBunProUser() {
+async function getBunProUser(): Promise<RawBunProUser> {
     return await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v5/user`,

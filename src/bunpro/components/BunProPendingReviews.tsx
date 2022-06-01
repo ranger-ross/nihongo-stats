@@ -1,7 +1,7 @@
 import {useTheme} from "@mui/material";
-import {ColoredButton} from "../../shared/ColoredButton.tsx";
+import {ColoredButton} from "../../shared/ColoredButton";
 
-export function BunProPendingReviews({count}) {
+export function BunProPendingReviews({count}: {count: number}) {
     const theme = useTheme();
     const color = count === 0 ? '#c4c4c4' : theme.palette.primary.main
 

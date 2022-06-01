@@ -1,7 +1,8 @@
 import {Card, CardContent, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
-import BunProApiService from "../service/BunProApiService.ts";
-import BunProPendingReviews from "./BunProPendingReviews.jsx";
+import BunProApiService from "../service/BunProApiService";
+import BunProPendingReviews from "./BunProPendingReviews";
+import {RawBunProUser} from "../models/raw/RawBunProUser";
 
 const styles = {
     welcomeText: {
@@ -12,7 +13,7 @@ const styles = {
 
 export function BunProWelcomeTile() {
 
-    const [user, setUser] = useState();
+    const [user, setUser] = useState<RawBunProUser>();
     const [pendingReviews, setPendingReviews] = useState(0);
 
     useEffect(() => {
@@ -25,12 +26,6 @@ export function BunProWelcomeTile() {
                 setUser(user);
             });
 
-
-        BunProApiService.getUser()
-        BunProApiService.getUser()
-        BunProApiService.getUser()
-
-
         BunProApiService.getPendingReviews()
             .then(data => {
                 if (!isSubscribed)
@@ -38,7 +33,9 @@ export function BunProWelcomeTile() {
                 setPendingReviews(data.length);
             });
 
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        }
     }, []);
 
     return (

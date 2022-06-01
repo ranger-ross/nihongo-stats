@@ -3,7 +3,7 @@ import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
 import React, {useEffect, useState} from "react";
 import AnkiDeckSummaries from "../../anki/components/AnkiDeckSummaries.tsx";
 import WanikaniPendingLessonsAndReviews from "../../wanikani/components/WanikaniPendingLessonAndReviews.tsx";
-import BunProPendingReviews from "../../bunpro/components/BunProPendingReviews.jsx";
+import BunProPendingReviews from "../../bunpro/components/BunProPendingReviews.tsx";
 import BunProApiService from "../../bunpro/service/BunProApiService.ts";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.tsx";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey.tsx";

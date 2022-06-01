@@ -4,9 +4,9 @@ import {CSSProperties} from "react";
 
 export type AppOption = {
     appName: string,
-    displayName: 'Overview',
+    displayName: string,
     icon: SvgIconComponent,
-    iconStyle: CSSProperties
+    iconStyle?: CSSProperties
 };
 
 type AppSelectorProps = {

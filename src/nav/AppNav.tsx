@@ -1,23 +1,27 @@
 import {Box, Grid} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router";
+// @ts-ignore
 import {AllRoutes, convertAppNameToDashboardRoute} from '../Routes';
-import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.tsx";
-import AppSelector from "./components/AppSelector";
-import WanikaniNav from "./navbars/WanikaniNav.tsx";
+import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
+import AppSelector, {AppOption} from "./components/AppSelector";
+import WanikaniNav from "./navbars/WanikaniNav";
 import AnkiNav from "./navbars/AnkiNav";
-import BunProNav from "./navbars/BunProNav.tsx";
-import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
-import OverviewNav from "./navbars/OverviewNav.tsx";
+import BunProNav from "./navbars/BunProNav";
+import {useBunProApiKey} from "../hooks/useBunProApiKey";
+import OverviewNav from "./navbars/OverviewNav";
 import {AppNames} from "../Constants";
-import {useSelectedApp} from "../hooks/useSelectedApp.tsx";
-
+import {useSelectedApp} from "../hooks/useSelectedApp";
+// @ts-ignore
 import ankiIcon from '../../assets/icons/anki-icon.png';
+// @ts-ignore
 import bunProIcon from '../../assets/icons/bunpro-icon.png';
+// @ts-ignore
 import wanikaniIcon from '../../assets/icons/wanikani-icon.png';
 import {BarChart} from "@mui/icons-material";
+import {AppStyles} from "../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     container: {
         padding: '5px',
         boxShadow: '0 2px 4px rgb(0 0 0 / 50%)',
@@ -28,7 +32,7 @@ const styles = {
     }
 };
 
-const appOptions = [
+const appOptions: AppOption[] = [
     {appName: AppNames.overview, displayName: 'Overview', icon: BarChart, iconStyle: {color: '#21bcff'}},
     {appName: AppNames.anki, displayName: 'Anki', icon: ankiIcon},
     {appName: AppNames.bunpro, displayName: 'BunPro', icon: bunProIcon, iconStyle: {marginLeft: '-4px'}},
@@ -43,7 +47,7 @@ function AppNav() {
     const {apiKey: bunProApiKey} = useBunProApiKey();
     const [isFirstLoad, setIsFirstLoad] = useState(true);
 
-    const route = AllRoutes.find(route => route.path === location.pathname)
+    const route = AllRoutes.find((route: any) => route.path === location.pathname);
 
     useEffect(() => {
         // Don't navigate to dashboard on page load.

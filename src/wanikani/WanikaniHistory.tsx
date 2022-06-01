@@ -1,22 +1,27 @@
-import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.tsx";
+import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
+// @ts-ignore
 import {RoutePaths} from "../Routes";
-import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart.tsx";
+import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart";
 import {Card, CircularProgress, Typography} from "@mui/material";
-import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart.tsx";
-import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart.tsx";
-import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart.tsx";
-import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart.tsx";
+import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart";
+import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart";
+import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart";
+import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import ReactVisibilitySensor from "react-visibility-sensor";
 import {useState} from "react";
-import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
-import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart.tsx";
+import RequireOrRedirect from "../shared/RequireOrRedirect";
+import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart";
 
+type LoadableChartProps = {
+    placeholderTitle: string
+} & React.PropsWithChildren<any>;
 
-function LoadableChart({placeholderTitle, children}) {
+function LoadableChart({placeholderTitle, children}: LoadableChartProps) {
     const [isLoaded, setIsLoaded] = useState(false)
     return (
-        <ReactVisibilitySensor partialVisibility={true} onChange={(isVisible) => isVisible ? setIsLoaded(true) : null}>
+        <ReactVisibilitySensor partialVisibility={true}
+                               onChange={(isVisible: boolean) => isVisible ? setIsLoaded(true) : null}>
             <Card style={{margin: '15px'}}>
                 {isLoaded ? children : (
                     <div style={{height: '500px', textAlign: 'center'}}>

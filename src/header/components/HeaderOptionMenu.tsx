@@ -1,21 +1,23 @@
 import {IconButton, Link, Menu, MenuItem} from "@mui/material";
 import MoreIcon from '@mui/icons-material/MoreVert';
 import React, {useState} from "react";
-import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.tsx";
+import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey";
 import LogoutIcon from '@mui/icons-material/Logout';
 import InfoIcon from '@mui/icons-material/Info';
+// @ts-ignore
 import {RoutePaths} from "../../Routes.jsx";
 import {useNavigate} from "react-router";
-import {useBunProApiKey} from "../../hooks/useBunProApiKey.tsx";
-import {useAppVersion} from "../../hooks/useAppVersion.tsx";
+import {useBunProApiKey} from "../../hooks/useBunProApiKey";
+import {useAppVersion} from "../../hooks/useAppVersion";
 import {AppUrls} from "../../Constants";
 import {AccountCircle, Replay} from "@mui/icons-material";
-import {ClearCacheDialog} from "./ClearCacheDialog.tsx";
-import UserPreferencesDialog from "./UserPreferencesDialog.tsx";
+import {ClearCacheDialog} from "./ClearCacheDialog";
+import UserPreferencesDialog from "./UserPreferencesDialog";
+import {AppStyles} from "../../util/TypeUtils";
 
 const iconPaddingRight = '7px';
 
-const styles = {
+const styles: AppStyles = {
     logoutOption: {
         color: 'red',
         marginRight: iconPaddingRight
@@ -45,7 +47,7 @@ const styles = {
 };
 
 function HeaderOptionMenu() {
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [isClearCacheDialogOpen, setIsClearCacheDialogOpen] = useState(false);
     const [isPreferencesDialogOpen, setIsPreferencesDialogOpen] = useState(false);
     const open = Boolean(anchorEl);

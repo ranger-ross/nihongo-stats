@@ -150,27 +150,6 @@ function WanikaniAccuracyHistoryChart() {
     const [daysToLookBack, setDaysToLookBack] = useState(90);
     const data = useData(daysToLookBack);
 
-    // const [rawData, setRawData] = useState<DayDataPoint[]>([]);
-    // const [daysToLookBack, setDaysToLookBack] = useState(90);
-    //
-    // useEffect(() => {
-    //     let isSubscribed = true;
-    //     fetchData()
-    //         .then(data => {
-    //             if (!isSubscribed)
-    //                 return;
-    //             setRawData(data);
-    //         })
-    //         .catch(console.error);
-    //     return () => {
-    //         isSubscribed = false;
-    //     };
-    // }, []);
-    //
-    //
-    // const data = useMemo(() => rawData.filter(dp => dp.date.getTime() > (Date.now() - (1000 * 3600 * 24 * daysToLookBack))),
-    //     [rawData, daysToLookBack]);
-
     function AccuracyToolTip({targetItem}: Tooltip.ContentProps) {
         const isAverageSeries = targetItem.series.toLowerCase().includes('average');
         const dataPoint = data[targetItem.point];

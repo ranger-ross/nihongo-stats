@@ -1,6 +1,8 @@
 import * as localForage from "localforage"
 import {AppUrls} from "../../Constants";
 import {AnkiDeck} from "../models/AnkiDeck";
+import {AnkiReview} from "../models/AnkiReview";
+import {AnkiCard} from "../models/AnkiCard";
 
 const ankiConnectApiUrl = AppUrls.ankiApi;
 
@@ -55,7 +57,7 @@ function convertDeckMapToArray(decks: { [name: string]: number }) {
     return arr;
 }
 
-function createCardReviewFromTuple(tuple: number[]) {
+function createCardReviewFromTuple(tuple: number[]): AnkiReview {
     return {
         reviewTime: tuple[0],
         cardId: tuple[1],
@@ -80,7 +82,7 @@ function connect() {
         });
 }
 
-function getCardReviews(deckName: string, startTimestamp = new Date(2000, 0, 1).getTime()) {
+function getCardReviews(deckName: string, startTimestamp = new Date(2000, 0, 1).getTime()): Promise<AnkiReview[]> {
     return invoke("cardReviews", 6, {
         "deck": deckName,
         "startID": startTimestamp
@@ -91,7 +93,7 @@ function getReviewsCacheKey(deckName: string) {
     return `${cacheKeys.reviewsPrefix}${deckName}`;
 }
 
-async function getAllReviewsByDeck(deckName: string) {
+async function getAllReviewsByDeck(deckName: string): Promise<AnkiReview[]> {
     const cachedValue: any = await localForage.getItem(getReviewsCacheKey(deckName));
     let reviews;
     if (!!cachedValue && cachedValue.data.length > 0) {
@@ -153,7 +155,7 @@ async function flushCache() {
     }
 }
 
-async function getCardInfo(cardIds: string | string[]) {
+async function getCardInfo(cardIds: string | string[]): Promise<AnkiCard[]> {
     if (!Array.isArray(cardIds))
         cardIds = [cardIds];
 

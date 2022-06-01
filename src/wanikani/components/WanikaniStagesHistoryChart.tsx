@@ -25,6 +25,7 @@ import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniReset} from "../models/raw/RawWanikaniReset";
 import {mapWanikaniReset} from "../service/WanikaniMappingService";
 import {WanikaniReset} from "../models/WanikaniReset";
+import Area from "../../shared/Area";
 
 
 type StageHistoryUnit = {
@@ -332,28 +333,6 @@ function useData() {
         data,
         isLoading: state.isLoading
     };
-}
-
-function Area(props: any) {
-    const {
-        coordinates,
-        color,
-    } = props;
-
-    return (
-        <path
-            fill={color}
-            d={area()
-                // @ts-ignore
-                .x(({arg}) => arg)
-                // @ts-ignore
-                .y1(({val}) => val)
-                // @ts-ignore
-                .y0(({startVal}) => startVal)
-                .curve(curveCatmullRom)(coordinates)}
-            opacity={0.5}
-        />
-    );
 }
 
 

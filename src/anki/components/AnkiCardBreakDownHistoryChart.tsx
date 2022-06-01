@@ -1,20 +1,25 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import {addDays, daysToMillis, truncDate} from "../../util/DateUtils.ts";
+import PeriodSelector from "../../shared/PeriodSelector";
+import {addDays, daysToMillis, truncDate} from "../../util/DateUtils";
 import * as React from "react";
-import {useEffect, useState, useMemo} from "react";
-import AnkiApiService from "../service/AnkiApiService.ts";
-import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
+import {useEffect, useMemo, useState} from "react";
+import AnkiApiService from "../service/AnkiApiService";
+import {getVisibleLabelIndices} from "../../util/ChartUtils";
+// @ts-ignore
 import {scaleBand} from 'd3-scale';
+// @ts-ignore
 import {area, curveCatmullRom,} from 'd3-shape';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
-import {AreaSeries, ArgumentScale, EventTracker, Stack} from "@devexpress/dx-react-chart";
+import {AreaSeries, ArgumentScale, EventTracker, Stack, ValueAxis as ValueAxisBase} from "@devexpress/dx-react-chart";
 
 import {AnkiColors} from "../../Constants";
-import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
+import ToolTipLabel from "../../shared/ToolTipLabel";
+import {AnkiReview} from "../models/AnkiReview";
+import Area from "../../shared/Area";
+import {AnkiCard} from "../models/AnkiCard";
 
-function createCardTimestampMap(cards) {
-    let map = {};
+function createCardTimestampMap(cards: AnkiCard[]) {
+    const map: { [key: number]: AnkiCard[] } = {};
     for (const card of cards) {
         const date = truncDate(card.note).getTime();
         if (!!map[date]) {
@@ -26,8 +31,8 @@ function createCardTimestampMap(cards) {
     return map;
 }
 
-function createReviewTimestampMap(reviews) {
-    let map = {};
+function createReviewTimestampMap(reviews: AnkiReview[]) {
+    const map: { [key: number]: AnkiReview[] } = {};
     for (const review of reviews) {
         const date = truncDate(review.reviewTime).getTime();
         if (!!map[date]) {
@@ -39,33 +44,41 @@ function createReviewTimestampMap(reviews) {
     return map;
 }
 
-async function getBreakDownHistoryData(decks) {
+type DataPoint = {
+    date: number,
+    newCount: number,
+    learningCount: number,
+    relearningCount: number,
+    youngCount: number,
+    matureCount: number,
+};
+
+async function getBreakDownHistoryData(decks: string[]) {
     // Fetch all the cards
-    const cardIdPromises = decks.map(deck =>  AnkiApiService.getAllCardIdsByDeck(deck));
+    const cardIdPromises = decks.map(deck => AnkiApiService.getAllCardIdsByDeck(deck));
     const cardIdResults = await Promise.all(cardIdPromises);
     const cardIds = cardIdResults.flat();
     const cards = await AnkiApiService.getCardInfo(Array.from(new Set(cardIds)));
 
     // Fetch all the reviews
-    const reviewPromises = decks.map(deck =>  AnkiApiService.getAllReviewsByDeck(deck));
+    const reviewPromises = decks.map(deck => AnkiApiService.getAllReviewsByDeck(deck));
     const reviewResults = await Promise.all(reviewPromises);
-    let reviews = reviewResults.flat();
-    reviews = reviews.sort((a, b) => a.reviewTime - b.reviewTime);
+    const reviews = reviewResults.flat().sort((a, b) => a.reviewTime - b.reviewTime);
 
     const reviewsMap = createReviewTimestampMap(reviews);
 
-    let firstDay = truncDate(reviews[0].reviewTime).getTime();
-    let lastDay = Date.now();
+    const firstDay = truncDate(reviews[0].reviewTime).getTime();
+    const lastDay = Date.now();
 
-    let tsMap = createCardTimestampMap(cards);
+    const tsMap = createCardTimestampMap(cards);
 
-    let statusMap = {};
+    const statusMap: { [cardId: number]: { newInterval: number, reviewType: number } } = {};
 
     // Add any cards that were created before the first review day
     Object.entries(tsMap)
         .filter(([key]) => parseInt(key) < firstDay)
         .forEach(([, value]) => {
-            for (const card of value) {
+            for (const card of (value as AnkiCard[])) {
                 statusMap[card.cardId] = {
                     newInterval: 0,
                     reviewType: 0,
@@ -74,7 +87,7 @@ async function getBreakDownHistoryData(decks) {
         })
 
 
-    let data = [];
+    const data: DataPoint[] = [];
 
     function snapshot() {
         let newCount = 0;
@@ -150,31 +163,29 @@ async function getBreakDownHistoryData(decks) {
     return data;
 }
 
-function Area(props) {
-    const {
-        coordinates,
-        color,
-    } = props;
-
-    return (
-        <path
-            fill={color}
-            d={area()
-                .x(({arg}) => arg)
-                .y1(({val}) => val)
-                .y0(({startVal}) => startVal)
-                .curve(curveCatmullRom)(coordinates)}
-            opacity={0.5}
-        />
-    );
+function useOptions() {
+    return [
+        {value: 30, text: '1 Mon'},
+        {value: 60, text: '2 Mon'},
+        {value: 90, text: '3 Mon'},
+        {value: 180, text: '6 Mon'},
+        {value: 365, text: '1 Yr'},
+        {value: 10_000, text: 'All'},
+    ];
 }
 
-function AnkiCardBreakDownHistoryChart({deckNames}) {
+type AnkiCardBreakDownHistoryChartProps = {
+    deckNames: string[]
+};
+
+function AnkiCardBreakDownHistoryChart({deckNames}: AnkiCardBreakDownHistoryChartProps) {
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
     const [isLoading, setIsLoading] = useState(true);
-    const [historyData, setHistoryData] = useState(null);
+    const [historyData, setHistoryData] = useState<DataPoint[] | null>(null);
+    const options = useOptions();
 
-    useEffect(async () => {
+
+    useEffect(() => {
         let isSubscribed = true;
 
         setIsLoading(true);
@@ -182,13 +193,13 @@ function AnkiCardBreakDownHistoryChart({deckNames}) {
             .then(data => {
                 if (!isSubscribed)
                     return;
-
                 setHistoryData(data)
             })
             .finally(() => setIsLoading(false));
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, [deckNames]);
-
 
 
     const chartData = useMemo(() => (historyData ?? [])
@@ -196,7 +207,7 @@ function AnkiCardBreakDownHistoryChart({deckNames}) {
         [historyData, daysToLookBack]);
     const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], 6);
 
-    function StatsToolTip({targetItem}) {
+    function StatsToolTip({targetItem}: Tooltip.ContentProps) {
         const dp = chartData[targetItem.point];
         return (
             <>
@@ -210,7 +221,7 @@ function AnkiCardBreakDownHistoryChart({deckNames}) {
         );
     }
 
-    function LabelWithDate(props) {
+    function LabelWithDate(props: ValueAxisBase.LabelProps) {
         const date = new Date(props.text);
         if (!date) {
             return (<></>)
@@ -245,17 +256,7 @@ function AnkiCardBreakDownHistoryChart({deckNames}) {
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
                         <PeriodSelector period={daysToLookBack}
                                         setPeriod={setDaysToLookBack}
-                                        options={[
-                                            {value: 30, text: '1 Mon'},
-                                            {value: 60, text: '2 Mon'},
-                                            {value: 90, text: '3 Mon'},
-                                            {value: 180, text: '6 Mon'},
-                                            {value: 365, text: '1 Yr'},
-                                            !!historyData ? {
-                                                value: 10_000,
-                                                text: 'All'
-                                            } : null
-                                        ]}
+                                        options={options}
                         />
                     </Grid>
                 </Grid>
@@ -266,6 +267,7 @@ function AnkiCardBreakDownHistoryChart({deckNames}) {
                     </div>
                 ) : (
                     !!deckNames && chartData ? (
+                        // @ts-ignore
                         <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

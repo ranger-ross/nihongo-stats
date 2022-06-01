@@ -1,20 +1,21 @@
 import {Card, CardContent, IconButton, Menu, MenuItem, Typography} from "@mui/material";
-import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
+import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
 import React, {useEffect, useState} from "react";
-import AnkiDeckSummaries from "../../anki/components/AnkiDeckSummaries.tsx";
-import WanikaniPendingLessonsAndReviews from "../../wanikani/components/WanikaniPendingLessonAndReviews.tsx";
-import BunProPendingReviews from "../../bunpro/components/BunProPendingReviews.tsx";
-import BunProApiService from "../../bunpro/service/BunProApiService.ts";
-import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey.tsx";
-import {useBunProApiKey} from "../../hooks/useBunProApiKey.tsx";
+import AnkiDeckSummaries from "../../anki/components/AnkiDeckSummaries";
+import WanikaniPendingLessonsAndReviews from "../../wanikani/components/WanikaniPendingLessonAndReviews";
+import BunProPendingReviews from "../../bunpro/components/BunProPendingReviews";
+import BunProApiService from "../../bunpro/service/BunProApiService";
+import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey";
+import {useBunProApiKey} from "../../hooks/useBunProApiKey";
 import {Add} from "@mui/icons-material";
-import {useAnkiConnection} from "../../hooks/useAnkiConnection.tsx";
+import {useAnkiConnection} from "../../hooks/useAnkiConnection";
 import {AppNames} from "../../Constants";
-import {useSelectedApp} from "../../hooks/useSelectedApp.tsx";
-import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
-import {fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil.ts";
+import {useSelectedApp} from "../../hooks/useSelectedApp";
+import WanikaniApiService from "../../wanikani/service/WanikaniApiService";
+import {AnkiDeckSummary, fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil";
+import {AppStyles} from "../../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     titleText: {
         textShadow: '4px 4px 6px #000000bb'
     },
@@ -34,7 +35,7 @@ const styles = {
 
 function AnkiSection() {
     const {selectedDecks} = useSelectedAnkiDecks();
-    const [ankiDeckData, setAnkiDeckData] = useState([]);
+    const [ankiDeckData, setAnkiDeckData] = useState<AnkiDeckSummary[]>([]);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -44,7 +45,9 @@ function AnkiSection() {
                     return;
                 setAnkiDeckData(data);
             });
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        }
     }, [selectedDecks]);
 
     return (
@@ -61,7 +64,7 @@ function AnkiSection() {
 }
 
 function WanikaniSection() {
-    const [wanikaniStudyData, setWanikaniStudyData] = useState();
+    const [wanikaniStudyData, setWanikaniStudyData] = useState<{ lessons: number, reviews: number }>();
 
     useEffect(() => {
         let isSubscribed = true;
@@ -71,7 +74,9 @@ function WanikaniSection() {
                     return;
                 setWanikaniStudyData(data);
             });
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        }
     }, [])
 
     return (
@@ -82,8 +87,8 @@ function WanikaniSection() {
 
             <div style={{...styles.buttonContainer, marginBottom: '0'}}>
                 <WanikaniPendingLessonsAndReviews
-                    lessons={wanikaniStudyData?.lessons}
-                    reviews={wanikaniStudyData?.reviews}
+                    lessons={wanikaniStudyData?.lessons ?? 0}
+                    reviews={wanikaniStudyData?.reviews ?? 0}
                 />
             </div>
         </>
@@ -101,7 +106,9 @@ function BunProSection() {
                     return;
                 setPendingReviews(data.length);
             });
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, []);
 
     return (
@@ -117,9 +124,15 @@ function BunProSection() {
     );
 }
 
-function AddAppDropdown({showAnki, showBunPro, showWanikani}) {
+type AddAppDropdownProps = {
+    showAnki: boolean,
+    showBunPro: boolean,
+    showWanikani: boolean
+};
+
+function AddAppDropdown({showAnki, showBunPro, showWanikani}: AddAppDropdownProps) {
     const {setSelectedApp} = useSelectedApp();
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const open = Boolean(anchorEl);
     return (
         <>

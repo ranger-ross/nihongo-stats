@@ -1,4 +1,4 @@
-import OverviewWelcomeTile from "./components/OverviewWelcomeTile.jsx";
+import OverviewWelcomeTile from "./components/OverviewWelcomeTile.tsx";
 import OverviewUpcomingReviewsChart from "./components/OverviewUpcomingReviewsChart.jsx";
 import {useDeviceInfo} from "../hooks/useDeviceInfo.tsx";
 import WanikaniActiveItemsChart from "../wanikani/components/WanikaniActiveItemChart.tsx";

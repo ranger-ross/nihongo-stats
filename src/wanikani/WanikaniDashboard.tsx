@@ -1,14 +1,16 @@
-import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.tsx";
+import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
+// @ts-ignore
 import {RoutePaths} from "../Routes";
-import WanikaniLevelSummaryChart from "./components/WanikaniLevelSummaryChart.tsx";
-import WanikaniUpcomingReviewsChart from "./components/WanikaniUpcomingReviewsChart.tsx";
+import WanikaniLevelSummaryChart from "./components/WanikaniLevelSummaryChart";
+import WanikaniUpcomingReviewsChart from "./components/WanikaniUpcomingReviewsChart";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
-import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart.tsx";
+import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
-import WanikaniActiveItemsChart from "./components/WanikaniActiveItemChart.tsx";
-import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
+import WanikaniActiveItemsChart from "./components/WanikaniActiveItemChart";
+import RequireOrRedirect from "../shared/RequireOrRedirect";
+import {AppStyles} from "../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     container: {
         display: 'flex',
         flexDirection: 'column',

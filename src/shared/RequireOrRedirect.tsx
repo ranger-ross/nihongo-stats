@@ -9,7 +9,7 @@ type Props = {
 };
 
 function RequireOrRedirect({children, resource, redirectPath}: Props) {
-    return !!resource ? children : (<Navigate to={redirectPath} replace={true}/>);
+    return !!resource ? <>{children}</> : (<Navigate to={redirectPath} replace={true}/>);
 }
 
 export default RequireOrRedirect;

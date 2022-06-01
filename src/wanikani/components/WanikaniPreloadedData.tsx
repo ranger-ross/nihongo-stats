@@ -49,7 +49,7 @@ function LoadingItem({text, isLoading}: LoadingItemProps) {
     );
 }
 
-function WanikaniPreloadedData({children}: React.PropsWithChildren<never>) {
+function WanikaniPreloadedData({children}: React.PropsWithChildren<any>) {
     const [isSubjectsLoaded, setIsSubjectsLoaded] = useState(false);
     const [isUserLoaded, setIsUserLoaded] = useState(false);
     const [isAssignmentsLoaded, setIsAssignmentsLoaded] = useState(false);

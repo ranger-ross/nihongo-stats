@@ -1,12 +1,14 @@
 import {Alert, Button, Grid, Link, Snackbar, TextField, Typography} from "@mui/material";
 import {useState} from "react";
-import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.tsx";
-import WanikaniApiService from "./service/WanikaniApiService.ts";
+import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
+import WanikaniApiService from "./service/WanikaniApiService";
 import {useNavigate} from "react-router";
+// @ts-ignore
 import {RoutePaths} from "../Routes";
+import {AppStyles} from "../util/TypeUtils";
 
 
-const styles = {
+const styles: AppStyles = {
     container: {
         minHeight: '70vh'
     },
@@ -25,7 +27,7 @@ function EnterWanikaniApiKeyPage() {
     const [textfieldValue, setTextfieldValue] = useState('');
     const [isFailure, setIsFailure] = useState(false);
 
-    const verifyAndSetApiKey = (key) => {
+    const verifyAndSetApiKey = (key: string) => {
         console.log(key);
         WanikaniApiService.login(key)
             .then(async (response) => {

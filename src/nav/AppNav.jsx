@@ -4,11 +4,11 @@ import {useLocation, useNavigate} from "react-router";
 import {AllRoutes, convertAppNameToDashboardRoute} from '../Routes';
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.tsx";
 import AppSelector from "./components/AppSelector";
-import WanikaniNav from "./navbars/WanikaniNav.jsx";
+import WanikaniNav from "./navbars/WanikaniNav.tsx";
 import AnkiNav from "./navbars/AnkiNav";
-import BunProNav from "./navbars/BunProNav.jsx";
+import BunProNav from "./navbars/BunProNav.tsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
-import OverviewNav from "./navbars/OverviewNav.jsx";
+import OverviewNav from "./navbars/OverviewNav.tsx";
 import {AppNames} from "../Constants";
 import {useSelectedApp} from "../hooks/useSelectedApp.tsx";
 

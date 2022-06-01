@@ -1,5 +1,5 @@
 import {render, screen} from '@testing-library/react';
-import AppSelector from "../AppSelector.jsx";
+import AppSelector from "../AppSelector.tsx";
 
 describe('AppSelector', function () {
 

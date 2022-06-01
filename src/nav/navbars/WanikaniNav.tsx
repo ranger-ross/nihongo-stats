@@ -1,4 +1,5 @@
 import React from "react";
+// @ts-ignore
 import {RoutePaths} from '../../Routes';
 import NavButton from "../components/NavButton";
 

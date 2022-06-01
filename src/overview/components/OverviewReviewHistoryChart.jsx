@@ -136,7 +136,7 @@ function OverviewReviewsHistoryChart() {
 
     const [toolTipTargetItem, setToolTipTargetItem] = useState();
     const [daysToLookBack, setDaysToLookBack] = useState(30);
-    const [ankiDecks] = useAnkiDecks();
+    const {ankiDecks} = useAnkiDecks();
 
     const [ankiReviews, setAnkiReviews] = useState([]);
     const [bunProReviews, setBunProReviews] = useState([]);

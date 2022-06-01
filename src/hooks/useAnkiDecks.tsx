@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import AnkiApiService from "../anki/service/AnkiApiService";
 
-export const useAnkiDecks = () => {
+export const useAnkiDecks = (): { decks: string[], isLoading: boolean } => {
     const [decks, setDecks] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -19,5 +19,8 @@ export const useAnkiDecks = () => {
         };
     }, []);
 
-    return [decks, isLoading];
+    return {
+        decks,
+        isLoading
+    };
 };

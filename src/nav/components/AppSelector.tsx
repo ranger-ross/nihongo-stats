@@ -1,6 +1,21 @@
 import {FormControl, InputLabel, MenuItem, Select} from "@mui/material";
+import {SvgIconComponent} from "@mui/icons-material";
+import {CSSProperties} from "react";
 
-function AppSelector({options, selectedApp, setSelectedApp}) {
+export type AppOption = {
+    appName: string,
+    displayName: 'Overview',
+    icon: SvgIconComponent,
+    iconStyle: CSSProperties
+};
+
+type AppSelectorProps = {
+    options: AppOption[],
+    selectedApp: string,
+    setSelectedApp: (app: string) => void
+};
+
+function AppSelector({options, selectedApp, setSelectedApp}: AppSelectorProps) {
     return (
         <FormControl fullWidth>
             <InputLabel>Selected App</InputLabel>

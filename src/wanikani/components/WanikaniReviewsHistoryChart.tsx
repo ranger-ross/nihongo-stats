@@ -1,19 +1,34 @@
-import {Chart, ValueAxis, ArgumentAxis, Tooltip} from '@devexpress/dx-react-chart-material-ui';
-import {useState, useEffect, useMemo} from "react";
-import WanikaniApiService from "../service/WanikaniApiService.ts";
-import {ArgumentScale, BarSeries, Stack} from "@devexpress/dx-react-chart";
+import {ArgumentAxis, Chart, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
+import React, {useEffect, useMemo, useState} from "react";
+import WanikaniApiService from "../service/WanikaniApiService";
+import {
+    ArgumentScale,
+    BarSeries,
+    EventTracker,
+    SeriesRef,
+    Stack,
+    Tooltip as TooltipBase,
+    ValueAxis as ValueAxisBase
+} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants';
-import {Card, CardContent, Typography, Grid, CircularProgress, Select, MenuItem} from "@mui/material";
-import {EventTracker} from "@devexpress/dx-react-chart";
+import {Card, CardContent, CircularProgress, Grid, MenuItem, Select, Typography} from "@mui/material";
+// @ts-ignore
 import {scaleBand} from 'd3-scale';
-import React from 'react';
-import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
-import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils.ts";
-import {createSubjectMap} from "../service/WanikaniDataUtil.ts";
-import ToolTipLabel from "../../shared/ToolTipLabel.tsx";
+import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import PeriodSelector from "../../shared/PeriodSelector";
+import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
+import {createSubjectMap} from "../service/WanikaniDataUtil";
+import ToolTipLabel from "../../shared/ToolTipLabel";
+import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
+import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 
-const units = {
+type PeriodUnit = {
+    key: string,
+    text: string,
+    trunc: (date: Date | number) => Date,
+};
+
+const units: { [key: string]: PeriodUnit } = {
     days: {
         key: 'days',
         text: 'Days',
@@ -31,14 +46,30 @@ const units = {
     },
 };
 
-function DataPoint(date) {
-    let data = {
+type WkReviewSubject = {
+    review: RawWanikaniReview,
+    subject: RawWanikaniSubject,
+};
+
+type DataPoint = {
+    date: Date,
+    data: any[],
+    total: number,
+    radicals: number,
+    kanji: number,
+    vocabulary: number,
+    push: (d: any) => void,
+};
+
+function dataPoint(date: Date) {
+    const data: DataPoint = {
         date: date,
         data: [],
         total: 0,
         radicals: 0,
         kanji: 0,
         vocabulary: 0,
+        push: (d: any) => null,
     };
 
     data.push = (d) => {
@@ -64,7 +95,7 @@ function DataPoint(date) {
 async function fetchData() {
     const reviews = await WanikaniApiService.getReviews();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    let data = [];
+    const data: WkReviewSubject[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
@@ -75,53 +106,59 @@ async function fetchData() {
     return data;
 }
 
-function aggregateDate(rawData, daysToLookBack, unit) {
-    const areDatesDifferent = (date1, date2) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
+function aggregateDate(rawData: WkReviewSubject[], daysToLookBack: number, unit: PeriodUnit): DataPoint[] {
+    const areDatesDifferent = (date1: Date, date2: Date) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
     const startDate = unit.trunc(Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1))).getTime();
     const dataForTimeRange = rawData.filter(data => new Date(data.review.data['created_at']).getTime() > startDate);
 
     // Make sure to DataPoints for days with no reviews, so there is a gap in the graph
-    function fillInEmptyDaysIfNeeded(aggregatedDate, reviewDate) {
+    function fillInEmptyDaysIfNeeded(aggregatedData: DataPoint[], reviewDate: Date) {
         const dayBeforeReview = addDays(truncDate(reviewDate), -1);
-        let lastDataPoint = aggregatedDate[aggregatedDate.length - 1];
+        let lastDataPoint = aggregatedData[aggregatedData.length - 1];
         while (lastDataPoint.date.getTime() < dayBeforeReview.getTime()) {
-            aggregatedDate.push(new DataPoint(addDays(lastDataPoint.date, 1)));
-            lastDataPoint = aggregatedDate[aggregatedDate.length - 1];
+            aggregatedData.push(dataPoint(addDays(lastDataPoint.date, 1)));
+            lastDataPoint = aggregatedData[aggregatedData.length - 1];
         }
     }
 
-    let aggregatedDate = [new DataPoint(truncDate(dataForTimeRange[0].review.data['created_at']))];
+    const aggregatedData: DataPoint[] = [dataPoint(truncDate(new Date(dataForTimeRange[0].review.data['created_at'])))];
     for (const data of dataForTimeRange) {
-        if (areDatesDifferent(aggregatedDate[aggregatedDate.length - 1].date, data.review.data['created_at'])) {
-            fillInEmptyDaysIfNeeded(aggregatedDate, data.review.data['created_at']);
-            aggregatedDate.push(new DataPoint(unit.trunc(data.review.data['created_at'])));
+        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, new Date(data.review.data['created_at']))) {
+            fillInEmptyDaysIfNeeded(aggregatedData, new Date(data.review.data['created_at']));
+            aggregatedData.push(dataPoint(unit.trunc(new Date(data.review.data['created_at']))));
         }
 
-        aggregatedDate[aggregatedDate.length - 1].push(data);
+        aggregatedData[aggregatedData.length - 1].push(data);
     }
 
-    return aggregatedDate;
+    return aggregatedData;
 }
 
 function getTotalDays() {
-    const firstDate = truncDate(new Date(2000,0,1));
+    const firstDate = truncDate(new Date(2000, 0, 1));
     const today = truncDate(Date.now());
     const difference = today.getTime() - firstDate.getTime();
     return millisToDays(difference);
 }
 
-function calculateLabelPositions(data) {
+function calculateLabelPositions(data: DataPoint[]) {
     const numberOfLabels = data.length == 7 ? 7 : 6
     return getVisibleLabelIndices(data, numberOfLabels);
 }
 
-function UnitSelector({options, unit, onChange}) {
+type UnitSelectorProps = {
+    options: PeriodUnit[],
+    unit: PeriodUnit,
+    onChange: (unit: PeriodUnit) => void,
+};
+
+function UnitSelector({options, unit, onChange}: UnitSelectorProps) {
     return (
         <Select
             style={{minWidth: '130px'}}
             size={'small'}
             value={unit.key}
-            onChange={e => onChange(options.find(o => o.key === e.target.value))}
+            onChange={e => onChange(options.find(o => o.key === e.target.value) as PeriodUnit)}
         >
             {options.map((option) => (
                 <MenuItem key={option.key}
@@ -137,10 +174,10 @@ function UnitSelector({options, unit, onChange}) {
 const totalDays = getTotalDays();
 
 function WanikaniReviewsHistoryChart() {
-    const [rawData, setRawData] = useState([]);
+    const [rawData, setRawData] = useState<WkReviewSubject[]>([]);
     const [daysToLookBack, setDaysToLookBack] = useState(30);
     const [isLoading, setIsLoading] = useState(false);
-    const [tooltipTargetItem, setTooltipTargetItem] = useState();
+    const [tooltipTargetItem, setTooltipTargetItem] = useState<SeriesRef>();
     const [unit, setUnit] = useState(units.days);
 
     useEffect(() => {
@@ -154,23 +191,26 @@ function WanikaniReviewsHistoryChart() {
                 setIsLoading(false);
             })
             .catch(console.error);
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, []);
 
-    const chartData = useMemo(() => rawData.length == 0 ? [] :
+    const chartData: DataPoint[] = useMemo(() => rawData.length == 0 ? [] :
         aggregateDate(rawData, daysToLookBack, unit), [rawData, daysToLookBack, unit])
 
     const ReviewsToolTip = useMemo(() => {
-        function getDateLabelText(date) {
+        function getDateLabelText(date: Date): string {
             if (unit.key === units.days.key)
                 return date.toLocaleDateString()
             else if (unit.key === units.weeks.key)
                 return date.toLocaleDateString()
             else if (unit.key === units.months.key)
                 return `${getMonthName(date, true)} ${date.getFullYear()}`
+            return '';
         }
 
-        return function ReviewsToolTip({targetItem}) {
+        return function ReviewsToolTip({targetItem}: TooltipBase.ContentProps) {
             const data = chartData[targetItem.point];
             return (
                 <>
@@ -189,13 +229,13 @@ function WanikaniReviewsHistoryChart() {
     const LabelWithDate = useMemo(() => {
         const visibleLabelIndices = calculateLabelPositions(chartData);
 
-        return function LabelWithDate(props) {
+        return function LabelWithDate(props: ValueAxisBase.LabelProps) {
             const date = props.text;
             if (!date) {
                 return (<></>);
             }
 
-            const index = chartData.findIndex(d => d.date === date);
+            const index = chartData.findIndex(d => new Date(d.date).getTime() === new Date(date).getTime());
 
             if (!visibleLabelIndices.includes(index)) {
                 return (<></>);
@@ -257,6 +297,7 @@ function WanikaniReviewsHistoryChart() {
 
                     {!isLoading ? (
                         <div style={{flexGrow: '1'}}>
+                            {/*@ts-ignore*/}
                             <Chart data={chartData}>
                                 <ArgumentScale factory={scaleBand}/>
                                 <ArgumentAxis labelComponent={LabelWithDate}/>
@@ -289,7 +330,10 @@ function WanikaniReviewsHistoryChart() {
 
                                 <EventTracker/>
                                 <Tooltip
-                                    targetItem={tooltipTargetItem ? {...tooltipTargetItem, series: 'vocabulary'} : null}
+                                    targetItem={tooltipTargetItem ? {
+                                        ...tooltipTargetItem,
+                                        series: 'vocabulary'
+                                    } : undefined}
                                     onTargetItemChange={setTooltipTargetItem}
                                     contentComponent={ReviewsToolTip}
                                 />

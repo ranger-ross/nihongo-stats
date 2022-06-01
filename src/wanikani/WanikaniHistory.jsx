@@ -3,7 +3,7 @@ import {RoutePaths} from "../Routes";
 import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart.tsx";
 import {Card, CircularProgress, Typography} from "@mui/material";
 import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart.tsx";
-import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart.jsx";
+import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart.tsx";
 import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart.tsx";
 import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart.tsx";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";

@@ -1,13 +1,13 @@
 import {Card, CardContent} from "@mui/material";
-import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
+import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
 import {useEffect, useState} from "react";
-import AnkiDeckSummaries from "./AnkiDeckSummaries.tsx";
-import {fetchAnkiDeckSummaries} from "../service/AnkiDataUtil.ts";
+import AnkiDeckSummaries from "./AnkiDeckSummaries";
+import {AnkiDeckSummary, fetchAnkiDeckSummaries} from "../service/AnkiDataUtil";
 
 
 function AnkiDeckSummariesTile() {
     const {selectedDecks} = useSelectedAnkiDecks();
-    const [deckData, setDeckData] = useState([]);
+    const [deckData, setDeckData] = useState<AnkiDeckSummary[]>([]);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -18,7 +18,9 @@ function AnkiDeckSummariesTile() {
                     return;
                 setDeckData(data);
             });
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, [selectedDecks]);
 
 

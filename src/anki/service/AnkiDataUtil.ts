@@ -38,7 +38,7 @@ async function fetchDeckSummary(deckName: string): Promise<AnkiDeckSummary> {
     };
 }
 
-export async function fetchAnkiDeckSummaries(decks: string[]) {
+export async function fetchAnkiDeckSummaries(decks: string[]): Promise<AnkiDeckSummary[]> {
     const requests = [];
     for (const deck of decks) {
         requests.push(fetchDeckSummary(deck));

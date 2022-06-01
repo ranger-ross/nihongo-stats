@@ -1,33 +1,41 @@
 import * as React from 'react';
-import {
-    Chart, Legend, Tooltip, ValueAxis, ArgumentAxis,
-} from '@devexpress/dx-react-chart-material-ui';
+import {useEffect, useState} from 'react';
+import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import {useEffect, useState} from "react";
-import {Animation, ArgumentScale, BarSeries, EventTracker, Stack} from "@devexpress/dx-react-chart";
-import AnkiApiService from "../service/AnkiApiService.ts";
+import {
+    Animation,
+    ArgumentAxis as ArgumentAxisBase,
+    ArgumentScale,
+    BarSeries,
+    EventTracker,
+    Stack
+} from "@devexpress/dx-react-chart";
+import AnkiApiService from "../service/AnkiApiService";
+// @ts-ignore
 import {scaleBand} from 'd3-scale';
-import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
-import {truncDate} from "../../util/DateUtils.ts";
-import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
-import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import {createAnkiCardsDueQuery} from "../service/AnkiDataUtil.ts";
+import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
+import {truncDate} from "../../util/DateUtils";
+import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import PeriodSelector from "../../shared/PeriodSelector";
+import {createAnkiCardsDueQuery} from "../service/AnkiDataUtil";
 
-function DataPoint(day) {
-    let data = {
+type DataPoint = any;
+
+function dataPoint(day: number): DataPoint {
+    const data: DataPoint = {
         day,
         date: truncDate(Date.now() + (1000 * 60 * 60 * 24 * day))
     };
 
-    data.addDueCards = (deck, cards) => {
+    data.addDueCards = (deck: string, cards: any[]) => {
         data[deck] = cards.length;
     };
 
     return data;
 }
 
-async function fetchData(decks, numberOfDays) {
-    let actions = [];
+async function fetchData(decks: string[], numberOfDays: number): Promise<DataPoint[]> {
+    const actions = [];
     for (let i = 0; i < numberOfDays; i++) {
         for (const deck of decks) {
             actions.push(createAnkiCardsDueQuery(deck, i));
@@ -36,10 +44,10 @@ async function fetchData(decks, numberOfDays) {
 
     const listOfListDueCards = await AnkiApiService.sendMultiRequest(actions);
 
-    let data = [new DataPoint(0)];
+    const data = [dataPoint(0)];
     for (let i = 0; i < listOfListDueCards.length; i++) {
         if (i % decks.length === 0 && i != 0) {
-            data.push(new DataPoint(data[data.length - 1].day + 1));
+            data.push(dataPoint(data[data.length - 1].day + 1));
         }
         const dp = data[data.length - 1];
         const deck = decks[i % decks.length];
@@ -48,10 +56,12 @@ async function fetchData(decks, numberOfDays) {
     return data;
 }
 
+type ChartData = { data: DataPoint[], decks: string[]}
+
 function AnkiUpcomingReviewsChart() {
     const {selectedDecks} = useSelectedAnkiDecks();
     const [days, setDays] = useState(14);
-    const [chartData, setChartData] = useState();
+    const [chartData, setChartData] = useState<ChartData>();
 
     useEffect(() => {
         let isSubscribed = true;
@@ -60,7 +70,7 @@ function AnkiUpcomingReviewsChart() {
             return;
 
         if (selectedDecks?.length != chartData?.decks?.length) {
-            setChartData(null);
+            setChartData(undefined);
         }
 
         fetchData(selectedDecks, days)
@@ -72,18 +82,20 @@ function AnkiUpcomingReviewsChart() {
                     decks: selectedDecks
                 });
             });
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, [selectedDecks, days]);
 
     const visibleLabelIndices = getVisibleLabelIndices(chartData?.data ?? [], 20);
 
-    function LabelWithDate(props) {
+    function LabelWithDate(props: ArgumentAxisBase.LabelProps) {
         const dateAsString = props.text;
         if (!dateAsString) {
             return (<></>);
         }
         const date = new Date(dateAsString)
-        const index = chartData.data.findIndex(d => d.date.getTime() === date.getTime());
+        const index = (chartData as ChartData).data.findIndex(d => d.date.getTime() === date.getTime());
         if (!visibleLabelIndices.includes(index)) {
             return (<></>);
         }
@@ -96,12 +108,12 @@ function AnkiUpcomingReviewsChart() {
         );
     }
 
-    function ReviewsToolTip({targetItem}) {
-        const data = chartData.data[targetItem.point];
+    function ReviewsToolTip({targetItem}: Tooltip.ContentProps) {
+        const data = (chartData as ChartData).data[targetItem.point];
         return (
             <>
                 <p>Date: {data.date.toLocaleDateString()}</p>
-                {chartData.decks.map(deck => (
+                {(chartData as ChartData).decks.map(deck => (
                     <p key={deck}>{deck}: {data[deck]}</p>
                 ))}
             </>
@@ -141,12 +153,13 @@ function AnkiUpcomingReviewsChart() {
                         <CircularProgress style={{margin: '100px'}}/>
                     </div>
                 ) : (
-                    <Chart data={chartData.data} height={800}>
+                    // @ts-ignore
+                    <Chart data={(chartData as ChartData).data} height={800}>
                         <ArgumentScale factory={scaleBand}/>
                         <ArgumentAxis labelComponent={LabelWithDate}/>
                         <ValueAxis/>
 
-                        {chartData.decks?.map(deck => (
+                        {(chartData as ChartData).decks?.map(deck => (
                             <BarSeries
                                 key={deck}
                                 name={deck}
@@ -156,7 +169,7 @@ function AnkiUpcomingReviewsChart() {
                         ))}
 
                         <Stack
-                            stacks={[{series: chartData.decks}]}
+                            stacks={[{series: (chartData as ChartData).decks}]}
                         />
 
                         <Animation/>

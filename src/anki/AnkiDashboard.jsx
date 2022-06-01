@@ -1,7 +1,7 @@
 import AnkiDeckSummariesTile from "./components/AnkiDeckSummariesTile.tsx";
 import AnkiCardBreakDownChart from "./components/AnkiCardBreakDownChart.tsx";
 import AnkiApiProvider from "./components/AnkiApiProvider.tsx";
-import AnkiUpcomingReviewsChart from "./components/AnkiUpcomingReviewsChart.jsx";
+import AnkiUpcomingReviewsChart from "./components/AnkiUpcomingReviewsChart.tsx";
 
 const styles = {
     container: {

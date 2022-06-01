@@ -1,7 +1,12 @@
 import create from "zustand";
 import {persist} from "zustand/middleware"
 
-export const useSelectedAnkiDecks = create(persist(
+type SelectedAnkiDecksState = {
+    selectedDecks: string[],
+    setSelectedDecks: (decks: string[]) => void
+}
+
+export const useSelectedAnkiDecks = create(persist<SelectedAnkiDecksState>(
     (set) => ({
         selectedDecks: [],
         setSelectedDecks: (decks: string[]) => set(() => {

@@ -1,5 +1,5 @@
 import AnkiDeckSummariesTile from "./components/AnkiDeckSummariesTile.tsx";
-import AnkiCardBreakDownChart from "./components/AnkiCardBreakDownChart.jsx";
+import AnkiCardBreakDownChart from "./components/AnkiCardBreakDownChart.tsx";
 import AnkiApiProvider from "./components/AnkiApiProvider.tsx";
 import AnkiUpcomingReviewsChart from "./components/AnkiUpcomingReviewsChart.jsx";
 

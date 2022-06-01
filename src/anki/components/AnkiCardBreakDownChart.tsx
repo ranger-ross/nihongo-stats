@@ -1,11 +1,19 @@
 import {Card, CardContent} from "@mui/material";
 import {useEffect, useState} from "react";
-import AnkiApiService from "../service/AnkiApiService.ts";
-import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks.tsx";
+import AnkiApiService from "../service/AnkiApiService";
+import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
 import {Chart, PieSeries, Legend, Title} from '@devexpress/dx-react-chart-material-ui';
 import {AnkiColors} from "../../Constants";
+import * as React from "react";
+import {Legend as LegendBase} from "@devexpress/dx-react-chart";
 
-async function fetchCardBreakDownData(decks) {
+type StageBreakDown = {
+    type: string,
+    color: string,
+    count: number,
+}
+
+async function fetchCardBreakDownData(decks: string[]): Promise<StageBreakDown[]> {
     const query = decks
         .map(deck => `deck:"${deck}"`)
         .join(" OR ")
@@ -25,10 +33,11 @@ async function fetchCardBreakDownData(decks) {
     ];
 }
 
+type LegendMarkerProps = object & { className?: string; style?: React.CSSProperties; [x: string]: any };
 
 function AnkiCardBreakDownChart() {
     const {selectedDecks} = useSelectedAnkiDecks();
-    const [data, setData] = useState([]);
+    const [data, setData] = useState<StageBreakDown[]>([]);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -40,12 +49,15 @@ function AnkiCardBreakDownChart() {
                     setData(_data);
                 });
         }
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        }
     }, [selectedDecks]);
 
     return (
         <Card>
             <CardContent>
+                {/*@ts-ignore*/}
                 <Chart data={data} height={600}>
                     <Title text={'Card Breakdown'}/>
                     <PieSeries
@@ -58,14 +70,14 @@ function AnkiCardBreakDownChart() {
                         )}
                     />
                     <Legend position={'bottom'}
-                            markerComponent={(props) => (
+                            markerComponent={(props: LegendMarkerProps) => (
                                 <Legend.Marker {...props}
-                                               color={data.find(({type}) => type === props.name).color}
+                                               color={(data.find(({type}) => type === props.name) as StageBreakDown).color}
                                 />
                             )}
-                            labelComponent={(props) => (
+                            labelComponent={(props: LegendBase.LabelProps) => (
                                 <Legend.Label {...props}
-                                              text={`${props.text}  -  ${data.find(({type}) => type === props.text).count}`}
+                                              text={`${props.text}  -  ${(data.find(({type}) => type === props.text) as StageBreakDown).count}`}
                                 />
                             )}
                     />

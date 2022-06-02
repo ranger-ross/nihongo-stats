@@ -1,28 +1,45 @@
-import {Chart, ValueAxis, ArgumentAxis, Tooltip, Legend} from '@devexpress/dx-react-chart-material-ui';
-import {useState, useEffect, useMemo} from "react";
-import {ArgumentScale, BarSeries, Stack} from "@devexpress/dx-react-chart";
+import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
+import React, {useEffect, useMemo, useState} from "react";
 import {
-    AnkiColors,
-    AppNames,
-    BunProColors,
-    WanikaniColors
-} from '../../Constants';
-import {Card, CardContent, Typography, Grid, CircularProgress} from "@mui/material";
-import {EventTracker} from "@devexpress/dx-react-chart";
+    ArgumentAxis as ArgumentAxisBase,
+    ArgumentScale,
+    BarSeries,
+    EventTracker,
+    SeriesRef,
+    Stack
+} from "@devexpress/dx-react-chart";
+import {AnkiColors, AppNames, BunProColors, WanikaniColors} from '../../Constants';
+import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
+// @ts-ignore
 import {scaleBand} from 'd3-scale';
-import React from 'react';
-import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
-import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import WanikaniApiService from "../../wanikani/service/WanikaniApiService.ts";
-import {daysToMillis, truncDate} from "../../util/DateUtils.ts";
-import AnkiApiService from "../../anki/service/AnkiApiService.ts";
-import {useAnkiDecks} from "../../hooks/useAnkiDecks.tsx";
-import {fetchAllBunProReviews} from "../../bunpro/service/BunProDataUtil.ts";
-import {useAnkiConnection} from "../../hooks/useAnkiConnection.tsx";
-import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil.ts";
+import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import PeriodSelector from "../../shared/PeriodSelector";
+import WanikaniApiService from "../../wanikani/service/WanikaniApiService";
+import {daysToMillis, truncDate} from "../../util/DateUtils";
+import AnkiApiService from "../../anki/service/AnkiApiService";
+import {useAnkiDecks} from "../../hooks/useAnkiDecks";
+import {fetchAllBunProReviews, RawBunProFlattenedReviewWithLevel} from "../../bunpro/service/BunProDataUtil";
+import {useAnkiConnection} from "../../hooks/useAnkiConnection";
+import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil";
+import {AnkiReview} from "../../anki/models/AnkiReview";
+import {RawWanikaniSubject} from "../../wanikani/models/raw/RawWanikaniSubject";
+import {RawWanikaniReview} from "../../wanikani/models/raw/RawWanikaniReview";
 
-function DataPoint(date) {
-    let data = {
+type DataPoint = {
+    date: Date,
+    ankiData: any[],
+    anki: number,
+    bunProData: any[],
+    bunPro: number,
+    wanikaniData: any[],
+    wanikani: number,
+    addAnki: (d: any) => void,
+    addBunPro: (d: any) => void,
+    addWanikani: (d: any) => void,
+};
+
+function dataPoint(date: Date): DataPoint {
+    const data: DataPoint = {
         date: date,
         ankiData: [],
         anki: 0,
@@ -30,6 +47,9 @@ function DataPoint(date) {
         bunPro: 0,
         wanikaniData: [],
         wanikani: 0,
+        addAnki: (d: any) => null,
+        addBunPro: (d: any) => null,
+        addWanikani: (d: any) => null,
     };
 
     data.addAnki = (d) => {
@@ -50,10 +70,16 @@ function DataPoint(date) {
     return data;
 }
 
-async function fetchWanikaniData() {
+type WKData = {
+    date: Date,
+    review: RawWanikaniReview,
+    subject: RawWanikaniSubject
+};
+
+async function fetchWanikaniData(): Promise<WKData[]> {
     const reviews = await WanikaniApiService.getReviews();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    let data = [];
+    const data: WKData[] = [];
     for (const review of reviews) {
         data.push({
             date: new Date(review['data_updated_at']),
@@ -65,11 +91,11 @@ async function fetchWanikaniData() {
     return data;
 }
 
-function addAppNameToReviewData(data, appName) {
+function addAppNameToReviewData(data: any[], appName: string) {
     return data.map(review => ({...review, appName}));
 }
 
-function aggregateDate(ankiReviews, bunProReviews, wanikaniReviews, daysToLookBack) {
+function aggregateDate(ankiReviews: any[], bunProReviews: any[], wanikaniReviews: any[], daysToLookBack: number) {
     const reviews = [
         ...(bunProReviews ? addAppNameToReviewData(bunProReviews, AppNames.bunpro) : []),
         ...(ankiReviews ? addAppNameToReviewData(ankiReviews, AppNames.anki) : []),
@@ -83,10 +109,10 @@ function aggregateDate(ankiReviews, bunProReviews, wanikaniReviews, daysToLookBa
         return [];
     }
 
-    let aggregatedDate = [new DataPoint(truncDate(reviews[0].date))];
+    const aggregatedDate = [dataPoint(truncDate(reviews[0].date))];
     for (const data of reviews) {
         if (aggregatedDate[aggregatedDate.length - 1].date.getTime() != truncDate(data.date).getTime()) {
-            aggregatedDate.push(new DataPoint(truncDate(data.date)));
+            aggregatedDate.push(dataPoint(truncDate(data.date)));
         }
 
         const lastDay = aggregatedDate[aggregatedDate.length - 1];
@@ -103,8 +129,12 @@ function aggregateDate(ankiReviews, bunProReviews, wanikaniReviews, daysToLookBa
     return aggregatedDate;
 }
 
-async function fetchAnkiReviews(ankiDecks) {
-    let reviewPromises = [];
+type AnkiDateReview = AnkiReview & {
+    date: Date
+}
+
+async function fetchAnkiReviews(ankiDecks: string[]): Promise<AnkiDateReview[]> {
+    const reviewPromises: Promise<AnkiReview[]>[] = [];
     ankiDecks.forEach(name => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
     const data = await Promise.all(reviewPromises)
     return data
@@ -115,14 +145,18 @@ async function fetchAnkiReviews(ankiDecks) {
         }));
 }
 
-async function fetchBunProData() {
+type BPData = RawBunProFlattenedReviewWithLevel & {
+    date: Date
+};
+
+async function fetchBunProData(): Promise<BPData[]> {
     const reviews = await fetchAllBunProReviews();
     return reviews
         .map(review => ({...review, date: new Date(review.current.time)}))
         .sort((a, b,) => a.date.getTime() - b.date.getTime());
 }
 
-function calculateLabelPositions(data) {
+function calculateLabelPositions(data: any[]) {
     const numberOfLabels = data.length == 7 ? 7 : 6
     return getVisibleLabelIndices(data, numberOfLabels);
 }
@@ -134,13 +168,13 @@ function OverviewReviewsHistoryChart() {
 
     const isAnkiConnected = useAnkiConnection();
 
-    const [toolTipTargetItem, setToolTipTargetItem] = useState();
+    const [toolTipTargetItem, setToolTipTargetItem] = useState<SeriesRef>();
     const [daysToLookBack, setDaysToLookBack] = useState(30);
-    const {ankiDecks} = useAnkiDecks();
+    const {decks: ankiDecks} = useAnkiDecks();
 
-    const [ankiReviews, setAnkiReviews] = useState([]);
-    const [bunProReviews, setBunProReviews] = useState([]);
-    const [wanikaniReviews, setWanikaniReviews] = useState([]);
+    const [ankiReviews, setAnkiReviews] = useState<AnkiDateReview[]>([]);
+    const [bunProReviews, setBunProReviews] = useState<BPData[]>([]);
+    const [wanikaniReviews, setWanikaniReviews] = useState<WKData[]>([]);
 
     const [isAnkiLoading, setIsAnkiLoading] = useState(false);
     const [isBunProLoading, setIsBunProLoading] = useState(false);
@@ -166,7 +200,9 @@ function OverviewReviewsHistoryChart() {
                 setIsWanikaniLoading(false);
             })
             .catch(console.error);
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, []);
 
 
@@ -181,7 +217,9 @@ function OverviewReviewsHistoryChart() {
                 setIsBunProLoading(false);
             })
             .catch(console.error);
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        }
     }, []);
 
     useEffect(() => {
@@ -201,27 +239,39 @@ function OverviewReviewsHistoryChart() {
                 setAnkiReviews(reviews);
             })
             .finally(() => setIsAnkiLoading(false));
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, [ankiDecks, isAnkiConnected]);
 
     const showAnkiSeries = isAnkiConnected && !!ankiReviews && ankiReviews.length > 0;
     const showBunProSeries = !!bunProReviews && bunProReviews.length > 0;
     const showWanikaniSeries = !!wanikaniReviews && wanikaniReviews.length > 0;
 
-    function onTooltipChange(target) {
+    function onTooltipChange(target: SeriesRef) {
+        let newTarget = target;
         if (target?.point) {
             if (showWanikaniSeries && chartData[target.point].wanikani > 0) {
-                target.series = wanikaniSeriesName;
+                newTarget = {
+                    ...target,
+                    series: wanikaniSeriesName
+                }
             } else if (showBunProSeries && chartData[target.point].bunPro > 0) {
-                target.series = bunProSeriesName;
+                newTarget = {
+                    ...target,
+                    series: bunProSeriesName
+                }
             } else if (showAnkiSeries && chartData[target.point].anki > 0) {
-                target.series = ankiSeriesName;
+                newTarget = {
+                    ...target,
+                    series: ankiSeriesName
+                }
             }
         }
-        setToolTipTargetItem(target);
+        setToolTipTargetItem(newTarget);
     }
 
-    function ReviewsToolTip({targetItem}) {
+    function ReviewsToolTip({targetItem}: Tooltip.ContentProps) {
         const dp = chartData[targetItem.point];
         return (
             <>
@@ -236,13 +286,13 @@ function OverviewReviewsHistoryChart() {
 
     const visibleLabelIndices = calculateLabelPositions(chartData);
 
-    function LabelWithDate(props) {
+    function LabelWithDate(props: ArgumentAxisBase.LabelProps) {
         const date = props.text;
         if (!date) {
             return (<></>);
         }
 
-        const index = chartData.findIndex(d => d.date === date);
+        const index = chartData.findIndex(d => new Date(d.date).getTime() === new Date(date).getTime());
 
         if (!visibleLabelIndices.includes(index)) {
             return (<></>);
@@ -295,6 +345,7 @@ function OverviewReviewsHistoryChart() {
 
                     {!isLoading && !!chartData ? (
                         <div style={{flexGrow: '1'}}>
+                            {/*@ts-ignore*/}
                             <Chart data={chartData}>
                                 <ArgumentScale factory={scaleBand}/>
                                 <ArgumentAxis labelComponent={LabelWithDate}/>

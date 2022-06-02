@@ -1,4 +1,4 @@
-import OverviewReviewsHistoryChart from "./components/OverviewReviewHistoryChart.jsx";
+import OverviewReviewsHistoryChart from "./components/OverviewReviewHistoryChart.tsx";
 
 const styles = {
     container: {

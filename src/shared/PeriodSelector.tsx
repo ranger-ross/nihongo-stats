@@ -1,8 +1,13 @@
 import {ToggleButton, ToggleButtonGroup} from "@mui/material";
 import React from "react";
 
+type Option = {
+    text: string,
+    value: number
+};
+
 type Props = {
-    options: { text: string, value: number }[],
+    options: (Option | null)[],
     period: number,
     setPeriod: (v: number) => void
 };
@@ -18,7 +23,8 @@ function PeriodSelector({options, period, setPeriod}: Props) {
         >
             {options
                 .filter(option => !!option)
-                .map(option => (
+                .map(option => option as Option)
+                .map((option: Option) => (
                     <ToggleButton key={option.value}
                                   value={option.value}
                     >

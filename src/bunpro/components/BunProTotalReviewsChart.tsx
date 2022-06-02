@@ -2,23 +2,25 @@ import * as React from 'react';
 import {useEffect, useMemo, useState} from 'react';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import {ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
-import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.ts";
+import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
+import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
+// @ts-ignore
 import {scaleBand} from 'd3-scale';
-import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
-import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import {fetchAllBunProReviews} from "../service/BunProDataUtil.ts";
-import useWindowDimensions from "../../hooks/useWindowDimensions.tsx";
+import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import PeriodSelector from "../../shared/PeriodSelector";
+import {fetchAllBunProReviews, RawBunProFlattenedReviewWithLevel} from "../service/BunProDataUtil";
+import useWindowDimensions from "../../hooks/useWindowDimensions";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
+type DataPoint = any;
 
-function DataPoint(date, previousDataPoint) {
+function dataPoint(date: Date, previousDataPoint?: DataPoint): DataPoint {
     const createEmptyDataPoint = () => ({
         total: 0,
     });
 
-    let dp = createEmptyDataPoint();
+    let dp: DataPoint = createEmptyDataPoint();
 
     if (!!previousDataPoint) {
         dp = {...previousDataPoint};
@@ -26,7 +28,7 @@ function DataPoint(date, previousDataPoint) {
 
     dp.date = truncDate(date);
 
-    dp.addReview = (review) => {
+    dp.addReview = (review: RawBunProFlattenedReviewWithLevel) => {
         dp.total += 1;
 
         const level = review.level;
@@ -40,15 +42,15 @@ function DataPoint(date, previousDataPoint) {
 }
 
 
-function aggregateReviewByDay(reviews) {
+function aggregateReviewByDay(reviews: RawBunProFlattenedReviewWithLevel[]): DataPoint[] {
     const orderedReviews = reviews.sort((a, b,) => a.current.time.getTime() - b.current.time.getTime());
 
-    let days = [new DataPoint(orderedReviews[0].current.time)];
+    const days = [dataPoint(orderedReviews[0].current.time)];
 
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
         if (lastDay.date.getTime() !== truncDate(review.current.time).getTime()) {
-            days.push(new DataPoint(review.current.time, lastDay));
+            days.push(dataPoint(review.current.time, lastDay));
             lastDay = days[days.length - 1];
         }
         lastDay.addReview(review);
@@ -62,7 +64,7 @@ async function fetchData() {
 }
 
 function BunProTotalReviewsChart() {
-    const [rawData, setRawData] = useState(null);
+    const [rawData, setRawData] = useState<DataPoint[]>();
     const [isLoading, setIsLoading] = useState(false);
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
     const {width} = useWindowDimensions();
@@ -85,12 +87,16 @@ function BunProTotalReviewsChart() {
                 setIsLoading(false);
             });
 
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, []);
 
     const chartData = useMemo(() => rawData?.filter(day => day.date.getTime() > Date.now() - (daysToMillis(daysToLookBack))), [rawData, daysToLookBack]);
 
-    function ReviewToolTip({targetItem}) {
+    function ReviewToolTip({targetItem}: Tooltip.ContentProps) {
+        if (!chartData)
+            return <></>;
         const dp = chartData[targetItem.point];
         return (
             <>
@@ -106,9 +112,9 @@ function BunProTotalReviewsChart() {
 
     const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], isMobile ? 3 : 6);
 
-    function LabelWithDate(props) {
+    function LabelWithDate(props: ArgumentAxisBase.LabelProps) {
         const date = new Date(props.text);
-        if (!date) {
+        if (!date || !chartData) {
             return (<></>)
         }
 
@@ -162,6 +168,7 @@ function BunProTotalReviewsChart() {
                     </div>
                 ) : (
                     !!chartData ? (
+                        // @ts-ignore
                         <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

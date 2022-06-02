@@ -2,7 +2,7 @@ import {RoutePaths} from "../Routes";
 import BunProPreloadedData from "./components/BunProPreloadedData.tsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
 import BunProReviewsHistoryChart from "./components/BunProReviewsHistoryChart.tsx";
-import BunProTotalReviewsChart from "./components/BunProTotalReviewsChart.jsx";
+import BunProTotalReviewsChart from "./components/BunProTotalReviewsChart.tsx";
 import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
 import BunProTotalGrammarPointsChart from "./components/BunProTotalGrammarPointsChart.tsx";
 

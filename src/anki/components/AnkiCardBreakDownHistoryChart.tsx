@@ -7,8 +7,6 @@ import AnkiApiService from "../service/AnkiApiService";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 // @ts-ignore
 import {scaleBand} from 'd3-scale';
-// @ts-ignore
-import {area, curveCatmullRom,} from 'd3-shape';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {AreaSeries, ArgumentScale, EventTracker, Stack, ValueAxis as ValueAxisBase} from "@devexpress/dx-react-chart";
 

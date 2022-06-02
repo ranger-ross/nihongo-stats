@@ -47,8 +47,11 @@ function dataPoint(date: Date): DataPoint {
         bunPro: 0,
         wanikaniData: [],
         wanikani: 0,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         addAnki: (d: any) => null,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         addBunPro: (d: any) => null,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         addWanikani: (d: any) => null,
     };
 

@@ -75,6 +75,7 @@ function dataPoint(date: Date, unit: UpcomingReviewUnit, reviews: any[], previou
         wanikaniCount: 0,
         ankiCount: 0,
         total: reviews.length,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         addReview: (appName: string) => null
     };
 

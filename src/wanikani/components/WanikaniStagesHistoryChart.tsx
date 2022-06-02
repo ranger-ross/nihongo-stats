@@ -15,8 +15,6 @@ import {
 } from "@devexpress/dx-react-chart";
 import {WanikaniColors} from "../../Constants";
 // @ts-ignore
-import {area, curveCatmullRom} from 'd3-shape';
-// @ts-ignore
 import {scaleBand} from 'd3-scale';
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
@@ -89,8 +87,10 @@ function dataPoint(date: Date, previousDataPoint = {}) {
 
         ...previousDataPoint, // Continue counts from previous day
         date: date,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         reset: reset => {// TODO: fix dummy method, this is added to fix typing
         },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         push: data => {// TODO: fix dummy method, this is added to fix typing
         },
     };

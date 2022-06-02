@@ -69,7 +69,8 @@ function dataPoint(date: Date) {
         radicals: 0,
         kanji: 0,
         vocabulary: 0,
-        push: (d: any) => null,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        push: (_: any) => null,
     };
 
     data.push = (d) => {

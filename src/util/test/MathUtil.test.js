@@ -1,4 +1,4 @@
-import {sortAndGetMedian} from "../MathUtils.js";
+import {sortAndGetMedian} from "../MathUtils";
 
 describe('MathUtils', function () {
     describe('getMedian()', function () {

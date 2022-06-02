@@ -3,6 +3,7 @@ import {WanikaniUser} from "../models/WanikaniUser";
 import {RawWanikaniReset} from "../models/raw/RawWanikaniReset";
 import {WanikaniReset} from "../models/WanikaniReset";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function mapWanikaniUser(rawUser: RawWanikaniUser): WanikaniUser {
     return {
         id: rawUser.data.id,

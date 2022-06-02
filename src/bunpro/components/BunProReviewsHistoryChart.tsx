@@ -94,6 +94,7 @@ function dataPoint(date: Date, unit: ReviewUnit) {
         N3: 0,
         N2: 0,
         N1: 0,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         addReview: (review) => null
     };
 

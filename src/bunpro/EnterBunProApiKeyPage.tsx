@@ -1,12 +1,14 @@
 import {Alert, Button, Grid, Link, Snackbar, TextField, Typography} from "@mui/material";
 import {useState} from "react";
 import {useNavigate} from "react-router";
+// @ts-ignore
 import {RoutePaths} from "../Routes";
-import BunProApiService from "./service/BunProApiService.ts";
-import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
+import BunProApiService from "./service/BunProApiService";
+import {useBunProApiKey} from "../hooks/useBunProApiKey";
+import {AppStyles} from "../util/TypeUtils";
 
 
-const styles = {
+const styles: AppStyles = {
     container: {
         minHeight: '70vh'
     },
@@ -25,7 +27,7 @@ function EnterBunProApiKeyPage() {
     const [textfieldValue, setTextfieldValue] = useState('');
     const [isFailure, setIsFailure] = useState(false);
 
-    const verifyAndSetApiKey = (key) => {
+    const verifyAndSetApiKey = (key: string) => {
         BunProApiService.login(key)
             .then(user => {
                 console.log('Logged in to BunPro', user);

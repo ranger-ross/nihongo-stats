@@ -13,7 +13,7 @@ const styles = {
 
 type Props = {
     title: string,
-    value: string | number
+    value?: string | number
 };
 
 function ToolTipLabel({title, value}: Props) {

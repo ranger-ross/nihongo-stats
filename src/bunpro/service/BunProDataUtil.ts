@@ -10,8 +10,18 @@ export function createGrammarPointsLookupMap(grammarPoints: RawBunProGrammarPoin
     return map;
 }
 
-export function flattenReview(review: RawBunProReview) {
-    const data = [];
+export type RawBunProFlattenedReview = RawBunProReview & {
+    current: {
+        id: number
+        status: boolean
+        attempts: number
+        streak: number
+        time: Date
+    }
+}
+
+export function flattenReview(review: RawBunProReview): RawBunProFlattenedReview[] {
+    const data: RawBunProFlattenedReview[] = [];
 
     for (const history of review.history) {
         data.push({
@@ -26,7 +36,11 @@ export function flattenReview(review: RawBunProReview) {
     return data;
 }
 
-export async function fetchAllBunProReviews(grammarPoints: RawBunProGrammarPoint[] | null = null) {
+export type RawBunProFlattenedReviewWithLevel = RawBunProFlattenedReview & {
+    level: string
+};
+
+export async function fetchAllBunProReviews(grammarPoints: RawBunProGrammarPoint[] | null = null): Promise<RawBunProFlattenedReviewWithLevel[]> {
     const needToFetchGrammarPoints = !grammarPoints;
 
     let reviewsData;
@@ -44,7 +58,7 @@ export async function fetchAllBunProReviews(grammarPoints: RawBunProGrammarPoint
 
     const grammarPointsLookupMap = createGrammarPointsLookupMap(grammarPoints as RawBunProGrammarPoint[]);
 
-    const reviews = [];
+    const reviews: RawBunProFlattenedReviewWithLevel[] = [];
 
     for (const review of reviewsData.reviews) {
         const grammarPoint = grammarPointsLookupMap[review['grammar_point_id']];

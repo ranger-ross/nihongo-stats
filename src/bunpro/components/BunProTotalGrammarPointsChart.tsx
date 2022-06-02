@@ -2,23 +2,27 @@ import * as React from 'react';
 import {useEffect, useMemo, useState} from 'react';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import {ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
-import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.ts";
+import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
+import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
+// @ts-ignore
 import {scaleBand} from 'd3-scale';
-import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
-import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import useWindowDimensions from "../../hooks/useWindowDimensions.tsx";
-import BunProApiService from "../service/BunProApiService.ts";
-import {createGrammarPointsLookupMap} from "../service/BunProDataUtil.ts";
+import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import PeriodSelector from "../../shared/PeriodSelector";
+import useWindowDimensions from "../../hooks/useWindowDimensions";
+import BunProApiService from "../service/BunProApiService";
+import {createGrammarPointsLookupMap, RawBunProGrammarPointLookupMap} from "../service/BunProDataUtil";
+import {RawBunProReview} from "../models/raw/RawBunProReview";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
-function DataPoint(date, previousDataPoint) {
-    const createEmptyDataPoint = () => ({
+type DataPoint = any;
+
+function dataPoint(date: Date, previousDataPoint?: DataPoint): DataPoint {
+    const createEmptyDataPoint = (): any => ({
         total: 0,
     });
 
-    let dp = createEmptyDataPoint();
+    let dp: DataPoint = createEmptyDataPoint();
 
     if (!!previousDataPoint) {
         dp = {...previousDataPoint};
@@ -26,7 +30,7 @@ function DataPoint(date, previousDataPoint) {
 
     dp.date = truncDate(date);
 
-    dp.addReview = (level) => {
+    dp.addReview = (level: string) => {
         dp.total += 1;
         if (!!dp[level]) {
             dp[level] += 1;
@@ -38,7 +42,7 @@ function DataPoint(date, previousDataPoint) {
     return dp;
 }
 
-function aggregateReviewByDay(reviews, grammarPoints) {
+function aggregateReviewByDay(reviews: RawBunProReview[], grammarPoints: RawBunProGrammarPointLookupMap) {
     const orderedReviews = reviews
         .map(review => ({
             ...review,
@@ -47,12 +51,12 @@ function aggregateReviewByDay(reviews, grammarPoints) {
         .sort((a, b,) => a.createdAt.getTime() - b.createdAt.getTime());
 
 
-    let days = [new DataPoint(orderedReviews[0].createdAt)];
+    const days: DataPoint[] = [dataPoint(orderedReviews[0].createdAt)];
 
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
         if (lastDay.date.getTime() !== truncDate(review.createdAt).getTime()) {
-            days.push(new DataPoint(review.createdAt, lastDay));
+            days.push(dataPoint(review.createdAt, lastDay));
             lastDay = days[days.length - 1];
         }
         const gp = grammarPoints[review['grammar_point_id']]
@@ -73,18 +77,37 @@ async function fetchData() {
     return aggregateReviewByDay(reviews.reviews, grammarPoints);
 }
 
-function daysSinceDate(date) {
+function daysSinceDate(date: Date | number) {
     const millis = truncDate(Date.now()).getTime() - truncDate(date).getTime();
     return millisToDays(millis);
 }
 
+function useOptions(rawData?: DataPoint[]) {
+    const options = [
+        {value: 30, text: '1 Mon'},
+        {value: 60, text: '2 Mon'},
+        {value: 90, text: '3 Mon'},
+        {value: 180, text: '6 Mon'},
+        {value: 365, text: '1 Yr'}
+    ];
+
+    if (!!rawData) {
+        options.push({
+            value: millisToDays(Date.now() - rawData[0].date),
+            text: 'All'
+        });
+    }
+
+    return options
+}
+
 function BunProTotalGrammarPointsChart() {
-    const [rawData, setRawData] = useState(null);
+    const [rawData, setRawData] = useState<DataPoint[]>();
     const [isLoading, setIsLoading] = useState(false);
     const [daysToLookBack, setDaysToLookBack] = useState(60);
     const {width} = useWindowDimensions();
     const isMobile = width < 400;
-
+    const options = useOptions(rawData);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -106,12 +129,17 @@ function BunProTotalGrammarPointsChart() {
                 setIsLoading(false);
             });
 
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, []);
 
     const chartData = useMemo(() => rawData?.filter(day => day.date.getTime() > Date.now() - (daysToMillis(daysToLookBack))), [rawData, daysToLookBack]);
 
-    function ReviewToolTip({targetItem}) {
+    function ReviewToolTip({targetItem}: Tooltip.ContentProps) {
+        if (!chartData) {
+            return <></>;
+        }
         const dp = chartData[targetItem.point];
         const value = targetItem.series.toLowerCase() === 'total' ? dp.total : dp[targetItem.series];
         return (
@@ -124,9 +152,9 @@ function BunProTotalGrammarPointsChart() {
 
     const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], isMobile ? 3 : 6);
 
-    function LabelWithDate(props) {
+    function LabelWithDate(props: ArgumentAxisBase.LabelProps) {
         const date = new Date(props.text);
-        if (!date) {
+        if (!date || !chartData) {
             return (<></>)
         }
 
@@ -159,17 +187,7 @@ function BunProTotalGrammarPointsChart() {
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
                         <PeriodSelector period={daysToLookBack}
                                         setPeriod={setDaysToLookBack}
-                                        options={[
-                                            {value: 30, text: '1 Mon'},
-                                            {value: 60, text: '2 Mon'},
-                                            {value: 90, text: '3 Mon'},
-                                            {value: 180, text: '6 Mon'},
-                                            {value: 365, text: '1 Yr'},
-                                            !!rawData ? {
-                                                value: millisToDays(Date.now() - rawData[0].date),
-                                                text: 'All'
-                                            } : null
-                                        ]}
+                                        options={options}
                         />
                     </Grid>
                 </Grid>
@@ -180,6 +198,7 @@ function BunProTotalGrammarPointsChart() {
                     </div>
                 ) : (
                     !!chartData ? (
+                        // @ts-ignore
                         <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

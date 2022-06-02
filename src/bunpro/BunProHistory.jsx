@@ -4,7 +4,7 @@ import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
 import BunProReviewsHistoryChart from "./components/BunProReviewsHistoryChart.tsx";
 import BunProTotalReviewsChart from "./components/BunProTotalReviewsChart.jsx";
 import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
-import BunProTotalGrammarPointsChart from "./components/BunProTotalGrammarPointsChart.jsx";
+import BunProTotalGrammarPointsChart from "./components/BunProTotalGrammarPointsChart.tsx";
 
 
 function BunProHistory() {

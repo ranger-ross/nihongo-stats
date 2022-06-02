@@ -2,8 +2,10 @@ import BunProApiService from "./BunProApiService";
 import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
 import {RawBunProReview} from "../models/raw/RawBunProReview";
 
-export function createGrammarPointsLookupMap(grammarPoints: RawBunProGrammarPoint[]) {
-    const map: { [id: string]: RawBunProGrammarPoint } = {};
+export type RawBunProGrammarPointLookupMap = { [id: string]: RawBunProGrammarPoint }
+
+export function createGrammarPointsLookupMap(grammarPoints: RawBunProGrammarPoint[]): RawBunProGrammarPointLookupMap {
+    const map: RawBunProGrammarPointLookupMap = {};
     for (const grammarPoint of grammarPoints) {
         map[grammarPoint.id] = grammarPoint;
     }

@@ -1,5 +1,4 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
-// @ts-ignore
 import {RoutePaths} from "../Routes";
 import WanikaniLevelSummaryChart from "./components/WanikaniLevelSummaryChart";
 import WanikaniUpcomingReviewsChart from "./components/WanikaniUpcomingReviewsChart";

@@ -1,5 +1,4 @@
-// @ts-ignore
-import {RoutePaths} from "../Routes.js";
+import {RoutePaths} from "../Routes";
 import {useBunProApiKey} from "../hooks/useBunProApiKey";
 import {BunProWelcomeTile} from "./components/BunProWelcomeTile";
 import BunProPreloadedData from "./components/BunProPreloadedData";

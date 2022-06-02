@@ -1,7 +1,6 @@
 import {Box, Grid} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router";
-// @ts-ignore
 import {AllRoutes, convertAppNameToDashboardRoute} from '../Routes';
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
 import AppSelector, {AppOption} from "./components/AppSelector";

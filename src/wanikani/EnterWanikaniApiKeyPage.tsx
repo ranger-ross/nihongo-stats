@@ -3,7 +3,6 @@ import {useState} from "react";
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
 import WanikaniApiService from "./service/WanikaniApiService";
 import {useNavigate} from "react-router";
-// @ts-ignore
 import {RoutePaths} from "../Routes";
 import {AppStyles} from "../util/TypeUtils";
 

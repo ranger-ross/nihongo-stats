@@ -4,8 +4,7 @@ import {useSelectedApp} from "../hooks/useSelectedApp";
 import {AppNames} from "../Constants";
 import create from "zustand";
 import {useUserPreferences} from "../hooks/useUserPreferences";
-// @ts-ignore
-import {convertAppNameToDashboardRoute} from "../Routes.js";
+import {convertAppNameToDashboardRoute} from "../Routes";
 import {AppStyles} from "../util/TypeUtils";
 
 const styles: AppStyles = {

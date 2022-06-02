@@ -1,5 +1,4 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
-// @ts-ignore
 import {RoutePaths} from "../Routes";
 import * as React from "react";
 import {useEffect, useMemo, useState} from "react";

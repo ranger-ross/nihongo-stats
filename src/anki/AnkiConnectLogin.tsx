@@ -1,7 +1,6 @@
 import {Button, Container, Link} from "@mui/material";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
-// @ts-ignore
 import {RoutePaths} from "../Routes";
 import {useState} from "react";
 import AnkiHowToInstall from "./components/AnkiHowToInstall";

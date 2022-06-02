@@ -1,7 +1,6 @@
 import {Alert, Button, Grid, Link, Snackbar, TextField, Typography} from "@mui/material";
 import {useState} from "react";
 import {useNavigate} from "react-router";
-// @ts-ignore
 import {RoutePaths} from "../Routes";
 import BunProApiService from "./service/BunProApiService";
 import {useBunProApiKey} from "../hooks/useBunProApiKey";

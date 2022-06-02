@@ -2,7 +2,6 @@ import React, {useEffect} from "react";
 import {BrowserRouter} from "react-router-dom";
 import AppNav from './nav/AppNav'
 import AppHeader from './header/AppHeader'
-// @ts-ignore
 import {AppRoutes} from './Routes'
 import {AppThemeProvider} from './Theme'
 import {useTheme} from "@mui/material";

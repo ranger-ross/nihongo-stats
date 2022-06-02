@@ -1,4 +1,3 @@
-// @ts-ignore
 import {RoutePaths} from "../Routes";
 import BunProPreloadedData from "./components/BunProPreloadedData";
 import {useBunProApiKey} from "../hooks/useBunProApiKey";

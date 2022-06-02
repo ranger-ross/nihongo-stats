@@ -4,8 +4,7 @@ import React, {useState} from "react";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey";
 import LogoutIcon from '@mui/icons-material/Logout';
 import InfoIcon from '@mui/icons-material/Info';
-// @ts-ignore
-import {RoutePaths} from "../../Routes.js";
+import {RoutePaths} from "../../Routes";
 import {useNavigate} from "react-router";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey";
 import {useAppVersion} from "../../hooks/useAppVersion";

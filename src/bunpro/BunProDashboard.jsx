@@ -3,7 +3,7 @@ import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
 import {BunProWelcomeTile} from "./components/BunProWelcomeTile.tsx";
 import BunProPreloadedData from "./components/BunProPreloadedData.tsx";
 import {BunProJLPTTile} from "./components/BunProJLPTTile";
-import BunProUpcomingReviewsChart from "./components/BunProUpcomingReviewsChart.jsx";
+import BunProUpcomingReviewsChart from "./components/BunProUpcomingReviewsChart.tsx";
 import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
 import {useDeviceInfo} from "../hooks/useDeviceInfo.tsx";
 import BunProActiveItemsChart from "./components/BunProActiveItemsChart.tsx";

@@ -1,12 +1,17 @@
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import React, {useEffect, useState} from "react";
-import BunProApiService from "../service/BunProApiService.ts";
-import {lightenDarkenColor} from "../../util/CssUtils.ts";
+import BunProApiService from "../service/BunProApiService";
+import {lightenDarkenColor} from "../../util/CssUtils";
 import {BunProColors} from "../../Constants";
-import GradientLinearProgress from "../../shared/GradientLinearProgress.tsx";
+import GradientLinearProgress from "../../shared/GradientLinearProgress";
+import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
+import {RawBunProUserData} from "../models/raw/RawBunProUser";
+import {RawBunProReview} from "../models/raw/RawBunProReview";
 
-function getBunProGrammarPointsGroupedByLesson(grammarPoints) {
-    let map = {};
+type GpByLessonIdMap = { [lessonId: string]: RawBunProGrammarPoint[] };
+
+function getBunProGrammarPointsGroupedByLesson(grammarPoints: RawBunProGrammarPoint[]) {
+    const map: GpByLessonIdMap = {};
     for (const gp of grammarPoints) {
         const lessonId = gp.attributes['lesson-id'];
         if (!map[lessonId]) {
@@ -23,8 +28,10 @@ function getBunProGrammarPointsGroupedByLesson(grammarPoints) {
     return map;
 }
 
-function getReviewsByGrammarPointId(reviews) {
-    let map = {};
+type ReviewByGpIdMap = { [gpId: string]: RawBunProReview };
+
+function getReviewsByGrammarPointId(reviews: RawBunProReview[]) {
+    const map: ReviewByGpIdMap = {};
 
     for (const r of reviews) {
         map[r['grammar_point_id']] = r;
@@ -33,7 +40,7 @@ function getReviewsByGrammarPointId(reviews) {
     return map;
 }
 
-function getActiveLessonId(grammarPointsByLesson, reviewsByGrammarPointId) {
+function getActiveLessonId(grammarPointsByLesson: GpByLessonIdMap, reviewsByGrammarPointId: ReviewByGpIdMap) {
     const lessons = Object.keys(grammarPointsByLesson).map(key => parseInt(key)).sort();
 
     for (const lessonId of lessons) {
@@ -48,7 +55,18 @@ function getActiveLessonId(grammarPointsByLesson, reviewsByGrammarPointId) {
     return lessons[lessons.length - 1];
 }
 
-function getBunProOrderActiveItems(user, grammarPoints, reviews) {
+type JoinedGPReview = {
+    grammarPoint: RawBunProGrammarPoint,
+    review: RawBunProReview,
+}
+
+type FormattedData = {
+    title: string,
+    isLoading: boolean,
+    data: JoinedGPReview[],
+};
+
+function getBunProOrderActiveItems(user: RawBunProUserData, grammarPoints: RawBunProGrammarPoint[], reviews: RawBunProReview[]): FormattedData {
     const jlptLevel = user.attributes['study-level'];
     grammarPoints = grammarPoints.filter(gp => gp.attributes['level'] === jlptLevel);
 
@@ -57,7 +75,7 @@ function getBunProOrderActiveItems(user, grammarPoints, reviews) {
     const activeLessonId = getActiveLessonId(grammarPointsByLesson, reviewsByGrammarPointId);
     const activeLessonGrammarPoints = grammarPointsByLesson[activeLessonId];
 
-    let data = [];
+    const data = [];
     for (const gp of activeLessonGrammarPoints) {
         data.push({
             grammarPoint: gp,
@@ -72,7 +90,7 @@ function getBunProOrderActiveItems(user, grammarPoints, reviews) {
     };
 }
 
-async function fetchData() {
+async function fetchData(): Promise<FormattedData> {
     const user = (await BunProApiService.getUser()).data;
     const grammarPoints = await BunProApiService.getGrammarPoints();
     const reviews = (await BunProApiService.getAllReviews()).reviews;
@@ -88,13 +106,18 @@ async function fetchData() {
     }
 }
 
-const defaultData = {
+const defaultData: FormattedData = {
     isLoading: true,
     data: [],
     title: ''
 }
 
-function GrammarPointTile({grammarPoint, review}) {
+type GrammarPointTileProps = {
+    grammarPoint: RawBunProGrammarPoint,
+    review: RawBunProReview
+};
+
+function GrammarPointTile({grammarPoint, review}: GrammarPointTileProps) {
     const isStarted = !!review;
     const softWhite = '#b5b5b5';
     return (
@@ -118,7 +141,7 @@ function GrammarPointTile({grammarPoint, review}) {
 }
 
 function BunProActiveItemsChart({showBunProHeader = false}) {
-    const [data, setData] = useState(defaultData);
+    const [data, setData] = useState<FormattedData>(defaultData);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -128,7 +151,9 @@ function BunProActiveItemsChart({showBunProHeader = false}) {
                     return;
                 setData(data)
             });
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, [])
 
     const percentage = data.isLoading ? 0.0 : (

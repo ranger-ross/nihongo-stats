@@ -6,7 +6,7 @@ import {BunProJLPTTile} from "./components/BunProJLPTTile";
 import BunProUpcomingReviewsChart from "./components/BunProUpcomingReviewsChart.jsx";
 import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
 import {useDeviceInfo} from "../hooks/useDeviceInfo.tsx";
-import BunProActiveItemsChart from "./components/BunProActiveItemsChart.jsx";
+import BunProActiveItemsChart from "./components/BunProActiveItemsChart.tsx";
 
 const styles = {
     container: {

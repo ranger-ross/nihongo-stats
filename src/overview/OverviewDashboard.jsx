@@ -2,7 +2,7 @@ import OverviewWelcomeTile from "./components/OverviewWelcomeTile.tsx";
 import OverviewUpcomingReviewsChart from "./components/OverviewUpcomingReviewsChart.jsx";
 import {useDeviceInfo} from "../hooks/useDeviceInfo.tsx";
 import WanikaniActiveItemsChart from "../wanikani/components/WanikaniActiveItemChart.tsx";
-import BunProActiveItemsChart from "../bunpro/components/BunProActiveItemsChart.jsx";
+import BunProActiveItemsChart from "../bunpro/components/BunProActiveItemsChart.tsx";
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.tsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
 

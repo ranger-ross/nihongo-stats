@@ -1,4 +1,4 @@
-import {distinct} from "../ArrayUtils.js";
+import {distinct} from "../ArrayUtils.ts";
 
 describe('ArrayUtils', function () {
 

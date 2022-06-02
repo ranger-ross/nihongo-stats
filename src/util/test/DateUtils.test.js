@@ -7,7 +7,7 @@ import {
     millisToDays,
     millisToHours,
     truncDate, truncMinutes
-} from "../DateUtils.js";
+} from "../DateUtils.ts";
 
 describe('Timezones', () => {
     it('should always be UTC', () => {

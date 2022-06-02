@@ -1,4 +1,4 @@
-import {getVisibleLabelIndices} from "../ChartUtils.js";
+import {getVisibleLabelIndices} from "../ChartUtils.ts";
 
 describe('ChartUtils', function () {
     describe('getVisibleLabelIndices()', function () {

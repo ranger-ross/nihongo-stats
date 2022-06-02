@@ -5,7 +5,8 @@ module.exports = {
     },
     "extends": [
         "eslint:recommended",
-        "plugin:react/recommended"
+        "plugin:react/recommended",
+        'plugin:@typescript-eslint/recommended',
     ],
     'parserOptions': {
         'ecmaFeatures': {
@@ -16,6 +17,7 @@ module.exports = {
     },
     'plugins': [
         'react',
+        '@typescript-eslint',
     ],
     'rules': {
         'react/function-component-definition': 'error',
@@ -29,6 +31,8 @@ module.exports = {
         'react/react-in-jsx-scope': 'off',
         'react/prop-types': 'off',
         'react/no-unescaped-entities': 'off',
+        '@typescript-eslint/ban-ts-comment': 'off',
+        '@typescript-eslint/no-explicit-any': 'off', // TODO: ReEnable when project is cleaned up and better migrated to TypeScript
     },
     'settings': {
         "react": {

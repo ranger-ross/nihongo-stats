@@ -1,10 +1,11 @@
+// @ts-ignore
 import {RoutePaths} from "../Routes";
-import BunProPreloadedData from "./components/BunProPreloadedData.tsx";
-import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
-import BunProReviewsHistoryChart from "./components/BunProReviewsHistoryChart.tsx";
-import BunProTotalReviewsChart from "./components/BunProTotalReviewsChart.tsx";
-import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
-import BunProTotalGrammarPointsChart from "./components/BunProTotalGrammarPointsChart.tsx";
+import BunProPreloadedData from "./components/BunProPreloadedData";
+import {useBunProApiKey} from "../hooks/useBunProApiKey";
+import BunProReviewsHistoryChart from "./components/BunProReviewsHistoryChart";
+import BunProTotalReviewsChart from "./components/BunProTotalReviewsChart";
+import RequireOrRedirect from "../shared/RequireOrRedirect";
+import BunProTotalGrammarPointsChart from "./components/BunProTotalGrammarPointsChart";
 
 
 function BunProHistory() {

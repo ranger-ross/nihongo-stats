@@ -13,7 +13,7 @@ const WanikaniHistory = React.lazy(() => import("./wanikani/WanikaniHistory"));
 const WanikaniItems = React.lazy(() => import("./wanikani/WanikaniItems"));
 const BunProDashboard = React.lazy(() => import("./bunpro/BunProDashboard"));
 const EnterBunProApiKeyPage = React.lazy(() => import("./bunpro/EnterBunProApiKeyPage"));
-const BunProHistory = React.lazy(() => import("./bunpro/BunProHistory.jsx"));
+const BunProHistory = React.lazy(() => import("./bunpro/BunProHistory"));
 const OverviewDashboard = React.lazy(() => import("./overview/OverviewDashboard.jsx"));
 const OverviewHistory = React.lazy(() => import("./overview/OverviewHistory.jsx"));
 const NotFoundPage = React.lazy(() => import("./landing/NotFoundPage"));

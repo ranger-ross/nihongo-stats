@@ -1,5 +1,5 @@
 import OverviewWelcomeTile from "./components/OverviewWelcomeTile.tsx";
-import OverviewUpcomingReviewsChart from "./components/OverviewUpcomingReviewsChart.jsx";
+import OverviewUpcomingReviewsChart from "./components/OverviewUpcomingReviewsChart.tsx";
 import {useDeviceInfo} from "../hooks/useDeviceInfo.tsx";
 import WanikaniActiveItemsChart from "../wanikani/components/WanikaniActiveItemChart.tsx";
 import BunProActiveItemsChart from "../bunpro/components/BunProActiveItemsChart.tsx";

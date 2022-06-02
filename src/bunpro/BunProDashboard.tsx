@@ -1,14 +1,16 @@
+// @ts-ignore
 import {RoutePaths} from "../Routes.jsx";
-import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
-import {BunProWelcomeTile} from "./components/BunProWelcomeTile.tsx";
-import BunProPreloadedData from "./components/BunProPreloadedData.tsx";
+import {useBunProApiKey} from "../hooks/useBunProApiKey";
+import {BunProWelcomeTile} from "./components/BunProWelcomeTile";
+import BunProPreloadedData from "./components/BunProPreloadedData";
 import {BunProJLPTTile} from "./components/BunProJLPTTile";
-import BunProUpcomingReviewsChart from "./components/BunProUpcomingReviewsChart.tsx";
-import RequireOrRedirect from "../shared/RequireOrRedirect.tsx";
-import {useDeviceInfo} from "../hooks/useDeviceInfo.tsx";
-import BunProActiveItemsChart from "./components/BunProActiveItemsChart.tsx";
+import BunProUpcomingReviewsChart from "./components/BunProUpcomingReviewsChart";
+import RequireOrRedirect from "../shared/RequireOrRedirect";
+import {useDeviceInfo} from "../hooks/useDeviceInfo";
+import BunProActiveItemsChart from "./components/BunProActiveItemsChart";
+import {AppStyles} from "../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     container: {
         display: 'flex',
         flexDirection: 'column',
@@ -46,7 +48,7 @@ function BunProDashboard() {
 
                         <div style={styles.innerContainer}>
 
-                            <div style={{...styles.leftPanel, minWidth: !isMobile ? '500px' : null}}>
+                            <div style={{...styles.leftPanel, minWidth: !isMobile ? '500px' : undefined}}>
                                 <BunProWelcomeTile/>
 
                                 <BunProJLPTTile showXpProgress={true}/>

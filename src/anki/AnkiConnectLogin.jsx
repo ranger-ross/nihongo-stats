@@ -1,9 +1,9 @@
 import {Button, Container, Link} from "@mui/material";
-import AnkiApiService from "./service/AnkiApiService.js";
+import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
 import {RoutePaths} from "../Routes";
 import {useState} from "react";
-import AnkiHowToInstall from "./components/AnkiHowToInstall.jsx";
+import AnkiHowToInstall from "./components/AnkiHowToInstall.tsx";
 import QuestionToolTip from "../shared/QuestionToolTip.tsx";
 
 const styles = {

@@ -1,20 +1,21 @@
-import {
-    Accordion,
-    AccordionSummary, Button,
-    Link,
-    ToggleButton,
-    ToggleButtonGroup,
-    Typography
-} from "@mui/material";
-import {useState} from "react";
+import {Accordion, AccordionSummary, Button, Link, ToggleButton, ToggleButtonGroup, Typography} from "@mui/material";
 import * as React from "react";
+import {useState} from "react";
+// @ts-ignore
 import macosAnkiAddOns from '../../../assets/anki/macos/anki-add-ons.png'
+// @ts-ignore
 import macosAnkiGetAddOns from '../../../assets/anki/macos/anki-get-add-ons.png'
+// @ts-ignore
 import macosAnkiInstallAddOns from '../../../assets/anki/macos/anki-install-add-ons.png'
+// @ts-ignore
 import macosAnkiRequestPermission from '../../../assets/anki/macos/anki-request-permission.png'
+// @ts-ignore
 import windowsAnkiAddOns from '../../../assets/anki/windows/anki-add-ons.png'
+// @ts-ignore
 import windowsAnkiGetAddOns from '../../../assets/anki/windows/anki-get-add-ons.png'
+// @ts-ignore
 import windowsAnkiInstallAddOns from '../../../assets/anki/windows/anki-install-add-ons.png'
+// @ts-ignore
 import windowsAnkiRequestPermission from '../../../assets/anki/windows/anki-request-permission.png'
 
 
@@ -22,12 +23,18 @@ const windows = 'Windows';
 const macos = 'Mac OS';
 
 
-function OsSelector({options, os, setOs}) {
+type OsSelectorProps = {
+    options: string[],
+    os: string,
+    setOs: (v: string) => void,
+};
+
+function OsSelector({options, os, setOs}: OsSelectorProps) {
     return (
         <ToggleButtonGroup
             value={os}
             exclusive
-            onChange={e => setOs(e.target.value)}
+            onChange={(e: React.MouseEvent<any>) => setOs(e.currentTarget.value)}
         >
             {options.map(option => (
                 <ToggleButton key={option} value={option}>{option}</ToggleButton>
@@ -37,7 +44,11 @@ function OsSelector({options, os, setOs}) {
 }
 
 
-function AnkiHowToInstall({onConnect}) {
+type AnkiHowToInstallProps = {
+    onConnect: () => void
+};
+
+function AnkiHowToInstall({onConnect}: AnkiHowToInstallProps) {
     const [os, setOs] = useState(windows);
 
     const isWindows = os === windows;

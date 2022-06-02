@@ -1,5 +1,5 @@
 import {RoutePaths} from "../Routes";
-import BunProPreloadedData from "./components/BunProPreloadedData.jsx";
+import BunProPreloadedData from "./components/BunProPreloadedData.tsx";
 import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
 import BunProReviewsHistoryChart from "./components/BunProReviewsHistoryChart.jsx";
 import BunProTotalReviewsChart from "./components/BunProTotalReviewsChart.jsx";

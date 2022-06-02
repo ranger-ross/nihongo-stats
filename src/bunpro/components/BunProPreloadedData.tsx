@@ -1,10 +1,11 @@
 import {useEffect, useState} from "react";
 import {CircularProgress} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
-import BunProApiService from "../service/BunProApiService.ts";
-import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus.tsx";
+import BunProApiService from "../service/BunProApiService";
+import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus";
+import {AppStyles} from "../../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     loadingItem: {
         display: 'flex',
         alignItems: 'center',
@@ -23,8 +24,12 @@ const styles = {
     }
 };
 
+type LoadingItemProps = {
+    text: string,
+    isLoading: boolean,
+};
 
-function LoadingItem({text, isLoading}) {
+function LoadingItem({text, isLoading}: LoadingItemProps) {
     return (
         <div style={styles.loadingItem}>
             {text}
@@ -33,7 +38,7 @@ function LoadingItem({text, isLoading}) {
     );
 }
 
-function BunProPreloadedData({children}) {
+function BunProPreloadedData({children}: React.PropsWithChildren<any>) {
     const [grammarPoints, setGrammarPoints] = useState(false);
     const [allReviews, setAllReviews] = useState(false);
     const {status, setStatus} = useBunProPreloadStatus();

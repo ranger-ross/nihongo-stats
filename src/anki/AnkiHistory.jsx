@@ -1,4 +1,4 @@
-import AnkiReviewsChart from "./components/AnkiReviewsChart.jsx";
+import AnkiReviewsChart from "./components/AnkiReviewsChart.tsx";
 import {useSelectedAnkiDecks} from "../hooks/useSelectedAnkiDecks.tsx";
 import AnkiApiProvider from "./components/AnkiApiProvider.tsx";
 import AnkiTotalCardsHistoryChart from "./components/AnkiTotalCardsHistoryChart.jsx";

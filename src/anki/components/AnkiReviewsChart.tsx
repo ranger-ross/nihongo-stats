@@ -1,18 +1,27 @@
 import * as React from 'react';
-import {
-    Chart, Legend, Tooltip, ValueAxis, ArgumentAxis,
-} from '@devexpress/dx-react-chart-material-ui';
+import {useEffect, useMemo, useState} from 'react';
+import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import {useEffect, useState} from "react";
-import {ArgumentScale, BarSeries, EventTracker, LineSeries, Stack} from "@devexpress/dx-react-chart";
-import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.ts";
-import AnkiApiService from "../service/AnkiApiService.ts";
+import {
+    ArgumentAxis as ArgumentAxisBase,
+    ArgumentScale,
+    BarSeries,
+    EventTracker,
+    LineSeries,
+    Stack
+} from "@devexpress/dx-react-chart";
+import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
+import AnkiApiService from "../service/AnkiApiService";
+// @ts-ignore
 import {scaleBand} from 'd3-scale';
-import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
-import PeriodSelector from "../../shared/PeriodSelector.tsx";
+import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import PeriodSelector from "../../shared/PeriodSelector";
+import {AnkiReview} from "../models/AnkiReview";
 
-function DataPoint(date, previousDataPoint) {
-    let dp = {
+type DataPoint = any;
+
+function dataPoint(date: number, previousDataPoint?: DataPoint): DataPoint {
+    const dp: DataPoint = {
         date: truncDate(date),
         reviews: {},
         totalCount: previousDataPoint?.totalCount ?? 0
@@ -24,7 +33,7 @@ function DataPoint(date, previousDataPoint) {
             dp[key] = previousDataPoint[key] ?? 0;
         }
     }
-    dp.addReview = (deck, review) => {
+    dp.addReview = (deck: string, review: AnkiReview) => {
         if (!dp.reviews[deck]) {
             dp.reviews[deck] = [review];
         } else {
@@ -42,8 +51,13 @@ function DataPoint(date, previousDataPoint) {
     return dp;
 }
 
-function formatMultiDeckReviewData(decks) {
-    let reviews = [];
+type DeckReviews = {
+    deckName: string,
+    reviews: AnkiReview[]
+};
+
+function formatMultiDeckReviewData(decks: DeckReviews[]): DataPoint[] {
+    const reviews = [];
     for (const deck of decks) {
         reviews.push(...deck.reviews.map(r => ({
             ...r,
@@ -52,12 +66,12 @@ function formatMultiDeckReviewData(decks) {
     }
 
     const orderedReviews = reviews.sort((a, b,) => a.reviewTime - b.reviewTime);
-    let days = [new DataPoint(orderedReviews[0].reviewTime)];
+    const days = [dataPoint(orderedReviews[0].reviewTime)];
 
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
         if (lastDay.date.getTime() !== truncDate(review.reviewTime).getTime()) {
-            days.push(new DataPoint(review.reviewTime, lastDay));
+            days.push(dataPoint(review.reviewTime, lastDay));
             lastDay = days[days.length - 1];
         }
         lastDay.addReview(review.deckName, review);
@@ -66,24 +80,48 @@ function formatMultiDeckReviewData(decks) {
     return days;
 }
 
-function AnkiReviewsChart({deckNames, showTotals}) {
-    const [reviewsByDeck, setReviewsByDeck] = useState(null);
-    const [chartData, setChartData] = useState(null);
-    const [decksToDisplay, setDecksToDisplay] = useState([]);
+function useOptions(reviewsByDeck?: DataPoint[]) {
+    const options = [
+        {value: 30, text: '1 Mon'},
+        {value: 60, text: '2 Mon'},
+        {value: 90, text: '3 Mon'},
+        {value: 180, text: '6 Mon'},
+        {value: 365, text: '1 Yr'},
+    ];
+
+    if (!!reviewsByDeck) {
+        options.push({
+            value: millisToDays(Date.now() - reviewsByDeck[0].date),
+            text: 'All'
+        });
+    }
+
+    return options;
+}
+
+type AnkiReviewsChartProps = {
+    deckNames: string[],
+    showTotals: boolean,
+};
+
+function AnkiReviewsChart({deckNames, showTotals}: AnkiReviewsChartProps) {
+    const [reviewsByDeck, setReviewsByDeck] = useState<DataPoint[]>();
+    const [decksToDisplay, setDecksToDisplay] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
+    const options = useOptions(reviewsByDeck);
 
     useEffect(() => {
         let isSubscribed = true;
 
-        let reviewPromises = [];
+        const reviewPromises: Promise<AnkiReview[]>[] = [];
         deckNames.forEach(name => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
         setIsLoading(true);
         Promise.all(reviewPromises)
             .then(data => {
                 if (!isSubscribed)
                     return;
-                let deckData = data.map(((value, index) => ({
+                const deckData: DeckReviews[] = data.map(((value, index) => ({
                     deckName: deckNames[index],
                     reviews: value
                 })));
@@ -93,16 +131,16 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                 setDecksToDisplay(deckNames);
             })
             .finally(() => setIsLoading(false));
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        }
     }, [deckNames]);
 
-    useEffect(() => {
-        if (!!reviewsByDeck) {
-            setChartData(reviewsByDeck.filter(dp => dp.date.getTime() >= Date.now() - daysToMillis(daysToLookBack)))
-        }
-    }, [reviewsByDeck, daysToLookBack])
+    const chartData = useMemo(() =>
+            !!reviewsByDeck ? reviewsByDeck.filter(dp => dp.date.getTime() >= Date.now() - daysToMillis(daysToLookBack)) : null,
+        [reviewsByDeck, daysToLookBack]);
 
-    function ReviewToolTip({text, targetItem}) {
+    function ReviewToolTip({text, targetItem}: Tooltip.ContentProps) {
         return (
             <>
                 <p>{targetItem.series !== 'Total' ? 'Deck:' : null} {targetItem.series}</p>
@@ -113,9 +151,9 @@ function AnkiReviewsChart({deckNames, showTotals}) {
 
     const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], 6);
 
-    function LabelWithDate(props) {
+    function LabelWithDate(props: ArgumentAxisBase.LabelProps) {
         const date = new Date(props.text);
-        if (!date) {
+        if (!date || !chartData) {
             return (<></>)
         }
 
@@ -148,17 +186,7 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
                         <PeriodSelector period={daysToLookBack}
                                         setPeriod={setDaysToLookBack}
-                                        options={[
-                                          {value: 30, text: '1 Mon'},
-                                          {value: 60, text: '2 Mon'},
-                                          {value: 90, text: '3 Mon'},
-                                          {value: 180, text: '6 Mon'},
-                                          {value: 365, text: '1 Yr'},
-                                          !!reviewsByDeck ? {
-                                              value: millisToDays(Date.now() - reviewsByDeck[0].date),
-                                              text: 'All'
-                                          } : null
-                                      ]}
+                                        options={options}
                         />
                     </Grid>
                 </Grid>
@@ -169,6 +197,7 @@ function AnkiReviewsChart({deckNames, showTotals}) {
                     </div>
                 ) : (
                     !!decksToDisplay && chartData ? (
+                        // @ts-ignore
                         <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

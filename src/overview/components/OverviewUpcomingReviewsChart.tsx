@@ -359,17 +359,23 @@ function OverviewUpcomingReviewsChart() {
                 return ankiSeriesName;
         }
 
+        let newTarget = target;
+
         if (target) {
             if (!target.series.toLowerCase().includes('total')) {
-                // @ts-ignore
-                target.series = getTopSeries(target, chartData);
+                newTarget = {
+                    ...target,
+                    series: getTopSeries(target, chartData)
+                }
             }
             if (target.series.toLowerCase() == 'total-points') {
-                // @ts-ignore
-                target.series = 'Total';
+                newTarget = {
+                    ...target,
+                    series: 'Total'
+                }
             }
         }
-        setToolTipTargetItem(target);
+        setToolTipTargetItem(newTarget);
     }
 
     const BarWithLabel = useMemo(() => {

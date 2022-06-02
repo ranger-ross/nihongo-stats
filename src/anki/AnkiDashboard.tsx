@@ -1,9 +1,10 @@
-import AnkiDeckSummariesTile from "./components/AnkiDeckSummariesTile.tsx";
-import AnkiCardBreakDownChart from "./components/AnkiCardBreakDownChart.tsx";
-import AnkiApiProvider from "./components/AnkiApiProvider.tsx";
-import AnkiUpcomingReviewsChart from "./components/AnkiUpcomingReviewsChart.tsx";
+import AnkiDeckSummariesTile from "./components/AnkiDeckSummariesTile";
+import AnkiCardBreakDownChart from "./components/AnkiCardBreakDownChart";
+import AnkiApiProvider from "./components/AnkiApiProvider";
+import AnkiUpcomingReviewsChart from "./components/AnkiUpcomingReviewsChart";
+import {AppStyles} from "../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     container: {
         margin: '5px',
         display: 'flex',

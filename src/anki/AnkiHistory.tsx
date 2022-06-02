@@ -1,10 +1,11 @@
-import AnkiReviewsChart from "./components/AnkiReviewsChart.tsx";
-import {useSelectedAnkiDecks} from "../hooks/useSelectedAnkiDecks.tsx";
-import AnkiApiProvider from "./components/AnkiApiProvider.tsx";
-import AnkiTotalCardsHistoryChart from "./components/AnkiTotalCardsHistoryChart.tsx";
-import AnkiCardBreakDownHistoryChart from "./components/AnkiCardBreakDownHistoryChart.tsx";
+import AnkiReviewsChart from "./components/AnkiReviewsChart";
+import {useSelectedAnkiDecks} from "../hooks/useSelectedAnkiDecks";
+import AnkiApiProvider from "./components/AnkiApiProvider";
+import AnkiTotalCardsHistoryChart from "./components/AnkiTotalCardsHistoryChart";
+import AnkiCardBreakDownHistoryChart from "./components/AnkiCardBreakDownHistoryChart";
+import {AppStyles} from "../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     container: {
         margin: '5px',
         display: 'flex',
@@ -29,7 +30,6 @@ function AnkiHistory() {
 
                         <AnkiCardBreakDownHistoryChart
                             deckNames={selectedDecks}
-                            showTotals={true}
                         />
 
                         <AnkiReviewsChart

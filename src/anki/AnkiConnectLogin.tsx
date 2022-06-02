@@ -1,12 +1,14 @@
 import {Button, Container, Link} from "@mui/material";
 import AnkiApiService from "./service/AnkiApiService";
 import {useNavigate} from "react-router";
+// @ts-ignore
 import {RoutePaths} from "../Routes";
 import {useState} from "react";
-import AnkiHowToInstall from "./components/AnkiHowToInstall.tsx";
-import QuestionToolTip from "../shared/QuestionToolTip.tsx";
+import AnkiHowToInstall from "./components/AnkiHowToInstall";
+import QuestionToolTip from "../shared/QuestionToolTip";
+import {AppStyles} from "../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     container: {
         textAlign: 'center',
         marginTop: '15vh'
@@ -15,7 +17,7 @@ const styles = {
 
 function AnkiConnectLogin() {
     const navigate = useNavigate();
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string>();
 
     function connectToAnki() {
         AnkiApiService.requestPermission()

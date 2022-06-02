@@ -1,6 +1,7 @@
-import OverviewReviewsHistoryChart from "./components/OverviewReviewHistoryChart.tsx";
+import OverviewReviewsHistoryChart from "./components/OverviewReviewHistoryChart";
+import {AppStyles} from "../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     container: {
         display: 'flex',
         flexDirection: 'column',

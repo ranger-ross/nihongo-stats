@@ -14,8 +14,8 @@ const WanikaniItems = React.lazy(() => import("./wanikani/WanikaniItems"));
 const BunProDashboard = React.lazy(() => import("./bunpro/BunProDashboard"));
 const EnterBunProApiKeyPage = React.lazy(() => import("./bunpro/EnterBunProApiKeyPage"));
 const BunProHistory = React.lazy(() => import("./bunpro/BunProHistory"));
-const OverviewDashboard = React.lazy(() => import("./overview/OverviewDashboard.jsx"));
-const OverviewHistory = React.lazy(() => import("./overview/OverviewHistory.jsx"));
+const OverviewDashboard = React.lazy(() => import("./overview/OverviewDashboard.tsx"));
+const OverviewHistory = React.lazy(() => import("./overview/OverviewHistory.tsx"));
 const NotFoundPage = React.lazy(() => import("./landing/NotFoundPage"));
 
 function AppRoute(path, appName, hideNav = false) {

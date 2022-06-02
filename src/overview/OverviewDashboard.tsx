@@ -1,12 +1,13 @@
-import OverviewWelcomeTile from "./components/OverviewWelcomeTile.tsx";
-import OverviewUpcomingReviewsChart from "./components/OverviewUpcomingReviewsChart.tsx";
-import {useDeviceInfo} from "../hooks/useDeviceInfo.tsx";
-import WanikaniActiveItemsChart from "../wanikani/components/WanikaniActiveItemChart.tsx";
-import BunProActiveItemsChart from "../bunpro/components/BunProActiveItemsChart.tsx";
-import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey.tsx";
-import {useBunProApiKey} from "../hooks/useBunProApiKey.tsx";
+import OverviewWelcomeTile from "./components/OverviewWelcomeTile";
+import OverviewUpcomingReviewsChart from "./components/OverviewUpcomingReviewsChart";
+import {useDeviceInfo} from "../hooks/useDeviceInfo";
+import WanikaniActiveItemsChart from "../wanikani/components/WanikaniActiveItemChart";
+import BunProActiveItemsChart from "../bunpro/components/BunProActiveItemsChart";
+import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
+import {useBunProApiKey} from "../hooks/useBunProApiKey";
+import {AppStyles} from "../util/TypeUtils";
 
-const styles = {
+const styles: AppStyles = {
     container: {
         display: 'flex',
         flexDirection: 'column',
@@ -46,7 +47,7 @@ function OverviewDashboard() {
         <div style={styles.container}>
             <div style={styles.innerContainer}>
 
-                <div style={{...styles.leftPanel, minWidth: !isMobile ? '200px' : null}}>
+                <div style={{...styles.leftPanel, minWidth: !isMobile ? '200px' : undefined}}>
                     <OverviewWelcomeTile/>
                 </div>
 

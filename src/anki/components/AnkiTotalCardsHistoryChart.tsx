@@ -1,16 +1,20 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import PeriodSelector from "../../shared/PeriodSelector.tsx";
-import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils.ts";
+import PeriodSelector from "../../shared/PeriodSelector";
+import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
-import {ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
+import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
 import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
-import AnkiApiService from "../service/AnkiApiService.ts";
+import AnkiApiService from "../service/AnkiApiService";
+// @ts-ignore
 import {scaleBand} from 'd3-scale';
-import {getVisibleLabelIndices} from "../../util/ChartUtils.ts";
+import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import {AnkiReview} from "../models/AnkiReview";
 
-function DataPoint(date, previousDataPoint) {
-    let dp = {
+type DataPoint = any;
+
+function dataPoint(date: number, previousDataPoint?: DataPoint) {
+    const dp: DataPoint = {
         date: truncDate(date),
         cards: {},
         totalCount: previousDataPoint?.totalCount ?? 0
@@ -22,7 +26,7 @@ function DataPoint(date, previousDataPoint) {
             dp[key] = previousDataPoint[key] ?? 0;
         }
     }
-    dp.addCard = (deck, review) => {
+    dp.addCard = (deck: string, review: AnkiReview) => {
         if (!dp.cards[deck]) {
             dp.cards[deck] = [review];
         } else {
@@ -45,8 +49,8 @@ function DataPoint(date, previousDataPoint) {
     return dp;
 }
 
-function formatMultiDeckReviewData(decks) {
-    let reviews = [];
+function formatMultiDeckReviewData(decks: DeckReviews[]): DataPoint[] {
+    const reviews = [];
     for (const deck of decks) {
         reviews.push(...deck.reviews.map(r => ({
             ...r,
@@ -55,14 +59,14 @@ function formatMultiDeckReviewData(decks) {
     }
 
     const orderedReviews = reviews.sort((a, b,) => a.reviewTime - b.reviewTime);
-    const dayBeforeStartPoint = new DataPoint(orderedReviews[0].reviewTime - daysToMillis(1))
-    let days = [dayBeforeStartPoint, new DataPoint(orderedReviews[0].reviewTime, dayBeforeStartPoint)];
+    const dayBeforeStartPoint = dataPoint(orderedReviews[0].reviewTime - daysToMillis(1))
+    const days = [dayBeforeStartPoint, dataPoint(orderedReviews[0].reviewTime, dayBeforeStartPoint)];
 
-    let cards = {};
+    const cards: { [cardId: number]: boolean } = {};
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
         if (lastDay.date.getTime() !== truncDate(review.reviewTime).getTime()) {
-            days.push(new DataPoint(review.reviewTime, lastDay));
+            days.push(dataPoint(review.reviewTime, lastDay));
             lastDay = days[days.length - 1];
         }
 
@@ -76,24 +80,52 @@ function formatMultiDeckReviewData(decks) {
     return days;
 }
 
-function AnkiTotalCardsHistoryChart({deckNames}) {
+function useOptions(cardData?: DataPoint[]) {
+    const options = [
+        {value: 30, text: '1 Mon'},
+        {value: 60, text: '2 Mon'},
+        {value: 90, text: '3 Mon'},
+        {value: 180, text: '6 Mon'},
+        {value: 365, text: '1 Yr'},
+    ];
+
+    if (!!cardData) {
+        options.push({
+            value: millisToDays(Date.now() - cardData[0].date),
+            text: 'All'
+        });
+    }
+
+    return options;
+}
+
+type DeckReviews = {
+    deckName: string,
+    reviews: AnkiReview[]
+};
+
+type AnkiTotalCardsHistoryChartProps = {
+    deckNames: string[]
+};
+
+function AnkiTotalCardsHistoryChart({deckNames}: AnkiTotalCardsHistoryChartProps) {
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
     const [isLoading, setIsLoading] = useState(true);
-    const [decksToDisplay, setDecksToDisplay] = useState([]);
-    const [cardData, setCardData] = useState(null);
-
+    const [decksToDisplay, setDecksToDisplay] = useState<string[]>([]);
+    const [cardData, setCardData] = useState<DataPoint[]>();
+    const options = useOptions(cardData);
 
     useEffect(() => {
         let isSubscribed = true;
 
-        let reviewPromises = [];
-        deckNames.forEach(name => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
+        const reviewPromises: Promise<AnkiReview[]>[] = [];
+        deckNames.forEach((name: string) => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
         setIsLoading(true);
         Promise.all(reviewPromises)
             .then(data => {
                 if (!isSubscribed)
                     return;
-                let deckData = data.map(((value, index) => ({
+                const deckData: DeckReviews[] = data.map(((value, index) => ({
                     deckName: deckNames[index],
                     reviews: value
                 })));
@@ -103,7 +135,9 @@ function AnkiTotalCardsHistoryChart({deckNames}) {
                 setDecksToDisplay(deckNames);
             })
             .finally(() => setIsLoading(false));
-        return () => isSubscribed = false;
+        return () => {
+            isSubscribed = false;
+        };
     }, [deckNames]);
 
     const chartData = useMemo(() => (cardData ?? [])
@@ -111,7 +145,7 @@ function AnkiTotalCardsHistoryChart({deckNames}) {
         [cardData, daysToLookBack]);
     const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], 6);
 
-    function CardToolTip({text, targetItem}) {
+    function CardToolTip({text, targetItem}: Tooltip.ContentProps) {
         return (
             <>
                 <p>{targetItem.series !== 'Total' ? 'Deck:' : null} {targetItem.series}</p>
@@ -120,7 +154,7 @@ function AnkiTotalCardsHistoryChart({deckNames}) {
         );
     }
 
-    function LabelWithDate(props) {
+    function LabelWithDate(props: ArgumentAxisBase.LabelProps) {
         const date = new Date(props.text);
         if (!date) {
             return (<></>)
@@ -155,17 +189,7 @@ function AnkiTotalCardsHistoryChart({deckNames}) {
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
                         <PeriodSelector period={daysToLookBack}
                                         setPeriod={setDaysToLookBack}
-                                        options={[
-                                            {value: 30, text: '1 Mon'},
-                                            {value: 60, text: '2 Mon'},
-                                            {value: 90, text: '3 Mon'},
-                                            {value: 180, text: '6 Mon'},
-                                            {value: 365, text: '1 Yr'},
-                                            !!cardData ? {
-                                                value: millisToDays(Date.now() - cardData[0].date),
-                                                text: 'All'
-                                            } : null
-                                        ]}
+                                        options={options}
                         />
                     </Grid>
                 </Grid>
@@ -176,6 +200,7 @@ function AnkiTotalCardsHistoryChart({deckNames}) {
                     </div>
                 ) : (
                     !!decksToDisplay && chartData ? (
+                        // @ts-ignore
                         <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

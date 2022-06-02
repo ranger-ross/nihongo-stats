@@ -1,7 +1,7 @@
 import AnkiReviewsChart from "./components/AnkiReviewsChart.tsx";
 import {useSelectedAnkiDecks} from "../hooks/useSelectedAnkiDecks.tsx";
 import AnkiApiProvider from "./components/AnkiApiProvider.tsx";
-import AnkiTotalCardsHistoryChart from "./components/AnkiTotalCardsHistoryChart.jsx";
+import AnkiTotalCardsHistoryChart from "./components/AnkiTotalCardsHistoryChart.tsx";
 import AnkiCardBreakDownHistoryChart from "./components/AnkiCardBreakDownHistoryChart.tsx";
 
 const styles = {

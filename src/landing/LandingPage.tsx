@@ -5,7 +5,7 @@ import {AppNames} from "../Constants";
 import create from "zustand";
 import {useUserPreferences} from "../hooks/useUserPreferences";
 // @ts-ignore
-import {convertAppNameToDashboardRoute} from "../Routes.jsx";
+import {convertAppNameToDashboardRoute} from "../Routes.js";
 import {AppStyles} from "../util/TypeUtils";
 
 const styles: AppStyles = {
@@ -46,7 +46,9 @@ function LandingPage() {
 
         if (selectedApp === defaultDashboard) {
             const dashboardRoute = convertAppNameToDashboardRoute(defaultDashboard);
-            return (<Navigate to={dashboardRoute.path} replace={true}/>);
+            if (dashboardRoute) {
+                return (<Navigate to={dashboardRoute.path} replace={true}/>);
+            }
         } else {
             setSelectedApp(defaultDashboard);
         }

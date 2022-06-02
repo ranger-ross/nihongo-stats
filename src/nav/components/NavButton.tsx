@@ -1,18 +1,13 @@
 import {Button} from "@mui/material";
 import React from "react";
 import {useNavigate, useLocation} from "react-router";
+import {AppRoute} from "../../Routes";
 
 const styles = {
     button: {
         marginLeft: '13px'
     }
 };
-
-type AppRoute = { // TODO: Use AppRoute from Routes in src dir once its migrated to typescript
-    path: string,
-    appName: string,
-    hideNav: boolean,
-}
 
 type Props = {
     text: string,

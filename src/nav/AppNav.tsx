@@ -56,8 +56,10 @@ function AppNav() {
 
             // If path changes, we need to update the SelectedApp to match
             if (!!route && route.appName !== selectedApp && !route.hideNav) {
-                setSelectedApp(route.appName);
-                return;
+                if (route.appName) {
+                    setSelectedApp(route.appName);
+                    return;
+                }
             }
 
             setIsFirstLoad(false);
@@ -65,7 +67,9 @@ function AppNav() {
         }
 
         const dashboardRoute = convertAppNameToDashboardRoute(selectedApp);
-        navigate(dashboardRoute.path);
+        if (dashboardRoute) {
+            navigate(dashboardRoute.path);
+        }
     }, [selectedApp])
 
     const hideNav = !!route && route.hideNav;

@@ -5,7 +5,7 @@ import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey";
 import LogoutIcon from '@mui/icons-material/Logout';
 import InfoIcon from '@mui/icons-material/Info';
 // @ts-ignore
-import {RoutePaths} from "../../Routes.jsx";
+import {RoutePaths} from "../../Routes.js";
 import {useNavigate} from "react-router";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey";
 import {useAppVersion} from "../../hooks/useAppVersion";

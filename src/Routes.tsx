@@ -18,59 +18,60 @@ const OverviewDashboard = React.lazy(() => import("./overview/OverviewDashboard"
 const OverviewHistory = React.lazy(() => import("./overview/OverviewHistory"));
 const NotFoundPage = React.lazy(() => import("./landing/NotFoundPage"));
 
-function AppRoute(path, appName, hideNav = false) {
-    return {
-        path: path,
-        appName: appName,
-        hideNav: hideNav,
-    };
-}
+export type AppRoute = {
+    path: string,
+    appName: string | null,
+    hideNav?: boolean,
+};
 
-export const RoutePaths = {
+export const RoutePaths: { [key: string]: AppRoute } = {
 
     // Landing Page
-    landingPage: new AppRoute('/', null, true),
+    landingPage: {path: '/', hideNav: true, appName: null},
 
     // Overview
-    overviewDashboard: new AppRoute('/dashboard', AppNames.overview),
-    overviewHistory: new AppRoute('/history', AppNames.overview),
+    overviewDashboard: {path: '/dashboard', appName: AppNames.overview},
+    overviewHistory: {path: '/history', appName: AppNames.overview},
 
     // Wanikani
-    wanikaniDashboard: new AppRoute('/wanikani-dashboard', AppNames.wanikani),
-    wanikaniLogin: new AppRoute('/wanikani-login', AppNames.wanikani),
-    wanikaniHistory: new AppRoute('/wanikani-history', AppNames.wanikani),
-    wanikaniItems: new AppRoute('/wanikani-items', AppNames.wanikani),
+    wanikaniDashboard: {path: '/wanikani-dashboard', appName: AppNames.wanikani},
+    wanikaniLogin: {path: '/wanikani-login', appName: AppNames.wanikani},
+    wanikaniHistory: {path: '/wanikani-history', appName: AppNames.wanikani},
+    wanikaniItems: {path: '/wanikani-items', appName: AppNames.wanikani},
 
     // Anki
-    ankiConnect: new AppRoute('/anki-connect', AppNames.anki),
-    ankiDashboard: new AppRoute('/anki-dashboard', AppNames.anki),
-    ankiHistory: new AppRoute('/anki-history', AppNames.anki),
+    ankiConnect: {path: '/anki-connect', appName: AppNames.anki},
+    ankiDashboard: {path: '/anki-dashboard', appName: AppNames.anki},
+    ankiHistory: {path: '/anki-history', appName: AppNames.anki},
 
     // BunPro
-    bunproDashboard: new AppRoute('/bunpro-dashboard', AppNames.bunpro),
-    bunproHistory: new AppRoute('/bunpro-history', AppNames.bunpro),
-    bunproLogin: new AppRoute('/bunpro-login', AppNames.bunpro),
+    bunproDashboard: {path: '/bunpro-dashboard', appName: AppNames.bunpro},
+    bunproHistory: {path: '/bunpro-history', appName: AppNames.bunpro},
+    bunproLogin: {path: '/bunpro-login', appName: AppNames.bunpro},
 
     // About
-    aboutPage: new AppRoute('/about'),
+    aboutPage: {path: '/about', appName: null},
 };
 
 export const AllRoutes = Object.keys(RoutePaths).map(key => RoutePaths[key]);
 
-function lazyRoute(route, element, exact = false) {
+function lazyRoute(route: AppRoute, element: any) {
     return (
-        <Route path={route.path} element={
-            <React.Suspense fallback={<></>}>
-                {element}
-            </React.Suspense>
-        } exact={exact}/>
+        <Route
+            path={route.path}
+            element={
+                <React.Suspense fallback={<></>}>
+                    {element}
+                </React.Suspense>
+            }
+        />
     );
 }
 
 export function AppRoutes() {
     return (
         <Routes>
-            {lazyRoute(RoutePaths.landingPage, <LandingPage/>, true)}
+            {lazyRoute(RoutePaths.landingPage, <LandingPage/>)}
             {lazyRoute(RoutePaths.overviewDashboard, <OverviewDashboard/>)}
             {lazyRoute(RoutePaths.overviewHistory, <OverviewHistory/>)}
             {lazyRoute(RoutePaths.wanikaniDashboard, <WanikaniDashboard/>)}
@@ -84,12 +85,12 @@ export function AppRoutes() {
             {lazyRoute(RoutePaths.ankiDashboard, <AnkiDashboard/>)}
             {lazyRoute(RoutePaths.ankiHistory, <AnkiHistory/>)}
             {lazyRoute(RoutePaths.ankiConnect, <AnkiConnectLogin/>)}
-            {lazyRoute({path: '*'}, <NotFoundPage/>)}
+            {lazyRoute({path: '*', appName: null}, <NotFoundPage/>)}
         </Routes>
     );
 }
 
-export function convertAppNameToDashboardRoute(appName) {
+export function convertAppNameToDashboardRoute(appName: string) {
     switch (appName) {
         case AppNames.overview:
             return RoutePaths.overviewDashboard

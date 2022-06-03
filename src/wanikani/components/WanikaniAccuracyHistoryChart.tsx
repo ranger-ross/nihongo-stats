@@ -10,7 +10,6 @@ import {
 } from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, Grid, Typography} from "@mui/material";
-// @ts-ignore
 import _ from 'lodash';
 // @ts-ignore
 import {scaleLinear} from 'd3-scale';

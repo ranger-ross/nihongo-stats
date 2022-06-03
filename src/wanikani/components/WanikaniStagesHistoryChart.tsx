@@ -14,8 +14,6 @@ import {
     Tooltip as TooltipBase
 } from "@devexpress/dx-react-chart";
 import {WanikaniColors} from "../../Constants";
-// @ts-ignore
-import {scaleBand} from 'd3-scale';
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
@@ -24,6 +22,7 @@ import {RawWanikaniReset} from "../models/raw/RawWanikaniReset";
 import {mapWanikaniReset} from "../service/WanikaniMappingService";
 import {WanikaniReset} from "../models/WanikaniReset";
 import Area from "../../shared/Area";
+import { scaleBand } from "../../util/ChartUtils";
 
 
 type StageHistoryUnit = {

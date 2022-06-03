@@ -1,3 +1,10 @@
+import {scaleBand as sb} from 'd3-scale';
+import { FactoryFn } from "@devexpress/dx-react-chart";
+
+// Fix type mismatch in React Chart
+export const scaleBand: FactoryFn = sb as unknown as FactoryFn;
+
+
 export function getVisibleLabelIndices(data: unknown[], maxNumberOfLabels: number) {
     if (data.length <= maxNumberOfLabels) {
         return data.map((_, i) => i);

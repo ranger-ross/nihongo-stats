@@ -8,12 +8,10 @@ import {
     SeriesRef,
     Stack,
     Tooltip as TooltipBase,
-    ValueAxis as ValueAxisBase
+    ValueAxis as ValueAxisBase,
 } from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, CircularProgress, Grid, MenuItem, Select, Typography} from "@mui/material";
-// @ts-ignore
-import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
@@ -21,6 +19,7 @@ import {createSubjectMap} from "../service/WanikaniDataUtil";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
+import { scaleBand } from '../../util/ChartUtils';
 
 type PeriodUnit = {
     key: string,

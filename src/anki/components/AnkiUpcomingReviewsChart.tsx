@@ -11,11 +11,9 @@ import {
     Stack
 } from "@devexpress/dx-react-chart";
 import AnkiApiService from "../service/AnkiApiService";
-// @ts-ignore
-import {scaleBand} from 'd3-scale';
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
 import {truncDate} from "../../util/DateUtils";
-import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {createAnkiCardsDueQuery} from "../service/AnkiDataUtil";
 

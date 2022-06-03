@@ -10,8 +10,6 @@ import {
 } from "@devexpress/dx-react-chart";
 import {AnkiColors, AppNames, BunProColors, WanikaniColors} from '../../Constants';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-// @ts-ignore
-import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService";
@@ -24,6 +22,7 @@ import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil";
 import {AnkiReview} from "../../anki/models/AnkiReview";
 import {RawWanikaniSubject} from "../../wanikani/models/raw/RawWanikaniSubject";
 import {RawWanikaniReview} from "../../wanikani/models/raw/RawWanikaniReview";
+import { scaleBand } from '../../util/ChartUtils';
 
 type DataPoint = {
     date: Date,

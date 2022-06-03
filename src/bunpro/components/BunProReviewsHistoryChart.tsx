@@ -9,9 +9,7 @@ import {
     Stack
 } from "@devexpress/dx-react-chart";
 import {daysToMillis, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
-// @ts-ignore
-import {scaleBand} from 'd3-scale';
-import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {fetchAllBunProReviews, RawBunProFlattenedReviewWithLevel} from "../service/BunProDataUtil";
 import useWindowDimensions from "../../hooks/useWindowDimensions";

@@ -6,10 +6,9 @@ import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSerie
 import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
 import AnkiApiService from "../service/AnkiApiService";
-// @ts-ignore
-import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import {AnkiReview} from "../models/AnkiReview";
+import { scaleBand } from "../../util/ChartUtils";
 
 type DataPoint = any;
 

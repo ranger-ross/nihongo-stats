@@ -13,8 +13,7 @@ import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addHours, truncMinutes} from '../../util/DateUtils';
 import {WanikaniColors} from '../../Constants';
 import PeriodSelector from "../../shared/PeriodSelector";
-// @ts-ignore
-import {scaleBand} from 'd3-scale';
+import {scaleBand} from '../../util/ChartUtils'
 import {
     addTimeToDate,
     createUpcomingReviewsChartBarLabel,

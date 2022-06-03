@@ -1,5 +1,4 @@
 import React from "react";
-// @ts-ignore
 import {area, curveCatmullRom} from 'd3-shape';
 
 function Area(props: any) {
@@ -18,7 +17,7 @@ function Area(props: any) {
                 .y1(({val}) => val)
                 // @ts-ignore
                 .y0(({startVal}) => startVal)
-                .curve(curveCatmullRom)(coordinates)}
+                .curve(curveCatmullRom)(coordinates) as string | undefined}
             opacity={0.5}
         />
     );

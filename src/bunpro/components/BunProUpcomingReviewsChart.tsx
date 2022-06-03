@@ -2,8 +2,6 @@ import React, {useEffect, useMemo, useState} from "react";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addHours, truncMinutes} from '../../util/DateUtils';
 import PeriodSelector from "../../shared/PeriodSelector";
-// @ts-ignore
-import {scaleBand} from 'd3-scale';
 import BunProApiService from "../service/BunProApiService";
 import {createGrammarPointsLookupMap, filterDeadGhostReviews} from "../service/BunProDataUtil";
 import {ArgumentAxis, Chart, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
@@ -30,6 +28,7 @@ import {
 } from "../../util/UpcomingReviewChartUtils";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {AppStyles} from "../../util/TypeUtils";
+import {scaleBand} from "../../util/ChartUtils";
 import {RawBunProReview} from "../models/raw/RawBunProReview";
 import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
 

@@ -11,11 +11,8 @@ import {useBunProApiKey} from "../hooks/useBunProApiKey";
 import OverviewNav from "./navbars/OverviewNav";
 import {AppNames} from "../Constants";
 import {useSelectedApp} from "../hooks/useSelectedApp";
-// @ts-ignore
 import ankiIcon from '../../assets/icons/anki-icon.png';
-// @ts-ignore
 import bunProIcon from '../../assets/icons/bunpro-icon.png';
-// @ts-ignore
 import wanikaniIcon from '../../assets/icons/wanikani-icon.png';
 import {BarChart} from "@mui/icons-material";
 import {AppStyles} from "../util/TypeUtils";

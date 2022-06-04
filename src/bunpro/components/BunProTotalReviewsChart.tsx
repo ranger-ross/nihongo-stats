@@ -4,12 +4,11 @@ import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-r
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
-// @ts-ignore
-import {scaleBand} from 'd3-scale';
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {fetchAllBunProReviews, RawBunProFlattenedReviewWithLevel} from "../service/BunProDataUtil";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
+import { scaleBand } from '../../util/ChartUtils';
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 

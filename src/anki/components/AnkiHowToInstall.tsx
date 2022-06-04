@@ -1,21 +1,13 @@
 import {Accordion, AccordionSummary, Button, Link, ToggleButton, ToggleButtonGroup, Typography} from "@mui/material";
 import * as React from "react";
 import {useState} from "react";
-// @ts-ignore
 import macosAnkiAddOns from '../../../assets/anki/macos/anki-add-ons.png'
-// @ts-ignore
 import macosAnkiGetAddOns from '../../../assets/anki/macos/anki-get-add-ons.png'
-// @ts-ignore
 import macosAnkiInstallAddOns from '../../../assets/anki/macos/anki-install-add-ons.png'
-// @ts-ignore
 import macosAnkiRequestPermission from '../../../assets/anki/macos/anki-request-permission.png'
-// @ts-ignore
 import windowsAnkiAddOns from '../../../assets/anki/windows/anki-add-ons.png'
-// @ts-ignore
 import windowsAnkiGetAddOns from '../../../assets/anki/windows/anki-get-add-ons.png'
-// @ts-ignore
 import windowsAnkiInstallAddOns from '../../../assets/anki/windows/anki-install-add-ons.png'
-// @ts-ignore
 import windowsAnkiRequestPermission from '../../../assets/anki/windows/anki-request-permission.png'
 
 

@@ -12,9 +12,7 @@ import {
 } from "@devexpress/dx-react-chart";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import AnkiApiService from "../service/AnkiApiService";
-// @ts-ignore
-import {scaleBand} from 'd3-scale';
-import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {AnkiReview} from "../models/AnkiReview";
 

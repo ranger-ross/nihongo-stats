@@ -5,11 +5,8 @@ import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
 import AnkiApiService from "../service/AnkiApiService";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
-// @ts-ignore
-import {scaleBand} from 'd3-scale';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
-import {AreaSeries, ArgumentScale, EventTracker, Stack, ValueAxis as ValueAxisBase} from "@devexpress/dx-react-chart";
-
+import {AreaSeries, ArgumentScale, EventTracker, scaleBand, Stack, ValueAxis as ValueAxisBase} from "@devexpress/dx-react-chart";
 import {AnkiColors} from "../../Constants";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {AnkiReview} from "../models/AnkiReview";

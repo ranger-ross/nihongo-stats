@@ -5,7 +5,7 @@ import {CSSProperties} from "react";
 export type AppOption = {
     appName: string,
     displayName: string,
-    icon: SvgIconComponent,
+    icon: SvgIconComponent | string,
     iconStyle?: CSSProperties
 };
 

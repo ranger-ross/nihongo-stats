@@ -1,4 +1,5 @@
-import {distinct} from "../ArrayUtils.ts";
+import { describe, beforeEach, it, expect } from "vitest";
+import {distinct} from "../ArrayUtils";
 
 describe('ArrayUtils', function () {
 

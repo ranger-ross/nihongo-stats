@@ -1,9 +1,6 @@
-export function distinct<T>(array: T[], compareFn: (entry: T) => string | number): T[] {
-
-    let compare = compareFn;
-    if (!compareFn) {
-        compare = (entry: T) => entry as unknown as string | number;
-    }
+export function distinct<T>(array: T[], compareFn?: (entry: T) => string | number): T[] {
+    const defaultCompare = (entry: T) => entry as unknown as string | number;
+    const compare = !!compareFn ? compareFn : defaultCompare;
 
     const flags: { [key: number | string]: boolean } = {};
 

@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
     addDays,
     addHours,
@@ -8,7 +8,7 @@ import {
     millisToDays,
     millisToHours,
     truncDate, truncMinutes
-} from "../DateUtils.ts";
+} from "../DateUtils";
 
 describe('Timezones', () => {
     it('should always be UTC', () => {

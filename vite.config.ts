@@ -1,6 +1,9 @@
-import {defineConfig} from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import checker from 'vite-plugin-checker'
+
+// Set timezone to UTC so unit tests are predicable regardless of timezone.
+process.env.TZ = 'UTC'
 
 // https://vitejs.dev/config/
 export default defineConfig({

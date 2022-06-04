@@ -1,5 +1,5 @@
 import { describe, beforeEach, it, expect } from "vitest";
-import {getVisibleLabelIndices} from "../ChartUtils.ts";
+import {getVisibleLabelIndices} from "../ChartUtils";
 
 describe('ChartUtils', function () {
     describe('getVisibleLabelIndices()', function () {
@@ -71,7 +71,7 @@ describe('ChartUtils', function () {
 });
 
 
-function dummyData(length) {
+function dummyData(length: number) {
     let data = [];
     for (let i = 0; i < length; i++) {
         data.push(i);

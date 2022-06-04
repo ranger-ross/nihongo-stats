@@ -1,6 +1,6 @@
 import {WanikaniColors} from "../../Constants";
 
-export function getColorByWanikaniSrsStage(stage: number) {
+export function getColorByWanikaniSrsStage(stage?: number | null) {
     if (!stage && stage !== 0) {
         return WanikaniColors.lockedGray;
     }

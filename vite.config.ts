@@ -19,5 +19,9 @@ export default defineConfig({
     },
     esbuild: {
         legalComments: 'none'
+    },
+    test: {
+        include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}"],
+        environment: "jsdom",
     }
 })

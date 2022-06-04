@@ -1,3 +1,4 @@
+import { describe, beforeEach, it, expect } from "vitest";
 import {getVisibleLabelIndices} from "../ChartUtils.ts";
 
 describe('ChartUtils', function () {

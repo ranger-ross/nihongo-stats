@@ -62,12 +62,33 @@ async function fetchData() {
     return aggregateReviewByDay(reviews)
 }
 
+function useOptions(rawData?: DataPoint[]) {
+    const options = [
+        {value: 30, text: '1 Mon'},
+        {value: 60, text: '2 Mon'},
+        {value: 90, text: '3 Mon'},
+        {value: 180, text: '6 Mon'},
+        {value: 365, text: '1 Yr'},
+    ];
+
+    if (!!rawData && rawData.length > 0) {
+        console.log(rawData[0].date);
+        options.push({
+            value: millisToDays(Date.now() - rawData[0].date),
+            text: 'All'
+        });
+    }
+
+    return options;
+}
+
 function BunProTotalReviewsChart() {
     const [rawData, setRawData] = useState<DataPoint[]>();
     const [isLoading, setIsLoading] = useState(false);
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
     const {width} = useWindowDimensions();
     const isMobile = width < 400;
+    const options = useOptions(rawData)
 
     useEffect(() => {
         let isSubscribed = true;
@@ -146,17 +167,7 @@ function BunProTotalReviewsChart() {
                     <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
                         <PeriodSelector period={daysToLookBack}
                                         setPeriod={setDaysToLookBack}
-                                        options={[
-                                            {value: 30, text: '1 Mon'},
-                                            {value: 60, text: '2 Mon'},
-                                            {value: 90, text: '3 Mon'},
-                                            {value: 180, text: '6 Mon'},
-                                            {value: 365, text: '1 Yr'},
-                                            !!rawData ? {
-                                                value: millisToDays(Date.now() - rawData[0].date),
-                                                text: 'All'
-                                            } : null
-                                        ]}
+                                        options={options}
                         />
                     </Grid>
                 </Grid>

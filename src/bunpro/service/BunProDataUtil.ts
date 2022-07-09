@@ -22,6 +22,11 @@ export type RawBunProFlattenedReview = RawBunProReview & {
     }
 }
 
+// Needed because Safari new Date() with dashes does not work
+function formatDate(time: string) {
+    return new Date(time.replace(/-/g, "/"));
+}
+
 export function flattenReview(review: RawBunProReview): RawBunProFlattenedReview[] {
     const data: RawBunProFlattenedReview[] = [];
 
@@ -30,7 +35,7 @@ export function flattenReview(review: RawBunProReview): RawBunProFlattenedReview
             ...review,
             current: {
                 ...history,
-                time: new Date(history.time)
+                time: formatDate(history.time)
             }
         })
     }

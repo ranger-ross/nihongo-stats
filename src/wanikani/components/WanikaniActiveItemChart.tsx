@@ -60,6 +60,8 @@ async function fetchData(level: number) {
         WanikaniApiService.getAssignmentsForLevel(level),
     ]);
 
+    console.log(allSubjects)
+
     const subjects: RawWanikaniSubject[] = allSubjects.filter((subject: RawWanikaniSubject) => subject.data.level === level);
 
     const assignments = rawAssignments.data;
@@ -188,6 +190,8 @@ function WanikaniLevelItemsChart({level, showWanikaniHeader = false}: WanikaniLe
             .then(d => {
                 if (!isSubscribed)
                     return;
+
+                console.log(d);
 
                 if (wanikaniPreferences.showPreviousLevelByDefault &&
                     _isFirstLoad &&

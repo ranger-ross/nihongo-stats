@@ -10,7 +10,7 @@ export interface RawWanikaniSubjectData {
     amalgamation_subject_ids: number[]
     auxiliary_meanings: RawWanikaniSubjectAuxiliaryMeaning[]
     characters: string
-    character_images: RawWanikaniSubjectCharacterImage[]
+    character_images?: RawWanikaniSubjectCharacterImage[]
     created_at: string
     document_url: string
     hidden_at: any
@@ -21,6 +21,11 @@ export interface RawWanikaniSubjectData {
     meaning_mnemonic: string
     slug: string
     spaced_repetition_system_id: number
+    component_subject_ids?: number[]
+    visually_similar_subject_ids?: number[]
+    meaning_hint?: string
+    reading_mnemonic?: string
+    reading_hint?: string
 }
 
 export interface RawWanikaniSubjectAuxiliaryMeaning {

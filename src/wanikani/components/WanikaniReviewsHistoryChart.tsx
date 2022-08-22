@@ -17,9 +17,9 @@ import PeriodSelector from "../../shared/PeriodSelector";
 import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
 import {createSubjectMap} from "../service/WanikaniDataUtil";
 import ToolTipLabel from "../../shared/ToolTipLabel";
-import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {scaleBand} from '../../util/ChartUtils';
 import {WanikaniSubject} from "../models/WanikaniSubject";
+import {WanikaniReview} from "../models/WanikaniReview";
 
 type PeriodUnit = {
     key: string,
@@ -46,7 +46,7 @@ const units: { [key: string]: PeriodUnit } = {
 };
 
 type WkReviewSubject = {
-    review: RawWanikaniReview,
+    review: WanikaniReview,
     subject: WanikaniSubject,
 };
 
@@ -93,13 +93,13 @@ function dataPoint(date: Date) {
 }
 
 async function fetchData() {
-    const reviews = await WanikaniApiService.getReviews();
+    const reviews = await WanikaniApiService.getReviewsV2();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
     const data: WkReviewSubject[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
-            subject: subjects[review.data['subject_id']]
+            subject: subjects[review.subjectId]
         });
     }
 
@@ -109,7 +109,7 @@ async function fetchData() {
 function aggregateDate(rawData: WkReviewSubject[], daysToLookBack: number, unit: PeriodUnit): DataPoint[] {
     const areDatesDifferent = (date1: Date, date2: Date) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
     const startDate = unit.trunc(Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1))).getTime();
-    const dataForTimeRange = rawData.filter(data => new Date(data.review.data['created_at']).getTime() > startDate);
+    const dataForTimeRange = rawData.filter(data => data.review.createdAt.getTime() > startDate);
 
     // Make sure to DataPoints for days with no reviews, so there is a gap in the graph
     function fillInEmptyDaysIfNeeded(aggregatedData: DataPoint[], reviewDate: Date) {
@@ -121,11 +121,11 @@ function aggregateDate(rawData: WkReviewSubject[], daysToLookBack: number, unit:
         }
     }
 
-    const aggregatedData: DataPoint[] = [dataPoint(truncDate(new Date(dataForTimeRange[0].review.data['created_at'])))];
+    const aggregatedData: DataPoint[] = [dataPoint(truncDate(dataForTimeRange[0].review.createdAt))];
     for (const data of dataForTimeRange) {
-        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, new Date(data.review.data['created_at']))) {
-            fillInEmptyDaysIfNeeded(aggregatedData, new Date(data.review.data['created_at']));
-            aggregatedData.push(dataPoint(unit.trunc(new Date(data.review.data['created_at']))));
+        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.review.createdAt)) {
+            fillInEmptyDaysIfNeeded(aggregatedData, data.review.createdAt);
+            aggregatedData.push(dataPoint(unit.trunc(data.review.createdAt)));
         }
 
         aggregatedData[aggregatedData.length - 1].push(data);

@@ -7,8 +7,6 @@ import {createSubjectMap} from "../service/WanikaniDataUtil";
 import {millisToDays, millisToHours} from "../../util/DateUtils";
 import {distinct} from "../../util/ArrayUtils";
 import {AppStyles} from "../../util/TypeUtils";
-import {WanikaniSubject} from "../models/WanikaniSubject";
-import {WanikaniReview} from "../models/WanikaniReview";
 import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 
 const styles: AppStyles = {
@@ -95,10 +93,10 @@ async function fetchLevelData(): Promise<FormattedLevelData> {
     const timeSinceStart = Date.now() - user.startedAt.getTime();
 
     const levelTimes = [];
-    for (const level of levelProgressData.data) {
-        const start = new Date(level.data['unlocked_at']).getTime();
-        const end = !!level.data['passed_at'] ? new Date(level.data['passed_at']).getTime() : null;
-        if (!end) {
+    for (const level of levelProgressData) {
+        const start = level.unlockedAt?.getTime();
+        const end = level.passedAt?.getTime();
+        if (!start || !end) {
             continue;
         }
         levelTimes.push(end - start);

@@ -4,7 +4,6 @@ import {AppUrls} from "../../Constants";
 import {PromiseCache} from "../../util/PromiseCache";
 import WanikaniApiServiceRxJs, {EVENT_STATUS} from "./WanikaniApiServiceRxJs";
 import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
-import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelProgress";
 import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
@@ -12,7 +11,7 @@ import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
 import {
-    mapWanikaniAssignment,
+    mapWanikaniAssignment, mapWanikaniLevelProgression,
     mapWanikaniReset,
     mapWanikaniReview,
     mapWanikaniSubject,
@@ -21,6 +20,7 @@ import {
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {WanikaniReset} from "../models/WanikaniReset";
 import {WanikaniUser} from "../models/WanikaniUser";
+import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -270,8 +270,9 @@ async function getAssignmentsForLevel(level: number): Promise<WanikaniAssignment
     return page.data.map(mapWanikaniAssignment);
 }
 
-function getLevelProgress(): Promise<RawWanikaniLevelProgressionPage> {
-    return joinAndSendCacheableRequest('/v2/level_progressions', cacheKeys.levelProgression, fetchWithCache, 1000 * 60);
+async function getLevelProgress(): Promise<WanikaniLevelProgression[]> {
+    const page: RawWanikaniLevelProgressionPage = await joinAndSendCacheableRequest('/v2/level_progressions', cacheKeys.levelProgression, fetchWithCache, 1000 * 60);
+    return page.data.map(mapWanikaniLevelProgression);
 }
 
 function getRawSubjects(): Promise<RawWanikaniSubject[]> {

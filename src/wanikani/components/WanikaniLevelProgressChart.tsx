@@ -2,7 +2,7 @@ import {ArgumentAxis, BarSeries, Chart, Title, Tooltip, ValueAxis} from '@devexp
 import {CSSProperties, useEffect, useMemo, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import {Animation, BarSeries as BarSeriesBase, EventTracker, SeriesRef} from "@devexpress/dx-react-chart";
-import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelProgress";
+import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
 
 function parseTimestamp(text: string | number) {
     const millis = parseFloat(text as string) * 86400000;
@@ -27,17 +27,16 @@ function LevelToolTip({text}: { text: string }) {
 
 type FormattedData = { level: string, days: number, startedAt: number };
 
-function formatData(data: RawWanikaniLevelProgressionPage, currentLevel: number): FormattedData[] {
+function formatData(data: WanikaniLevelProgression[], currentLevel: number): FormattedData[] {
     console.log(data);
-    const rawData = data.data
-        .map(level => level.data)
-        .filter(level => !level['abandoned_at'] && level['level'] <= currentLevel);
+    const rawData = data
+        .filter(level => !level.abandonedAt && level.level <= currentLevel);
 
     const map: { [level: number]: FormattedData } = {};
 
     for (const level of rawData) {
-        const passedAt = !!level['passed_at'] ? new Date(level['passed_at']).getTime() : Date.now();
-        const startedAt = new Date(level['created_at']).getTime();
+        const passedAt = level.passedAt?.getTime() ?? Date.now();
+        const startedAt = level.createdAt.getTime();
 
         const add = () => map[level.level] = {
             level: level.level.toString(),

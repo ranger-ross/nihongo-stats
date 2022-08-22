@@ -3,8 +3,8 @@ import WanikaniApiService from "../service/WanikaniApiService";
 import {Box, Card, CardContent, CircularProgress, Grid, Stack, Tooltip, Typography} from "@mui/material";
 import {millisToDays, millisToHours} from '../../util/DateUtils';
 import {WanikaniColors} from "../../Constants";
-import {RawWanikaniLevelProgression} from "../models/raw/RawWanikaniLevelProgress";
 import {AppStyles} from "../../util/TypeUtils";
+import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
 
 
 const racialColor = WanikaniColors.blue;
@@ -79,9 +79,9 @@ function FractionText({top, bottom}: { top: string | number, bottom: string | nu
     );
 }
 
-function getLevelProgress(levelsProgress: RawWanikaniLevelProgression[], currentLevel: number) {
-    const currentLevelAttempts = levelsProgress.filter(lvl => lvl.data.level === currentLevel);
-    return currentLevelAttempts[currentLevelAttempts.length - 1].data
+function getLevelProgress(levelsProgress: WanikaniLevelProgression[], currentLevel: number) {
+    const currentLevelAttempts = levelsProgress.filter(lvl => lvl.level === currentLevel);
+    return currentLevelAttempts[currentLevelAttempts.length - 1]
 }
 
 async function getCurrentLevelProgressData(): Promise<ProgressData> {
@@ -93,18 +93,18 @@ async function getCurrentLevelProgressData(): Promise<ProgressData> {
 
     const currentLevel = user.level;
 
-    const currentLevelProgress = getLevelProgress(levelsProgress.data, currentLevel);
+    const currentLevelProgress = getLevelProgress(levelsProgress, currentLevel);
 
     let start;
     if (currentLevel > 1) {
-        const previousLevelProgress = getLevelProgress(levelsProgress.data, currentLevel - 1);
-        start = new Date(previousLevelProgress['passed_at']);
+        const previousLevelProgress = getLevelProgress(levelsProgress, currentLevel - 1);
+        start = previousLevelProgress.passedAt;
     } else {
-        start = new Date(currentLevelProgress['started_at']);
+        start = currentLevelProgress.startedAt;
     }
 
-    const end = !!currentLevelProgress['passed_at'] ? new Date(currentLevelProgress['passed_at']) : new Date();
-    const timeOnLevel = end.getTime() - start.getTime()
+    const end = currentLevelProgress.passedAt ?? new Date();
+    const timeOnLevel = end.getTime() - (start as Date).getTime()
 
     const assignments = await WanikaniApiService.getAssignmentsForLevel(currentLevel);
     const subjects = allSubjects.filter(subject => subject.level === currentLevel);

@@ -12,6 +12,7 @@ import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
 import {mapWanikaniAssignment, mapWanikaniReview, mapWanikaniSubject} from "./WanikaniMappingService";
+import {WanikaniAssignment} from "../models/WanikaniAssignment";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -254,8 +255,9 @@ function getResets(): Promise<RawWanikaniResetPage> {
     return joinAndSendCacheableRequest('/v2/resets', cacheKeys.resets, fetchWithCache, 1000 * 60 * 10);
 }
 
-function getAssignmentsForLevel(level: number): Promise<RawWanikaniAssignmentPage> {
-    return joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
+async function getAssignmentsForLevel(level: number): Promise<WanikaniAssignment[]> {
+    const page: RawWanikaniAssignmentPage = await joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
+    return page.data.map(mapWanikaniAssignment);
 }
 
 function getLevelProgress(): Promise<RawWanikaniLevelProgressionPage> {
@@ -352,8 +354,7 @@ export default {
     getLevelProgress: getLevelProgress,
     getAssignmentsForLevel: getAssignmentsForLevel,
     getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
-    getAllAssignments: getAllRawAssignments,
-    getAllAssignmentsV2: getAllAssignments,
+    getAllAssignments: getAllAssignments,
     getSubjects: getSubjects,
     getReviews: getReviews,
     getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,

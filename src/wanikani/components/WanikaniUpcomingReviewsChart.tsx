@@ -81,7 +81,7 @@ function formatChartData(rawData: WanikaniAssignment[], unit: UpcomingReviewUnit
 }
 
 async function fetchFutureReviews() {
-    const data = await WanikaniApiService.getAllAssignmentsV2();
+    const data = await WanikaniApiService.getAllAssignments();
     return data.filter(assignment => !assignment.burnedAt || !assignment.availableAt);
 }
 

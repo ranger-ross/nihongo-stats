@@ -64,7 +64,7 @@ type AssignmentSnippet = {
 };
 
 async function fetchData() {
-    const assignments = await WanikaniApiService.getAllAssignmentsV2();
+    const assignments = await WanikaniApiService.getAllAssignments();
     const orderedAssignments: AssignmentSnippet[] = assignments
         .filter(assignment => !!assignment.startedAt)
         .map(assignment => ({

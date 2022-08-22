@@ -17,7 +17,6 @@ import GradientLinearProgress from "../../shared/GradientLinearProgress";
 import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
-import {mapWanikaniAssignment} from "../service/WanikaniMappingService";
 
 const styles = {
     showPreviousLevelMobile: {
@@ -56,14 +55,13 @@ async function fetchData(level: number) {
         return memCache[level];
     }
 
-    const [allSubjects, rawAssignments] = await Promise.all([
+    const [allSubjects, assignments] = await Promise.all([
         WanikaniApiService.getSubjects(),
         WanikaniApiService.getAssignmentsForLevel(level),
     ]);
 
     const subjects: WanikaniSubject[] = allSubjects.filter((subject: WanikaniSubject) => subject.level === level);
 
-    const assignments = rawAssignments.data.map(mapWanikaniAssignment);
     const radicalsStarted = assignments.filter((s: WanikaniAssignment) => s.subjectType === 'radical' && !!s.startedAt).length;
     const kanjiStarted = assignments.filter((s: WanikaniAssignment) => s.subjectType === 'kanji' && !!s.startedAt).length;
     const vocabularyStarted = assignments.filter((s: WanikaniAssignment) => s.subjectType === 'vocabulary' && !!s.startedAt).length;

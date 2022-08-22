@@ -140,7 +140,7 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortR
 
 async function fetchItems() {
     const subjects = await WanikaniApiService.getSubjects();
-    const assignments = await WanikaniApiService.getAllAssignmentsV2();
+    const assignments = await WanikaniApiService.getAllAssignments();
     const assignmentMap = createAssignmentMap(assignments);
 
     return subjects

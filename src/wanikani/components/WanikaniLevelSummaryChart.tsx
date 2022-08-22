@@ -110,14 +110,14 @@ async function getCurrentLevelProgressData(): Promise<ProgressData> {
     const subjects = allSubjects.filter(subject => subject.level === currentLevel);
 
     const radicalsTotal = subjects.filter(s => s.object === 'radical');
-    const radicals = assignments.data.filter(s => s.data['subject_type'] === 'radical' && !!s.data['passed_at']);
-    const radicalsStarted = assignments.data.filter(s => s.data['subject_type'] === 'radical' && !!s.data['started_at']);
+    const radicals = assignments.filter(s => s.subjectType === 'radical' && !!s.passedAt);
+    const radicalsStarted = assignments.filter(s => s.subjectType === 'radical' && !!s.startedAt);
     const kanjiTotal = subjects.filter(s => s.object === 'kanji');
-    const kanji = assignments.data.filter(s => s.data['subject_type'] === 'kanji' && !!s.data['passed_at']);
-    const kanjiStarted = assignments.data.filter(s => s.data['subject_type'] === 'kanji' && !!s.data['started_at']);
+    const kanji = assignments.filter(s => s.subjectType === 'kanji' && !!s.passedAt);
+    const kanjiStarted = assignments.filter(s => s.subjectType === 'kanji' && !!s.startedAt);
     const vocabularyTotal = subjects.filter(s => s.object === 'vocabulary');
-    const vocabulary = assignments.data.filter(s => s.data['subject_type'] === 'vocabulary' && !!s.data['passed_at']);
-    const vocabularyStarted = assignments.data.filter(s => s.data['subject_type'] === 'vocabulary' && !!s.data['started_at']);
+    const vocabulary = assignments.filter(s => s.subjectType === 'vocabulary' && !!s.passedAt);
+    const vocabularyStarted = assignments.filter(s => s.subjectType === 'vocabulary' && !!s.startedAt);
 
     return {
         isLoading: false,

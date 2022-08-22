@@ -94,7 +94,7 @@ function CountTile({label, data, color}: CountTileProps) {
 }
 
 async function fetchData(): Promise<FormattedData> {
-    const assignments = await WanikaniApiService.getAllAssignmentsV2();
+    const assignments = await WanikaniApiService.getAllAssignments();
 
     const available = assignments.filter(assignment => assignment.srsStage == 0);
     const apprentice = assignments.filter(assignment => assignment.srsStage > 0 && assignment.srsStage < 5);

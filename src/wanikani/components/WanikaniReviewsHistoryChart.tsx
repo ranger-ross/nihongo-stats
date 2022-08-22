@@ -17,9 +17,8 @@ import PeriodSelector from "../../shared/PeriodSelector";
 import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
 import {createSubjectMap} from "../service/WanikaniDataUtil";
 import ToolTipLabel from "../../shared/ToolTipLabel";
-import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
-import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
-import { scaleBand } from '../../util/ChartUtils';
+import {scaleBand} from '../../util/ChartUtils';
+import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 
 type PeriodUnit = {
     key: string,
@@ -43,11 +42,6 @@ const units: { [key: string]: PeriodUnit } = {
         text: 'Months',
         trunc: truncMonth
     },
-};
-
-type WkReviewSubject = {
-    review: RawWanikaniReview,
-    subject: RawWanikaniSubject,
 };
 
 type DataPoint = {
@@ -95,21 +89,21 @@ function dataPoint(date: Date) {
 async function fetchData() {
     const reviews = await WanikaniApiService.getReviews();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    const data: WkReviewSubject[] = [];
+    const data: WanikaniSubjectReview[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
-            subject: subjects[review.data['subject_id']]
+            subject: subjects[review.subjectId]
         });
     }
 
     return data;
 }
 
-function aggregateDate(rawData: WkReviewSubject[], daysToLookBack: number, unit: PeriodUnit): DataPoint[] {
+function aggregateDate(rawData: WanikaniSubjectReview[], daysToLookBack: number, unit: PeriodUnit): DataPoint[] {
     const areDatesDifferent = (date1: Date, date2: Date) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
     const startDate = unit.trunc(Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1))).getTime();
-    const dataForTimeRange = rawData.filter(data => new Date(data.review.data['created_at']).getTime() > startDate);
+    const dataForTimeRange = rawData.filter(data => data.review.createdAt.getTime() > startDate);
 
     // Make sure to DataPoints for days with no reviews, so there is a gap in the graph
     function fillInEmptyDaysIfNeeded(aggregatedData: DataPoint[], reviewDate: Date) {
@@ -121,11 +115,11 @@ function aggregateDate(rawData: WkReviewSubject[], daysToLookBack: number, unit:
         }
     }
 
-    const aggregatedData: DataPoint[] = [dataPoint(truncDate(new Date(dataForTimeRange[0].review.data['created_at'])))];
+    const aggregatedData: DataPoint[] = [dataPoint(truncDate(dataForTimeRange[0].review.createdAt))];
     for (const data of dataForTimeRange) {
-        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, new Date(data.review.data['created_at']))) {
-            fillInEmptyDaysIfNeeded(aggregatedData, new Date(data.review.data['created_at']));
-            aggregatedData.push(dataPoint(unit.trunc(new Date(data.review.data['created_at']))));
+        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.review.createdAt)) {
+            fillInEmptyDaysIfNeeded(aggregatedData, data.review.createdAt);
+            aggregatedData.push(dataPoint(unit.trunc(data.review.createdAt)));
         }
 
         aggregatedData[aggregatedData.length - 1].push(data);
@@ -174,7 +168,7 @@ function UnitSelector({options, unit, onChange}: UnitSelectorProps) {
 const totalDays = getTotalDays();
 
 function WanikaniReviewsHistoryChart() {
-    const [rawData, setRawData] = useState<WkReviewSubject[]>([]);
+    const [rawData, setRawData] = useState<WanikaniSubjectReview[]>([]);
     const [daysToLookBack, setDaysToLookBack] = useState(30);
     const [isLoading, setIsLoading] = useState(false);
     const [tooltipTargetItem, setTooltipTargetItem] = useState<SeriesRef>();

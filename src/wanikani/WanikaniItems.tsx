@@ -40,15 +40,15 @@ function SubjectTile({subject, colorBy}: SubjectTileProps) {
     return useMemo(() => (
         <WanikaniItemTile
             text={subject.characters || '?'}
-            link={subject['document_url']}
+            link={subject.documentUrl}
             meaning={subject?.meanings?.map(m => m.meaning).join(', ')}
-            srsLevel={subject['srs_stage']}
+            srsLevel={subject.srsStage}
             color={colorBy.color(subject) as string}
             size={5}
             type={subject.subjectType}
             level={subject.level}
             readings={subject.readings}
-            nextReviewDate={!!subject['available_at'] ? new Date(subject['available_at']) : null}
+            nextReviewDate={subject.availableAt}
         />
     ), [subject, colorBy.key]);
 }

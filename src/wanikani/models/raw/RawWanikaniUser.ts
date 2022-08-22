@@ -11,7 +11,7 @@ export interface RawWanikaniUserData {
     level: number
     profile_url: string
     started_at: string
-    current_vacation_started_at: string
+    current_vacation_started_at: string | null
     subscription: RawWanikaniSubscription
     preferences: RawWanikaniPreferences
 }
@@ -30,4 +30,7 @@ export interface RawWanikaniPreferences {
     lessons_presentation_order: string
     reviews_autoplay_audio: boolean
     reviews_display_srs_indicator: boolean
+    extra_study_autoplay_audio: boolean
+    wanikani_compatibility_mode: boolean
+    reviews_presentation_order: string
 }

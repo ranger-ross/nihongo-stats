@@ -3,8 +3,8 @@ import WanikaniApiService from "../service/WanikaniApiService";
 import {Box, Card, CardContent, CircularProgress, Grid, Stack, Tooltip, Typography} from "@mui/material";
 import {millisToDays, millisToHours} from '../../util/DateUtils';
 import {WanikaniColors} from "../../Constants";
-import {RawWanikaniLevelProgression} from "../models/raw/RawWanikaniLevelProgress";
 import {AppStyles} from "../../util/TypeUtils";
+import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
 
 
 const racialColor = WanikaniColors.blue;
@@ -79,45 +79,45 @@ function FractionText({top, bottom}: { top: string | number, bottom: string | nu
     );
 }
 
-function getLevelProgress(levelsProgress: RawWanikaniLevelProgression[], currentLevel: number) {
-    const currentLevelAttempts = levelsProgress.filter(lvl => lvl.data.level === currentLevel);
-    return currentLevelAttempts[currentLevelAttempts.length - 1].data
+function getLevelProgress(levelsProgress: WanikaniLevelProgression[], currentLevel: number) {
+    const currentLevelAttempts = levelsProgress.filter(lvl => lvl.level === currentLevel);
+    return currentLevelAttempts[currentLevelAttempts.length - 1]
 }
 
 async function getCurrentLevelProgressData(): Promise<ProgressData> {
-    const [userData, levelsProgress, allSubjects] = await Promise.all([
+    const [user, levelsProgress, allSubjects] = await Promise.all([
         WanikaniApiService.getUser(),
         WanikaniApiService.getLevelProgress(),
         WanikaniApiService.getSubjects(),
     ]);
 
-    const currentLevel = userData.data.level;
+    const currentLevel = user.level;
 
-    const currentLevelProgress = getLevelProgress(levelsProgress.data, currentLevel);
+    const currentLevelProgress = getLevelProgress(levelsProgress, currentLevel);
 
     let start;
     if (currentLevel > 1) {
-        const previousLevelProgress = getLevelProgress(levelsProgress.data, currentLevel - 1);
-        start = new Date(previousLevelProgress['passed_at']);
+        const previousLevelProgress = getLevelProgress(levelsProgress, currentLevel - 1);
+        start = previousLevelProgress.passedAt;
     } else {
-        start = new Date(currentLevelProgress['started_at']);
+        start = currentLevelProgress.startedAt;
     }
 
-    const end = !!currentLevelProgress['passed_at'] ? new Date(currentLevelProgress['passed_at']) : new Date();
-    const timeOnLevel = end.getTime() - start.getTime()
+    const end = currentLevelProgress.passedAt ?? new Date();
+    const timeOnLevel = end.getTime() - (start as Date).getTime()
 
     const assignments = await WanikaniApiService.getAssignmentsForLevel(currentLevel);
-    const subjects = allSubjects.filter(subject => subject.data.level === currentLevel);
+    const subjects = allSubjects.filter(subject => subject.level === currentLevel);
 
     const radicalsTotal = subjects.filter(s => s.object === 'radical');
-    const radicals = assignments.data.filter(s => s.data['subject_type'] === 'radical' && !!s.data['passed_at']);
-    const radicalsStarted = assignments.data.filter(s => s.data['subject_type'] === 'radical' && !!s.data['started_at']);
+    const radicals = assignments.filter(s => s.subjectType === 'radical' && !!s.passedAt);
+    const radicalsStarted = assignments.filter(s => s.subjectType === 'radical' && !!s.startedAt);
     const kanjiTotal = subjects.filter(s => s.object === 'kanji');
-    const kanji = assignments.data.filter(s => s.data['subject_type'] === 'kanji' && !!s.data['passed_at']);
-    const kanjiStarted = assignments.data.filter(s => s.data['subject_type'] === 'kanji' && !!s.data['started_at']);
+    const kanji = assignments.filter(s => s.subjectType === 'kanji' && !!s.passedAt);
+    const kanjiStarted = assignments.filter(s => s.subjectType === 'kanji' && !!s.startedAt);
     const vocabularyTotal = subjects.filter(s => s.object === 'vocabulary');
-    const vocabulary = assignments.data.filter(s => s.data['subject_type'] === 'vocabulary' && !!s.data['passed_at']);
-    const vocabularyStarted = assignments.data.filter(s => s.data['subject_type'] === 'vocabulary' && !!s.data['started_at']);
+    const vocabulary = assignments.filter(s => s.subjectType === 'vocabulary' && !!s.passedAt);
+    const vocabularyStarted = assignments.filter(s => s.subjectType === 'vocabulary' && !!s.startedAt);
 
     return {
         isLoading: false,

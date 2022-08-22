@@ -40,7 +40,7 @@ import {AppStyles} from "../../util/TypeUtils";
 import {scaleBand} from "../../util/ChartUtils";
 import {AnkiReview} from "../../anki/models/AnkiReview";
 import {RawBunProReview} from "../../bunpro/models/raw/RawBunProReview";
-import {RawWanikaniAssignment} from "../../wanikani/models/raw/RawWanikaniAssignment";
+import {WanikaniAssignment} from "../../wanikani/models/WanikaniAssignment";
 
 const maxDaysIntoFuture = 31;
 
@@ -165,16 +165,16 @@ function aggregateData(ankiReviews: AnkiDateReview[], bunProReviews: BunProDateR
     return data;
 }
 
-type WanikaniDateReview = RawWanikaniAssignment & { date: Date }
+type WanikaniDateReview = WanikaniAssignment & { date: Date }
 
 
 async function fetchWanikaniReviews(): Promise<WanikaniDateReview[]> {
     const rawData = await WanikaniApiService.getAllAssignments()
-    const data = rawData.filter(assignment => !assignment.data['burned_at'] || !assignment.data['available_at']);
+    const data = rawData.filter(assignment => !assignment.burnedAt || !assignment.availableAt);
 
     return data
-        .filter(assignment => new Date(assignment.data['available_at']) > addDays(new Date(), -1))
-        .map(assignment => ({...assignment, date: new Date(assignment.data['available_at'])}));
+        .filter(assignment => !!assignment.availableAt && assignment.availableAt > addDays(new Date(), -1))
+        .map(assignment => ({...assignment, date: assignment.availableAt as Date}));
 }
 
 function useWanikaniReviews(wanikaniApiKey?: string | null) {

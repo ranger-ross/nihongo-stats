@@ -7,8 +7,7 @@ import {createSubjectMap} from "../service/WanikaniDataUtil";
 import {millisToDays, millisToHours} from "../../util/DateUtils";
 import {distinct} from "../../util/ArrayUtils";
 import {AppStyles} from "../../util/TypeUtils";
-import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
-import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
+import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 
 const styles: AppStyles = {
     loadingContainer: {
@@ -24,8 +23,8 @@ const styles: AppStyles = {
     },
 };
 
-function getBurnedItems(allReviewsByType: { review: RawWanikaniReview, subject: RawWanikaniSubject }[]) {
-    const burned = allReviewsByType.filter(review => review.review.data['ending_srs_stage'] == 9);
+function getBurnedItems(allReviewsByType: WanikaniSubjectReview[]) {
+    const burned = allReviewsByType.filter(review => review.review.endingSrsStage == 9);
     return distinct(burned, review => review.subject.id);
 }
 
@@ -45,11 +44,11 @@ type FormattedData = {
 async function fetchTotalsData(): Promise<FormattedData> {
     const reviews = await WanikaniApiService.getReviews();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    const data: { review: RawWanikaniReview, subject: RawWanikaniSubject }[] = [];
+    const data: WanikaniSubjectReview[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
-            subject: subjects[review.data['subject_id']]
+            subject: subjects[review.subjectId]
         });
     }
 
@@ -91,13 +90,13 @@ async function fetchLevelData(): Promise<FormattedLevelData> {
         WanikaniApiService.getLevelProgress()
     ]);
 
-    const timeSinceStart = Date.now() - new Date(user.data['started_at']).getTime();
+    const timeSinceStart = Date.now() - user.startedAt.getTime();
 
     const levelTimes = [];
-    for (const level of levelProgressData.data) {
-        const start = new Date(level.data['unlocked_at']).getTime();
-        const end = !!level.data['passed_at'] ? new Date(level.data['passed_at']).getTime() : null;
-        if (!end) {
+    for (const level of levelProgressData) {
+        const start = level.unlockedAt?.getTime();
+        const end = level.passedAt?.getTime();
+        if (!start || !end) {
             continue;
         }
         levelTimes.push(end - start);

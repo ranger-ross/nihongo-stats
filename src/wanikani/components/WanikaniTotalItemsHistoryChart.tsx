@@ -6,6 +6,7 @@ import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, Checkbox, FormControlLabel, Grid, Typography} from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
+import {WanikaniSubjectType} from "../models/WanikaniSubject";
 
 function LabelWithDate(props: ValueAxisBase.LabelProps) {
     const {text} = props;
@@ -58,18 +59,18 @@ function dataPoint(date: Date, previousDataPoint?: DataPoint): DataPoint {
 
 type AssignmentSnippet = {
     subjectId: number,
-    type: string,
+    type: WanikaniSubjectType,
     startedAt: Date,
 };
 
 async function fetchData() {
     const assignments = await WanikaniApiService.getAllAssignments();
     const orderedAssignments: AssignmentSnippet[] = assignments
-        .filter(assignment => !!assignment.data['started_at'])
+        .filter(assignment => !!assignment.startedAt)
         .map(assignment => ({
-            subjectId: assignment.data['subject_id'],
-            type: assignment.data['subject_type'],
-            startedAt: new Date(assignment.data['started_at']),
+            subjectId: assignment.subjectId,
+            type: assignment.subjectType,
+            startedAt: assignment.startedAt as Date,
         } as AssignmentSnippet))
         .sort(sortByStartedAtDate)
 

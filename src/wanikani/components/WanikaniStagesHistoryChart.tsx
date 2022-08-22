@@ -16,13 +16,11 @@ import {
 import {WanikaniColors} from "../../Constants";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
-import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
-import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
-import {RawWanikaniReset} from "../models/raw/RawWanikaniReset";
-import {mapWanikaniReset} from "../service/WanikaniMappingService";
 import {WanikaniReset} from "../models/WanikaniReset";
 import Area from "../../shared/Area";
-import { scaleBand } from "../../util/ChartUtils";
+import {scaleBand} from "../../util/ChartUtils";
+import {WanikaniSubject} from "../models/WanikaniSubject";
+import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 
 
 type StageHistoryUnit = {
@@ -49,7 +47,7 @@ const units: { [key: string]: StageHistoryUnit } = {
     },
 };
 
-type SubjectMap = { [id: string]: RawWanikaniSubject };
+type SubjectMap = { [id: string]: WanikaniSubject };
 
 type DataPoint = {
     date: Date,
@@ -114,7 +112,7 @@ function dataPoint(date: Date, previousDataPoint = {}) {
         return [9].includes(stage);
     }
 
-    function decrement(stage: number, subject: RawWanikaniSubject) {
+    function decrement(stage: number, subject: WanikaniSubject) {
         if (stage === 0) {
             return;
         }
@@ -147,7 +145,7 @@ function dataPoint(date: Date, previousDataPoint = {}) {
         }
     }
 
-    function increment(stage: number, subject: RawWanikaniSubject) {
+    function increment(stage: number, subject: WanikaniSubject) {
         if (isApprentice(stage)) {
             if (!data.apprenticeItems[subject.id]) {
                 data['apprentice'] += 1;
@@ -187,9 +185,9 @@ function dataPoint(date: Date, previousDataPoint = {}) {
     }
 
     // Add a review, check the start/end stages and increment and decrement accordingly
-    data.push = (d) => {
-        const startingStage = d.review.data['starting_srs_stage'];
-        const endingStage = d.review.data['ending_srs_stage'];
+    data.push = (d: WanikaniSubjectReview) => {
+        const startingStage = d.review.startingSrsStage;
+        const endingStage = d.review.endingSrsStage;
 
         if (areSameStage(startingStage, endingStage)) {
             return; // Do nothing, the stage didn't change
@@ -203,7 +201,7 @@ function dataPoint(date: Date, previousDataPoint = {}) {
     function resetStage(stageKey: string, stageItemsKey: string, targetLevel: number) {
         // @ts-ignore
         for (const [key, subject] of Object.entries(data[stageItemsKey])) {
-            if ((subject as RawWanikaniSubject).data.level >= targetLevel) {
+            if ((subject as WanikaniSubject).level >= targetLevel) {
                 // @ts-ignore
                 delete data[stageItemsKey][key];
             }
@@ -224,23 +222,19 @@ function dataPoint(date: Date, previousDataPoint = {}) {
     return data;
 }
 
-type RawWKReviewSubject = { review: RawWanikaniReview, subject: RawWanikaniSubject };
-
 async function fetchData() {
-    const [reviews, rawResets] = await Promise.all([
+    const [reviews, resets] = await Promise.all([
         WanikaniApiService.getReviews(),
         WanikaniApiService.getResets(),
     ]);
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    const data: RawWKReviewSubject[] = [];
+    const data: WanikaniSubjectReview[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
-            subject: subjects[review.data['subject_id']]
+            subject: subjects[review.subjectId]
         });
     }
-
-    const resets = (rawResets.data as RawWanikaniReset[]).map(mapWanikaniReset);
 
     return {
         data: data,
@@ -248,7 +242,7 @@ async function fetchData() {
     };
 }
 
-function aggregateDate(rawData: RawWKReviewSubject[] | null, resets: WanikaniReset[], unit: StageHistoryUnit) {
+function aggregateDate(rawData: WanikaniSubjectReview[] | null, resets: WanikaniReset[], unit: StageHistoryUnit) {
     if (!rawData)
         return null;
     const areDatesDifferent = (date1: Date | number, date2: Date | number) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
@@ -263,12 +257,12 @@ function aggregateDate(rawData: RawWKReviewSubject[] | null, resets: WanikaniRes
         }
     }
 
-    const aggregatedData: DataPoint[] = [dataPoint(truncDate(new Date(rawData[0].review.data['created_at'])))];
+    const aggregatedData: DataPoint[] = [dataPoint(truncDate(rawData[0].review.createdAt))];
     let nextReset = resets[0];
     for (const data of rawData) {
 
         // Handle Resets by remove items and reset counts for levels higher than the reset target level
-        if (nextReset && nextReset.confirmedAt.getTime() < new Date(data.review.data['created_at']).getTime()) {
+        if (nextReset && nextReset.confirmedAt.getTime() < data.review.createdAt.getTime()) {
             if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, nextReset.confirmedAt.getTime())) {
                 fillInEmptyDaysIfNeeded(aggregatedData, nextReset.confirmedAt);
                 aggregatedData.push(dataPoint(unit.trunc(nextReset.confirmedAt), aggregatedData[aggregatedData.length - 1]));
@@ -281,9 +275,9 @@ function aggregateDate(rawData: RawWKReviewSubject[] | null, resets: WanikaniRes
         }
 
         // Add new DataPoints for each day
-        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, new Date(data.review.data['created_at']))) {
-            fillInEmptyDaysIfNeeded(aggregatedData, new Date(data.review.data['created_at']));
-            aggregatedData.push(dataPoint(unit.trunc(new Date(data.review.data['created_at'])), aggregatedData[aggregatedData.length - 1]));
+        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.review.createdAt)) {
+            fillInEmptyDaysIfNeeded(aggregatedData, data.review.createdAt);
+            aggregatedData.push(dataPoint(unit.trunc(data.review.createdAt), aggregatedData[aggregatedData.length - 1]));
         }
 
         // Add the data to the current day/DataPoint
@@ -295,7 +289,7 @@ function aggregateDate(rawData: RawWKReviewSubject[] | null, resets: WanikaniRes
 
 type DataState = {
     isLoading: boolean,
-    data: RawWKReviewSubject[] | null,
+    data: WanikaniSubjectReview[] | null,
     resets: WanikaniReset[],
 };
 

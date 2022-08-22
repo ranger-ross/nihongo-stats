@@ -3,24 +3,27 @@ export interface WanikaniUser {
     username: string
     level: number
     profileUrl: string
-    startedAt: string
-    currentVacationStartedAt: string
-    subscription: RawWanikaniSubscription
-    preferences: RawWanikaniPreferences
+    startedAt: Date
+    currentVacationStartedAt: Date | null
+    subscription: WanikaniSubscription
+    preferences: WanikaniPreferences
 }
 
-export interface RawWanikaniSubscription {
+export interface WanikaniSubscription {
     active: boolean
     type: string
     maxLevelGranted: number
-    periodEndsAt: string
+    periodEndsAt: Date | null
 }
 
-export interface RawWanikaniPreferences {
+export interface WanikaniPreferences {
     defaultVoiceActorId: number
     lessonsAutoplayAudio: boolean
     lessonsBatchSize: number
     lessonsPresentationOrder: string
     reviewsAutoplayAudio: boolean
     reviewsDisplaySrsIndicator: boolean
+    extraStudyAutoplayAudio: boolean
+    wanikaniCompatibilityMode: boolean
+    reviewsPresentationOrder: string
 }

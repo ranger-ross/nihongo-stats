@@ -14,9 +14,9 @@ import {useUserPreferences} from "../../hooks/useUserPreferences";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {lightenDarkenColor} from "../../util/CssUtils";
 import GradientLinearProgress from "../../shared/GradientLinearProgress";
-import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
-import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
-import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
+import {WanikaniSubject} from "../models/WanikaniSubject";
+import {WanikaniAssignment} from "../models/WanikaniAssignment";
+import {WanikaniUser} from "../models/WanikaniUser";
 
 const styles = {
     showPreviousLevelMobile: {
@@ -55,17 +55,16 @@ async function fetchData(level: number) {
         return memCache[level];
     }
 
-    const [allSubjects, rawAssignments] = await Promise.all([
+    const [allSubjects, assignments] = await Promise.all([
         WanikaniApiService.getSubjects(),
         WanikaniApiService.getAssignmentsForLevel(level),
     ]);
 
-    const subjects: RawWanikaniSubject[] = allSubjects.filter((subject: RawWanikaniSubject) => subject.data.level === level);
+    const subjects: WanikaniSubject[] = allSubjects.filter((subject: WanikaniSubject) => subject.level === level);
 
-    const assignments = rawAssignments.data;
-    const radicalsStarted = assignments.filter((s: RawWanikaniAssignment) => s.data['subject_type'] === 'radical' && !!s.data['started_at']).length;
-    const kanjiStarted = assignments.filter((s: RawWanikaniAssignment) => s.data['subject_type'] === 'kanji' && !!s.data['started_at']).length;
-    const vocabularyStarted = assignments.filter((s: RawWanikaniAssignment) => s.data['subject_type'] === 'vocabulary' && !!s.data['started_at']).length;
+    const radicalsStarted = assignments.filter((s: WanikaniAssignment) => s.subjectType === 'radical' && !!s.startedAt).length;
+    const kanjiStarted = assignments.filter((s: WanikaniAssignment) => s.subjectType === 'kanji' && !!s.startedAt).length;
+    const vocabularyStarted = assignments.filter((s: WanikaniAssignment) => s.subjectType === 'vocabulary' && !!s.startedAt).length;
 
     const assignmentMap = createAssignmentMap(assignments);
 
@@ -133,7 +132,7 @@ function RatioLabel({started, total}: { started: number, total: number }) {
 }
 
 function getTileColor(subject: JoinedRawWKAssignmentAndSubject) {
-    if (subject['started_at']) {
+    if (subject.startedAt) {
         return getColorByWanikaniSubjectType(subject.subjectType);
     } else if (subject.hasAssignment) {
         return WanikaniColors.lessonGray;
@@ -145,15 +144,15 @@ function SubjectTile({subject, isMobile}: { subject: JoinedRawWKAssignmentAndSub
     return (
         <WanikaniItemTile
             text={subject.characters || '?'}
-            link={subject['document_url']}
+            link={subject.documentUrl}
             meaning={subject.meanings.map(m => m.meaning).join(', ')}
-            srsLevel={subject['srs_stage']}
+            srsLevel={subject.srsStage}
             color={getTileColor(subject)}
             type={subject.subjectType}
             level={subject.level}
             readings={subject.readings}
             size={isMobile ? 6 : 10}
-            nextReviewDate={!!subject['available_at'] ? new Date(subject['available_at']) : null}
+            nextReviewDate={subject.availableAt}
         />
     );
 }
@@ -309,7 +308,7 @@ function WanikaniLevelItemsChart({level, showWanikaniHeader = false}: WanikaniLe
 }
 
 function WanikaniActiveItemsChart({showWanikaniHeader = false}) {
-    const [user, setUser] = useState<RawWanikaniUser>();
+    const [user, setUser] = useState<WanikaniUser>();
     useEffect(() => {
         let isSubscribed = true;
 
@@ -327,7 +326,7 @@ function WanikaniActiveItemsChart({showWanikaniHeader = false}) {
         <>
             {!!user ? (
                 <WanikaniLevelItemsChart
-                    level={user.data.level}
+                    level={user.level}
                     showWanikaniHeader={showWanikaniHeader}
                 />
             ) : null}

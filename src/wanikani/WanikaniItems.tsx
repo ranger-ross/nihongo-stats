@@ -40,7 +40,7 @@ function SubjectTile({subject, colorBy}: SubjectTileProps) {
     return useMemo(() => (
         <WanikaniItemTile
             text={subject.characters || '?'}
-            link={subject['document_url']}
+            link={subject.documentUrl}
             meaning={subject?.meanings?.map(m => m.meaning).join(', ')}
             srsLevel={subject['srs_stage']}
             color={colorBy.color(subject) as string}
@@ -139,7 +139,7 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortR
 }
 
 async function fetchItems() {
-    const subjects = await WanikaniApiService.getSubjects();
+    const subjects = await WanikaniApiService.getSubjectsV2();
     const assignments = await WanikaniApiService.getAllAssignments();
     const assignmentMap = createAssignmentMap(assignments);
 

@@ -17,6 +17,7 @@ import GradientLinearProgress from "../../shared/GradientLinearProgress";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
+import {WanikaniSubject} from "../models/WanikaniSubject";
 
 const styles = {
     showPreviousLevelMobile: {
@@ -56,13 +57,13 @@ async function fetchData(level: number) {
     }
 
     const [allSubjects, rawAssignments] = await Promise.all([
-        WanikaniApiService.getSubjects(),
+        WanikaniApiService.getSubjectsV2(),
         WanikaniApiService.getAssignmentsForLevel(level),
     ]);
 
     console.log(allSubjects)
 
-    const subjects: RawWanikaniSubject[] = allSubjects.filter((subject: RawWanikaniSubject) => subject.data.level === level);
+    const subjects: WanikaniSubject[] = allSubjects.filter((subject: WanikaniSubject) => subject.level === level);
 
     const assignments = rawAssignments.data;
     const radicalsStarted = assignments.filter((s: RawWanikaniAssignment) => s.data['subject_type'] === 'radical' && !!s.data['started_at']).length;
@@ -147,7 +148,7 @@ function SubjectTile({subject, isMobile}: { subject: JoinedRawWKAssignmentAndSub
     return (
         <WanikaniItemTile
             text={subject.characters || '?'}
-            link={subject['document_url']}
+            link={subject.documentUrl}
             meaning={subject.meanings.map(m => m.meaning).join(', ')}
             srsLevel={subject['srs_stage']}
             color={getTileColor(subject)}

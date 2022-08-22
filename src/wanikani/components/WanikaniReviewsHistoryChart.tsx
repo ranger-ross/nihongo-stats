@@ -15,11 +15,11 @@ import {Card, CardContent, CircularProgress, Grid, MenuItem, Select, Typography}
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
-import {createSubjectMap} from "../service/WanikaniDataUtil";
+import {createSubjectMapV2} from "../service/WanikaniDataUtil";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
-import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
-import { scaleBand } from '../../util/ChartUtils';
+import {scaleBand} from '../../util/ChartUtils';
+import {WanikaniSubject} from "../models/WanikaniSubject";
 
 type PeriodUnit = {
     key: string,
@@ -47,7 +47,7 @@ const units: { [key: string]: PeriodUnit } = {
 
 type WkReviewSubject = {
     review: RawWanikaniReview,
-    subject: RawWanikaniSubject,
+    subject: WanikaniSubject,
 };
 
 type DataPoint = {
@@ -94,7 +94,7 @@ function dataPoint(date: Date) {
 
 async function fetchData() {
     const reviews = await WanikaniApiService.getReviews();
-    const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
+    const subjects = createSubjectMapV2(await WanikaniApiService.getSubjectsV2());
     const data: WkReviewSubject[] = [];
     for (const review of reviews) {
         data.push({

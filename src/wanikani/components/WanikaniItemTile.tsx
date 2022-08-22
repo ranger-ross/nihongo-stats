@@ -1,8 +1,8 @@
 import {Tooltip} from "@mui/material";
 import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil";
 import {getWanikaniSrsStageDescription} from "../service/WanikaniDataUtil";
-import {RawWanikaniSubjectReading} from "../models/raw/RawWanikaniSubject";
 import {CSSProperties} from "react";
+import {WanikaniSubjectReading} from "../models/WanikaniSubject";
 
 function useTileStyle(color: string, size: number): CSSProperties { // 10 is base
     const topPadding = (size / 2) + 'px';
@@ -31,7 +31,7 @@ function ValueLabel({label, value}: { label: string, value?: string | number | n
     );
 }
 
-function formatReadings(readings?: RawWanikaniSubjectReading[]) {
+function formatReadings(readings?: WanikaniSubjectReading[]) {
     if (!readings)
         return null;
     return readings.map(r => r.reading).join(', ');
@@ -51,7 +51,7 @@ type WanikaniItemTile = {
     color: string,
     type: string,
     level: number,
-    readings?: RawWanikaniSubjectReading[],
+    readings?: WanikaniSubjectReading[],
     nextReviewDate: Date | null,
     size: number,
 };

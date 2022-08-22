@@ -3,9 +3,9 @@ import kanji from "kanji";
 import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil";
 import {getColorByJLPTLevel, getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "./WanikaniStyleUtil";
 import {WanikaniColors} from "../../Constants";
-import {RawWanikaniSubject, RawWanikaniSubjectData} from "../models/raw/RawWanikaniSubject";
+import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniAssignment, RawWanikaniAssignmentData} from "../models/raw/RawWanikaniAssignment";
-import {WanikaniSubject} from "../models/WanikaniSubject";
+import {WanikaniSubject, WanikaniSubjectType} from "../models/WanikaniSubject";
 
 /**
  * @deprecated use createSubjectMapV2
@@ -36,15 +36,15 @@ export function createAssignmentMap(assignments: RawWanikaniAssignment[]) {
     return map;
 }
 
-export type JoinedRawWKAssignmentAndSubject = RawWanikaniAssignmentData & RawWanikaniSubjectData & {
+export type JoinedRawWKAssignmentAndSubject = RawWanikaniAssignmentData & WanikaniSubject & {
     hasAssignment: boolean,
     subjectId: number,
-    subjectType: 'radical' | 'kanji' | 'vocabulary',
+    subjectType: WanikaniSubjectType,
 };
 
-export function combineAssignmentAndSubject(assignment: RawWanikaniAssignment, subject: RawWanikaniSubject): JoinedRawWKAssignmentAndSubject {
+export function combineAssignmentAndSubject(assignment: RawWanikaniAssignment, subject: WanikaniSubject): JoinedRawWKAssignmentAndSubject {
     return {
-        ...subject.data,
+        ...subject,
         ...assignment?.data,
         hasAssignment: !!assignment,
         subjectId: subject.id,
@@ -310,7 +310,7 @@ export const sortByOptions: { [key: string]: WKSortByOption } = {
         key: 'jlpt',
         displayText: 'JLPT',
         sort: (subjects: JoinedRawWKAssignmentAndSubject[]) => {
-            function getJLPTLevel(subject: RawWanikaniSubjectData) {
+            function getJLPTLevel(subject: WanikaniSubject) {
                 const level = kanjiJLPTLookupMap[subject.slug];
                 if (level === 'N5') {
                     return 1;
@@ -334,7 +334,7 @@ export const sortByOptions: { [key: string]: WKSortByOption } = {
         displayText: 'Frequency',
         sort: (subjects: JoinedRawWKAssignmentAndSubject[]) => {
 
-            function getFrequency(subject: RawWanikaniSubjectData) {
+            function getFrequency(subject: WanikaniSubject) {
                 return kanjiFrequencyLookupMap[subject.slug] ?? 1_000_000;
             }
 

@@ -7,7 +7,7 @@ import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
 import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelProgress";
-import {RawWanikaniReset, RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
+import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
@@ -240,8 +240,10 @@ function joinAndSendCacheableRequest(request: string, cacheKey: string, factory:
     return promise
 }
 
-function getUser(): Promise<RawWanikaniUser> {
-    return joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000);
+async function getUser(): Promise<RawWanikaniUser> {
+    const user = await joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000);
+    console.log(user)
+    return user;
 }
 
 function getSummary(): Promise<RawWanikaniSummary> {

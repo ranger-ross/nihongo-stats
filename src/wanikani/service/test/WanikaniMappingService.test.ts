@@ -6,12 +6,16 @@ import {
     mapWanikaniSubject,
     mapWanikaniPage,
     mapWanikaniReview,
-    mapWanikaniAssignment
+    mapWanikaniAssignment, mapWanikaniUser
 } from "../WanikaniMappingService";
 import {RawWanikaniSubject} from "../../models/raw/RawWanikaniSubject";
 import {RawWanikaniPage} from "../../models/raw/RawWanikaniPage";
 import {RawWanikaniReview} from "../../models/raw/RawWanikaniReview";
 import {RawWanikaniAssignment} from "../../models/raw/RawWanikaniAssignment";
+import {RawWanikaniUser} from "../../models/raw/RawWanikaniUser";
+import {WanikaniUser} from "../../models/WanikaniUser";
+
+
 
 
 describe('WanikaniMappingService', () => {
@@ -40,6 +44,67 @@ describe('WanikaniMappingService', () => {
             expect(result.confirmedAt.getTime()).toBe(1513726278077);
             expect(result.originalLevel).toBe(42);
             expect(result.targetLevel).toBe(8);
+
+        });
+
+    });
+
+    describe('mapWanikaniUser', () => {
+
+        it('should map resets properly', () => {
+
+            const input: RawWanikaniUser = {
+                "object": "user",
+                "url": "https://api.wanikani.com/v2/user",
+                "data_updated_at": "2022-08-21T03:22:07.511075Z",
+                "data": {
+                    "id": "test-id",
+                    "username": "Sully22",
+                    "level": 27,
+                    "profile_url": "https://www.wanikani.com/users/Sully22",
+                    "started_at": "2020-11-11T23:14:08.841279Z",
+                    "subscription": {
+                        "active": true,
+                        "type": "recurring",
+                        "max_level_granted": 60,
+                        "period_ends_at": "2022-12-21T17:27:56.000000Z"
+                    },
+                    "current_vacation_started_at": null,
+                    "preferences": {
+                        "lessons_batch_size": 5,
+                        "default_voice_actor_id": 1,
+                        "lessons_autoplay_audio": false,
+                        "reviews_autoplay_audio": false,
+                        "extra_study_autoplay_audio": false,
+                        "lessons_presentation_order": "ascending_level_then_subject",
+                        "reviews_presentation_order": "shuffled",
+                        "wanikani_compatibility_mode": false,
+                        "reviews_display_srs_indicator": true
+                    }
+                }
+            }
+
+
+            const result = mapWanikaniUser(input);
+
+            expect(result.id).toBe('test-id');
+            expect(result.currentVacationStartedAt).toBe(null);
+            expect(result.username).toBe('Sully22');
+            expect(result.level).toBe(27);
+            expect(result.startedAt.getTime()).toBe(1605136448841);
+            expect(result.profileUrl).toBe("https://www.wanikani.com/users/Sully22");
+            expect(result.subscription.active).toBe(true);
+            expect(result.subscription.type).toBe('recurring');
+            expect(result.subscription.maxLevelGranted).toBe(60);
+            expect(result.subscription.periodEndsAt?.getTime()).toBe(1671643676000);
+            expect(result.preferences.defaultVoiceActorId).toBe(1);
+            expect(result.preferences.lessonsBatchSize).toBe(5);
+            expect(result.preferences.lessonsAutoplayAudio).toBe(false);
+            expect(result.preferences.reviewsAutoplayAudio).toBe(false);
+            expect(result.preferences.extraStudyAutoplayAudio).toBe(false);
+            expect(result.preferences.lessonsPresentationOrder).toBe('ascending_level_then_subject');
+            expect(result.preferences.wanikaniCompatibilityMode).toBe(false);
+            expect(result.preferences.reviewsDisplaySrsIndicator).toBe(true);
 
         });
 

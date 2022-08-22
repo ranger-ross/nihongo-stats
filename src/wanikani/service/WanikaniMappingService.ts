@@ -20,20 +20,19 @@ import {WanikaniReview} from "../models/WanikaniReview";
 import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function mapWanikaniUser(rawUser: RawWanikaniUser): WanikaniUser {
+export function mapWanikaniUser(rawUser: RawWanikaniUser): WanikaniUser {
     return {
         id: rawUser.data.id,
-        startedAt: rawUser.data.started_at,
+        startedAt: new Date(rawUser.data.started_at),
         level: rawUser.data.level,
-        currentVacationStartedAt: rawUser.data.current_vacation_started_at,
+        currentVacationStartedAt: !!rawUser.data.current_vacation_started_at ? new Date(rawUser.data.current_vacation_started_at) : null,
         profileUrl: rawUser.data.profile_url,
         username: rawUser.data.username,
         subscription: {
             type: rawUser.data.subscription.type,
             active: rawUser.data.subscription.active,
             maxLevelGranted: rawUser.data.subscription.max_level_granted,
-            periodEndsAt: rawUser.data.subscription.period_ends_at,
+            periodEndsAt: !!rawUser.data.subscription.period_ends_at ? new Date(rawUser.data.subscription.period_ends_at) : null,
         },
         preferences: {
             lessonsPresentationOrder: rawUser.data.preferences.lessons_presentation_order,
@@ -42,6 +41,9 @@ function mapWanikaniUser(rawUser: RawWanikaniUser): WanikaniUser {
             lessonsBatchSize: rawUser.data.preferences.lessons_batch_size,
             reviewsAutoplayAudio: rawUser.data.preferences.reviews_autoplay_audio,
             reviewsDisplaySrsIndicator: rawUser.data.preferences.reviews_display_srs_indicator,
+            wanikaniCompatibilityMode: rawUser.data.preferences.wanikani_compatibility_mode,
+            extraStudyAutoplayAudio: rawUser.data.preferences.extra_study_autoplay_audio,
+            reviewsPresentationOrder: rawUser.data.preferences.reviews_presentation_order,
         },
     };
 }

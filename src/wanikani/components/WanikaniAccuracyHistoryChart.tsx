@@ -14,7 +14,7 @@ import _ from 'lodash';
 // @ts-ignore
 import {scaleLinear} from 'd3-scale';
 import PeriodSelector from "../../shared/PeriodSelector";
-import {createSubjectMapV2} from "../service/WanikaniDataUtil";
+import {createSubjectMap} from "../service/WanikaniDataUtil";
 import {millisToDays, truncDate} from "../../util/DateUtils";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {WanikaniSubject} from "../models/WanikaniSubject";
@@ -72,7 +72,7 @@ type DayDataPoint = {
 
 async function fetchData() {
     const reviews = await WanikaniApiService.getReviews();
-    const subjects = createSubjectMapV2(await WanikaniApiService.getSubjectsV2());
+    const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
     const data: JoinedReviewAndSubject[] = [];
     for (const review of reviews) {
         data.push({

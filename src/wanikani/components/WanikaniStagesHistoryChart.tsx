@@ -1,7 +1,7 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import React, {useEffect, useMemo, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import {createSubjectMapV2} from "../service/WanikaniDataUtil";
+import {createSubjectMap} from "../service/WanikaniDataUtil";
 import {addDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
 import {ArgumentAxis, Chart, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {
@@ -17,7 +17,6 @@ import {WanikaniColors} from "../../Constants";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
-import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniReset} from "../models/raw/RawWanikaniReset";
 import {mapWanikaniReset} from "../service/WanikaniMappingService";
 import {WanikaniReset} from "../models/WanikaniReset";
@@ -50,7 +49,7 @@ const units: { [key: string]: StageHistoryUnit } = {
     },
 };
 
-type SubjectMap = { [id: string]: RawWanikaniSubject };
+type SubjectMap = { [id: string]: WanikaniSubject };
 
 type DataPoint = {
     date: Date,
@@ -115,7 +114,7 @@ function dataPoint(date: Date, previousDataPoint = {}) {
         return [9].includes(stage);
     }
 
-    function decrement(stage: number, subject: RawWanikaniSubject) {
+    function decrement(stage: number, subject: WanikaniSubject) {
         if (stage === 0) {
             return;
         }
@@ -148,7 +147,7 @@ function dataPoint(date: Date, previousDataPoint = {}) {
         }
     }
 
-    function increment(stage: number, subject: RawWanikaniSubject) {
+    function increment(stage: number, subject: WanikaniSubject) {
         if (isApprentice(stage)) {
             if (!data.apprenticeItems[subject.id]) {
                 data['apprentice'] += 1;
@@ -204,7 +203,7 @@ function dataPoint(date: Date, previousDataPoint = {}) {
     function resetStage(stageKey: string, stageItemsKey: string, targetLevel: number) {
         // @ts-ignore
         for (const [key, subject] of Object.entries(data[stageItemsKey])) {
-            if ((subject as RawWanikaniSubject).data.level >= targetLevel) {
+            if ((subject as WanikaniSubject).level >= targetLevel) {
                 // @ts-ignore
                 delete data[stageItemsKey][key];
             }
@@ -232,7 +231,7 @@ async function fetchData() {
         WanikaniApiService.getReviews(),
         WanikaniApiService.getResets(),
     ]);
-    const subjects = createSubjectMapV2(await WanikaniApiService.getSubjectsV2());
+    const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
     const data: RawWKReviewSubject[] = [];
     for (const review of reviews) {
         data.push({

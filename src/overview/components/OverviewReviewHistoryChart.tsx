@@ -20,9 +20,9 @@ import {fetchAllBunProReviews, RawBunProFlattenedReviewWithLevel} from "../../bu
 import {useAnkiConnection} from "../../hooks/useAnkiConnection";
 import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil";
 import {AnkiReview} from "../../anki/models/AnkiReview";
-import {RawWanikaniSubject} from "../../wanikani/models/raw/RawWanikaniSubject";
 import {RawWanikaniReview} from "../../wanikani/models/raw/RawWanikaniReview";
 import { scaleBand } from '../../util/ChartUtils';
+import {WanikaniSubject} from "../../wanikani/models/WanikaniSubject";
 
 type DataPoint = {
     date: Date,
@@ -75,7 +75,7 @@ function dataPoint(date: Date): DataPoint {
 type WKData = {
     date: Date,
     review: RawWanikaniReview,
-    subject: RawWanikaniSubject
+    subject: WanikaniSubject
 };
 
 async function fetchWanikaniData(): Promise<WKData[]> {

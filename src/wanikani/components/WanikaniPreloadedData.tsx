@@ -81,7 +81,7 @@ function WanikaniPreloadedData({children}: React.PropsWithChildren<any>) {
         });
 
         Promise.all([
-            WanikaniApiService.getSubjectsV2()
+            WanikaniApiService.getSubjects()
                 .then(() => setIsSubjectsLoaded(true)),
             WanikaniApiService.getUser()
                 .then(() => setIsUserLoaded(true)),

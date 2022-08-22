@@ -88,7 +88,7 @@ async function getCurrentLevelProgressData(): Promise<ProgressData> {
     const [userData, levelsProgress, allSubjects] = await Promise.all([
         WanikaniApiService.getUser(),
         WanikaniApiService.getLevelProgress(),
-        WanikaniApiService.getSubjectsV2(),
+        WanikaniApiService.getSubjects(),
     ]);
 
     const currentLevel = userData.data.level;

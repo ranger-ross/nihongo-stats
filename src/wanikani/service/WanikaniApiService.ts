@@ -342,8 +342,7 @@ export default {
     getAssignmentsForLevel: getAssignmentsForLevel,
     getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
     getAllAssignments: getAllAssignments,
-    getSubjects: getRawSubjects,
-    getSubjectsV2: getSubjects,
+    getSubjects: getSubjects,
     getReviews: getReviews,
     getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,
     getPendingLessonsAndReviews: async (): Promise<{ lessons: number, reviews: number }> => {

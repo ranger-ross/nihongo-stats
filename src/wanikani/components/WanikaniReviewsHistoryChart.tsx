@@ -15,7 +15,7 @@ import {Card, CardContent, CircularProgress, Grid, MenuItem, Select, Typography}
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
-import {createSubjectMapV2} from "../service/WanikaniDataUtil";
+import {createSubjectMap} from "../service/WanikaniDataUtil";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {scaleBand} from '../../util/ChartUtils';
@@ -94,7 +94,7 @@ function dataPoint(date: Date) {
 
 async function fetchData() {
     const reviews = await WanikaniApiService.getReviews();
-    const subjects = createSubjectMapV2(await WanikaniApiService.getSubjectsV2());
+    const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
     const data: WkReviewSubject[] = [];
     for (const review of reviews) {
         data.push({

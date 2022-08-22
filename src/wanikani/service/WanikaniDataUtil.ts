@@ -3,22 +3,10 @@ import kanji from "kanji";
 import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil";
 import {getColorByJLPTLevel, getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "./WanikaniStyleUtil";
 import {WanikaniColors} from "../../Constants";
-import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniAssignment, RawWanikaniAssignmentData} from "../models/raw/RawWanikaniAssignment";
 import {WanikaniSubject, WanikaniSubjectType} from "../models/WanikaniSubject";
 
-/**
- * @deprecated use createSubjectMapV2
- */
-export function createSubjectMap(subjects: RawWanikaniSubject[]) {
-    const map: { [id: number]: RawWanikaniSubject } = {};
-    for (const subject of subjects) {
-        map[subject.id] = subject;
-    }
-    return map;
-}
-
-export function createSubjectMapV2(subjects: WanikaniSubject[]) {
+export function createSubjectMap(subjects: WanikaniSubject[]) {
     const map: { [id: number]: WanikaniSubject } = {};
     for (const subject of subjects) {
         map[subject.id] = subject;
@@ -55,15 +43,8 @@ export function combineAssignmentAndSubject(assignment: RawWanikaniAssignment, s
     };
 }
 
-export function isSubjectHidden(subject: RawWanikaniSubject | WanikaniSubject) {
-    if (!!subject)
-        return false;
-
-    if ((subject as WanikaniSubject).hiddenAt != null)
-        return true;
-
-    const data = (subject as RawWanikaniSubject).data;
-    return !!data && data['hidden_at'];
+export function isSubjectHidden(subject: WanikaniSubject) {
+    return !!subject.hiddenAt;
 }
 
 export function getWanikaniSrsStageDescription(stage: number) {

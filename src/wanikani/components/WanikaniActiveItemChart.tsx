@@ -14,7 +14,6 @@ import {useUserPreferences} from "../../hooks/useUserPreferences";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {lightenDarkenColor} from "../../util/CssUtils";
 import GradientLinearProgress from "../../shared/GradientLinearProgress";
-import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 import {WanikaniSubject} from "../models/WanikaniSubject";
@@ -57,11 +56,9 @@ async function fetchData(level: number) {
     }
 
     const [allSubjects, rawAssignments] = await Promise.all([
-        WanikaniApiService.getSubjectsV2(),
+        WanikaniApiService.getSubjects(),
         WanikaniApiService.getAssignmentsForLevel(level),
     ]);
-
-    console.log(allSubjects)
 
     const subjects: WanikaniSubject[] = allSubjects.filter((subject: WanikaniSubject) => subject.level === level);
 
@@ -191,8 +188,6 @@ function WanikaniLevelItemsChart({level, showWanikaniHeader = false}: WanikaniLe
             .then(d => {
                 if (!isSubscribed)
                     return;
-
-                console.log(d);
 
                 if (wanikaniPreferences.showPreviousLevelByDefault &&
                     _isFirstLoad &&

@@ -1,5 +1,5 @@
 import {Card, CardContent, CircularProgress, LinearProgress, Typography} from "@mui/material";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import BunProApiService from "../service/BunProApiService";
 import {createGrammarPointsLookupMap} from "../service/BunProDataUtil";
 import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
@@ -210,7 +210,15 @@ export function BunProJLPTTile({showXpProgress}: BunProJLPTTileProps) {
 
 
                 {!data ? (
-                    <CircularProgress/>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        height: '90%',
+                        minHeight: '400px'
+                    }}>
+                        <CircularProgress/>
+                    </div>
                 ) : (
                     <>
 

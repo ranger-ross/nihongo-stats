@@ -16,8 +16,6 @@ import {
 import {WanikaniColors} from "../../Constants";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
-import {RawWanikaniReset} from "../models/raw/RawWanikaniReset";
-import {mapWanikaniReset} from "../service/WanikaniMappingService";
 import {WanikaniReset} from "../models/WanikaniReset";
 import Area from "../../shared/Area";
 import {scaleBand} from "../../util/ChartUtils";
@@ -225,7 +223,7 @@ function dataPoint(date: Date, previousDataPoint = {}) {
 }
 
 async function fetchData() {
-    const [reviews, rawResets] = await Promise.all([
+    const [reviews, resets] = await Promise.all([
         WanikaniApiService.getReviews(),
         WanikaniApiService.getResets(),
     ]);
@@ -237,8 +235,6 @@ async function fetchData() {
             subject: subjects[review.subjectId]
         });
     }
-
-    const resets = (rawResets.data as RawWanikaniReset[]).map(mapWanikaniReset);
 
     return {
         data: data,

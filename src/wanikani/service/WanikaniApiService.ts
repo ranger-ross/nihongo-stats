@@ -7,12 +7,13 @@ import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
 import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelProgress";
-import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
+import {RawWanikaniReset, RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
-import {mapWanikaniAssignment, mapWanikaniReview, mapWanikaniSubject} from "./WanikaniMappingService";
+import {mapWanikaniAssignment, mapWanikaniReset, mapWanikaniReview, mapWanikaniSubject} from "./WanikaniMappingService";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
+import {WanikaniReset} from "../models/WanikaniReset";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -251,8 +252,9 @@ function getSrsSystems(): Promise<RawWanikaniSrsSystemPage> {
     return joinAndSendCacheableRequest('/v2/spaced_repetition_systems', cacheKeys.srsSystems, fetchWithCache, 1000 * 60 * 60 * 24 * 7);
 }
 
-function getResets(): Promise<RawWanikaniResetPage> {
-    return joinAndSendCacheableRequest('/v2/resets', cacheKeys.resets, fetchWithCache, 1000 * 60 * 10);
+async function getResets(): Promise<WanikaniReset[]> {
+    const page: RawWanikaniResetPage = await joinAndSendCacheableRequest('/v2/resets', cacheKeys.resets, fetchWithCache, 1000 * 60 * 10);
+    return page.data.map(mapWanikaniReset);
 }
 
 async function getAssignmentsForLevel(level: number): Promise<WanikaniAssignment[]> {

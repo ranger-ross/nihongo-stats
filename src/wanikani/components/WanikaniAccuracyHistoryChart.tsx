@@ -16,8 +16,8 @@ import {scaleLinear} from 'd3-scale';
 import PeriodSelector from "../../shared/PeriodSelector";
 import {createSubjectMap} from "../service/WanikaniDataUtil";
 import {millisToDays, truncDate} from "../../util/DateUtils";
-import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {WanikaniSubject} from "../models/WanikaniSubject";
+import {WanikaniReview} from "../models/WanikaniReview";
 
 const scale = () => scaleLinear();
 const modifyDomain = () => [0, 100];
@@ -58,7 +58,7 @@ function calculateRollingAverageOfDaysInQueue(queue: any[]) {
 }
 
 type JoinedReviewAndSubject = {
-    review: RawWanikaniReview,
+    review: WanikaniReview,
     subject: WanikaniSubject,
 }
 
@@ -71,22 +71,22 @@ type DayDataPoint = {
 };
 
 async function fetchData() {
-    const reviews = await WanikaniApiService.getReviews();
+    const reviews = await WanikaniApiService.getReviewsV2();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
     const data: JoinedReviewAndSubject[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
-            subject: subjects[review.data['subject_id']]
+            subject: subjects[review.subjectId]
         });
     }
-    const groupedData = _.groupBy(data, (v: JoinedReviewAndSubject) => truncDate(new Date(v.review.data['created_at'])));
+    const groupedData = _.groupBy(data, (v: JoinedReviewAndSubject) => truncDate(v.review.createdAt));
     const groupedDataAsMap = new Map(Object.entries(groupedData));
     const result: DayDataPoint[] = Array.from(groupedDataAsMap, ([date, data]: any) => {
         const total = data.length;
         let incorrectCount = 0;
         for (const {review} of data) {
-            const isIncorrect = review.data['incorrect_meaning_answers'] > 0 || review.data['incorrect_reading_answers'] > 0;
+            const isIncorrect = review.incorrectMeaningAnswers > 0 || review.incorrectReadingAnswers > 0;
             if (isIncorrect)
                 incorrectCount += 1;
         }

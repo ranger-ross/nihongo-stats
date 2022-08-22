@@ -7,8 +7,8 @@ import {createSubjectMap} from "../service/WanikaniDataUtil";
 import {millisToDays, millisToHours} from "../../util/DateUtils";
 import {distinct} from "../../util/ArrayUtils";
 import {AppStyles} from "../../util/TypeUtils";
-import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {WanikaniSubject} from "../models/WanikaniSubject";
+import {WanikaniReview} from "../models/WanikaniReview";
 
 const styles: AppStyles = {
     loadingContainer: {
@@ -24,8 +24,8 @@ const styles: AppStyles = {
     },
 };
 
-function getBurnedItems(allReviewsByType: { review: RawWanikaniReview, subject: WanikaniSubject }[]) {
-    const burned = allReviewsByType.filter(review => review.review.data['ending_srs_stage'] == 9);
+function getBurnedItems(allReviewsByType: { review: WanikaniReview, subject: WanikaniSubject }[]) {
+    const burned = allReviewsByType.filter(review => review.review.endingSrsStage == 9);
     return distinct(burned, review => review.subject.id);
 }
 
@@ -43,14 +43,14 @@ type FormattedData = {
 };
 
 async function fetchTotalsData(): Promise<FormattedData> {
-    const reviews = await WanikaniApiService.getReviews();
+    const reviews = await WanikaniApiService.getReviewsV2();
     console.log(reviews)
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    const data: { review: RawWanikaniReview, subject: WanikaniSubject }[] = [];
+    const data: { review: WanikaniReview, subject: WanikaniSubject }[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
-            subject: subjects[review.data['subject_id']]
+            subject: subjects[review.subjectId]
         });
     }
 

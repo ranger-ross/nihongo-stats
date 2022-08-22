@@ -11,7 +11,7 @@ import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
-import {mapWanikaniReview, mapWanikaniSubject} from "./WanikaniMappingService";
+import {mapWanikaniAssignment, mapWanikaniReview, mapWanikaniSubject} from "./WanikaniMappingService";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -114,7 +114,7 @@ async function getFromMemoryCacheOrFetchMultiPageRequest(path: string) {
     return data;
 }
 
-async function getAllAssignments(): Promise<RawWanikaniAssignment[]> {
+async function getAllRawAssignments(): Promise<RawWanikaniAssignment[]> {
     if (memoryCache.includes(cacheKeys.assignments)) {
         const cachedValue = memoryCache.get(cacheKeys.assignments);
         // Assignments ttl is 5 mins in Mem Cache
@@ -140,6 +140,11 @@ async function getAllAssignments(): Promise<RawWanikaniAssignment[]> {
     memoryCache.put(cacheKeys.assignments, cacheObject);
 
     return assignments;
+}
+
+async function getAllAssignments() {
+    const assignments = await getAllRawAssignments();
+    return assignments.map(mapWanikaniAssignment);
 }
 
 function sortAndDeduplicateAssignments(assignments: RawWanikaniAssignment[]) {
@@ -347,7 +352,8 @@ export default {
     getLevelProgress: getLevelProgress,
     getAssignmentsForLevel: getAssignmentsForLevel,
     getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
-    getAllAssignments: getAllAssignments,
+    getAllAssignments: getAllRawAssignments,
+    getAllAssignmentsV2: getAllAssignments,
     getSubjects: getSubjects,
     getReviews: getReviews,
     getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,

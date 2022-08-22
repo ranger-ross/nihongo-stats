@@ -26,8 +26,8 @@ import {
     UpcomingReviewUnits
 } from "../../util/UpcomingReviewChartUtils";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
-import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
 import {AppStyles} from "../../util/TypeUtils";
+import {WanikaniAssignment} from "../models/WanikaniAssignment";
 
 const styles: AppStyles = {
     container: {
@@ -56,22 +56,22 @@ type FormattedDataPoint = {
     total: number
 };
 
-function formatChartData(rawData: RawWanikaniAssignment[], unit: UpcomingReviewUnit, period: number, initialReviewCount: number): FormattedDataPoint[] {
+function formatChartData(rawData: WanikaniAssignment[], unit: UpcomingReviewUnit, period: number, initialReviewCount: number): FormattedDataPoint[] {
     const data = rawData
-        .filter(assignment => new Date(assignment.data['available_at'] as string) > addTimeToDate(new Date(), unit, -1))
-        .filter(assignment => new Date(assignment.data['available_at'] as string) < addTimeToDate(new Date(), unit, period));
+        .filter(assignment => (assignment.availableAt as Date) > addTimeToDate(new Date(), unit, -1))
+        .filter(assignment => (assignment.availableAt as Date) < addTimeToDate(new Date(), unit, period));
 
     let totalReviewCount = initialReviewCount;
     const daysData = []
     for (let i = 0; i < period; i++) {
         const date = addTimeToDate(getChartStartTime(), unit, i);
-        const assignmentsOnDay = data.filter(assignment => unit.isPeriodTheSame(new Date(assignment.data['available_at'] as string), date));
+        const assignmentsOnDay = data.filter(assignment => unit.isPeriodTheSame(assignment.availableAt as Date, date));
         totalReviewCount += assignmentsOnDay.length;
 
         daysData.push({
-            radicals: assignmentsOnDay.filter(assignment => assignment.data['subject_type'] === 'radical').length,
-            kanji: assignmentsOnDay.filter(assignment => assignment.data['subject_type'] === 'kanji').length,
-            vocabulary: assignmentsOnDay.filter(assignment => assignment.data['subject_type'] === 'vocabulary').length,
+            radicals: assignmentsOnDay.filter(assignment => assignment.subjectType === 'radical').length,
+            kanji: assignmentsOnDay.filter(assignment => assignment.subjectType === 'kanji').length,
+            vocabulary: assignmentsOnDay.filter(assignment => assignment.subjectType === 'vocabulary').length,
             reviews: assignmentsOnDay.length,
             time: date.getTime(),
             total: totalReviewCount
@@ -81,8 +81,8 @@ function formatChartData(rawData: RawWanikaniAssignment[], unit: UpcomingReviewU
 }
 
 async function fetchFutureReviews() {
-    const data = await WanikaniApiService.getAllAssignments();
-    return data.filter(assignment => !assignment.data['burned_at'] || !assignment.data['available_at']);
+    const data = await WanikaniApiService.getAllAssignmentsV2();
+    return data.filter(assignment => !assignment.burnedAt || !assignment.availableAt);
 }
 
 function getTopSeries(targetItem: SeriesRef, chartData: FormattedDataPoint[]) {
@@ -96,7 +96,7 @@ function getTopSeries(targetItem: SeriesRef, chartData: FormattedDataPoint[]) {
 }
 
 function WanikaniUpcomingReviewsChart() {
-    const [rawData, setRawData] = useState<RawWanikaniAssignment[]>([]);
+    const [rawData, setRawData] = useState<WanikaniAssignment[]>([]);
     const [initialReviewCount, setInitialReviewCount] = useState(0);
     const [targetItem, setTargetItem] = useState<SeriesRef>();
     const [unit, setUnit] = useState(UpcomingReviewUnits.hours);

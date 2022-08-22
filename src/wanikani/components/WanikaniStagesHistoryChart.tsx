@@ -1,7 +1,7 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import React, {useEffect, useMemo, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
-import {createSubjectMap} from "../service/WanikaniDataUtil";
+import {createSubjectMapV2} from "../service/WanikaniDataUtil";
 import {addDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
 import {ArgumentAxis, Chart, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {
@@ -23,6 +23,7 @@ import {mapWanikaniReset} from "../service/WanikaniMappingService";
 import {WanikaniReset} from "../models/WanikaniReset";
 import Area from "../../shared/Area";
 import { scaleBand } from "../../util/ChartUtils";
+import {WanikaniSubject} from "../models/WanikaniSubject";
 
 
 type StageHistoryUnit = {
@@ -224,14 +225,14 @@ function dataPoint(date: Date, previousDataPoint = {}) {
     return data;
 }
 
-type RawWKReviewSubject = { review: RawWanikaniReview, subject: RawWanikaniSubject };
+type RawWKReviewSubject = { review: RawWanikaniReview, subject: WanikaniSubject };
 
 async function fetchData() {
     const [reviews, rawResets] = await Promise.all([
         WanikaniApiService.getReviews(),
         WanikaniApiService.getResets(),
     ]);
-    const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
+    const subjects = createSubjectMapV2(await WanikaniApiService.getSubjectsV2());
     const data: RawWKReviewSubject[] = [];
     for (const review of reviews) {
         data.push({

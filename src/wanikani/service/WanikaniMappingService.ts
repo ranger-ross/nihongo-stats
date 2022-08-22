@@ -19,6 +19,8 @@ import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {WanikaniReview} from "../models/WanikaniReview";
 import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
+import {RawWanikaniLevelProgression} from "../models/raw/RawWanikaniLevelProgress";
+import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
 
 export function mapWanikaniUser(rawUser: RawWanikaniUser): WanikaniUser {
     return {
@@ -55,6 +57,21 @@ export function mapWanikaniReset(rawReset: RawWanikaniReset): WanikaniReset {
         targetLevel: rawReset.data.target_level,
         confirmedAt: rawReset.data.confirmed_at ? new Date(rawReset.data.confirmed_at) : null,
         createdAt: rawReset.data.created_at ? new Date(rawReset.data.created_at) : null
+    };
+}
+
+export function mapWanikaniLevelProgression(lp: RawWanikaniLevelProgression): WanikaniLevelProgression {
+    return {
+        id: lp.id,
+        url: lp.url,
+        dataUpdatedAt: new Date(lp.data_updated_at),
+        createdAt: new Date(lp.data.created_at),
+        level: lp.data.level,
+        unlockedAt: !!lp.data.unlocked_at ? new Date(lp.data.unlocked_at) : null,
+        startedAt: !!lp.data.started_at ? new Date(lp.data.started_at) : null,
+        passedAt: !!lp.data.passed_at ? new Date(lp.data.passed_at) : null,
+        completedAt: !!lp.data.completed_at ? new Date(lp.data.completed_at) : null,
+        abandonedAt: !!lp.data.abandoned_at ? new Date(lp.data.abandoned_at) : null,
     };
 }
 

@@ -6,16 +6,14 @@ import {
     mapWanikaniSubject,
     mapWanikaniPage,
     mapWanikaniReview,
-    mapWanikaniAssignment, mapWanikaniUser
+    mapWanikaniAssignment, mapWanikaniUser, mapWanikaniLevelProgression
 } from "../WanikaniMappingService";
 import {RawWanikaniSubject} from "../../models/raw/RawWanikaniSubject";
 import {RawWanikaniPage} from "../../models/raw/RawWanikaniPage";
 import {RawWanikaniReview} from "../../models/raw/RawWanikaniReview";
 import {RawWanikaniAssignment} from "../../models/raw/RawWanikaniAssignment";
 import {RawWanikaniUser} from "../../models/raw/RawWanikaniUser";
-import {WanikaniUser} from "../../models/WanikaniUser";
-
-
+import {RawWanikaniLevelProgression} from "../../models/raw/RawWanikaniLevelProgress";
 
 
 describe('WanikaniMappingService', () => {
@@ -439,6 +437,42 @@ describe('WanikaniMappingService', () => {
             expect(result.perPage).toBe(20);
             expect(result.previousUrl).toBe('hello');
             expect(result.nextUrl).toBe('next');
+
+        });
+
+    });
+
+    describe('mapWanikaniLevelProgression', () => {
+
+        it('should map LevelProgression properly', () => {
+
+            const input: RawWanikaniLevelProgression = {
+                "id": 1302585,
+                "object": "level_progression",
+                "url": "https://api.wanikani.com/v2/level_progressions/1302585",
+                "data_updated_at": "2022-06-08T02:55:45.176815Z",
+                "data": {
+                    "created_at": "2020-11-11T23:14:08.868454Z",
+                    "level": 1,
+                    "unlocked_at": "2020-11-11T23:14:08.867420Z",
+                    "started_at": "2020-11-11T23:17:41.604493Z",
+                    "passed_at": "2020-11-16T12:36:40.627555Z",
+                    "completed_at": "2022-06-08T02:55:45.174333Z",
+                    "abandoned_at": "2023-06-08T02:55:45.174333Z",
+                }
+            }
+
+            const result = mapWanikaniLevelProgression(input);
+
+            expect(result.id).toBe(1302585);
+            expect(result.url).toBe("https://api.wanikani.com/v2/level_progressions/1302585");
+            expect(result.dataUpdatedAt.getTime()).toBe(1654656945176);
+            expect(result.createdAt.getTime()).toBe(1605136448868);
+            expect(result.unlockedAt?.getTime()).toBe(1605136448867);
+            expect(result.startedAt?.getTime()).toBe(1605136661604);
+            expect(result.passedAt?.getTime()).toBe(1605530200627);
+            expect(result.completedAt?.getTime()).toBe(1654656945174);
+            expect(result.abandonedAt?.getTime()).toBe(1686192945174);
 
         });
 

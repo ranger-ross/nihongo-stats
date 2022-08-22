@@ -28,6 +28,7 @@ function LevelToolTip({text}: { text: string }) {
 type FormattedData = { level: string, days: number, startedAt: number };
 
 function formatData(data: RawWanikaniLevelProgressionPage, currentLevel: number): FormattedData[] {
+    console.log(data);
     const rawData = data.data
         .map(level => level.data)
         .filter(level => !level['abandoned_at'] && level['level'] <= currentLevel);

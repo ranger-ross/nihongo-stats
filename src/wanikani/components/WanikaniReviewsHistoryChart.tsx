@@ -87,7 +87,7 @@ function dataPoint(date: Date) {
 }
 
 async function fetchData() {
-    const reviews = await WanikaniApiService.getReviewsV2();
+    const reviews = await WanikaniApiService.getReviews();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
     const data: WanikaniSubjectReview[] = [];
     for (const review of reviews) {

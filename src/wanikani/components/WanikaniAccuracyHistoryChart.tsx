@@ -71,7 +71,7 @@ type DayDataPoint = {
 };
 
 async function fetchData() {
-    const reviews = await WanikaniApiService.getReviewsV2();
+    const reviews = await WanikaniApiService.getReviews();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
     const data: JoinedReviewAndSubject[] = [];
     for (const review of reviews) {

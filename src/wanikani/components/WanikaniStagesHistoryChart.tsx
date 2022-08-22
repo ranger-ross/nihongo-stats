@@ -226,7 +226,7 @@ function dataPoint(date: Date, previousDataPoint = {}) {
 
 async function fetchData() {
     const [reviews, rawResets] = await Promise.all([
-        WanikaniApiService.getReviewsV2(),
+        WanikaniApiService.getReviews(),
         WanikaniApiService.getResets(),
     ]);
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());

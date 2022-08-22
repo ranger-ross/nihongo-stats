@@ -14,10 +14,10 @@ import _ from 'lodash';
 // @ts-ignore
 import {scaleLinear} from 'd3-scale';
 import PeriodSelector from "../../shared/PeriodSelector";
-import {createSubjectMap} from "../service/WanikaniDataUtil";
+import {createSubjectMapV2} from "../service/WanikaniDataUtil";
 import {millisToDays, truncDate} from "../../util/DateUtils";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
-import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
+import {WanikaniSubject} from "../models/WanikaniSubject";
 
 const scale = () => scaleLinear();
 const modifyDomain = () => [0, 100];
@@ -59,7 +59,7 @@ function calculateRollingAverageOfDaysInQueue(queue: any[]) {
 
 type JoinedReviewAndSubject = {
     review: RawWanikaniReview,
-    subject: RawWanikaniSubject,
+    subject: WanikaniSubject,
 }
 
 type DayDataPoint = {
@@ -72,7 +72,7 @@ type DayDataPoint = {
 
 async function fetchData() {
     const reviews = await WanikaniApiService.getReviews();
-    const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
+    const subjects = createSubjectMapV2(await WanikaniApiService.getSubjectsV2());
     const data: JoinedReviewAndSubject[] = [];
     for (const review of reviews) {
         data.push({

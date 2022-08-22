@@ -5,9 +5,21 @@ import {getColorByJLPTLevel, getColorByWanikaniSrsStage, getColorByWanikaniSubje
 import {WanikaniColors} from "../../Constants";
 import {RawWanikaniSubject, RawWanikaniSubjectData} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniAssignment, RawWanikaniAssignmentData} from "../models/raw/RawWanikaniAssignment";
+import {WanikaniSubject} from "../models/WanikaniSubject";
 
+/**
+ * @deprecated use createSubjectMapV2
+ */
 export function createSubjectMap(subjects: RawWanikaniSubject[]) {
     const map: { [id: number]: RawWanikaniSubject } = {};
+    for (const subject of subjects) {
+        map[subject.id] = subject;
+    }
+    return map;
+}
+
+export function createSubjectMapV2(subjects: WanikaniSubject[]) {
+    const map: { [id: number]: WanikaniSubject } = {};
     for (const subject of subjects) {
         map[subject.id] = subject;
     }
@@ -43,8 +55,15 @@ export function combineAssignmentAndSubject(assignment: RawWanikaniAssignment, s
     };
 }
 
-export function isSubjectHidden(subject: RawWanikaniSubject) {
-    return !!subject && !!subject.data && subject.data['hidden_at'];
+export function isSubjectHidden(subject: RawWanikaniSubject | WanikaniSubject) {
+    if (!!subject)
+        return false;
+
+    if ((subject as WanikaniSubject).hiddenAt != null)
+        return true;
+
+    const data = (subject as RawWanikaniSubject).data;
+    return !!data && data['hidden_at'];
 }
 
 export function getWanikaniSrsStageDescription(stage: number) {

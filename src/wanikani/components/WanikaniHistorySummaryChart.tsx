@@ -92,7 +92,7 @@ async function fetchLevelData(): Promise<FormattedLevelData> {
         WanikaniApiService.getLevelProgress()
     ]);
 
-    const timeSinceStart = Date.now() - new Date(user.data['started_at']).getTime();
+    const timeSinceStart = Date.now() - user.startedAt.getTime();
 
     const levelTimes = [];
     for (const level of levelProgressData.data) {

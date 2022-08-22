@@ -62,7 +62,7 @@ async function fetchData() {
         WanikaniApiService.getLevelProgress(),
         WanikaniApiService.getUser(),
     ]);
-    return formatData(levelProgress, user.data.level);
+    return formatData(levelProgress, user.level);
 }
 
 function useData() {

@@ -14,9 +14,9 @@ import {useUserPreferences} from "../../hooks/useUserPreferences";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {lightenDarkenColor} from "../../util/CssUtils";
 import GradientLinearProgress from "../../shared/GradientLinearProgress";
-import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
+import {WanikaniUser} from "../models/WanikaniUser";
 
 const styles = {
     showPreviousLevelMobile: {
@@ -308,7 +308,7 @@ function WanikaniLevelItemsChart({level, showWanikaniHeader = false}: WanikaniLe
 }
 
 function WanikaniActiveItemsChart({showWanikaniHeader = false}) {
-    const [user, setUser] = useState<RawWanikaniUser>();
+    const [user, setUser] = useState<WanikaniUser>();
     useEffect(() => {
         let isSubscribed = true;
 
@@ -326,7 +326,7 @@ function WanikaniActiveItemsChart({showWanikaniHeader = false}) {
         <>
             {!!user ? (
                 <WanikaniLevelItemsChart
-                    level={user.data.level}
+                    level={user.level}
                     showWanikaniHeader={showWanikaniHeader}
                 />
             ) : null}

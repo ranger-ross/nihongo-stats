@@ -11,9 +11,16 @@ import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
-import {mapWanikaniAssignment, mapWanikaniReset, mapWanikaniReview, mapWanikaniSubject} from "./WanikaniMappingService";
+import {
+    mapWanikaniAssignment,
+    mapWanikaniReset,
+    mapWanikaniReview,
+    mapWanikaniSubject,
+    mapWanikaniUser
+} from "./WanikaniMappingService";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {WanikaniReset} from "../models/WanikaniReset";
+import {WanikaniUser} from "../models/WanikaniUser";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -240,10 +247,9 @@ function joinAndSendCacheableRequest(request: string, cacheKey: string, factory:
     return promise
 }
 
-async function getUser(): Promise<RawWanikaniUser> {
+async function getUser(): Promise<WanikaniUser> {
     const user = await joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000);
-    console.log(user)
-    return user;
+    return mapWanikaniUser(user);
 }
 
 function getSummary(): Promise<RawWanikaniSummary> {

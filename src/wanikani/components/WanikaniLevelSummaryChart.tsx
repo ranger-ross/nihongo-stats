@@ -85,13 +85,13 @@ function getLevelProgress(levelsProgress: RawWanikaniLevelProgression[], current
 }
 
 async function getCurrentLevelProgressData(): Promise<ProgressData> {
-    const [userData, levelsProgress, allSubjects] = await Promise.all([
+    const [user, levelsProgress, allSubjects] = await Promise.all([
         WanikaniApiService.getUser(),
         WanikaniApiService.getLevelProgress(),
         WanikaniApiService.getSubjects(),
     ]);
 
-    const currentLevel = userData.data.level;
+    const currentLevel = user.level;
 
     const currentLevelProgress = getLevelProgress(levelsProgress.data, currentLevel);
 

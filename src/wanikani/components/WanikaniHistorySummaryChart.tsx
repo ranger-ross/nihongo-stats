@@ -44,6 +44,7 @@ type FormattedData = {
 
 async function fetchTotalsData(): Promise<FormattedData> {
     const reviews = await WanikaniApiService.getReviews();
+    console.log(reviews)
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
     const data: { review: RawWanikaniReview, subject: WanikaniSubject }[] = [];
     for (const review of reviews) {

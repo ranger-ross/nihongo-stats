@@ -13,6 +13,10 @@ import {
     WanikaniSubjectMeaning,
     WanikaniSubjectMetadata, WanikaniSubjectReading, WanikaniSubjectType
 } from "../models/WanikaniSubject";
+import {RawWanikaniPage} from "../models/raw/RawWanikaniPage";
+import {WanikaniPage} from "../models/WanikaniPage";
+import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
+import {WanikaniReview} from "../models/WanikaniReview";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function mapWanikaniUser(rawUser: RawWanikaniUser): WanikaniUser {
@@ -77,6 +81,30 @@ export function mapWanikaniSubject(rawSubject: RawWanikaniSubject): WanikaniSubj
         readingMnemonic: rawSubject.data.reading_mnemonic,
         componentSubjectIds: rawSubject.data.component_subject_ids,
         visuallySimilarSubjectIds: rawSubject.data.visually_similar_subject_ids,
+    };
+}
+
+export function mapWanikaniReview(review: RawWanikaniReview): WanikaniReview {
+    return {
+        id: review.id,
+        url: review.url,
+        dataUpdatedAt: new Date(review.data_updated_at),
+        createdAt: new Date(review.data.created_at),
+        assignmentId: review.data.assignment_id,
+        spacedRepetitionSystemId: review.data.spaced_repetition_system_id,
+        subjectId: review.data.subject_id,
+        startingSrsStage: review.data.starting_srs_stage,
+        endingSrsStage: review.data.ending_srs_stage,
+        incorrectMeaningAnswers: review.data.incorrect_meaning_answers,
+        incorrectReadingAnswers: review.data.incorrect_reading_answers,
+    };
+}
+
+export function mapWanikaniPage(page: RawWanikaniPage) {
+    return <WanikaniPage>{
+        perPage: page.per_page,
+        nextUrl: page.next_url,
+        previousUrl: page.previous_url,
     };
 }
 

@@ -23,6 +23,8 @@ import {AnkiReview} from "../../anki/models/AnkiReview";
 import { scaleBand } from '../../util/ChartUtils';
 import {WanikaniSubject} from "../../wanikani/models/WanikaniSubject";
 import {WanikaniReview} from "../../wanikani/models/WanikaniReview";
+import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey";
+import {useBunProApiKey} from "../../hooks/useBunProApiKey";
 
 type DataPoint = {
     date: Date,
@@ -170,6 +172,9 @@ function OverviewReviewsHistoryChart() {
 
     const isAnkiConnected = useAnkiConnection();
 
+    const {apiKey: wkApiKey} = useWanikaniApiKey();
+    const {apiKey: bpApiKey} = useBunProApiKey();
+
     const [toolTipTargetItem, setToolTipTargetItem] = useState<SeriesRef>();
     const [daysToLookBack, setDaysToLookBack] = useState(30);
     const {decks: ankiDecks} = useAnkiDecks();
@@ -192,6 +197,9 @@ function OverviewReviewsHistoryChart() {
 
 
     useEffect(() => {
+        if (!wkApiKey) {
+            return;
+        }
         setIsWanikaniLoading(true);
         let isSubscribed = true;
         fetchWanikaniData()
@@ -209,6 +217,9 @@ function OverviewReviewsHistoryChart() {
 
 
     useEffect(() => {
+        if (!bpApiKey) {
+            return;
+        }
         setIsBunProLoading(true);
         let isSubscribed = true;
         fetchBunProData()

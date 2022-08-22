@@ -9,6 +9,7 @@ import {distinct} from "../../util/ArrayUtils";
 import {AppStyles} from "../../util/TypeUtils";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniReview} from "../models/WanikaniReview";
+import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 
 const styles: AppStyles = {
     loadingContainer: {
@@ -24,7 +25,7 @@ const styles: AppStyles = {
     },
 };
 
-function getBurnedItems(allReviewsByType: { review: WanikaniReview, subject: WanikaniSubject }[]) {
+function getBurnedItems(allReviewsByType: WanikaniSubjectReview[]) {
     const burned = allReviewsByType.filter(review => review.review.endingSrsStage == 9);
     return distinct(burned, review => review.subject.id);
 }
@@ -44,9 +45,8 @@ type FormattedData = {
 
 async function fetchTotalsData(): Promise<FormattedData> {
     const reviews = await WanikaniApiService.getReviewsV2();
-    console.log(reviews)
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    const data: { review: WanikaniReview, subject: WanikaniSubject }[] = [];
+    const data: WanikaniSubjectReview[] = [];
     for (const review of reviews) {
         data.push({
             review: review,

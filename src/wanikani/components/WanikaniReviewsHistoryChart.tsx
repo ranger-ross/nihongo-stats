@@ -18,8 +18,7 @@ import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} f
 import {createSubjectMap} from "../service/WanikaniDataUtil";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {scaleBand} from '../../util/ChartUtils';
-import {WanikaniSubject} from "../models/WanikaniSubject";
-import {WanikaniReview} from "../models/WanikaniReview";
+import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 
 type PeriodUnit = {
     key: string,
@@ -43,11 +42,6 @@ const units: { [key: string]: PeriodUnit } = {
         text: 'Months',
         trunc: truncMonth
     },
-};
-
-type WkReviewSubject = {
-    review: WanikaniReview,
-    subject: WanikaniSubject,
 };
 
 type DataPoint = {
@@ -95,7 +89,7 @@ function dataPoint(date: Date) {
 async function fetchData() {
     const reviews = await WanikaniApiService.getReviewsV2();
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    const data: WkReviewSubject[] = [];
+    const data: WanikaniSubjectReview[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
@@ -106,7 +100,7 @@ async function fetchData() {
     return data;
 }
 
-function aggregateDate(rawData: WkReviewSubject[], daysToLookBack: number, unit: PeriodUnit): DataPoint[] {
+function aggregateDate(rawData: WanikaniSubjectReview[], daysToLookBack: number, unit: PeriodUnit): DataPoint[] {
     const areDatesDifferent = (date1: Date, date2: Date) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
     const startDate = unit.trunc(Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1))).getTime();
     const dataForTimeRange = rawData.filter(data => data.review.createdAt.getTime() > startDate);
@@ -174,7 +168,7 @@ function UnitSelector({options, unit, onChange}: UnitSelectorProps) {
 const totalDays = getTotalDays();
 
 function WanikaniReviewsHistoryChart() {
-    const [rawData, setRawData] = useState<WkReviewSubject[]>([]);
+    const [rawData, setRawData] = useState<WanikaniSubjectReview[]>([]);
     const [daysToLookBack, setDaysToLookBack] = useState(30);
     const [isLoading, setIsLoading] = useState(false);
     const [tooltipTargetItem, setTooltipTargetItem] = useState<SeriesRef>();

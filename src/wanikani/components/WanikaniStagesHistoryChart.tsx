@@ -22,7 +22,7 @@ import {WanikaniReset} from "../models/WanikaniReset";
 import Area from "../../shared/Area";
 import {scaleBand} from "../../util/ChartUtils";
 import {WanikaniSubject} from "../models/WanikaniSubject";
-import {WanikaniReview} from "../models/WanikaniReview";
+import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 
 
 type StageHistoryUnit = {
@@ -187,7 +187,7 @@ function dataPoint(date: Date, previousDataPoint = {}) {
     }
 
     // Add a review, check the start/end stages and increment and decrement accordingly
-    data.push = (d: WKReviewSubject) => {
+    data.push = (d: WanikaniSubjectReview) => {
         const startingStage = d.review.startingSrsStage;
         const endingStage = d.review.endingSrsStage;
 
@@ -224,15 +224,13 @@ function dataPoint(date: Date, previousDataPoint = {}) {
     return data;
 }
 
-type WKReviewSubject = { review: WanikaniReview, subject: WanikaniSubject };
-
 async function fetchData() {
     const [reviews, rawResets] = await Promise.all([
         WanikaniApiService.getReviewsV2(),
         WanikaniApiService.getResets(),
     ]);
     const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    const data: WKReviewSubject[] = [];
+    const data: WanikaniSubjectReview[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
@@ -248,7 +246,7 @@ async function fetchData() {
     };
 }
 
-function aggregateDate(rawData: WKReviewSubject[] | null, resets: WanikaniReset[], unit: StageHistoryUnit) {
+function aggregateDate(rawData: WanikaniSubjectReview[] | null, resets: WanikaniReset[], unit: StageHistoryUnit) {
     if (!rawData)
         return null;
     const areDatesDifferent = (date1: Date | number, date2: Date | number) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
@@ -295,7 +293,7 @@ function aggregateDate(rawData: WKReviewSubject[] | null, resets: WanikaniReset[
 
 type DataState = {
     isLoading: boolean,
-    data: WKReviewSubject[] | null,
+    data: WanikaniSubjectReview[] | null,
     resets: WanikaniReset[],
 };
 

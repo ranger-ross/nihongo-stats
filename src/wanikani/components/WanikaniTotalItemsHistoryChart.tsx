@@ -69,7 +69,7 @@ async function fetchData() {
         .map(assignment => ({
             subjectId: assignment.data['subject_id'],
             type: assignment.data['subject_type'],
-            startedAt: new Date(assignment.data['started_at']),
+            startedAt: new Date(assignment.data['started_at'] as string),
         } as AssignmentSnippet))
         .sort(sortByStartedAtDate)
 

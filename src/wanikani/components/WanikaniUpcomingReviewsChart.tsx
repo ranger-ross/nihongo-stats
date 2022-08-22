@@ -58,14 +58,14 @@ type FormattedDataPoint = {
 
 function formatChartData(rawData: RawWanikaniAssignment[], unit: UpcomingReviewUnit, period: number, initialReviewCount: number): FormattedDataPoint[] {
     const data = rawData
-        .filter(assignment => new Date(assignment.data['available_at']) > addTimeToDate(new Date(), unit, -1))
-        .filter(assignment => new Date(assignment.data['available_at']) < addTimeToDate(new Date(), unit, period));
+        .filter(assignment => new Date(assignment.data['available_at'] as string) > addTimeToDate(new Date(), unit, -1))
+        .filter(assignment => new Date(assignment.data['available_at'] as string) < addTimeToDate(new Date(), unit, period));
 
     let totalReviewCount = initialReviewCount;
     const daysData = []
     for (let i = 0; i < period; i++) {
         const date = addTimeToDate(getChartStartTime(), unit, i);
-        const assignmentsOnDay = data.filter(assignment => unit.isPeriodTheSame(new Date(assignment.data['available_at']), date));
+        const assignmentsOnDay = data.filter(assignment => unit.isPeriodTheSame(new Date(assignment.data['available_at'] as string), date));
         totalReviewCount += assignmentsOnDay.length;
 
         daysData.push({

@@ -17,6 +17,8 @@ import {RawWanikaniPage} from "../models/raw/RawWanikaniPage";
 import {WanikaniPage} from "../models/WanikaniPage";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {WanikaniReview} from "../models/WanikaniReview";
+import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
+import {WanikaniAssignment} from "../models/WanikaniAssignment";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function mapWanikaniUser(rawUser: RawWanikaniUser): WanikaniUser {
@@ -97,6 +99,25 @@ export function mapWanikaniReview(review: RawWanikaniReview): WanikaniReview {
         endingSrsStage: review.data.ending_srs_stage,
         incorrectMeaningAnswers: review.data.incorrect_meaning_answers,
         incorrectReadingAnswers: review.data.incorrect_reading_answers,
+    };
+}
+
+export function mapWanikaniAssignment(assignment: RawWanikaniAssignment): WanikaniAssignment {
+    return {
+        id: assignment.id,
+        url: assignment.url,
+        dataUpdatedAt: new Date(assignment.data_updated_at),
+        createdAt: new Date(assignment.data.created_at),
+        subjectId: assignment.data.subject_id,
+        subjectType: assignment.data.subject_type as WanikaniSubjectType,
+        srsStage: assignment.data.srs_stage,
+        unlockedAt: assignment.data.unlocked_at != null ? new Date(assignment.data.unlocked_at) : null,
+        startedAt: assignment.data.started_at != null ? new Date(assignment.data.started_at) : null,
+        passedAt: assignment.data.passed_at != null ? new Date(assignment.data.passed_at) : null,
+        burnedAt: assignment.data.burned_at != null ? new Date(assignment.data.burned_at) : null,
+        availableAt: assignment.data.available_at != null ? new Date(assignment.data.available_at) : null,
+        resurrectedAt: assignment.data.resurrected_at != null ? new Date(assignment.data.resurrected_at) : null,
+        hidden: assignment.data.hidden,
     };
 }
 

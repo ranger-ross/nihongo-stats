@@ -23,9 +23,10 @@ export interface RawWanikaniAssignmentData {
     subject_type: string
     srs_stage: number
     unlocked_at: string
-    started_at: string
-    passed_at: string
-    burned_at: string
-    available_at: string
-    resurrected_at: string
+    started_at: string | null
+    passed_at: string | null
+    burned_at: string | null
+    available_at: string | null
+    resurrected_at: string | null
+    hidden: boolean
 }

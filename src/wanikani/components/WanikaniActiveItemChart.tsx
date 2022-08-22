@@ -60,6 +60,8 @@ async function fetchData(level: number) {
         WanikaniApiService.getAssignmentsForLevel(level),
     ]);
 
+    console.log(rawAssignments);
+
     const subjects: WanikaniSubject[] = allSubjects.filter((subject: WanikaniSubject) => subject.level === level);
 
     const assignments = rawAssignments.data;

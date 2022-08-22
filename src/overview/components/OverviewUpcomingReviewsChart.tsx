@@ -173,8 +173,8 @@ async function fetchWanikaniReviews(): Promise<WanikaniDateReview[]> {
     const data = rawData.filter(assignment => !assignment.data['burned_at'] || !assignment.data['available_at']);
 
     return data
-        .filter(assignment => new Date(assignment.data['available_at']) > addDays(new Date(), -1))
-        .map(assignment => ({...assignment, date: new Date(assignment.data['available_at'])}));
+        .filter(assignment => !!assignment.data['available_at'] && new Date(assignment.data['available_at']) > addDays(new Date(), -1))
+        .map(assignment => ({...assignment, date: new Date(assignment.data['available_at'] as string)}));
 }
 
 function useWanikaniReviews(wanikaniApiKey?: string | null) {

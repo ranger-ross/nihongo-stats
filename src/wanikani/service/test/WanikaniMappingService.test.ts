@@ -1,10 +1,17 @@
 import {describe, it, expect} from "vitest";
 
 import {RawWanikaniReset} from "../../models/raw/RawWanikaniReset";
-import {mapWanikaniReset, mapWanikaniSubject, mapWanikaniPage, mapWanikaniReview} from "../WanikaniMappingService";
+import {
+    mapWanikaniReset,
+    mapWanikaniSubject,
+    mapWanikaniPage,
+    mapWanikaniReview,
+    mapWanikaniAssignment
+} from "../WanikaniMappingService";
 import {RawWanikaniSubject} from "../../models/raw/RawWanikaniSubject";
 import {RawWanikaniPage} from "../../models/raw/RawWanikaniPage";
 import {RawWanikaniReview} from "../../models/raw/RawWanikaniReview";
+import {RawWanikaniAssignment} from "../../models/raw/RawWanikaniAssignment";
 
 
 describe('WanikaniMappingService', () => {
@@ -277,6 +284,80 @@ describe('WanikaniMappingService', () => {
 
     });
 
+    describe('mapWanikaniAssignment', () => {
+
+        it('should map assignment properly', () => {
+
+            const input: RawWanikaniAssignment = {
+                "id": 302664759,
+                "object": "assignment",
+                "url": "https://api.wanikani.com/v2/assignments/302664759",
+                "data_updated_at": "2022-08-10T10:07:35.246177Z",
+                "data": {
+                    "created_at": "2022-08-10T10:07:35.246177Z",
+                    "subject_id": 4932,
+                    "subject_type": "vocabulary",
+                    "srs_stage": 0,
+                    "unlocked_at": "2022-08-10T10:07:35.242751Z",
+                    "started_at": null,
+                    "passed_at": null,
+                    "burned_at": null,
+                    "available_at": null,
+                    "resurrected_at": null,
+                    "hidden": false
+                }
+            }
+
+            const result = mapWanikaniAssignment(input);
+
+            expect(result.id).toBe(302664759);
+            expect(result.url).toBe("https://api.wanikani.com/v2/assignments/302664759");
+            expect(result.dataUpdatedAt.getTime()).toBe(1660126055246);
+            expect(result.createdAt.getTime()).toBe(1660126055246);
+            expect(result.subjectId).toBe(4932);
+            expect(result.startedAt).toBe(null);
+            expect(result.unlockedAt?.getTime()).toBe(1660126055242);
+            expect(result.passedAt).toBe(null);
+            expect(result.burnedAt).toBe(null);
+            expect(result.resurrectedAt).toBe(null);
+            expect(result.hidden).toBe(false);
+        });
+
+        it('should map assignment dates properly', () => {
+
+            const input: RawWanikaniAssignment = {
+                "id": 302664759,
+                "object": "assignment",
+                "url": "https://api.wanikani.com/v2/assignments/302664759",
+                "data_updated_at": "2022-08-10T10:07:35.246177Z",
+                "data": {
+                    "created_at": "2022-08-10T10:07:35.246177Z",
+                    "subject_id": 4932,
+                    "subject_type": "vocabulary",
+                    "srs_stage": 0,
+                    "unlocked_at": "2020-08-10T10:07:35.242751Z",
+                    "started_at": "2022-08-10T10:07:35.242751Z",
+                    "passed_at": "2022-08-11T10:07:35.242751Z",
+                    "burned_at": "2022-04-10T10:07:35.242751Z",
+                    "available_at": "2021-08-10T10:07:35.242751Z",
+                    "resurrected_at": "2023-08-10T10:07:35.242751Z",
+                    "hidden": true
+                }
+            }
+
+            const result = mapWanikaniAssignment(input);
+
+            expect(result.dataUpdatedAt.getTime()).toBe(1660126055246);
+            expect(result.createdAt.getTime()).toBe(1660126055246);
+            expect(result.startedAt?.getTime()).toBe(1660126055242);
+            expect(result.unlockedAt?.getTime()).toBe(1597054055242);
+            expect(result.passedAt?.getTime()).toBe(1660212455242);
+            expect(result.burnedAt?.getTime()).toBe(1649585255242);
+            expect(result.resurrectedAt?.getTime()).toBe(1691662055242);
+            expect(result.hidden).toBe(true);
+        });
+
+    });
 
     describe('mapWanikaniPage', () => {
 

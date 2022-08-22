@@ -14,9 +14,10 @@ import {useUserPreferences} from "../../hooks/useUserPreferences";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {lightenDarkenColor} from "../../util/CssUtils";
 import GradientLinearProgress from "../../shared/GradientLinearProgress";
-import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 import {WanikaniSubject} from "../models/WanikaniSubject";
+import {WanikaniAssignment} from "../models/WanikaniAssignment";
+import {mapWanikaniAssignment} from "../service/WanikaniMappingService";
 
 const styles = {
     showPreviousLevelMobile: {
@@ -60,14 +61,12 @@ async function fetchData(level: number) {
         WanikaniApiService.getAssignmentsForLevel(level),
     ]);
 
-    console.log(rawAssignments);
-
     const subjects: WanikaniSubject[] = allSubjects.filter((subject: WanikaniSubject) => subject.level === level);
 
-    const assignments = rawAssignments.data;
-    const radicalsStarted = assignments.filter((s: RawWanikaniAssignment) => s.data['subject_type'] === 'radical' && !!s.data['started_at']).length;
-    const kanjiStarted = assignments.filter((s: RawWanikaniAssignment) => s.data['subject_type'] === 'kanji' && !!s.data['started_at']).length;
-    const vocabularyStarted = assignments.filter((s: RawWanikaniAssignment) => s.data['subject_type'] === 'vocabulary' && !!s.data['started_at']).length;
+    const assignments = rawAssignments.data.map(mapWanikaniAssignment);
+    const radicalsStarted = assignments.filter((s: WanikaniAssignment) => s.subjectType === 'radical' && !!s.startedAt).length;
+    const kanjiStarted = assignments.filter((s: WanikaniAssignment) => s.subjectType === 'kanji' && !!s.startedAt).length;
+    const vocabularyStarted = assignments.filter((s: WanikaniAssignment) => s.subjectType === 'vocabulary' && !!s.startedAt).length;
 
     const assignmentMap = createAssignmentMap(assignments);
 
@@ -135,7 +134,7 @@ function RatioLabel({started, total}: { started: number, total: number }) {
 }
 
 function getTileColor(subject: JoinedRawWKAssignmentAndSubject) {
-    if (subject['started_at']) {
+    if (subject.startedAt) {
         return getColorByWanikaniSubjectType(subject.subjectType);
     } else if (subject.hasAssignment) {
         return WanikaniColors.lessonGray;
@@ -149,13 +148,13 @@ function SubjectTile({subject, isMobile}: { subject: JoinedRawWKAssignmentAndSub
             text={subject.characters || '?'}
             link={subject.documentUrl}
             meaning={subject.meanings.map(m => m.meaning).join(', ')}
-            srsLevel={subject['srs_stage']}
+            srsLevel={subject.srsStage}
             color={getTileColor(subject)}
             type={subject.subjectType}
             level={subject.level}
             readings={subject.readings}
             size={isMobile ? 6 : 10}
-            nextReviewDate={!!subject['available_at'] ? new Date(subject['available_at']) : null}
+            nextReviewDate={subject.availableAt}
         />
     );
 }

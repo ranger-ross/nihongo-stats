@@ -3,7 +3,7 @@ import WanikaniApiService from "../service/WanikaniApiService";
 import {Card, CardContent, CircularProgress, Tooltip, Typography} from "@mui/material";
 import {WanikaniColors} from "../../Constants";
 import {AppStyles} from "../../util/TypeUtils";
-import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
+import {WanikaniAssignment} from "../models/WanikaniAssignment";
 
 
 type FormattedDataPoint = {
@@ -42,12 +42,12 @@ const styles: AppStyles = {
     },
 };
 
-function assignmentsToCounts(assignments: RawWanikaniAssignment[]): FormattedDataPoint {
+function assignmentsToCounts(assignments: WanikaniAssignment[]): FormattedDataPoint {
     return {
         total: assignments.length,
-        radicals: assignments.filter(assignment => assignment.data['subject_type'] === 'radical').length,
-        kanji: assignments.filter(assignment => assignment.data['subject_type'] === 'kanji').length,
-        vocabulary: assignments.filter(assignment => assignment.data['subject_type'] === 'vocabulary').length,
+        radicals: assignments.filter(assignment => assignment.subjectType === 'radical').length,
+        kanji: assignments.filter(assignment => assignment.subjectType === 'kanji').length,
+        vocabulary: assignments.filter(assignment => assignment.subjectType === 'vocabulary').length,
     };
 }
 
@@ -94,14 +94,14 @@ function CountTile({label, data, color}: CountTileProps) {
 }
 
 async function fetchData(): Promise<FormattedData> {
-    const assignments = await WanikaniApiService.getAllAssignments();
+    const assignments = await WanikaniApiService.getAllAssignmentsV2();
 
-    const available = assignments.filter(assignment => assignment.data['srs_stage'] == 0);
-    const apprentice = assignments.filter(assignment => assignment.data['srs_stage'] > 0 && assignment.data['srs_stage'] < 5);
-    const guru = assignments.filter(assignment => assignment.data['srs_stage'] >= 5 && assignment.data['srs_stage'] < 7);
-    const master = assignments.filter(assignment => assignment.data['srs_stage'] >= 7 && assignment.data['srs_stage'] < 8);
-    const enlightened = assignments.filter(assignment => assignment.data['srs_stage'] >= 8 && assignment.data['srs_stage'] < 9);
-    const burned = assignments.filter(assignment => assignment.data['srs_stage'] >= 9);
+    const available = assignments.filter(assignment => assignment.srsStage == 0);
+    const apprentice = assignments.filter(assignment => assignment.srsStage > 0 && assignment.srsStage < 5);
+    const guru = assignments.filter(assignment => assignment.srsStage >= 5 && assignment.srsStage < 7);
+    const master = assignments.filter(assignment => assignment.srsStage >= 7 && assignment.srsStage < 8);
+    const enlightened = assignments.filter(assignment => assignment.srsStage >= 8 && assignment.srsStage < 9);
+    const burned = assignments.filter(assignment => assignment.srsStage >= 9);
 
     return {
         available: assignmentsToCounts(available),

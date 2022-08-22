@@ -42,13 +42,13 @@ function SubjectTile({subject, colorBy}: SubjectTileProps) {
             text={subject.characters || '?'}
             link={subject.documentUrl}
             meaning={subject?.meanings?.map(m => m.meaning).join(', ')}
-            srsLevel={subject['srs_stage']}
+            srsLevel={subject.srsStage}
             color={colorBy.color(subject) as string}
             size={5}
             type={subject.subjectType}
             level={subject.level}
             readings={subject.readings}
-            nextReviewDate={!!subject['available_at'] ? new Date(subject['available_at']) : null}
+            nextReviewDate={subject.availableAt}
         />
     ), [subject, colorBy.key]);
 }
@@ -140,7 +140,7 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortR
 
 async function fetchItems() {
     const subjects = await WanikaniApiService.getSubjects();
-    const assignments = await WanikaniApiService.getAllAssignments();
+    const assignments = await WanikaniApiService.getAllAssignmentsV2();
     const assignmentMap = createAssignmentMap(assignments);
 
     return subjects

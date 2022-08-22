@@ -3,8 +3,8 @@ import kanji from "kanji";
 import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil";
 import {getColorByJLPTLevel, getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "./WanikaniStyleUtil";
 import {WanikaniColors} from "../../Constants";
-import {RawWanikaniAssignment, RawWanikaniAssignmentData} from "../models/raw/RawWanikaniAssignment";
 import {WanikaniSubject, WanikaniSubjectType} from "../models/WanikaniSubject";
+import {WanikaniAssignment} from "../models/WanikaniAssignment";
 
 export function createSubjectMap(subjects: WanikaniSubject[]) {
     const map: { [id: number]: WanikaniSubject } = {};
@@ -14,26 +14,26 @@ export function createSubjectMap(subjects: WanikaniSubject[]) {
     return map;
 }
 
-export function createAssignmentMap(assignments: RawWanikaniAssignment[]) {
-    const map: { [id: number]: RawWanikaniAssignment } = {};
+export function createAssignmentMap(assignments: WanikaniAssignment[]) {
+    const map: { [id: number]: WanikaniAssignment } = {};
 
     for (const assignment of assignments) {
-        map[assignment.data['subject_id']] = assignment;
+        map[assignment.subjectId] = assignment;
     }
 
     return map;
 }
 
-export type JoinedRawWKAssignmentAndSubject = RawWanikaniAssignmentData & WanikaniSubject & {
+export type JoinedRawWKAssignmentAndSubject = WanikaniAssignment & WanikaniSubject & {
     hasAssignment: boolean,
     subjectId: number,
     subjectType: WanikaniSubjectType,
 };
 
-export function combineAssignmentAndSubject(assignment: RawWanikaniAssignment, subject: WanikaniSubject): JoinedRawWKAssignmentAndSubject {
+export function combineAssignmentAndSubject(assignment: WanikaniAssignment, subject: WanikaniSubject): JoinedRawWKAssignmentAndSubject {
     return {
         ...subject,
-        ...assignment?.data,
+        ...assignment,
         hasAssignment: !!assignment,
         subjectId: subject.id,
 
@@ -152,7 +152,7 @@ export const groupByOptions: { [key: string]: WKGroupByOption } = {
             const stageMap: { [stage: number | string]: JoinedRawWKAssignmentAndSubject[] } = {};
 
             for (const subject of subjects) {
-                const srsStage: string | number = subject['srs_stage'] != 0 && !subject['srs_stage'] ? 'locked' : subject['srs_stage'];
+                const srsStage: string | number = subject.srsStage != 0 && !subject.srsStage ? 'locked' : subject.srsStage;
                 if (!stageMap[srsStage]) {
                     stageMap[srsStage] = [];
                 }
@@ -272,7 +272,7 @@ export const sortByOptions: { [key: string]: WKSortByOption } = {
     srsStage: {
         key: 'srsStage',
         displayText: 'SRS Stage',
-        sort: (subjects: JoinedRawWKAssignmentAndSubject[]) => subjects.sort((a, b) => (b['srs_stage'] ?? -1) - (a['srs_stage'] ?? -1))
+        sort: (subjects: JoinedRawWKAssignmentAndSubject[]) => subjects.sort((a, b) => (b.srsStage ?? -1) - (a.srsStage ?? -1))
     },
     itemType: {
         key: 'itemType',
@@ -334,16 +334,16 @@ export const colorByOptions: { [key: string]: WKColorByOption } = {
     srsStage: {
         key: 'srsStage',
         displayText: 'SRS Stage',
-        color: (subject: JoinedRawWKAssignmentAndSubject) => getColorByWanikaniSrsStage(subject['srs_stage'])
+        color: (subject: JoinedRawWKAssignmentAndSubject) => getColorByWanikaniSrsStage(subject.srsStage)
     },
     itemType: {
         key: 'itemType',
         displayText: 'Item Type',
         color: (subject: JoinedRawWKAssignmentAndSubject) => {
-            if (!subject['srs_stage'] && subject['srs_stage'] !== 0)
+            if (!subject.srsStage && subject.srsStage !== 0)
                 return WanikaniColors.lockedGray;
 
-            if (subject['srs_stage'] === 0)
+            if (subject.srsStage === 0)
                 return WanikaniColors.lessonGray;
 
             return getColorByWanikaniSubjectType(subject.subjectType)

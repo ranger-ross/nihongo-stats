@@ -1,7 +1,9 @@
+export type WanikaniSubjectType = 'radical' | 'kanji' | 'vocabulary';
+
 export interface WanikaniSubject {
     id: number
     url: string
-    object: string
+    object: WanikaniSubjectType
     dataUpdatedAt: Date
     amalgamationSubjectIds: number[]
     auxiliaryMeanings: WanikaniSubjectAuxiliaryMeaning[]

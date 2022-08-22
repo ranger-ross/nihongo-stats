@@ -88,7 +88,7 @@ async function getCurrentLevelProgressData(): Promise<ProgressData> {
     const [userData, levelsProgress, allSubjects] = await Promise.all([
         WanikaniApiService.getUser(),
         WanikaniApiService.getLevelProgress(),
-        WanikaniApiService.getSubjects(),
+        WanikaniApiService.getSubjectsV2(),
     ]);
 
     const currentLevel = userData.data.level;
@@ -107,7 +107,7 @@ async function getCurrentLevelProgressData(): Promise<ProgressData> {
     const timeOnLevel = end.getTime() - start.getTime()
 
     const assignments = await WanikaniApiService.getAssignmentsForLevel(currentLevel);
-    const subjects = allSubjects.filter(subject => subject.data.level === currentLevel);
+    const subjects = allSubjects.filter(subject => subject.level === currentLevel);
 
     const radicalsTotal = subjects.filter(s => s.object === 'radical');
     const radicals = assignments.data.filter(s => s.data['subject_type'] === 'radical' && !!s.data['passed_at']);

@@ -17,7 +17,7 @@ export interface RawWanikaniSubjectData {
     lesson_position: number
     level: number
     meanings: RawWanikaniSubjectMeaning[]
-    readings: RawWanikaniSubjectReading[]
+    readings?: RawWanikaniSubjectReading[]
     meaning_mnemonic: string
     slug: string
     spaced_repetition_system_id: number

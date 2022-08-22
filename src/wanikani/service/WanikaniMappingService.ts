@@ -11,7 +11,7 @@ import {
     WanikaniSubject,
     WanikaniSubjectCharacterImage,
     WanikaniSubjectMeaning,
-    WanikaniSubjectMetadata, WanikaniSubjectReading
+    WanikaniSubjectMetadata, WanikaniSubjectReading, WanikaniSubjectType
 } from "../models/WanikaniSubject";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -54,7 +54,7 @@ export function mapWanikaniSubject(rawSubject: RawWanikaniSubject): WanikaniSubj
     const hiddenAt = !!rawSubject.data.hidden_at ? new Date(rawSubject.data.hidden_at) : null;
 
     return {
-        object: rawSubject.object,
+        object: rawSubject.object as WanikaniSubjectType,
         amalgamationSubjectIds: rawSubject.data.amalgamation_subject_ids,
         auxiliaryMeanings: rawSubject.data.auxiliary_meanings,
         characterImages: rawSubject.data.character_images?.map(mapSubjectCharacterImage) ?? [],
@@ -68,7 +68,7 @@ export function mapWanikaniSubject(rawSubject: RawWanikaniSubject): WanikaniSubj
         level: rawSubject.data.level,
         meaningMnemonic: rawSubject.data.meaning_mnemonic,
         meanings: rawSubject.data.meanings.map(mapSubjectMeaning),
-        readings: rawSubject.data.readings.map(mapSubjectReading),
+        readings: rawSubject.data.readings?.map(mapSubjectReading) ?? [],
         slug: rawSubject.data.slug,
         spacedRepetitionSystemId: rawSubject.data.spaced_repetition_system_id,
         url: rawSubject.url,

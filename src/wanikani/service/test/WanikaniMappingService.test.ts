@@ -1,4 +1,4 @@
-import {describe, beforeEach, it, expect} from "vitest";
+import {describe, it, expect} from "vitest";
 
 import {RawWanikaniReset} from "../../models/raw/RawWanikaniReset";
 import {mapWanikaniReset, mapWanikaniSubject} from "../WanikaniMappingService";
@@ -38,7 +38,80 @@ describe('WanikaniMappingService', () => {
 
     describe('mapWanikaniSubject', () => {
 
-        it('should map subject properly', () => {
+        it('should map radical properly', () => {
+            const rawRadical: RawWanikaniSubject = {
+                "id": 1,
+                "object": "radical",
+                "url": "https://api.wanikani.com/v2/subjects/1",
+                "data_updated_at": "2022-07-24T01:22:18.573676Z",
+                "data": {
+                    "created_at": "2012-02-27T18:08:16.000000Z",
+                    "level": 1,
+                    "slug": "ground",
+                    "hidden_at": null,
+                    "document_url": "https://www.wanikani.com/radicals/ground",
+                    "characters": "一",
+                    "character_images": [
+                        {
+                            "url": "https://files.wanikani.com/a7w32gazaor51ii0fbtxzk0wpmpc",
+                            "metadata": {
+                                "inline_styles": false
+                            },
+                            "content_type": "image/svg+xml"
+                        },
+                        {
+                            "url": "https://files.wanikani.com/fxufa23ht9uh0tkedo1zx5jemaio",
+                            "metadata": {
+                                "inline_styles": true
+                            },
+                            "content_type": "image/svg+xml"
+                        },
+                    ],
+                    "meanings": [
+                        {
+                            "meaning": "Ground",
+                            "primary": true,
+                            "accepted_answer": true
+                        }
+                    ],
+                    "auxiliary_meanings": [],
+                    "amalgamation_subject_ids": [
+                        440,
+                        449,
+                        2437
+                    ],
+                    "meaning_mnemonic": "This radical consists of a single, horizontal stroke. What's the biggest, single, horizontal stroke? That's the <radical>ground</radical>. Look at the ground, look at this radical, now look at the ground again. Kind of the same, right?",
+                    "lesson_position": 0,
+                    "spaced_repetition_system_id": 2
+                }
+            }
+
+
+            const kanji = mapWanikaniSubject(rawRadical);
+
+            expect(kanji.id).toBe(1);
+            expect(kanji.url).toBe("https://api.wanikani.com/v2/subjects/1");
+            expect(kanji.hiddenAt).toBe(null);
+            expect(kanji.slug).toBe("ground");
+            expect(kanji.spacedRepetitionSystemId).toBe(2);
+            expect(kanji.lessonPosition).toBe(0);
+            expect(kanji.readingHint).toBeUndefined();
+            // expect(kanji.meaningMnemonic).toBe("Giving a <radical>roof</radical> <radical>legs</radical> is the kind of <radical>construction</radical> you do. You make it so a roof can be in the <kanji>sky</kanji>. In addition to meaning \"sky\", this kanji often means <kanji>empty</kanji>. Think about it - there's nothing more empty than the sky!");
+            // expect(kanji.meaningHint).toBe("Think about it. If you give a roof legs, it goes even higher up. What's higher up? The sky is!");
+            // expect(kanji.readingMnemonic).toBe("The reason you want to put a roof in the <kanji>sky</kanji> is because it gets the roof away from all the <reading>coo</reading>ties (<ja>くう</ja>) that are on the ground.");
+            expect(kanji.documentUrl).toBe("https://www.wanikani.com/radicals/ground");
+            expect(kanji.readings.length).toBe(0);
+            expect(kanji.meanings.length).toBe(1);
+            expect(kanji.componentSubjectIds).toBeUndefined();
+            expect(kanji.visuallySimilarSubjectIds).toBeUndefined()
+            expect(kanji.amalgamationSubjectIds?.length).toBe(3);
+            expect(kanji.level).toBe(1);
+            expect(kanji.object).toBe('radical');
+            expect(kanji.createdAt.getTime()).toBe(1330366096000);
+            expect(kanji.dataUpdatedAt.getTime()).toBe(1658625738573);
+        });
+
+        it('should map kanji properly', () => {
             const rawKanji: RawWanikaniSubject = {
                 "id": 601,
                 "object": "kanji",
@@ -157,7 +230,6 @@ describe('WanikaniMappingService', () => {
             expect(kanji.object).toBe('kanji');
             expect(kanji.createdAt.getTime()).toBe(1331020980000);
             expect(kanji.dataUpdatedAt.getTime()).toBe(1654894680493);
-
 
 
         });

@@ -31,7 +31,7 @@ function ValueLabel({label, value}: { label: string, value?: string | number | n
     );
 }
 
-function formatReadings(readings: RawWanikaniSubjectReading[]) {
+function formatReadings(readings?: RawWanikaniSubjectReading[]) {
     if (!readings)
         return null;
     return readings.map(r => r.reading).join(', ');
@@ -51,7 +51,7 @@ type WanikaniItemTile = {
     color: string,
     type: string,
     level: number,
-    readings: RawWanikaniSubjectReading[],
+    readings?: RawWanikaniSubjectReading[],
     nextReviewDate: Date | null,
     size: number,
 };

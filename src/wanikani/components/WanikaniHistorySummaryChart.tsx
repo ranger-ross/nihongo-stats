@@ -1,5 +1,3 @@
-import {useEffect, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
 import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {sortAndGetMedian} from "../../util/MathUtils";
@@ -8,6 +6,10 @@ import {millisToDays, millisToHours} from "../../util/DateUtils";
 import {distinct} from "../../util/ArrayUtils";
 import {AppStyles} from "../../util/TypeUtils";
 import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
+import {WanikaniReview} from "../models/WanikaniReview";
+import {WanikaniSubject} from "../models/WanikaniSubject";
+import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
+import {WanikaniUser} from "../models/WanikaniUser";
 
 const styles: AppStyles = {
     loadingContainer: {
@@ -41,14 +43,13 @@ type FormattedData = {
     vocabularyBurned: number,
 };
 
-async function fetchTotalsData(): Promise<FormattedData> {
-    const reviews = await WanikaniApiService.getReviews();
-    const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
+function formatTotalsData(reviews: WanikaniReview[], subjects: WanikaniSubject[]): FormattedData {
+    const subjectsMap = createSubjectMap(subjects);
     const data: WanikaniSubjectReview[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
-            subject: subjects[review.subjectId]
+            subject: subjectsMap[review.subjectId]
         });
     }
 
@@ -84,12 +85,7 @@ type FormattedLevelData = {
     timeSinceStart: number
 };
 
-async function fetchLevelData(): Promise<FormattedLevelData> {
-    const [user, levelProgressData] = await Promise.all([
-        WanikaniApiService.getUser(),
-        WanikaniApiService.getLevelProgress()
-    ]);
-
+function formatLevelData(user: WanikaniUser, levelProgressData: WanikaniLevelProgression[]): FormattedLevelData {
     const timeSinceStart = Date.now() - user.startedAt.getTime();
 
     const levelTimes = [];
@@ -158,33 +154,18 @@ function DaysAndHoursLabel({label, milliseconds}: DaysAndHoursLabelProps) {
 }
 
 
-function WanikaniHistorySummaryChart() {
-    const [totalsData, setTotalsData] = useState<FormattedData>();
-    const [levelData, setLevelData] = useState<FormattedLevelData>();
+type WanikaniHistorySummaryChart = {
+    reviews: WanikaniReview[]
+    subjects: WanikaniSubject[]
+    levelProgress: WanikaniLevelProgression[]
+    user?: WanikaniUser
+};
+
+function WanikaniHistorySummaryChart({user, subjects, reviews, levelProgress}: WanikaniHistorySummaryChart) {
+    const totalsData = formatTotalsData(reviews, subjects);
+    const levelData = !user ? null : formatLevelData(user, levelProgress);
 
     const isLoading = !totalsData || !levelData;
-
-    useEffect(() => {
-        let isSubscribed = true;
-        fetchTotalsData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setTotalsData(data);
-            })
-            .catch(console.error);
-
-        fetchLevelData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setLevelData(data);
-            });
-
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
 
     return (
         <Card style={{height: '100%'}}>

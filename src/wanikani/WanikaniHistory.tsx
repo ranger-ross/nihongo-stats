@@ -46,6 +46,7 @@ function WanikaniHistoryContent() {
     const [levelProgress, setLevelProgress] = useState<WanikaniLevelProgression[]>([]);
     const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
     const [reviews, setReviews] = useState<WanikaniReview[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const isLoading = [
         subjects, reviews, assignments, levelProgress
     ].some(data => data.length === 0) && !!user;
@@ -96,7 +97,7 @@ function WanikaniHistoryContent() {
         <div>
 
             <Card variant={'outlined'} style={{margin: '15px'}}>
-                <WanikaniHistorySummaryChart/>
+                <WanikaniHistorySummaryChart levelProgress={levelProgress} user={user} subjects={subjects} reviews={reviews}/>
             </Card>
 
             <Card variant={'outlined'} style={{margin: '15px'}}>

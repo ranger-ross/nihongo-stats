@@ -42,7 +42,7 @@ function WanikaniHistoryContent() {
     const [subjects, setSubjects] = useState<WanikaniSubject[]>([]);
     const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
     const [reviews, setReviews] = useState<WanikaniReview[]>([]);
-    const isLoading = subjects.length === 0 || assignments.length === 0 || reviews.length === 0;
+    const isLoading = [subjects, reviews, assignments].some(data => data.length === 0);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -89,7 +89,7 @@ function WanikaniHistoryContent() {
             </Card>
 
             <LoadableChart placeholderTitle="Total Items">
-                <WanikaniTotalItemsHistoryChart/>
+                <WanikaniTotalItemsHistoryChart assignments={assignments}/>
             </LoadableChart>
 
             <LoadableChart placeholderTitle="Level Progress">

@@ -8,10 +8,14 @@ import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryCh
 import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import ReactVisibilitySensor from "react-visibility-sensor";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart";
 import WanikaniLessonHistoryChart from "./components/WanikaniLessonHistoryChart";
+import WanikaniApiService from "./service/WanikaniApiService";
+import {WanikaniAssignment} from "./models/WanikaniAssignment";
+import {WanikaniSubject} from "./models/WanikaniSubject";
+import {WanikaniReview} from "./models/WanikaniReview";
 
 type LoadableChartProps = {
     placeholderTitle: string
@@ -34,6 +38,76 @@ function LoadableChart({placeholderTitle, children}: LoadableChartProps) {
     );
 }
 
+function WanikaniHistoryContent() {
+    const [subjects, setSubjects] = useState<WanikaniSubject[]>([]);
+    const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
+    const [reviews, setReviews] = useState<WanikaniReview[]>([]);
+    const isLoading = subjects.length === 0 || assignments.length === 0 || reviews.length === 0;
+
+    useEffect(() => {
+        let isSubscribed = true;
+
+        WanikaniApiService.getAllAssignments()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setAssignments(data);
+            });
+
+        WanikaniApiService.getReviews()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setReviews(data);
+            })
+
+        WanikaniApiService.getSubjects()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setSubjects(data);
+            });
+
+        return () => {
+            isSubscribed = false;
+        };
+    }, []);
+
+    return (
+        <div>
+
+            <Card variant={'outlined'} style={{margin: '15px'}}>
+                <WanikaniHistorySummaryChart/>
+            </Card>
+
+            <Card variant={'outlined'} style={{margin: '15px'}}>
+                <WanikaniReviewsHistoryChart reviews={reviews} subjects={subjects}/>
+            </Card>
+
+            <Card variant={'outlined'} style={{margin: '15px'}}>
+                <WanikaniLessonHistoryChart assignments={assignments} subjects={subjects}/>
+            </Card>
+
+            <LoadableChart placeholderTitle="Total Items">
+                <WanikaniTotalItemsHistoryChart/>
+            </LoadableChart>
+
+            <LoadableChart placeholderTitle="Level Progress">
+                <WanikaniLevelProgressChart/>
+            </LoadableChart>
+
+            <LoadableChart placeholderTitle="Stages">
+                <WanikaniStagesHistoryChart/>
+            </LoadableChart>
+
+            <LoadableChart placeholderTitle="Review Accuracy">
+                <WanikaniAccuracyHistoryChart/>
+            </LoadableChart>
+
+        </div>
+    );
+}
+
 function WanikaniHistory() {
     const {apiKey} = useWanikaniApiKey();
 
@@ -42,37 +116,7 @@ function WanikaniHistory() {
                            redirectPath={RoutePaths.wanikaniLogin.path}
         >
             <WanikaniPreloadedData>
-                <div>
-
-                    <Card variant={'outlined'} style={{margin: '15px'}}>
-                        <WanikaniHistorySummaryChart/>
-                    </Card>
-
-                    <Card variant={'outlined'} style={{margin: '15px'}}>
-                        <WanikaniReviewsHistoryChart/>
-                    </Card>
-
-                    <Card variant={'outlined'} style={{margin: '15px'}}>
-                        <WanikaniLessonHistoryChart/>
-                    </Card>
-
-                    <LoadableChart placeholderTitle="Total Items">
-                        <WanikaniTotalItemsHistoryChart/>
-                    </LoadableChart>
-
-                    <LoadableChart placeholderTitle="Level Progress">
-                        <WanikaniLevelProgressChart/>
-                    </LoadableChart>
-
-                    <LoadableChart placeholderTitle="Stages">
-                        <WanikaniStagesHistoryChart/>
-                    </LoadableChart>
-
-                    <LoadableChart placeholderTitle="Review Accuracy">
-                        <WanikaniAccuracyHistoryChart/>
-                    </LoadableChart>
-
-                </div>
+                <WanikaniHistoryContent/>
             </WanikaniPreloadedData>
         </RequireOrRedirect>
     );

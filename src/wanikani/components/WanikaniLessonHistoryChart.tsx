@@ -1,6 +1,5 @@
 import {ArgumentAxis, Chart, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
-import React, {useEffect, useMemo, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
+import React, {useMemo, useState} from "react";
 import {
     ArgumentScale,
     BarSeries,
@@ -19,6 +18,8 @@ import {createSubjectMap} from "../service/WanikaniDataUtil";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {scaleBand} from '../../util/ChartUtils';
 import {WanikaniSubjectAssignment} from "../models/WanikaniSubjectAssignment";
+import {WanikaniSubject} from "../models/WanikaniSubject";
+import {WanikaniAssignment} from "../models/WanikaniAssignment";
 
 type PeriodUnit = {
     key: string,
@@ -86,14 +87,13 @@ function dataPoint(date: Date) {
     return data;
 }
 
-async function fetchData() {
-    const assignments = await WanikaniApiService.getAllAssignments();
-    const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
+function formatData(assignments: WanikaniAssignment[], subjects: WanikaniSubject[]) {
+    const subjectMap = createSubjectMap(subjects);
     const data: WanikaniSubjectAssignment[] = [];
     for (const assignment of assignments) {
         data.push({
             assignment: assignment,
-            subject: subjects[assignment.subjectId]
+            subject: subjectMap[assignment.subjectId]
         });
     }
 
@@ -179,28 +179,17 @@ function UnitSelector({options, unit, onChange}: UnitSelectorProps) {
 
 const totalDays = getTotalDays();
 
-function WanikaniLessonHistoryChart() {
-    const [rawData, setRawData] = useState<WanikaniSubjectAssignment[]>([]);
+type WanikaniLessonHistoryChart = {
+    subjects: WanikaniSubject[],
+    assignments: WanikaniAssignment[],
+};
+
+function WanikaniLessonHistoryChart({assignments, subjects}: WanikaniLessonHistoryChart) {
     const [daysToLookBack, setDaysToLookBack] = useState(30);
-    const [isLoading, setIsLoading] = useState(false);
     const [tooltipTargetItem, setTooltipTargetItem] = useState<SeriesRef>();
     const [unit, setUnit] = useState(units.days);
-
-    useEffect(() => {
-        setIsLoading(true);
-        let isSubscribed = true;
-        fetchData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setRawData(data);
-                setIsLoading(false);
-            })
-            .catch(console.error);
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
+    const isLoading = assignments.length === 0 || subjects.length === 0;
+    const rawData = useMemo(() => isLoading ? [] : formatData(assignments, subjects), [assignments, subjects]);
 
     const chartData: DataPoint[] = useMemo(() => rawData.length == 0 ? [] :
         aggregateDate(rawData, daysToLookBack, unit), [rawData, daysToLookBack, unit])

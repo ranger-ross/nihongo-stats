@@ -11,6 +11,7 @@ import ReactVisibilitySensor from "react-visibility-sensor";
 import {useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart";
+import WanikaniLessonHistoryChart from "./components/WanikaniLessonHistoryChart";
 
 type LoadableChartProps = {
     placeholderTitle: string
@@ -49,6 +50,10 @@ function WanikaniHistory() {
 
                     <Card variant={'outlined'} style={{margin: '15px'}}>
                         <WanikaniReviewsHistoryChart/>
+                    </Card>
+
+                    <Card variant={'outlined'} style={{margin: '15px'}}>
+                        <WanikaniLessonHistoryChart/>
                     </Card>
 
                     <LoadableChart placeholderTitle="Total Items">

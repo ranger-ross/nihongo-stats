@@ -18,6 +18,7 @@ import {WanikaniSubject} from "./models/WanikaniSubject";
 import {WanikaniReview} from "./models/WanikaniReview";
 import {WanikaniLevelProgression} from "./models/WanikaniLevelProgress";
 import {WanikaniUser} from "./models/WanikaniUser";
+import {WanikaniReset} from "./models/WanikaniReset";
 
 type LoadableChartProps = {
     placeholderTitle: string
@@ -40,16 +41,25 @@ function LoadableChart({placeholderTitle, children}: LoadableChartProps) {
     );
 }
 
+type Loadable<T> = {
+    isLoaded: boolean,
+    data: T
+}
+
 function WanikaniHistoryContent() {
     const [subjects, setSubjects] = useState<WanikaniSubject[]>([]);
     const [user, setUser] = useState<WanikaniUser>();
     const [levelProgress, setLevelProgress] = useState<WanikaniLevelProgression[]>([]);
     const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
     const [reviews, setReviews] = useState<WanikaniReview[]>([]);
+    const [resets, setResets] = useState<Loadable<WanikaniReset[]>>({
+        isLoaded: false,
+        data: []
+    });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const isLoading = [
         subjects, reviews, assignments, levelProgress
-    ].some(data => data.length === 0) && !!user;
+    ].some(data => data.length === 0) || !user || !resets.isLoaded;
 
     useEffect(() => {
         let isSubscribed = true;
@@ -81,12 +91,24 @@ function WanikaniHistoryContent() {
                     return;
                 setLevelProgress(data);
             });
+
         WanikaniApiService.getUser()
             .then(data => {
                 if (!isSubscribed)
                     return;
                 setUser(data);
             });
+
+        WanikaniApiService.getResets()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setResets({
+                    isLoaded: true,
+                    data: data
+                });
+            });
+
 
         return () => {
             isSubscribed = false;
@@ -97,7 +119,12 @@ function WanikaniHistoryContent() {
         <div>
 
             <Card variant={'outlined'} style={{margin: '15px'}}>
-                <WanikaniHistorySummaryChart levelProgress={levelProgress} user={user} subjects={subjects} reviews={reviews}/>
+                <WanikaniHistorySummaryChart
+                    levelProgress={levelProgress}
+                    user={user}
+                    subjects={subjects}
+                    reviews={reviews}
+                />
             </Card>
 
             <Card variant={'outlined'} style={{margin: '15px'}}>
@@ -119,7 +146,11 @@ function WanikaniHistoryContent() {
             </LoadableChart>
 
             <LoadableChart placeholderTitle="Stages">
-                <WanikaniStagesHistoryChart/>
+                <WanikaniStagesHistoryChart
+                    reviews={reviews}
+                    subjects={subjects}
+                    resets={resets.data}
+                />
             </LoadableChart>
 
             <LoadableChart placeholderTitle="Review Accuracy">

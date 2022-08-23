@@ -16,6 +16,8 @@ import WanikaniApiService from "./service/WanikaniApiService";
 import {WanikaniAssignment} from "./models/WanikaniAssignment";
 import {WanikaniSubject} from "./models/WanikaniSubject";
 import {WanikaniReview} from "./models/WanikaniReview";
+import {WanikaniLevelProgression} from "./models/WanikaniLevelProgress";
+import {WanikaniUser} from "./models/WanikaniUser";
 
 type LoadableChartProps = {
     placeholderTitle: string
@@ -40,9 +42,13 @@ function LoadableChart({placeholderTitle, children}: LoadableChartProps) {
 
 function WanikaniHistoryContent() {
     const [subjects, setSubjects] = useState<WanikaniSubject[]>([]);
+    const [user, setUser] = useState<WanikaniUser>();
+    const [levelProgress, setLevelProgress] = useState<WanikaniLevelProgression[]>([]);
     const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
     const [reviews, setReviews] = useState<WanikaniReview[]>([]);
-    const isLoading = [subjects, reviews, assignments].some(data => data.length === 0);
+    const isLoading = [
+        subjects, reviews, assignments, levelProgress
+    ].some(data => data.length === 0) && !!user;
 
     useEffect(() => {
         let isSubscribed = true;
@@ -66,6 +72,19 @@ function WanikaniHistoryContent() {
                 if (!isSubscribed)
                     return;
                 setSubjects(data);
+            });
+
+        WanikaniApiService.getLevelProgress()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setLevelProgress(data);
+            });
+        WanikaniApiService.getUser()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setUser(data);
             });
 
         return () => {
@@ -93,7 +112,9 @@ function WanikaniHistoryContent() {
             </LoadableChart>
 
             <LoadableChart placeholderTitle="Level Progress">
-                <WanikaniLevelProgressChart/>
+                {user ? (
+                    <WanikaniLevelProgressChart levelProgress={levelProgress} user={user}/>
+                ) : null}
             </LoadableChart>
 
             <LoadableChart placeholderTitle="Stages">

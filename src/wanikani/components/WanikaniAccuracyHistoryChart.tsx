@@ -1,6 +1,5 @@
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
-import React, {useEffect, useMemo, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
+import React, {useMemo, useState} from "react";
 import {
     ArgumentAxis as ArgumentAxisBase,
     EventTracker,
@@ -16,8 +15,9 @@ import {scaleLinear} from 'd3-scale';
 import PeriodSelector from "../../shared/PeriodSelector";
 import {createSubjectMap} from "../service/WanikaniDataUtil";
 import {millisToDays, truncDate} from "../../util/DateUtils";
-import {WanikaniSubject} from "../models/WanikaniSubject";
+import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 import {WanikaniReview} from "../models/WanikaniReview";
+import {WanikaniSubject} from "../models/WanikaniSubject";
 
 const scale = () => scaleLinear();
 const modifyDomain = () => [0, 100];
@@ -57,11 +57,6 @@ function calculateRollingAverageOfDaysInQueue(queue: any[]) {
     return Number((((total - incorrectCount) / total) * 100).toFixed(2));
 }
 
-type JoinedReviewAndSubject = {
-    review: WanikaniReview,
-    subject: WanikaniSubject,
-}
-
 type DayDataPoint = {
     date: Date,
     ratio: number,
@@ -70,17 +65,16 @@ type DayDataPoint = {
     movingAverage?: number,
 };
 
-async function fetchData() {
-    const reviews = await WanikaniApiService.getReviews();
-    const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
-    const data: JoinedReviewAndSubject[] = [];
+function fetchData(reviews: WanikaniReview[], subjects: WanikaniSubject[]) {
+    const subjectMap = createSubjectMap(subjects);
+    const data: WanikaniSubjectReview[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
-            subject: subjects[review.subjectId]
+            subject: subjectMap[review.subjectId]
         });
     }
-    const groupedData = _.groupBy(data, (v: JoinedReviewAndSubject) => truncDate(v.review.createdAt));
+    const groupedData = _.groupBy(data, (v: WanikaniSubjectReview) => truncDate(v.review.createdAt));
     const groupedDataAsMap = new Map(Object.entries(groupedData));
     const result: DayDataPoint[] = Array.from(groupedDataAsMap, ([date, data]: any) => {
         const total = data.length;
@@ -124,30 +118,21 @@ function getTotalDays() {
 
 const totalDays = getTotalDays();
 
-function useData(daysToLookBack: number) {
-    const [rawData, setRawData] = useState<DayDataPoint[]>([]);
-
-    useEffect(() => {
-        let isSubscribed = true;
-        fetchData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setRawData(data);
-            })
-            .catch(console.error);
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
+function useData(subjects: WanikaniSubject[], reviews: WanikaniReview[], daysToLookBack: number) {
+    const rawData = fetchData(reviews, subjects);
 
     return useMemo(() => rawData.filter(dp => dp.date.getTime() > (Date.now() - (1000 * 3600 * 24 * daysToLookBack))),
         [rawData, daysToLookBack]);
 }
 
-function WanikaniAccuracyHistoryChart() {
+type WanikaniAccuracyHistoryChartProps = {
+    reviews: WanikaniReview[]
+    subjects: WanikaniSubject[]
+};
+
+function WanikaniAccuracyHistoryChart({subjects, reviews}: WanikaniAccuracyHistoryChartProps) {
     const [daysToLookBack, setDaysToLookBack] = useState(90);
-    const data = useData(daysToLookBack);
+    const data = useData(subjects, reviews, daysToLookBack);
 
     function AccuracyToolTip({targetItem}: Tooltip.ContentProps) {
         const isAverageSeries = targetItem.series.toLowerCase().includes('average');

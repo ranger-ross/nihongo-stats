@@ -8,7 +8,7 @@ import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryCh
 import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart";
 import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import ReactVisibilitySensor from "react-visibility-sensor";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart";
 import WanikaniLessonHistoryChart from "./components/WanikaniLessonHistoryChart";
@@ -154,7 +154,10 @@ function WanikaniHistoryContent() {
             </LoadableChart>
 
             <LoadableChart placeholderTitle="Review Accuracy">
-                <WanikaniAccuracyHistoryChart/>
+                <WanikaniAccuracyHistoryChart
+                    reviews={reviews}
+                    subjects={subjects}
+                />
             </LoadableChart>
 
         </div>

@@ -1,12 +1,12 @@
 import {ArgumentAxis, Chart, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
 import React, {useEffect, useMemo, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
 import {EventTracker, LineSeries, Tooltip as TooltipBase, ValueAxis as ValueAxisBase} from "@devexpress/dx-react-chart";
 import {WanikaniColors} from '../../Constants';
 import {Card, CardContent, Checkbox, FormControlLabel, Grid, Typography} from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {WanikaniSubjectType} from "../models/WanikaniSubject";
+import {WanikaniAssignment} from "../models/WanikaniAssignment";
 
 function LabelWithDate(props: ValueAxisBase.LabelProps) {
     const {text} = props;
@@ -63,8 +63,7 @@ type AssignmentSnippet = {
     startedAt: Date,
 };
 
-async function fetchData() {
-    const assignments = await WanikaniApiService.getAllAssignments();
+function formatData(assignments: WanikaniAssignment[]) {
     const orderedAssignments: AssignmentSnippet[] = assignments
         .filter(assignment => !!assignment.startedAt)
         .map(assignment => ({
@@ -112,8 +111,12 @@ function useOptions(rawData: DataPoint[]) {
     return options;
 }
 
-function WanikaniTotalItemsHistoryChart() {
-    const [rawData, setRawData] = useState<DataPoint[]>([]);
+type WanikaniTotalItemsHistoryChartProps = {
+    assignments: WanikaniAssignment[]
+};
+
+function WanikaniTotalItemsHistoryChart({assignments}: WanikaniTotalItemsHistoryChartProps) {
+    const rawData: DataPoint[] = assignments.length > 0 ? formatData(assignments) : [];
     const [daysToLookBack, setDaysToLookBack] = useState(10000);
     const [showRadicals, setShowRadicals] = useState(true);
     const [showKanji, setShowKanji] = useState(true);
@@ -121,19 +124,9 @@ function WanikaniTotalItemsHistoryChart() {
     const options = useOptions(rawData);
 
     useEffect(() => {
-        let isSubscribed = true;
-        fetchData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setRawData(data);
-                setDaysToLookBack(millisToDays(Date.now() - data[0].date.getTime()));
-            })
-            .catch(console.error);
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
+        if (rawData.length > 0)
+            setDaysToLookBack(millisToDays(Date.now() - rawData[0].date.getTime()));
+    }, [rawData]);
 
     const chartData = useMemo(() => rawData ? (
         rawData

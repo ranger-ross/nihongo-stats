@@ -17,9 +17,9 @@ import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} f
 import {createSubjectMap} from "../service/WanikaniDataUtil";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {scaleBand} from '../../util/ChartUtils';
-import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
+import {WanikaniSubjectAssignment} from "../models/WanikaniSubjectAssignment";
 import {WanikaniSubject} from "../models/WanikaniSubject";
-import {WanikaniReview} from "../models/WanikaniReview";
+import {WanikaniAssignment} from "../models/WanikaniAssignment";
 
 type PeriodUnit = {
     key: string,
@@ -87,23 +87,23 @@ function dataPoint(date: Date) {
     return data;
 }
 
-function formatData(reviews: WanikaniReview[], subjects: WanikaniSubject[]) {
+function formatData(assignments: WanikaniAssignment[], subjects: WanikaniSubject[]) {
     const subjectMap = createSubjectMap(subjects);
-    const data: WanikaniSubjectReview[] = [];
-    for (const review of reviews) {
+    const data: WanikaniSubjectAssignment[] = [];
+    for (const assignment of assignments) {
         data.push({
-            review: review,
-            subject: subjectMap[review.subjectId]
+            assignment: assignment,
+            subject: subjectMap[assignment.subjectId]
         });
     }
 
     return data;
 }
 
-function aggregateDate(rawData: WanikaniSubjectReview[], daysToLookBack: number, unit: PeriodUnit): DataPoint[] {
+function aggregateDate(rawData: WanikaniSubjectAssignment[], daysToLookBack: number, unit: PeriodUnit): DataPoint[] {
     const areDatesDifferent = (date1: Date, date2: Date) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
     const startDate = unit.trunc(Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1))).getTime();
-    const dataForTimeRange = rawData.filter(data => data.review.createdAt.getTime() > startDate);
+    const dataForTimeRange = rawData.filter(data => data.assignment.createdAt.getTime() > startDate);
 
     function addPeriod(date: Date): Date {
         let temp = new Date(date);
@@ -114,24 +114,24 @@ function aggregateDate(rawData: WanikaniSubjectReview[], daysToLookBack: number,
     }
 
     if (dataForTimeRange.length === 0) {
-        return []; // No review for time range
+        return []; // No lessons for time range
     }
 
-    // Make sure to add DataPoints for days/weeks/months with no reviews, so there is a gap in the graph
-    function fillInEmptyPeriodsIfNeeded(aggregatedData: DataPoint[], reviewDate: Date) {
-        const dayBeforeReview = unit.trunc(unit.trunc(reviewDate).getTime() - 1);
+    // Make sure to add DataPoints for days/weeks/months with no lessons, so there is a gap in the graph
+    function fillInEmptyPeriodsIfNeeded(aggregatedData: DataPoint[], lessonDate: Date) {
+        const dayBeforeLesson = unit.trunc(unit.trunc(lessonDate).getTime() - 1);
         let lastDataPoint = aggregatedData[aggregatedData.length - 1];
-        while (lastDataPoint.date.getTime() < dayBeforeReview.getTime()) {
+        while (lastDataPoint.date.getTime() < dayBeforeLesson.getTime()) {
             aggregatedData.push(dataPoint(addPeriod(lastDataPoint.date)));
             lastDataPoint = aggregatedData[aggregatedData.length - 1];
         }
     }
 
-    const aggregatedData: DataPoint[] = [dataPoint(truncDate(dataForTimeRange[0].review.createdAt))];
+    const aggregatedData: DataPoint[] = [dataPoint(truncDate(dataForTimeRange[0].assignment.createdAt))];
     for (const data of dataForTimeRange) {
-        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.review.createdAt)) {
-            fillInEmptyPeriodsIfNeeded(aggregatedData, data.review.createdAt);
-            aggregatedData.push(dataPoint(unit.trunc(data.review.createdAt)));
+        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.assignment.createdAt)) {
+            fillInEmptyPeriodsIfNeeded(aggregatedData, data.assignment.createdAt);
+            aggregatedData.push(dataPoint(unit.trunc(data.assignment.createdAt)));
         }
 
         aggregatedData[aggregatedData.length - 1].push(data);
@@ -179,22 +179,22 @@ function UnitSelector({options, unit, onChange}: UnitSelectorProps) {
 
 const totalDays = getTotalDays();
 
-type WanikaniReviewsHistoryChart = {
-    subjects: WanikaniSubject[]
-    reviews: WanikaniReview[]
+type WanikaniLessonHistoryChart = {
+    subjects: WanikaniSubject[],
+    assignments: WanikaniAssignment[],
 };
 
-function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistoryChart) {
+function WanikaniLessonHistoryChart({assignments, subjects}: WanikaniLessonHistoryChart) {
     const [daysToLookBack, setDaysToLookBack] = useState(30);
     const [tooltipTargetItem, setTooltipTargetItem] = useState<SeriesRef>();
     const [unit, setUnit] = useState(units.days);
-    const isLoading = reviews.length === 0 || subjects.length === 0;
-    const rawData: WanikaniSubjectReview[] = useMemo(() => isLoading ? [] : formatData(reviews, subjects), [reviews, subjects]);
+    const isLoading = assignments.length === 0 || subjects.length === 0;
+    const rawData = useMemo(() => isLoading ? [] : formatData(assignments, subjects), [assignments, subjects]);
 
     const chartData: DataPoint[] = useMemo(() => rawData.length == 0 ? [] :
         aggregateDate(rawData, daysToLookBack, unit), [rawData, daysToLookBack, unit])
 
-    const ReviewsToolTip = useMemo(() => {
+    const LessonToolTip = useMemo(() => {
         function getDateLabelText(date: Date): string {
             if (unit.key === units.days.key)
                 return date.toLocaleDateString()
@@ -205,7 +205,7 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
             return '';
         }
 
-        return function ReviewsToolTip({targetItem}: TooltipBase.ContentProps) {
+        return function LessonToolTip({targetItem}: TooltipBase.ContentProps) {
             const data = chartData[targetItem.point];
             return (
                 <>
@@ -263,7 +263,7 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
                         </Grid>
                         <Grid item xs={12} md={4}>
                             <Typography variant={'h5'} style={{textAlign: 'center', paddingBottom: '5px'}}>
-                                Review History
+                                Lesson History
                             </Typography>
                         </Grid>
 
@@ -330,7 +330,7 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
                                         series: 'vocabulary'
                                     } : undefined}
                                     onTargetItemChange={setTooltipTargetItem}
-                                    contentComponent={ReviewsToolTip}
+                                    contentComponent={LessonToolTip}
                                 />
                             </Chart>
                         </div>
@@ -341,4 +341,4 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
     );
 }
 
-export default WanikaniReviewsHistoryChart;
+export default WanikaniLessonHistoryChart;

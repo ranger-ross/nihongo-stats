@@ -1,6 +1,5 @@
-import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import React, {useEffect, useMemo, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
+import {Card, CardContent, Grid, Typography} from "@mui/material";
+import React, {useMemo, useState} from "react";
 import {createSubjectMap} from "../service/WanikaniDataUtil";
 import {addDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
 import {ArgumentAxis, Chart, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
@@ -21,6 +20,7 @@ import Area from "../../shared/Area";
 import {scaleBand} from "../../util/ChartUtils";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
+import {WanikaniReview} from "../models/WanikaniReview";
 
 
 type StageHistoryUnit = {
@@ -222,24 +222,17 @@ function dataPoint(date: Date, previousDataPoint = {}) {
     return data;
 }
 
-async function fetchData() {
-    const [reviews, resets] = await Promise.all([
-        WanikaniApiService.getReviews(),
-        WanikaniApiService.getResets(),
-    ]);
-    const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
+function formatData(subjects: WanikaniSubject[], reviews: WanikaniReview[]) {
+    const subjectMap = createSubjectMap(subjects);
     const data: WanikaniSubjectReview[] = [];
     for (const review of reviews) {
         data.push({
             review: review,
-            subject: subjects[review.subjectId]
+            subject: subjectMap[review.subjectId]
         });
     }
 
-    return {
-        data: data,
-        resets: resets
-    };
+    return data;
 }
 
 function aggregateDate(rawData: WanikaniSubjectReview[] | null, resets: WanikaniReset[], unit: StageHistoryUnit) {
@@ -287,50 +280,18 @@ function aggregateDate(rawData: WanikaniSubjectReview[] | null, resets: Wanikani
     return aggregatedData;
 }
 
-type DataState = {
-    isLoading: boolean,
-    data: WanikaniSubjectReview[] | null,
-    resets: WanikaniReset[],
-};
-
-function useData() {
-    const [state, setState] = useState<DataState>({
-        isLoading: true,
-        data: null,
-        resets: [],
-    });
-
-    useEffect(() => {
-        let isSubscribed = true;
-
-        fetchData()
-            .then(({data, resets}) => {
-                if (!isSubscribed)
-                    return;
-                setState({
-                    data,
-                    resets,
-                    isLoading: false
-                });
-            });
-
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
-
-
-    const data = useMemo(() => aggregateDate(state.data, state.resets, units.days), [state.data, state.resets]);
-
-    return {
-        data,
-        isLoading: state.isLoading
-    };
+function useData(subjects: WanikaniSubject[], reviews: WanikaniReview[], resets: WanikaniReset[]) {
+    return useMemo(() => aggregateDate(formatData(subjects, reviews), resets, units.days), [subjects, reviews, resets]);
 }
 
+type WanikaniStagesHistoryChartProps = {
+    reviews: WanikaniReview[]
+    resets: WanikaniReset[]
+    subjects: WanikaniSubject[]
+};
 
-function WanikaniStagesHistoryChart() {
-    const {data, isLoading} = useData();
+function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesHistoryChartProps) {
+    const data = useData(subjects, reviews, resets);
     const [tooltipTargetItem, setTooltipTargetItem] = useState<SeriesRef>();
 
     const visibleLabelIndices = useMemo(() => getVisibleLabelIndices(data ?? [], 6), [data]);
@@ -389,74 +350,68 @@ function WanikaniStagesHistoryChart() {
                     </Grid>
                 </Grid>
 
-                {isLoading ? (
-                    <Grid item container xs={12} justifyContent={'center'} style={{padding: '10px'}}>
-                        <CircularProgress/>
-                    </Grid>
-                ) : (
-                    <div style={{flexGrow: '1'}}>
-                        {/*@ts-ignore*/}
-                        <Chart data={data}>
-                            <ArgumentScale factory={scaleBand}/>
-                            <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
-                            <ValueAxis/>
+                <div style={{flexGrow: '1'}}>
+                    {/*@ts-ignore*/}
+                    <Chart data={data}>
+                        <ArgumentScale factory={scaleBand}/>
+                        <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
+                        <ValueAxis/>
 
-                            <AreaSeries
-                                name="Apprentice"
-                                valueField="apprentice"
-                                argumentField="date"
-                                color={WanikaniColors.pink}
-                                seriesComponent={Area}
-                            />
+                        <AreaSeries
+                            name="Apprentice"
+                            valueField="apprentice"
+                            argumentField="date"
+                            color={WanikaniColors.pink}
+                            seriesComponent={Area}
+                        />
 
-                            <AreaSeries
-                                name="Guru"
-                                valueField="guru"
-                                argumentField="date"
-                                color={WanikaniColors.purple}
-                                seriesComponent={Area}
-                            />
+                        <AreaSeries
+                            name="Guru"
+                            valueField="guru"
+                            argumentField="date"
+                            color={WanikaniColors.purple}
+                            seriesComponent={Area}
+                        />
 
-                            <AreaSeries
-                                name="Master"
-                                valueField="master"
-                                argumentField="date"
-                                color={WanikaniColors.masterBlue}
-                                seriesComponent={Area}
-                            />
+                        <AreaSeries
+                            name="Master"
+                            valueField="master"
+                            argumentField="date"
+                            color={WanikaniColors.masterBlue}
+                            seriesComponent={Area}
+                        />
 
-                            <AreaSeries
-                                name="Enlightened"
-                                valueField="enlightened"
-                                argumentField="date"
-                                color={WanikaniColors.enlightenedBlue}
-                                seriesComponent={Area}
-                            />
+                        <AreaSeries
+                            name="Enlightened"
+                            valueField="enlightened"
+                            argumentField="date"
+                            color={WanikaniColors.enlightenedBlue}
+                            seriesComponent={Area}
+                        />
 
 
-                            <AreaSeries
-                                name="Burned"
-                                valueField="burned"
-                                argumentField="date"
-                                color={WanikaniColors.burnedGray}
-                                seriesComponent={Area}
-                            />
+                        <AreaSeries
+                            name="Burned"
+                            valueField="burned"
+                            argumentField="date"
+                            color={WanikaniColors.burnedGray}
+                            seriesComponent={Area}
+                        />
 
-                            <Stack
-                                stacks={[{
-                                    series: ['Apprentice', 'Guru', 'Master', 'Enlightened', 'Burned']
-                                }]}
-                            />
+                        <Stack
+                            stacks={[{
+                                series: ['Apprentice', 'Guru', 'Master', 'Enlightened', 'Burned']
+                            }]}
+                        />
 
-                            <EventTracker/>
-                            <Tooltip
-                                targetItem={tooltipTargetItem}
-                                onTargetItemChange={setTooltipTargetItem}
-                                contentComponent={StageToolTip}
-                            />
-                        </Chart>
-                    </div>
-                )}
+                        <EventTracker/>
+                        <Tooltip
+                            targetItem={tooltipTargetItem}
+                            onTargetItemChange={setTooltipTargetItem}
+                            contentComponent={StageToolTip}
+                        />
+                    </Chart>
+                </div>
             </CardContent>
         </Card>
     );

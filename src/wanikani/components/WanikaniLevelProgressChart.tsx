@@ -1,8 +1,8 @@
 import {ArgumentAxis, BarSeries, Chart, Title, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
 import {CSSProperties, useEffect, useMemo, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
 import {Animation, BarSeries as BarSeriesBase, EventTracker, SeriesRef} from "@devexpress/dx-react-chart";
 import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
+import {WanikaniUser} from "../models/WanikaniUser";
 
 function parseTimestamp(text: string | number) {
     const millis = parseFloat(text as string) * 86400000;
@@ -28,7 +28,6 @@ function LevelToolTip({text}: { text: string }) {
 type FormattedData = { level: string, days: number, startedAt: number };
 
 function formatData(data: WanikaniLevelProgression[], currentLevel: number): FormattedData[] {
-    console.log(data);
     const rawData = data
         .filter(level => !level.abandonedAt && level.level <= currentLevel);
 
@@ -57,40 +56,18 @@ function formatData(data: WanikaniLevelProgression[], currentLevel: number): For
         .sort((a, b) => parseInt(a.level) - parseInt(b.level));
 }
 
-async function fetchData() {
-    const [levelProgress, user] = await Promise.all([
-        WanikaniApiService.getLevelProgress(),
-        WanikaniApiService.getUser(),
-    ]);
-    return formatData(levelProgress, user.level);
+type WanikaniLevelProgressChartProps = {
+    levelProgress: WanikaniLevelProgression[]
+    user: WanikaniUser
 }
 
-function useData() {
-    const [levelProgress, setLevelProgress] = useState<FormattedData[]>([]);
-
-    useEffect(() => {
-        let isSubscribed = true;
-        fetchData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setLevelProgress(data);
-            })
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
-
-    return levelProgress;
-}
-
-function WanikaniLevelProgressChart() {
-    const levelProgress = useData();
+function WanikaniLevelProgressChart({levelProgress, user}: WanikaniLevelProgressChartProps) {
+    const data = useMemo(() => formatData(levelProgress, user.level), [levelProgress, user.level]);
     const [targetItem, setTargetItem] = useState<SeriesRef>();
 
     function BarWithLabel(props: BarSeriesBase.PointProps) {
         const {arg, val, index} = props;
-        const {days, hours} = parseTimestamp(levelProgress[index].days)
+        const {days, hours} = parseTimestamp(data[index].days)
         const [animationStyle, setAnimationStyle] = useState<CSSProperties>({opacity: '0'});
         const animationInitialDelay = 1_000;
 
@@ -136,7 +113,7 @@ function WanikaniLevelProgressChart() {
 
     return (
         // @ts-ignore
-        <Chart data={levelProgress}>
+        <Chart data={data}>
             <ValueAxis/>
             <ArgumentAxis/>
             <Title text="Level Progress"/>

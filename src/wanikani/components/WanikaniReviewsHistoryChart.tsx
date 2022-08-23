@@ -105,12 +105,24 @@ function aggregateDate(rawData: WanikaniSubjectReview[], daysToLookBack: number,
     const startDate = unit.trunc(Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1))).getTime();
     const dataForTimeRange = rawData.filter(data => data.review.createdAt.getTime() > startDate);
 
-    // Make sure to DataPoints for days with no reviews, so there is a gap in the graph
-    function fillInEmptyDaysIfNeeded(aggregatedData: DataPoint[], reviewDate: Date) {
-        const dayBeforeReview = addDays(truncDate(reviewDate), -1);
+    function addPeriod(date: Date): Date {
+        let temp = new Date(date);
+        while (!areDatesDifferent(temp, date)) {
+            temp = addDays(temp, 1);
+        }
+        return temp;
+    }
+
+    if (dataForTimeRange.length === 0) {
+        return []; // No review for time range
+    }
+
+    // Make sure to add DataPoints for days/weeks/months with no reviews, so there is a gap in the graph
+    function fillInEmptyPeriodsIfNeeded(aggregatedData: DataPoint[], reviewDate: Date) {
+        const dayBeforeReview = unit.trunc(unit.trunc(reviewDate).getTime() - 1);
         let lastDataPoint = aggregatedData[aggregatedData.length - 1];
         while (lastDataPoint.date.getTime() < dayBeforeReview.getTime()) {
-            aggregatedData.push(dataPoint(addDays(lastDataPoint.date, 1)));
+            aggregatedData.push(dataPoint(addPeriod(lastDataPoint.date)));
             lastDataPoint = aggregatedData[aggregatedData.length - 1];
         }
     }
@@ -118,7 +130,7 @@ function aggregateDate(rawData: WanikaniSubjectReview[], daysToLookBack: number,
     const aggregatedData: DataPoint[] = [dataPoint(truncDate(dataForTimeRange[0].review.createdAt))];
     for (const data of dataForTimeRange) {
         if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.review.createdAt)) {
-            fillInEmptyDaysIfNeeded(aggregatedData, data.review.createdAt);
+            fillInEmptyPeriodsIfNeeded(aggregatedData, data.review.createdAt);
             aggregatedData.push(dataPoint(unit.trunc(data.review.createdAt)));
         }
 
@@ -242,7 +254,7 @@ function WanikaniReviewsHistoryChart() {
                 />
             );
         }
-    }, [chartData])
+    }, [chartData]);
 
     return (
         <Card style={{height: '100%'}}>

@@ -62,7 +62,6 @@ type WanikaniLoadingScreenState = {
     user?: boolean
     summary?: boolean
     subjects?: boolean
-    reviews?: boolean
 };
 
 type Progress = {
@@ -79,7 +78,7 @@ type WanikaniLoadingScreenProps = {
     }
 };
 
-export function WanikaniLoadingScreen({fetch, isLoaded}: WanikaniLoadingScreenProps) {
+export function WanikaniLoadingScreen({fetch, isLoaded, progress}: WanikaniLoadingScreenProps) {
     return (
         <>
             <div style={styles.loadingItemsContainer}>
@@ -101,14 +100,14 @@ export function WanikaniLoadingScreen({fetch, isLoaded}: WanikaniLoadingScreenPr
                     <br/>
                     {fetch.reviews ? (
                         <>
-                            {/*<LoadingItem text={'User Reviews'} isLoading={!isReviewsLoaded}/>*/}
-                            {/*<LinearProgressWithLabel value={reviewsProgress * 100}/>*/}
+                            <LoadingItem text={'User Reviews'} isLoading={!progress?.reviews?.isComplete}/>
+                            <LinearProgressWithLabel value={(progress?.reviews?.progress ?? 0) * 100}/>
 
-                            {/*{reviewsIsRateLimited && (*/}
-                            {/*    <Typography variant="body2" color="text.secondary">*/}
-                            {/*        Rate Limited. Continuing in a minute*/}
-                            {/*    </Typography>*/}
-                            {/*)}*/}
+                            {progress?.reviews?.isRateLimited && (
+                                <Typography variant="body2" color="text.secondary">
+                                    Rate Limited. Continuing in a minute
+                                </Typography>
+                            )}
                         </>
                     ) : null}
 

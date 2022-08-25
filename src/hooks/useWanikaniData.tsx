@@ -6,6 +6,9 @@ import {WanikaniAssignment} from "../wanikani/models/WanikaniAssignment";
 import {WanikaniReview} from "../wanikani/models/WanikaniReview";
 import {WanikaniSummary} from "../wanikani/models/WanikaniSummary";
 import WanikaniApiService from "../wanikani/service/WanikaniApiService";
+import {EVENT_STATUS, MultiPageObservableEvent} from "../wanikani/service/WanikaniApiServiceRxJs";
+import {Observable} from "rxjs";
+import {number} from "prop-types";
 
 export type WanikaniDataConfig = {
     summary?: boolean;
@@ -23,6 +26,10 @@ export function useWanikaniData(config: WanikaniDataConfig) {
     const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
     const [reviews, setReviews] = useState<WanikaniReview[]>([]);
     const [summary, setSummary] = useState<WanikaniSummary>();
+
+    // const [reviewsObservable, setReviewsObservable] = useState<Observable<MultiPageObservableEvent<WanikaniReview>>>();
+    const [reviewsProgress, setReviewsProgress] = useState<number>(0.0);
+    const [reviewsIsRateLimited, setReviewsIsRateLimited] = useState(false);
 
     const isLoading = (config.user && !user) ||
         (config.summary && !summary) ||
@@ -80,11 +87,16 @@ export function useWanikaniData(config: WanikaniDataConfig) {
         }
 
         if (config.reviews) {
-            WanikaniApiService.getReviews()
-                .then(data => {
-                    if (!isSubscribed)
-                        return;
-                    setReviews(data);
+            WanikaniApiService.getReviewAsObservable()
+                .subscribe((event: MultiPageObservableEvent<WanikaniReview>) => {
+                    if (event.status === EVENT_STATUS.IN_PROGRESS) {
+                        setReviewsProgress((event.progress as number) / (event.size as number));
+                    }
+                    if (event.status === EVENT_STATUS.COMPLETE) {
+                        setReviewsProgress(1.0);
+                        setReviews(event.data ?? [])
+                    }
+                    setReviewsIsRateLimited(event.status === EVENT_STATUS.RATE_LIMITED);
                 });
         }
 
@@ -102,5 +114,7 @@ export function useWanikaniData(config: WanikaniDataConfig) {
         reviews,
         isLoading,
         summary,
+        reviewsProgress,
+        reviewsIsRateLimited
     }
 }

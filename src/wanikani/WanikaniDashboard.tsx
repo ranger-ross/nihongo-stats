@@ -47,7 +47,7 @@ function DashboardContent() {
         subjects: true,
         assignments: true,
         summary: true,
-        levelProgress: true
+        levelProgress: true,
     });
 
     if (isLoading) {
@@ -57,7 +57,7 @@ function DashboardContent() {
                     user: true,
                     assignments: true,
                     summary: true,
-                    subjects: true
+                    subjects: true,
                 }}
                 isLoaded={{
                     user: !!user,

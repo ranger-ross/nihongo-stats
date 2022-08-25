@@ -65,6 +65,14 @@ function DashboardContent() {
                     subjects: subjects.length > 0,
                     summary: !!summary,
                 }}
+                // progress={{
+                //     reviews: {
+                //         isRateLimited: reviewsIsRateLimited,
+                //         progress: reviewsProgress,
+                //         isComplete: reviewsProgress === 1.0
+                //     }
+                // }}
+
             />
         );
     }

@@ -7,8 +7,15 @@ import {WanikaniReview} from "../wanikani/models/WanikaniReview";
 import {WanikaniSummary} from "../wanikani/models/WanikaniSummary";
 import WanikaniApiService from "../wanikani/service/WanikaniApiService";
 import {EVENT_STATUS, MultiPageObservableEvent} from "../wanikani/service/WanikaniApiServiceRxJs";
-import {Observable} from "rxjs";
-import {number} from "prop-types";
+import {WanikaniReset} from "../wanikani/models/WanikaniReset";
+
+// Simple wrapper for data arrays that can be empty
+// For example, resets can be empty, so `array.length > 0` can not be used to check if the data is loaded
+type Loadable<T> = {
+    isLoaded: boolean,
+    data: T
+}
+
 
 export type WanikaniDataConfig = {
     summary?: boolean;
@@ -17,6 +24,7 @@ export type WanikaniDataConfig = {
     levelProgress?: boolean
     assignments?: boolean
     reviews?: boolean
+    resets?: boolean
 };
 
 export function useWanikaniData(config: WanikaniDataConfig) {
@@ -26,13 +34,17 @@ export function useWanikaniData(config: WanikaniDataConfig) {
     const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
     const [reviews, setReviews] = useState<WanikaniReview[]>([]);
     const [summary, setSummary] = useState<WanikaniSummary>();
+    const [resets, setResets] = useState<Loadable<WanikaniReset[]>>({
+        isLoaded: false,
+        data: []
+    });
 
-    // const [reviewsObservable, setReviewsObservable] = useState<Observable<MultiPageObservableEvent<WanikaniReview>>>();
     const [reviewsProgress, setReviewsProgress] = useState<number>(0.0);
     const [reviewsIsRateLimited, setReviewsIsRateLimited] = useState(false);
 
     const isLoading = (config.user && !user) ||
         (config.summary && !summary) ||
+        (config.resets && !resets.isLoaded) ||
         (config.levelProgress && levelProgress.length === 0) ||
         (config.subjects && subjects.length === 0) ||
         (config.reviews && reviews.length === 0) ||
@@ -77,6 +89,18 @@ export function useWanikaniData(config: WanikaniDataConfig) {
                 });
         }
 
+        if (config.resets) {
+            WanikaniApiService.getResets()
+                .then(data => {
+                    if (!isSubscribed)
+                        return;
+                    setResets({
+                        isLoaded: true,
+                        data: data
+                    });
+                });
+        }
+
         if (config.assignments) {
             WanikaniApiService.getAllAssignments()
                 .then(data => {
@@ -115,6 +139,7 @@ export function useWanikaniData(config: WanikaniDataConfig) {
         isLoading,
         summary,
         reviewsProgress,
-        reviewsIsRateLimited
+        reviewsIsRateLimited,
+        resets
     }
 }

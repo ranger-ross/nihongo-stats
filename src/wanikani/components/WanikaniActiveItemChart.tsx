@@ -1,10 +1,9 @@
 import React, {useEffect, useRef, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
 import {Card, CardContent, CircularProgress, FormControlLabel, FormGroup, Switch, Typography} from "@mui/material";
 import WanikaniItemTile from "./WanikaniItemTile";
 import {
     combineAssignmentAndSubject,
-    createAssignmentMap,
+    createAssignmentMap, createSubjectMap,
     isSubjectHidden,
     JoinedRawWKAssignmentAndSubject
 } from "../service/WanikaniDataUtil";
@@ -48,17 +47,24 @@ const defaultState: ActiveItemChartState = {
     vocabularyStarted: 0,
 };
 
-const memCache: { [level: number]: ActiveItemChartState } = {};
+function getAssignmentsForCurrentLevel(
+    subjects: WanikaniSubject[],
+    assignments: WanikaniAssignment[],
+    level: number
+) {
+    if (subjects.length === 0 || assignments.length === 0)
+        return [];
 
-async function fetchData(level: number) {
-    if (memCache[level]) {
-        return memCache[level];
-    }
+    const sub = createSubjectMap(subjects);
 
-    const [allSubjects, assignments] = await Promise.all([
-        WanikaniApiService.getSubjects(),
-        WanikaniApiService.getAssignmentsForLevel(level),
-    ]);
+    return assignments.filter(assignment => {
+        const s = sub[assignment.subjectId];
+        return s.level === level;
+    });
+}
+
+function formatData(allSubjects: WanikaniSubject[], allAssignments: WanikaniAssignment[], level: number): ActiveItemChartState {
+    const assignments = getAssignmentsForCurrentLevel(allSubjects, allAssignments, level);
 
     const subjects: WanikaniSubject[] = allSubjects.filter((subject: WanikaniSubject) => subject.level === level);
 
@@ -78,7 +84,7 @@ async function fetchData(level: number) {
         .filter(subject => subject.object === 'vocabulary' && !isSubjectHidden(subject))
         .map(s => combineAssignmentAndSubject(assignmentMap[s.id], s));
 
-    const data: ActiveItemChartState = {
+    return {
         isLoading: false,
         radicals,
         kanji,
@@ -87,8 +93,6 @@ async function fetchData(level: number) {
         kanjiStarted,
         vocabularyStarted,
     };
-    memCache[level] = data;
-    return data;
 }
 
 type PreviousLevelSelectorProps = {
@@ -157,52 +161,50 @@ function SubjectTile({subject, isMobile}: { subject: JoinedRawWKAssignmentAndSub
     );
 }
 
-type WanikaniLevelItemsChartProps = {
-    level: number,
-    showWanikaniHeader: boolean,
+type WanikaniActiveItemsChartProps = {
+    user?: WanikaniUser
+    showWanikaniHeader?: boolean
+    assignments: WanikaniAssignment[]
+    subjects: WanikaniSubject[]
 };
 
-function WanikaniLevelItemsChart({level, showWanikaniHeader = false}: WanikaniLevelItemsChartProps) {
+function WanikaniActiveItemsChart({
+                                      user,
+                                      showWanikaniHeader = false,
+                                      subjects,
+                                      assignments
+                                  }: WanikaniActiveItemsChartProps) {
     const {wanikaniPreferences} = useUserPreferences();
     const isFirstLoad = useRef(true);
     const [isPreviousLevel, setIsPreviousLevel] = useState(true);
-    const [data, setData] = useState(defaultState);
     const {isMobile} = useDeviceInfo();
 
     useEffect(() => {
-        let isSubscribed = true;
-        const cleanUp = () => {
-            isSubscribed = false;
-        };
 
-        const _isFirstLoad = isFirstLoad.current
-        isFirstLoad.current = false;
+        if (user && subjects.length > 0 && assignments.length > 0 && isFirstLoad.current) {
+            if (wanikaniPreferences.showPreviousLevelByDefault && user.level > 1) {
+                data = formatData(subjects, assignments, user.level - 1);
 
-        if (_isFirstLoad && !wanikaniPreferences.showPreviousLevelByDefault) {
-            setIsPreviousLevel(false);
-            return cleanUp;
+                // If everything on the previous level has been completed, show current level
+                if (data.radicalsStarted === data.radicals.length &&
+                    data.kanjiStarted === data.kanji.length &&
+                    data.vocabularyStarted === data.vocabulary.length) {
+                    setIsPreviousLevel(false);
+                }
+            } else {
+                setIsPreviousLevel(false);
+            }
+            isFirstLoad.current = false;
         }
 
-        fetchData(level > 1 && isPreviousLevel ? level - 1 : level)
-            .then(d => {
-                if (!isSubscribed)
-                    return;
+    }, []);
 
-                if (wanikaniPreferences.showPreviousLevelByDefault &&
-                    _isFirstLoad &&
-                    d.radicalsStarted === d.radicals.length &&
-                    d.kanjiStarted === d.kanji.length &&
-                    d.vocabularyStarted === d.vocabulary.length) {
-                    setIsPreviousLevel(false);
-                    return;
-                }
+    let data = defaultState;
+    if (user) {
+        const level = isPreviousLevel ? user.level - 1 : user.level;
+        data = formatData(subjects, assignments, level);
+    }
 
-                setData(d);
-            })
-            .catch(console.error);
-
-        return cleanUp;
-    }, [level, isPreviousLevel]);
 
     const percentage = data.isLoading ? 0.0 : (
         (data.radicalsStarted + data.kanjiStarted + data.vocabularyStarted) / (data.radicals.length + data.kanji.length + data.vocabulary.length)
@@ -247,7 +249,9 @@ function WanikaniLevelItemsChart({level, showWanikaniHeader = false}: WanikaniLe
                                 <Typography variant={'body1'}
                                             style={{color: 'lightgray'}}
                                 >
-                                    Level {isPreviousLevel ? level - 1 : level}
+                                    {user ? (
+                                        <>Level {isPreviousLevel ? user.level - 1 : user.level}</>
+                                    ) : null}
                                 </Typography>
                             </div>
 
@@ -305,33 +309,6 @@ function WanikaniLevelItemsChart({level, showWanikaniHeader = false}: WanikaniLe
             </CardContent>
         </Card>
     );
-}
-
-function WanikaniActiveItemsChart({showWanikaniHeader = false}) {
-    const [user, setUser] = useState<WanikaniUser>();
-    useEffect(() => {
-        let isSubscribed = true;
-
-        WanikaniApiService.getUser()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setUser(data);
-            })
-        return () => {
-            isSubscribed = false;
-        };
-    }, [])
-    return (
-        <>
-            {!!user ? (
-                <WanikaniLevelItemsChart
-                    level={user.level}
-                    showWanikaniHeader={showWanikaniHeader}
-                />
-            ) : null}
-        </>
-    )
 }
 
 export default WanikaniActiveItemsChart;

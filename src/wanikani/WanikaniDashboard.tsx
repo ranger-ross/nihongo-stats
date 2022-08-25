@@ -133,7 +133,11 @@ function DashboardContent() {
             </div>
 
             <div style={styles.bottomContainer}>
-                <WanikaniActiveItemsChart/>
+                <WanikaniActiveItemsChart
+                    subjects={subjects}
+                    assignments={assignments}
+                    user={user}
+                />
             </div>
         </>
     );

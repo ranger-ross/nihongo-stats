@@ -91,7 +91,7 @@ export type MultiPageObservableEvent<T> = {
  * NOTE: progress will not take into account any data before the startingId
  */
 function fetchMultiPageRequestObservable(path: string, startingId?: number) {
-    const subject = new Subject<MultiPageObservableEvent<RawWanikaniReviewPage>>();
+    const subject = new Subject<MultiPageObservableEvent<RawWanikaniReview>>();
 
     const options = {
         headers: {
@@ -168,10 +168,10 @@ function fetchMultiPageRequestObservable(path: string, startingId?: number) {
     return subject.asObservable();
 }
 
-function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReviewPage>> {
-    const subject = new Subject<MultiPageObservableEvent<RawWanikaniReviewPage>>();
+function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReview>> {
+    const subject = new Subject<MultiPageObservableEvent<RawWanikaniReview>>();
 
-    const complete = (data: any) => subject.next({
+    const complete = (data: RawWanikaniReview[]) => subject.next({
         status: EVENT_STATUS.COMPLETE,
         data: data,
     });
@@ -184,8 +184,8 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReviewPage
 
     const rateLimited = () => subject.next({status: EVENT_STATUS.RATE_LIMITED});
 
-    function handleEvent(event: MultiPageObservableEvent<RawWanikaniReviewPage>, reviews: any[] = []) {
-        function save(partialData: any, saveToMemCache = false) {
+    function handleEvent(event: MultiPageObservableEvent<RawWanikaniReview>, reviews: RawWanikaniReview[] = []) {
+        function save(partialData: RawWanikaniReview[], saveToMemCache = false) {
             const reviewsToSave = sortAndDeduplicateReviews([...reviews, ...partialData]);
 
             const cacheObject = {
@@ -201,7 +201,7 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReviewPage
 
         switch (event.status) {
             case EVENT_STATUS.COMPLETE: {
-                const data = save(event.data);
+                const data = save(event.data ?? []);
                 complete(data)
                 return;
             }
@@ -210,7 +210,7 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReviewPage
                 return;
             }
             case EVENT_STATUS.IN_PROGRESS: {
-                save(event.partialData);
+                save(event.partialData ?? []);
                 inProgress(event.size as number, event.progress as number + reviews.length);
                 return;
             }
@@ -225,7 +225,7 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReviewPage
         }>(cacheKeys.reviews);
 
         if (cachedValue && cachedValue?.data?.length > 0) {
-            const reviews: any[] = sortAndDeduplicateReviews(cachedValue.data);
+            const reviews = sortAndDeduplicateReviews(cachedValue.data);
             const lastId = reviews[reviews.length - 1].id;
             fetchMultiPageRequestObservable('/v2/reviews', lastId)
                 .subscribe({

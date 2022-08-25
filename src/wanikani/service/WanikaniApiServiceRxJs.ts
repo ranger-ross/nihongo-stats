@@ -2,9 +2,9 @@ import * as localForage from "localforage";
 import InMemoryCache from "../../util/InMemoryCache";
 import {AppUrls} from "../../Constants";
 import {Observable, Subject} from "rxjs";
-import {WanikaniReview, WanikaniReviewPage} from "../models/WanikaniReview";
-import {RawWanikaniReview, RawWanikaniReviewPage} from "../models/raw/RawWanikaniReview";
-import {mapWanikaniReview, mapWanikaniReviewPage} from "./WanikaniMappingService";
+import {WanikaniReview} from "../models/WanikaniReview";
+import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
+import {mapWanikaniReview} from "./WanikaniMappingService";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -168,12 +168,12 @@ function fetchMultiPageRequestObservable(path: string, startingId?: number) {
     return subject.asObservable();
 }
 
-function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReview>> {
-    const subject = new Subject<MultiPageObservableEvent<RawWanikaniReview>>();
+function getReviews(): Observable<MultiPageObservableEvent<WanikaniReview>> {
+    const subject = new Subject<MultiPageObservableEvent<WanikaniReview>>();
 
     const complete = (data: RawWanikaniReview[]) => subject.next({
         status: EVENT_STATUS.COMPLETE,
-        data: data,
+        data: data.map(mapWanikaniReview),
     });
 
     const inProgress = (size: number, progress: number) => subject.next({

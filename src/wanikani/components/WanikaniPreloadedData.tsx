@@ -6,7 +6,7 @@ import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus";
 import QuestionToolTip from "../../shared/QuestionToolTip";
 import {EVENT_STATUS, MultiPageObservableEvent} from "../service/WanikaniApiServiceRxJs";
 import LinearProgressWithLabel from "../../shared/LinearProgressWithLabel";
-import {RawWanikaniReview, RawWanikaniReviewPage} from "../models/raw/RawWanikaniReview";
+import {WanikaniReview} from "../models/WanikaniReview";
 
 const styles: { [key: string]: CSSProperties } = {
     loadingItem: {
@@ -153,7 +153,7 @@ function WanikaniPreloadedData({children}: PropsWithChildren<any>) {
 
         const reviewsPromise = new Promise<void>(resolve => {
             WanikaniApiService.getReviewAsObservable()
-                .subscribe((event: MultiPageObservableEvent<RawWanikaniReview>) => {
+                .subscribe((event: MultiPageObservableEvent<WanikaniReview>) => {
                     if (event.status === EVENT_STATUS.IN_PROGRESS) {
                         setReviewsProgress((event.progress as number) / (event.size as number));
                     }

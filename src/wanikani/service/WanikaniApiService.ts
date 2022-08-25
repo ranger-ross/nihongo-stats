@@ -7,13 +7,11 @@ import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelProgress";
 import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
-import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
 import {
     mapWanikaniAssignment, mapWanikaniLevelProgression,
     mapWanikaniReset,
-    mapWanikaniReview,
     mapWanikaniSubject, mapWanikaniSummary,
     mapWanikaniUser
 } from "./WanikaniMappingService";
@@ -23,6 +21,7 @@ import {WanikaniUser} from "../models/WanikaniUser";
 import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
 import {WanikaniSummary} from "../models/WanikaniSummary";
 import {getPendingLessonsAndReviews} from "./WanikaniDataUtil";
+import {WanikaniReview} from "../models/WanikaniReview";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -322,7 +321,7 @@ function attemptLogin(apiKey: string) {
     return fetchWanikaniApi('/v2/user', apiKey);
 }
 
-function getRawReviews(): Promise<RawWanikaniReview[]> {
+function getReviews(): Promise<WanikaniReview[]> {
     const fetchReviews = () => {
         return new Promise((resolve, reject) => {
             WanikaniApiServiceRxJs.getReviewAsObservable()
@@ -347,12 +346,6 @@ function getRawReviews(): Promise<RawWanikaniReview[]> {
     }
     return promise;
 }
-
-async function getReviews() {
-    const reviews = await getRawReviews();
-    return reviews.map(mapWanikaniReview);
-}
-
 
 export default {
     saveApiKey: saveApiKey,

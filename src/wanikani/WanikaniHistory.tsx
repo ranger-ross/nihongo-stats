@@ -6,7 +6,7 @@ import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHisto
 import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart";
 import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart";
 import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart";
-import {WanikaniLoadingScreen} from "./components/WanikaniPreloadedData";
+import WanikaniLoadingScreen from "./components/WanikaniLoadingScreen";
 import ReactVisibilitySensor from "react-visibility-sensor";
 import React, {useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect";

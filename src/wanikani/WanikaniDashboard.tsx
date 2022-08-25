@@ -7,7 +7,7 @@ import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart";
 import WanikaniActiveItemsChart from "./components/WanikaniActiveItemChart";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import {AppStyles} from "../util/TypeUtils";
-import {WanikaniLoadingScreen} from "./components/WanikaniPreloadedData";
+import WanikaniLoadingScreen from "./components/WanikaniLoadingScreen";
 import {useWanikaniData} from "../hooks/useWanikaniData";
 
 const styles: AppStyles = {
@@ -65,14 +65,6 @@ function DashboardContent() {
                     subjects: subjects.length > 0,
                     summary: !!summary,
                 }}
-                // progress={{
-                //     reviews: {
-                //         isRateLimited: reviewsIsRateLimited,
-                //         progress: reviewsProgress,
-                //         isComplete: reviewsProgress === 1.0
-                //     }
-                // }}
-
             />
         );
     }

@@ -57,13 +57,13 @@ function DashboardContent() {
                     user: true,
                     assignments: true,
                     summary: true,
-
+                    subjects: true
                 }}
                 isLoaded={{
                     user: !!user,
                     assignments: assignments.length > 0,
+                    subjects: subjects.length > 0,
                     summary: !!summary,
-
                 }}
             />
         );

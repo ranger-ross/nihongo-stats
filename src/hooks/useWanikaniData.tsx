@@ -39,7 +39,7 @@ export function useWanikaniData(config: WanikaniDataConfig) {
         data: []
     });
 
-    const [reviewsProgress, setReviewsProgress] = useState<number>(0.0);
+    const [reviewsProgress, setReviewsProgress] = useState<number>(-1.0);
     const [reviewsIsRateLimited, setReviewsIsRateLimited] = useState(false);
 
     const isLoading = (config.user && !user) ||

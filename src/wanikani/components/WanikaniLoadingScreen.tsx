@@ -97,7 +97,9 @@ function WanikaniLoadingScreen({fetch, isLoaded, progress}: WanikaniLoadingScree
                     {fetch.reviews ? (
                         <>
                             <LoadingItem text={'User Reviews'} isLoading={!progress?.reviews?.isComplete}/>
-                            <LinearProgressWithLabel value={(progress?.reviews?.progress ?? 0) * 100}/>
+                            {progress?.reviews?.progress != -1 ? (
+                                <LinearProgressWithLabel value={(progress?.reviews?.progress ?? 0) * 100}/>
+                            ) : null}
 
                             {progress?.reviews?.isRateLimited && (
                                 <Typography variant="body2" color="text.secondary">

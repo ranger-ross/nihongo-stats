@@ -2,7 +2,9 @@ import * as localForage from "localforage";
 import InMemoryCache from "../../util/InMemoryCache";
 import {AppUrls} from "../../Constants";
 import {Observable, Subject} from "rxjs";
-import {RawWanikaniReviewPage} from "../models/raw/RawWanikaniReview";
+import {WanikaniReview, WanikaniReviewPage} from "../models/WanikaniReview";
+import {RawWanikaniReview, RawWanikaniReviewPage} from "../models/raw/RawWanikaniReview";
+import {mapWanikaniReview, mapWanikaniReviewPage} from "./WanikaniMappingService";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -61,14 +63,14 @@ function apiKey() {
     return localStorage.getItem(cacheKeys.apiKey) as string
 }
 
-function sortAndDeduplicateReviews(reviews: any[]) {
-    const map: { [id: string]: any } = {};
+function sortAndDeduplicateReviews(reviews: RawWanikaniReview[]) {
+    const map: { [id: string]: RawWanikaniReview } = {};
 
     for (const review of reviews) {
         map[review.id] = review;
     }
 
-    const result = [];
+    const result: RawWanikaniReview[] = [];
 
     for (const key of Object.keys(map)) {
         result.push(map[key]);
@@ -217,9 +219,12 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReviewPage
     }
 
     const fetchReviews = async () => {
-        const cachedValue = await localForage.getItem<any>(cacheKeys.reviews);
+        const cachedValue = await localForage.getItem<{
+            data: RawWanikaniReview[],
+            lastUpdatedAt: number
+        }>(cacheKeys.reviews);
 
-        if (cachedValue?.data?.length > 0) {
+        if (cachedValue && cachedValue?.data?.length > 0) {
             const reviews: any[] = sortAndDeduplicateReviews(cachedValue.data);
             const lastId = reviews[reviews.length - 1].id;
             fetchMultiPageRequestObservable('/v2/reviews', lastId)

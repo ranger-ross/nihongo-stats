@@ -15,8 +15,8 @@ import {
 } from "../models/WanikaniSubject";
 import {RawWanikaniPage} from "../models/raw/RawWanikaniPage";
 import {WanikaniPage} from "../models/WanikaniPage";
-import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
-import {WanikaniReview} from "../models/WanikaniReview";
+import {RawWanikaniReview, RawWanikaniReviewPage} from "../models/raw/RawWanikaniReview";
+import {WanikaniReview, WanikaniReviewPage} from "../models/WanikaniReview";
 import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {RawWanikaniLevelProgression} from "../models/raw/RawWanikaniLevelProgress";
@@ -75,6 +75,16 @@ export function mapWanikaniSummary(summary: RawWanikaniSummary): WanikaniSummary
             subjectIds: r.subject_ids
         })),
         nextReviewsAt: summary.data.next_reviews_at ? new Date(summary.data.next_reviews_at) : null
+    };
+}
+
+export function mapWanikaniReviewPage(page: RawWanikaniReviewPage): WanikaniReviewPage {
+    return {
+        url: page.url,
+        dataUpdatedAt: new Date(page.data_updated_at),
+        pages: mapWanikaniPage(page.pages),
+        totalCount: page.total_count,
+        data: page.data.map(mapWanikaniReview)
     };
 }
 
@@ -158,8 +168,8 @@ export function mapWanikaniAssignment(assignment: RawWanikaniAssignment): Wanika
     };
 }
 
-export function mapWanikaniPage(page: RawWanikaniPage) {
-    return <WanikaniPage>{
+export function mapWanikaniPage(page: RawWanikaniPage): WanikaniPage {
+    return {
         perPage: page.per_page,
         nextUrl: page.next_url,
         previousUrl: page.previous_url,

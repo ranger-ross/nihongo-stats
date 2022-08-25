@@ -5,6 +5,7 @@ import {getColorByJLPTLevel, getColorByWanikaniSrsStage, getColorByWanikaniSubje
 import {WanikaniColors} from "../../Constants";
 import {WanikaniSubject, WanikaniSubjectType} from "../models/WanikaniSubject";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
+import {WanikaniSummary} from "../models/WanikaniSummary";
 
 export function createSubjectMap(subjects: WanikaniSubject[]) {
     const map: { [id: number]: WanikaniSubject } = {};
@@ -355,3 +356,23 @@ export const colorByOptions: { [key: string]: WKColorByOption } = {
         color: (subject: JoinedRawWKAssignmentAndSubject) => getColorByJLPTLevel(kanjiJLPTLookupMap[subject.slug])
     },
 };
+
+export function getPendingLessonsAndReviews(summary: WanikaniSummary): { lessons: number, reviews: number } {
+    let lessons = 0;
+    for (const group of summary.lessons) {
+        if (group.availableAt.getTime() < Date.now()) {
+            lessons += group.subjectIds.length;
+        }
+    }
+
+    let reviews = 0;
+    for (const group of summary.reviews) {
+        if (group.availableAt.getTime() < Date.now()) {
+            reviews += group.subjectIds.length;
+        }
+    }
+    return {
+        lessons,
+        reviews
+    };
+}

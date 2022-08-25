@@ -1,4 +1,4 @@
-import {CSSProperties, useEffect, useState} from "react";
+import {CSSProperties, PropsWithChildren, useEffect, useState} from "react";
 import WanikaniApiService from "../service/WanikaniApiService";
 import {CircularProgress, Typography} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
@@ -49,7 +49,92 @@ function LoadingItem({text, isLoading}: LoadingItemProps) {
     );
 }
 
-function WanikaniPreloadedData({children}: React.PropsWithChildren<any>) {
+type WanikaniLoadingScreenFetchConfig = {
+    assignments?: boolean
+    user?: boolean
+    summary?: boolean
+    subjects?: boolean
+    reviews?: boolean
+};
+
+type WanikaniLoadingScreenState = {
+    assignments?: boolean
+    user?: boolean
+    summary?: boolean
+    subjects?: boolean
+    reviews?: boolean
+};
+
+type Progress = {
+    isRateLimited: boolean
+    progress: number
+    isComplete: boolean
+};
+
+type WanikaniLoadingScreenProps = {
+    fetch: WanikaniLoadingScreenFetchConfig
+    isLoaded: WanikaniLoadingScreenState
+    progress?: {
+        reviews?: Progress
+    }
+};
+
+export function WanikaniLoadingScreen({fetch, isLoaded}: WanikaniLoadingScreenProps) {
+    return (
+        <>
+            <div style={styles.loadingItemsContainer}>
+                <div style={styles.loadingItemsColumn}>
+                    <strong>Loading Wanikani Data...</strong>
+                    <br/>
+                    {fetch.subjects ? (
+                        <LoadingItem text={'Wanikani Items'} isLoading={!isLoaded.subjects}/>
+                    ) : null}
+                    {fetch.user ? (
+                        <LoadingItem text={'User Data'} isLoading={!isLoaded.user}/>
+                    ) : null}
+                    {fetch.summary ? (
+                        <LoadingItem text={'User Summary'} isLoading={!isLoaded.summary}/>
+                    ) : null}
+                    {fetch.assignments ? (
+                        <LoadingItem text={'User Assignments'} isLoading={!isLoaded.assignments}/>
+                    ) : null}
+                    <br/>
+                    {fetch.reviews ? (
+                        <>
+                            {/*<LoadingItem text={'User Reviews'} isLoading={!isReviewsLoaded}/>*/}
+                            {/*<LinearProgressWithLabel value={reviewsProgress * 100}/>*/}
+
+                            {/*{reviewsIsRateLimited && (*/}
+                            {/*    <Typography variant="body2" color="text.secondary">*/}
+                            {/*        Rate Limited. Continuing in a minute*/}
+                            {/*    </Typography>*/}
+                            {/*)}*/}
+                        </>
+                    ) : null}
+
+
+                </div>
+            </div>
+
+            <div style={styles.infoContainer}>
+                <p style={{textAlign: 'center'}}>
+                    This may take a few minutes if you have a long history on Wanikani.
+                </p>
+                <QuestionToolTip text={
+                    <>
+                        Wanikani's API limits the number of requests we can make per minute. <br/>
+                        If you have a long history, we will have to
+                        wait a minute to continue fetching data. <br/> <br/>
+                        Once the loaded, we will save your save data (on your computer)
+                        so it will load quicker next time
+                    </>
+                }/>
+            </div>
+        </>
+    );
+}
+
+function WanikaniPreloadedData({children}: PropsWithChildren<any>) {
     const [isSubjectsLoaded, setIsSubjectsLoaded] = useState(false);
     const [isUserLoaded, setIsUserLoaded] = useState(false);
     const [isAssignmentsLoaded, setIsAssignmentsLoaded] = useState(false);

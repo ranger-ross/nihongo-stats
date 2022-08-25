@@ -1,6 +1,8 @@
 import {Card, CardContent, Typography} from "@mui/material";
 import WanikaniPendingLessonsAndReviews from "./WanikaniPendingLessonAndReviews";
 import {WanikaniUser} from "../models/WanikaniUser";
+import {WanikaniSummary} from "../models/WanikaniSummary";
+import {getPendingLessonsAndReviews} from "../service/WanikaniDataUtil";
 
 const styles = {
     buttonsContainer: {
@@ -13,11 +15,14 @@ const styles = {
 
 type WanikaniWelcomeTileProps = {
     user?: WanikaniUser
-    pendingLessons: number
-    pendingReviews: number
+    summary?: WanikaniSummary
 };
 
-function WanikaniWelcomeTile({user, pendingReviews = 0, pendingLessons = 0}: WanikaniWelcomeTileProps) {
+function WanikaniWelcomeTile({user, summary}: WanikaniWelcomeTileProps) {
+    const pendingTasks = summary ? getPendingLessonsAndReviews(summary): {
+        reviews: 0,
+        lessons: 0
+    };
     return (
         <Card>
             <CardContent>
@@ -27,8 +32,8 @@ function WanikaniWelcomeTile({user, pendingReviews = 0, pendingLessons = 0}: Wan
 
                 <div style={styles.buttonsContainer}>
                     <WanikaniPendingLessonsAndReviews
-                        lessons={pendingLessons}
-                        reviews={pendingReviews}
+                        lessons={pendingTasks.lessons}
+                        reviews={pendingTasks.reviews}
                     />
                 </div>
             </CardContent>

@@ -27,6 +27,8 @@ import {
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {AppStyles} from "../../util/TypeUtils";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
+import {WanikaniSummary} from "../models/WanikaniSummary";
+import {getPendingLessonsAndReviews} from "../service/WanikaniDataUtil";
 
 const styles: AppStyles = {
     container: {
@@ -95,10 +97,11 @@ function getTopSeries(targetItem: SeriesRef, chartData: FormattedDataPoint[]) {
 
 type WanikaniUpcomingReviewsChartProps = {
     assignments: WanikaniAssignment[]
-    pendingReviewCount?: number
+    summary?: WanikaniSummary
 };
 
-function WanikaniUpcomingReviewsChart({assignments, pendingReviewCount}: WanikaniUpcomingReviewsChartProps) {
+function WanikaniUpcomingReviewsChart({assignments, summary}: WanikaniUpcomingReviewsChartProps) {
+    const pendingReviewCount = summary ? getPendingLessonsAndReviews(summary).reviews : 0
     const rawData = fetchFutureReviews(assignments);
     const [targetItem, setTargetItem] = useState<SeriesRef>();
     const [unit, setUnit] = useState(UpcomingReviewUnits.hours);
@@ -106,7 +109,7 @@ function WanikaniUpcomingReviewsChart({assignments, pendingReviewCount}: Wanikan
     const {isMobile} = useDeviceInfo();
 
     const chartData = useMemo(
-        () => !rawData || rawData.length == 0 ? [] : formatChartData(rawData, unit, period, pendingReviewCount ?? 0),
+        () => !rawData || rawData.length == 0 ? [] : formatChartData(rawData, unit, period, pendingReviewCount),
         [rawData, unit.key, period, pendingReviewCount]
     );
 

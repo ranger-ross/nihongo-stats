@@ -4,16 +4,11 @@ import WanikaniLevelSummaryChart from "./components/WanikaniLevelSummaryChart";
 import WanikaniUpcomingReviewsChart from "./components/WanikaniUpcomingReviewsChart";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
 import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart";
-import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import WanikaniActiveItemsChart from "./components/WanikaniActiveItemChart";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import {AppStyles} from "../util/TypeUtils";
-import {useEffect, useState} from "react";
-import WanikaniApiService from "./service/WanikaniApiService";
-import {WanikaniUser} from "./models/WanikaniUser";
-import {WanikaniSubject} from "./models/WanikaniSubject";
-import {WanikaniLevelProgression} from "./models/WanikaniLevelProgress";
-import {WanikaniAssignment} from "./models/WanikaniAssignment";
+import {WanikaniLoadingScreen} from "./components/WanikaniPreloadedData";
+import {useWanikaniData} from "../hooks/useWanikaniData";
 
 const styles: AppStyles = {
     container: {
@@ -47,55 +42,32 @@ const styles: AppStyles = {
 
 
 function DashboardContent() {
+    const {user, levelProgress, summary, subjects, assignments, isLoading} = useWanikaniData({
+        user: true,
+        subjects: true,
+        assignments: true,
+        summary: true,
+        levelProgress: true
+    });
 
-    const [user, setUser] = useState<WanikaniUser>();
-    const [subjects, setSubjects] = useState<WanikaniSubject[]>([]);
-    const [levelProgress, setLevelProgress] = useState<WanikaniLevelProgression[]>([]);
-    const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
-    const [pendingTasks, setPendingTasks] = useState<{ lessons: number, reviews: number }>({reviews: 0, lessons: 0});
+    if (isLoading) {
+        return (
+            <WanikaniLoadingScreen
+                fetch={{
+                    user: true,
+                    assignments: true,
+                    summary: true,
 
-    useEffect(() => {
-        let isSubscribed = true;
+                }}
+                isLoaded={{
+                    user: !!user,
+                    assignments: assignments.length > 0,
+                    summary: !!summary,
 
-        WanikaniApiService.getUser()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setUser(data);
-            });
-
-        WanikaniApiService.getSubjects()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setSubjects(data);
-            });
-
-        WanikaniApiService.getLevelProgress()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setLevelProgress(data);
-            });
-
-        WanikaniApiService.getAllAssignments()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setAssignments(data);
-            });
-
-        WanikaniApiService.getPendingLessonsAndReviews()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setPendingTasks(data);
-            });
-
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
+                }}
+            />
+        );
+    }
 
     return (
         <>
@@ -104,8 +76,7 @@ function DashboardContent() {
                     <div style={styles.leftContainer}>
                         <WanikaniWelcomeTile
                             user={user}
-                            pendingLessons={pendingTasks.lessons}
-                            pendingReviews={pendingTasks.reviews}
+                            summary={summary}
                         />
 
                         <WanikaniLevelSummaryChart
@@ -121,7 +92,7 @@ function DashboardContent() {
                     <div style={styles.rightContainer}>
                         <WanikaniUpcomingReviewsChart
                             assignments={assignments}
-                            pendingReviewCount={pendingTasks.lessons}
+                            summary={summary}
                         />
                     </div>
                 </div>
@@ -144,9 +115,7 @@ function WanikaniDashboard() {
         <RequireOrRedirect resource={apiKey}
                            redirectPath={RoutePaths.wanikaniLogin.path}
         >
-            <WanikaniPreloadedData>
-                <DashboardContent/>
-            </WanikaniPreloadedData>
+            <DashboardContent/>
         </RequireOrRedirect>
     );
 }

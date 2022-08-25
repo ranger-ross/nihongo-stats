@@ -14,13 +14,15 @@ import {
     mapWanikaniAssignment, mapWanikaniLevelProgression,
     mapWanikaniReset,
     mapWanikaniReview,
-    mapWanikaniSubject,
+    mapWanikaniSubject, mapWanikaniSummary,
     mapWanikaniUser
 } from "./WanikaniMappingService";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {WanikaniReset} from "../models/WanikaniReset";
 import {WanikaniUser} from "../models/WanikaniUser";
 import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
+import {WanikaniSummary} from "../models/WanikaniSummary";
+import {getPendingLessonsAndReviews} from "./WanikaniDataUtil";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -252,8 +254,9 @@ async function getUser(): Promise<WanikaniUser> {
     return mapWanikaniUser(user);
 }
 
-function getSummary(): Promise<RawWanikaniSummary> {
-    return joinAndSendCacheableRequest('/v2/summary', cacheKeys.summary, fetchWithCache, 1000 * 60);
+async function getSummary(): Promise<WanikaniSummary> {
+    const summary: RawWanikaniSummary = await joinAndSendCacheableRequest('/v2/summary', cacheKeys.summary, fetchWithCache, 1000 * 60);
+    return mapWanikaniSummary(summary)
 }
 
 function getSrsSystems(): Promise<RawWanikaniSrsSystemPage> {
@@ -371,22 +374,6 @@ export default {
     getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,
     getPendingLessonsAndReviews: async (): Promise<{ lessons: number, reviews: number }> => {
         const summary = await getSummary();
-        let lessons = 0;
-        for (const group of summary.data.lessons) {
-            if (new Date(group['available_at']).getTime() < Date.now()) {
-                lessons += group['subject_ids'].length;
-            }
-        }
-
-        let reviews = 0;
-        for (const group of summary.data.reviews) {
-            if (new Date(group['available_at']).getTime() < Date.now()) {
-                reviews += group['subject_ids'].length;
-            }
-        }
-        return {
-            lessons,
-            reviews
-        };
+        return getPendingLessonsAndReviews(summary);
     }
 }

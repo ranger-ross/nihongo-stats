@@ -14,7 +14,6 @@ import {WanikaniUser} from "./models/WanikaniUser";
 import {WanikaniSubject} from "./models/WanikaniSubject";
 import {WanikaniLevelProgression} from "./models/WanikaniLevelProgress";
 import {WanikaniAssignment} from "./models/WanikaniAssignment";
-import {WanikaniReview} from "./models/WanikaniReview";
 
 const styles: AppStyles = {
     container: {
@@ -54,7 +53,6 @@ function DashboardContent() {
     const [levelProgress, setLevelProgress] = useState<WanikaniLevelProgression[]>([]);
     const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
     const [pendingTasks, setPendingTasks] = useState<{ lessons: number, reviews: number }>({reviews: 0, lessons: 0});
-    const [reviews, setReviews] = useState<WanikaniReview[]>([]);
 
     useEffect(() => {
         let isSubscribed = true;
@@ -87,13 +85,6 @@ function DashboardContent() {
                 setAssignments(data);
             });
 
-        WanikaniApiService.getReviews()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setReviews(data);
-            });
-
         WanikaniApiService.getPendingLessonsAndReviews()
             .then(data => {
                 if (!isSubscribed)
@@ -111,7 +102,11 @@ function DashboardContent() {
             <div style={styles.container}>
                 <div style={styles.topContainer}>
                     <div style={styles.leftContainer}>
-                        <WanikaniWelcomeTile/>
+                        <WanikaniWelcomeTile
+                            user={user}
+                            pendingLessons={pendingTasks.lessons}
+                            pendingReviews={pendingTasks.reviews}
+                        />
 
                         <WanikaniLevelSummaryChart
                             levelsProgress={levelProgress}

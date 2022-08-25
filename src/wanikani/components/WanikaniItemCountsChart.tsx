@@ -1,5 +1,3 @@
-import {useEffect, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
 import {Card, CardContent, CircularProgress, Tooltip, Typography} from "@mui/material";
 import {WanikaniColors} from "../../Constants";
 import {AppStyles} from "../../util/TypeUtils";
@@ -93,9 +91,7 @@ function CountTile({label, data, color}: CountTileProps) {
     );
 }
 
-async function fetchData(): Promise<FormattedData> {
-    const assignments = await WanikaniApiService.getAllAssignments();
-
+function formatData(assignments: WanikaniAssignment[]): FormattedData {
     const available = assignments.filter(assignment => assignment.srsStage == 0);
     const apprentice = assignments.filter(assignment => assignment.srsStage > 0 && assignment.srsStage < 5);
     const guru = assignments.filter(assignment => assignment.srsStage >= 5 && assignment.srsStage < 7);
@@ -113,23 +109,12 @@ async function fetchData(): Promise<FormattedData> {
     };
 }
 
-function WanikaniItemCountsChart() {
-    const [data, setData] = useState<FormattedData>();
+type WanikaniItemCountsChartProps = {
+    assignments: WanikaniAssignment[]
+};
 
-    useEffect(() => {
-        let isSubscribed = true;
-        fetchData()
-            .then(d => {
-                if (!isSubscribed)
-                    return;
-                setData(d);
-            })
-            .catch(console.error);
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
-
+function WanikaniItemCountsChart({assignments}: WanikaniItemCountsChartProps) {
+    const data = formatData(assignments);
     return (
         <Card>
             <CardContent>

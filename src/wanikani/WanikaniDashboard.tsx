@@ -8,6 +8,14 @@ import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import WanikaniActiveItemsChart from "./components/WanikaniActiveItemChart";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import {AppStyles} from "../util/TypeUtils";
+import {useEffect, useState} from "react";
+import WanikaniApiService from "./service/WanikaniApiService";
+import {WanikaniUser} from "./models/WanikaniUser";
+import {WanikaniSubject} from "./models/WanikaniSubject";
+import {WanikaniLevelProgression} from "./models/WanikaniLevelProgress";
+import {WanikaniAssignment} from "./models/WanikaniAssignment";
+import {WanikaniReview} from "./models/WanikaniReview";
+import {createSubjectMap} from "./service/WanikaniDataUtil";
 
 const styles: AppStyles = {
     container: {
@@ -39,6 +47,90 @@ const styles: AppStyles = {
     },
 };
 
+
+function DashboardContent() {
+
+    const [user, setUser] = useState<WanikaniUser>();
+    const [subjects, setSubjects] = useState<WanikaniSubject[]>([]);
+    const [levelProgress, setLevelProgress] = useState<WanikaniLevelProgression[]>([]);
+    const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
+    const [reviews, setReviews] = useState<WanikaniReview[]>([]);
+
+    useEffect(() => {
+        let isSubscribed = true;
+
+        WanikaniApiService.getUser()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setUser(data);
+            });
+
+        WanikaniApiService.getSubjects()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setSubjects(data);
+            });
+
+        WanikaniApiService.getLevelProgress()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setLevelProgress(data);
+            });
+
+
+        WanikaniApiService.getAllAssignments()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setAssignments(data);
+            });
+
+        WanikaniApiService.getReviews()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setReviews(data);
+            });
+
+
+        return () => {
+            isSubscribed = false;
+        };
+    }, []);
+
+    return (
+        <>
+            <div style={styles.container}>
+                <div style={styles.topContainer}>
+                    <div style={styles.leftContainer}>
+                        <WanikaniWelcomeTile/>
+
+                        <WanikaniLevelSummaryChart
+                            levelsProgress={levelProgress}
+                            user={user}
+                            subjects={subjects}
+                            assignments={assignments}
+                        />
+
+                        <WanikaniItemCountsChart assignments={assignments}/>
+                    </div>
+
+                    <div style={styles.rightContainer}>
+                        <WanikaniUpcomingReviewsChart/>
+                    </div>
+                </div>
+            </div>
+
+            <div style={styles.bottomContainer}>
+                <WanikaniActiveItemsChart/>
+            </div>
+        </>
+    );
+}
+
 function WanikaniDashboard() {
     const {apiKey} = useWanikaniApiKey();
     return (
@@ -46,25 +138,7 @@ function WanikaniDashboard() {
                            redirectPath={RoutePaths.wanikaniLogin.path}
         >
             <WanikaniPreloadedData>
-                <div style={styles.container}>
-                    <div style={styles.topContainer}>
-                        <div style={styles.leftContainer}>
-                            <WanikaniWelcomeTile/>
-
-                            <WanikaniLevelSummaryChart/>
-
-                            <WanikaniItemCountsChart/>
-                        </div>
-
-                        <div style={styles.rightContainer}>
-                            <WanikaniUpcomingReviewsChart/>
-                        </div>
-                    </div>
-                </div>
-
-                <div style={styles.bottomContainer}>
-                    <WanikaniActiveItemsChart/>
-                </div>
+                <DashboardContent/>
             </WanikaniPreloadedData>
         </RequireOrRedirect>
     );

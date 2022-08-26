@@ -249,7 +249,7 @@ function joinAndSendCacheableRequest(request: string, cacheKey: string, factory:
 }
 
 async function getUser(): Promise<WanikaniUser> {
-    const user = await joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000);
+    const user = await joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000 * 60);
     return mapWanikaniUser(user);
 }
 
@@ -258,6 +258,7 @@ async function getSummary(): Promise<WanikaniSummary> {
     return mapWanikaniSummary(summary)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getSrsSystems(): Promise<RawWanikaniSrsSystemPage> {
     return joinAndSendCacheableRequest('/v2/spaced_repetition_systems', cacheKeys.srsSystems, fetchWithCache, 1000 * 60 * 60 * 24 * 7);
 }
@@ -267,6 +268,7 @@ async function getResets(): Promise<WanikaniReset[]> {
     return page.data.map(mapWanikaniReset);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getAssignmentsForLevel(level: number): Promise<WanikaniAssignment[]> {
     const page: RawWanikaniAssignmentPage = await joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
     return page.data.map(mapWanikaniAssignment);
@@ -352,15 +354,11 @@ export default {
     apiKey: apiKey,
     flushCache: flushCache,
 
-
     login: attemptLogin,
     getUser: getUser,
     getSummary: getSummary,
-    getSrsSystems: getSrsSystems,
     getResets: getResets,
     getLevelProgress: getLevelProgress,
-    getAssignmentsForLevel: getAssignmentsForLevel,
-    getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
     getAllAssignments: getAllAssignments,
     getSubjects: getSubjects,
     getReviews: getReviews,

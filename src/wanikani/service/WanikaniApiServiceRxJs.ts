@@ -2,7 +2,9 @@ import * as localForage from "localforage";
 import InMemoryCache from "../../util/InMemoryCache";
 import {AppUrls} from "../../Constants";
 import {Observable, Subject} from "rxjs";
-import {RawWanikaniReviewPage} from "../models/raw/RawWanikaniReview";
+import {WanikaniReview} from "../models/WanikaniReview";
+import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
+import {mapWanikaniReview} from "./WanikaniMappingService";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -61,14 +63,14 @@ function apiKey() {
     return localStorage.getItem(cacheKeys.apiKey) as string
 }
 
-function sortAndDeduplicateReviews(reviews: any[]) {
-    const map: { [id: string]: any } = {};
+function sortAndDeduplicateReviews(reviews: RawWanikaniReview[]) {
+    const map: { [id: string]: RawWanikaniReview } = {};
 
     for (const review of reviews) {
         map[review.id] = review;
     }
 
-    const result = [];
+    const result: RawWanikaniReview[] = [];
 
     for (const key of Object.keys(map)) {
         result.push(map[key]);
@@ -89,7 +91,7 @@ export type MultiPageObservableEvent<T> = {
  * NOTE: progress will not take into account any data before the startingId
  */
 function fetchMultiPageRequestObservable(path: string, startingId?: number) {
-    const subject = new Subject<MultiPageObservableEvent<RawWanikaniReviewPage>>();
+    const subject = new Subject<MultiPageObservableEvent<RawWanikaniReview>>();
 
     const options = {
         headers: {
@@ -166,12 +168,12 @@ function fetchMultiPageRequestObservable(path: string, startingId?: number) {
     return subject.asObservable();
 }
 
-function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReviewPage>> {
-    const subject = new Subject<MultiPageObservableEvent<RawWanikaniReviewPage>>();
+function getReviews(): Observable<MultiPageObservableEvent<WanikaniReview>> {
+    const subject = new Subject<MultiPageObservableEvent<WanikaniReview>>();
 
-    const complete = (data: any) => subject.next({
+    const complete = (data: RawWanikaniReview[]) => subject.next({
         status: EVENT_STATUS.COMPLETE,
-        data: data,
+        data: data.map(mapWanikaniReview),
     });
 
     const inProgress = (size: number, progress: number) => subject.next({
@@ -182,8 +184,8 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReviewPage
 
     const rateLimited = () => subject.next({status: EVENT_STATUS.RATE_LIMITED});
 
-    function handleEvent(event: MultiPageObservableEvent<RawWanikaniReviewPage>, reviews: any[] = []) {
-        function save(partialData: any, saveToMemCache = false) {
+    function handleEvent(event: MultiPageObservableEvent<RawWanikaniReview>, reviews: RawWanikaniReview[] = []) {
+        function save(partialData: RawWanikaniReview[], saveToMemCache = false) {
             const reviewsToSave = sortAndDeduplicateReviews([...reviews, ...partialData]);
 
             const cacheObject = {
@@ -199,7 +201,7 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReviewPage
 
         switch (event.status) {
             case EVENT_STATUS.COMPLETE: {
-                const data = save(event.data);
+                const data = save(event.data ?? []);
                 complete(data)
                 return;
             }
@@ -208,7 +210,7 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReviewPage
                 return;
             }
             case EVENT_STATUS.IN_PROGRESS: {
-                save(event.partialData);
+                save(event.partialData ?? []);
                 inProgress(event.size as number, event.progress as number + reviews.length);
                 return;
             }
@@ -217,10 +219,13 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReviewPage
     }
 
     const fetchReviews = async () => {
-        const cachedValue = await localForage.getItem<any>(cacheKeys.reviews);
+        const cachedValue = await localForage.getItem<{
+            data: RawWanikaniReview[],
+            lastUpdatedAt: number
+        }>(cacheKeys.reviews);
 
-        if (cachedValue?.data?.length > 0) {
-            const reviews: any[] = sortAndDeduplicateReviews(cachedValue.data);
+        if (cachedValue && cachedValue?.data?.length > 0) {
+            const reviews = sortAndDeduplicateReviews(cachedValue.data);
             const lastId = reviews[reviews.length - 1].id;
             fetchMultiPageRequestObservable('/v2/reviews', lastId)
                 .subscribe({

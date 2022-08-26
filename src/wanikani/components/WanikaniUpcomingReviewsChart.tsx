@@ -6,8 +6,7 @@ import {
     Tooltip,
     ValueAxis
 } from '@devexpress/dx-react-chart-material-ui';
-import React, {useEffect, useMemo, useState} from "react";
-import WanikaniApiService from "../service/WanikaniApiService";
+import React, {useMemo, useState} from "react";
 import {ArgumentScale, EventTracker, LineSeries, SeriesRef, Stack, ValueScale} from "@devexpress/dx-react-chart";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addHours, truncMinutes} from '../../util/DateUtils';
@@ -28,6 +27,8 @@ import {
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {AppStyles} from "../../util/TypeUtils";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
+import {WanikaniSummary} from "../models/WanikaniSummary";
+import {getPendingLessonsAndReviews} from "../service/WanikaniDataUtil";
 
 const styles: AppStyles = {
     container: {
@@ -80,9 +81,8 @@ function formatChartData(rawData: WanikaniAssignment[], unit: UpcomingReviewUnit
     return daysData;
 }
 
-async function fetchFutureReviews() {
-    const data = await WanikaniApiService.getAllAssignments();
-    return data.filter(assignment => !assignment.burnedAt || !assignment.availableAt);
+function fetchFutureReviews(assignments: WanikaniAssignment[]) {
+    return assignments.filter(assignment => !assignment.burnedAt || !assignment.availableAt);
 }
 
 function getTopSeries(targetItem: SeriesRef, chartData: FormattedDataPoint[]) {
@@ -95,36 +95,22 @@ function getTopSeries(targetItem: SeriesRef, chartData: FormattedDataPoint[]) {
         return 'radicals'
 }
 
-function WanikaniUpcomingReviewsChart() {
-    const [rawData, setRawData] = useState<WanikaniAssignment[]>([]);
-    const [initialReviewCount, setInitialReviewCount] = useState(0);
+type WanikaniUpcomingReviewsChartProps = {
+    assignments: WanikaniAssignment[]
+    summary?: WanikaniSummary
+};
+
+function WanikaniUpcomingReviewsChart({assignments, summary}: WanikaniUpcomingReviewsChartProps) {
+    const pendingReviewCount = summary ? getPendingLessonsAndReviews(summary).reviews : 0
+    const rawData = fetchFutureReviews(assignments);
     const [targetItem, setTargetItem] = useState<SeriesRef>();
     const [unit, setUnit] = useState(UpcomingReviewUnits.hours);
     const [period, setPeriod] = useState(48);
     const {isMobile} = useDeviceInfo();
 
-    useEffect(() => {
-        let isSubscribed = true;
-        fetchFutureReviews()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setRawData(data);
-            });
-        WanikaniApiService.getPendingLessonsAndReviews()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setInitialReviewCount(data.reviews);
-            });
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
-
     const chartData = useMemo(
-        () => !rawData || rawData.length == 0 ? [] : formatChartData(rawData, unit, period, initialReviewCount),
-        [rawData, unit.key, period, initialReviewCount]
+        () => !rawData || rawData.length == 0 ? [] : formatChartData(rawData, unit, period, pendingReviewCount),
+        [rawData, unit.key, period, pendingReviewCount]
     );
 
     const maxScale = useMemo(() => {

@@ -1,3 +1,5 @@
+import {WanikaniPage} from "./WanikaniPage";
+
 export interface WanikaniReview {
     id: number
     url: string
@@ -10,4 +12,13 @@ export interface WanikaniReview {
     endingSrsStage: number
     incorrectMeaningAnswers: number
     incorrectReadingAnswers: number
+}
+
+
+export interface WanikaniReviewPage {
+    url: string
+    pages: WanikaniPage
+    totalCount: number
+    dataUpdatedAt: Date
+    data: WanikaniReview[]
 }

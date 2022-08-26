@@ -6,19 +6,13 @@ import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHisto
 import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart";
 import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart";
 import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart";
-import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
+import WanikaniLoadingScreen from "./components/WanikaniLoadingScreen";
 import ReactVisibilitySensor from "react-visibility-sensor";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart";
 import WanikaniLessonHistoryChart from "./components/WanikaniLessonHistoryChart";
-import WanikaniApiService from "./service/WanikaniApiService";
-import {WanikaniAssignment} from "./models/WanikaniAssignment";
-import {WanikaniSubject} from "./models/WanikaniSubject";
-import {WanikaniReview} from "./models/WanikaniReview";
-import {WanikaniLevelProgression} from "./models/WanikaniLevelProgress";
-import {WanikaniUser} from "./models/WanikaniUser";
-import {WanikaniReset} from "./models/WanikaniReset";
+import {useWanikaniData} from "../hooks/useWanikaniData";
 
 type LoadableChartProps = {
     placeholderTitle: string
@@ -41,83 +35,55 @@ function LoadableChart({placeholderTitle, children}: LoadableChartProps) {
     );
 }
 
-type Loadable<T> = {
-    isLoaded: boolean,
-    data: T
-}
 
 function WanikaniHistoryContent() {
-    const [subjects, setSubjects] = useState<WanikaniSubject[]>([]);
-    const [user, setUser] = useState<WanikaniUser>();
-    const [levelProgress, setLevelProgress] = useState<WanikaniLevelProgression[]>([]);
-    const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
-    const [reviews, setReviews] = useState<WanikaniReview[]>([]);
-    const [resets, setResets] = useState<Loadable<WanikaniReset[]>>({
-        isLoaded: false,
-        data: []
+
+    const {
+        user,
+        levelProgress,
+        subjects,
+        assignments,
+        reviews,
+        reviewsIsRateLimited,
+        reviewsProgress,
+        isLoading,
+        resets
+    } = useWanikaniData({
+        user: true,
+        subjects: true,
+        assignments: true,
+        levelProgress: true,
+        reviews: true
     });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const isLoading = [
-        subjects, reviews, assignments, levelProgress
-    ].some(data => data.length === 0) || !user || !resets.isLoaded;
 
-    useEffect(() => {
-        let isSubscribed = true;
+    if (isLoading) {
+        return (
+            <WanikaniLoadingScreen
+                fetch={{
+                    user: true,
+                    assignments: true,
+                    reviews: true,
+                    subjects: true,
+                }}
+                isLoaded={{
+                    user: !!user,
+                    assignments: assignments.length > 0,
+                    subjects: subjects.length > 0,
+                }}
+                progress={{
+                    reviews: {
+                        isRateLimited: reviewsIsRateLimited,
+                        progress: reviewsProgress,
+                        isComplete: reviewsProgress === 1.0
+                    }
+                }}
 
-        WanikaniApiService.getAllAssignments()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setAssignments(data);
-            });
-
-        WanikaniApiService.getReviews()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setReviews(data);
-            })
-
-        WanikaniApiService.getSubjects()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setSubjects(data);
-            });
-
-        WanikaniApiService.getLevelProgress()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setLevelProgress(data);
-            });
-
-        WanikaniApiService.getUser()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setUser(data);
-            });
-
-        WanikaniApiService.getResets()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setResets({
-                    isLoaded: true,
-                    data: data
-                });
-            });
-
-
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
+            />
+        );
+    }
 
     return (
-        <div>
-
+        <>
             <Card variant={'outlined'} style={{margin: '15px'}}>
                 <WanikaniHistorySummaryChart
                     levelProgress={levelProgress}
@@ -160,7 +126,7 @@ function WanikaniHistoryContent() {
                 />
             </LoadableChart>
 
-        </div>
+        </>
     );
 }
 
@@ -171,9 +137,7 @@ function WanikaniHistory() {
         <RequireOrRedirect resource={apiKey}
                            redirectPath={RoutePaths.wanikaniLogin.path}
         >
-            <WanikaniPreloadedData>
-                <WanikaniHistoryContent/>
-            </WanikaniPreloadedData>
+            <WanikaniHistoryContent/>
         </RequireOrRedirect>
     );
 }

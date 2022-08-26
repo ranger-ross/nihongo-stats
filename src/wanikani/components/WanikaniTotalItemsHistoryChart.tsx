@@ -116,7 +116,7 @@ type WanikaniTotalItemsHistoryChartProps = {
 };
 
 function WanikaniTotalItemsHistoryChart({assignments}: WanikaniTotalItemsHistoryChartProps) {
-    const rawData: DataPoint[] = assignments.length > 0 ? formatData(assignments) : [];
+    const rawData: DataPoint[] = useMemo(() => assignments.length > 0 ? formatData(assignments) : [], [assignments])
     const [daysToLookBack, setDaysToLookBack] = useState(10000);
     const [showRadicals, setShowRadicals] = useState(true);
     const [showKanji, setShowKanji] = useState(true);

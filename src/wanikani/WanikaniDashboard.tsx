@@ -4,10 +4,11 @@ import WanikaniLevelSummaryChart from "./components/WanikaniLevelSummaryChart";
 import WanikaniUpcomingReviewsChart from "./components/WanikaniUpcomingReviewsChart";
 import WanikaniWelcomeTile from "./components/WanikaniWelcomeTile";
 import WanikaniItemCountsChart from "./components/WanikaniItemCountsChart";
-import WanikaniPreloadedData from "./components/WanikaniPreloadedData";
 import WanikaniActiveItemsChart from "./components/WanikaniActiveItemChart";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import {AppStyles} from "../util/TypeUtils";
+import WanikaniLoadingScreen from "./components/WanikaniLoadingScreen";
+import {useWanikaniData} from "../hooks/useWanikaniData";
 
 const styles: AppStyles = {
     container: {
@@ -39,33 +40,82 @@ const styles: AppStyles = {
     },
 };
 
+
+function DashboardContent() {
+    const {user, levelProgress, summary, subjects, assignments, isLoading} = useWanikaniData({
+        user: true,
+        subjects: true,
+        assignments: true,
+        summary: true,
+        levelProgress: true,
+    });
+
+    if (isLoading) {
+        return (
+            <WanikaniLoadingScreen
+                fetch={{
+                    user: true,
+                    assignments: true,
+                    summary: true,
+                    subjects: true,
+                }}
+                isLoaded={{
+                    user: !!user,
+                    assignments: assignments.length > 0,
+                    subjects: subjects.length > 0,
+                    summary: !!summary,
+                }}
+            />
+        );
+    }
+
+    return (
+        <>
+            <div style={styles.container}>
+                <div style={styles.topContainer}>
+                    <div style={styles.leftContainer}>
+                        <WanikaniWelcomeTile
+                            user={user}
+                            summary={summary}
+                        />
+
+                        <WanikaniLevelSummaryChart
+                            levelsProgress={levelProgress}
+                            user={user}
+                            subjects={subjects}
+                            assignments={assignments}
+                        />
+
+                        <WanikaniItemCountsChart assignments={assignments}/>
+                    </div>
+
+                    <div style={styles.rightContainer}>
+                        <WanikaniUpcomingReviewsChart
+                            assignments={assignments}
+                            summary={summary}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div style={styles.bottomContainer}>
+                <WanikaniActiveItemsChart
+                    subjects={subjects}
+                    assignments={assignments}
+                    user={user}
+                />
+            </div>
+        </>
+    );
+}
+
 function WanikaniDashboard() {
     const {apiKey} = useWanikaniApiKey();
     return (
         <RequireOrRedirect resource={apiKey}
                            redirectPath={RoutePaths.wanikaniLogin.path}
         >
-            <WanikaniPreloadedData>
-                <div style={styles.container}>
-                    <div style={styles.topContainer}>
-                        <div style={styles.leftContainer}>
-                            <WanikaniWelcomeTile/>
-
-                            <WanikaniLevelSummaryChart/>
-
-                            <WanikaniItemCountsChart/>
-                        </div>
-
-                        <div style={styles.rightContainer}>
-                            <WanikaniUpcomingReviewsChart/>
-                        </div>
-                    </div>
-                </div>
-
-                <div style={styles.bottomContainer}>
-                    <WanikaniActiveItemsChart/>
-                </div>
-            </WanikaniPreloadedData>
+            <DashboardContent/>
         </RequireOrRedirect>
     );
 }

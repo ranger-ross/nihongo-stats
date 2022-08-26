@@ -15,12 +15,14 @@ import {
 } from "../models/WanikaniSubject";
 import {RawWanikaniPage} from "../models/raw/RawWanikaniPage";
 import {WanikaniPage} from "../models/WanikaniPage";
-import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
-import {WanikaniReview} from "../models/WanikaniReview";
+import {RawWanikaniReview, RawWanikaniReviewPage} from "../models/raw/RawWanikaniReview";
+import {WanikaniReview, WanikaniReviewPage} from "../models/WanikaniReview";
 import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {RawWanikaniLevelProgression} from "../models/raw/RawWanikaniLevelProgress";
 import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
+import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
+import {WanikaniSummary} from "../models/WanikaniSummary";
 
 export function mapWanikaniUser(rawUser: RawWanikaniUser): WanikaniUser {
     return {
@@ -57,6 +59,32 @@ export function mapWanikaniReset(rawReset: RawWanikaniReset): WanikaniReset {
         targetLevel: rawReset.data.target_level,
         confirmedAt: rawReset.data.confirmed_at ? new Date(rawReset.data.confirmed_at) : null,
         createdAt: rawReset.data.created_at ? new Date(rawReset.data.created_at) : null
+    };
+}
+
+export function mapWanikaniSummary(summary: RawWanikaniSummary): WanikaniSummary {
+    return {
+        url: summary.url,
+        dataUpdatedAt: new Date(summary.data_updated_at),
+        lessons: summary.data.lessons.map(l => ({
+            availableAt: new Date(l.available_at),
+            subjectIds: l.subject_ids
+        })),
+        reviews: summary.data.reviews.map(r => ({
+            availableAt: new Date(r.available_at),
+            subjectIds: r.subject_ids
+        })),
+        nextReviewsAt: summary.data.next_reviews_at ? new Date(summary.data.next_reviews_at) : null
+    };
+}
+
+export function mapWanikaniReviewPage(page: RawWanikaniReviewPage): WanikaniReviewPage {
+    return {
+        url: page.url,
+        dataUpdatedAt: new Date(page.data_updated_at),
+        pages: mapWanikaniPage(page.pages),
+        totalCount: page.total_count,
+        data: page.data.map(mapWanikaniReview)
     };
 }
 
@@ -140,8 +168,8 @@ export function mapWanikaniAssignment(assignment: RawWanikaniAssignment): Wanika
     };
 }
 
-export function mapWanikaniPage(page: RawWanikaniPage) {
-    return <WanikaniPage>{
+export function mapWanikaniPage(page: RawWanikaniPage): WanikaniPage {
+    return {
         perPage: page.per_page,
         nextUrl: page.next_url,
         previousUrl: page.previous_url,

@@ -6,6 +6,11 @@ import BunProActiveItemsChart from "../bunpro/components/BunProActiveItemsChart"
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
 import {useBunProApiKey} from "../hooks/useBunProApiKey";
 import {AppStyles} from "../util/TypeUtils";
+import {useEffect, useState} from "react";
+import {WanikaniUser} from "../wanikani/models/WanikaniUser";
+import {WanikaniSubject} from "../wanikani/models/WanikaniSubject";
+import {WanikaniAssignment} from "../wanikani/models/WanikaniAssignment";
+import WanikaniApiService from "../wanikani/service/WanikaniApiService";
 
 const styles: AppStyles = {
     container: {
@@ -42,6 +47,39 @@ function OverviewDashboard() {
     const {apiKey: bunProApiKey} = useBunProApiKey();
     const {isMobile} = useDeviceInfo();
 
+    const [user, setUser] = useState<WanikaniUser>();
+    const [subjects, setSubjects] = useState<WanikaniSubject[]>([]);
+    const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
+
+    useEffect(() => {
+        let isSubscribed = true;
+
+        WanikaniApiService.getUser()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setUser(data);
+            });
+
+        WanikaniApiService.getSubjects()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setSubjects(data);
+            });
+
+        WanikaniApiService.getAllAssignments()
+            .then(data => {
+                if (!isSubscribed)
+                    return;
+                setAssignments(data);
+            });
+
+        return () => {
+            isSubscribed = false;
+        };
+    }, []);
+
     return (
 
         <div style={styles.container}>
@@ -59,7 +97,12 @@ function OverviewDashboard() {
 
             <div style={styles.bottomPanel}>
                 {wanikaniApiKey ? (
-                    <WanikaniActiveItemsChart showWanikaniHeader={true}/>
+                    <WanikaniActiveItemsChart
+                        showWanikaniHeader={true}
+                        assignments={assignments}
+                        subjects={subjects}
+                        user={user}
+                    />
                 ) : null}
                 {bunProApiKey ? (
                     <BunProActiveItemsChart showBunProHeader={true}/>

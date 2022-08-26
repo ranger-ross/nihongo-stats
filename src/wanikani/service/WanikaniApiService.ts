@@ -7,20 +7,21 @@ import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelProgress";
 import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
-import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
 import {
     mapWanikaniAssignment, mapWanikaniLevelProgression,
     mapWanikaniReset,
-    mapWanikaniReview,
-    mapWanikaniSubject,
+    mapWanikaniSubject, mapWanikaniSummary,
     mapWanikaniUser
 } from "./WanikaniMappingService";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {WanikaniReset} from "../models/WanikaniReset";
 import {WanikaniUser} from "../models/WanikaniUser";
 import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
+import {WanikaniSummary} from "../models/WanikaniSummary";
+import {getPendingLessonsAndReviews} from "./WanikaniDataUtil";
+import {WanikaniReview} from "../models/WanikaniReview";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -248,14 +249,16 @@ function joinAndSendCacheableRequest(request: string, cacheKey: string, factory:
 }
 
 async function getUser(): Promise<WanikaniUser> {
-    const user = await joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000);
+    const user = await joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000 * 60);
     return mapWanikaniUser(user);
 }
 
-function getSummary(): Promise<RawWanikaniSummary> {
-    return joinAndSendCacheableRequest('/v2/summary', cacheKeys.summary, fetchWithCache, 1000 * 60);
+async function getSummary(): Promise<WanikaniSummary> {
+    const summary: RawWanikaniSummary = await joinAndSendCacheableRequest('/v2/summary', cacheKeys.summary, fetchWithCache, 1000 * 60);
+    return mapWanikaniSummary(summary)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getSrsSystems(): Promise<RawWanikaniSrsSystemPage> {
     return joinAndSendCacheableRequest('/v2/spaced_repetition_systems', cacheKeys.srsSystems, fetchWithCache, 1000 * 60 * 60 * 24 * 7);
 }
@@ -265,6 +268,7 @@ async function getResets(): Promise<WanikaniReset[]> {
     return page.data.map(mapWanikaniReset);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getAssignmentsForLevel(level: number): Promise<WanikaniAssignment[]> {
     const page: RawWanikaniAssignmentPage = await joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
     return page.data.map(mapWanikaniAssignment);
@@ -319,7 +323,7 @@ function attemptLogin(apiKey: string) {
     return fetchWanikaniApi('/v2/user', apiKey);
 }
 
-function getRawReviews(): Promise<RawWanikaniReview[]> {
+function getReviews(): Promise<WanikaniReview[]> {
     const fetchReviews = () => {
         return new Promise((resolve, reject) => {
             WanikaniApiServiceRxJs.getReviewAsObservable()
@@ -345,48 +349,22 @@ function getRawReviews(): Promise<RawWanikaniReview[]> {
     return promise;
 }
 
-async function getReviews() {
-    const reviews = await getRawReviews();
-    return reviews.map(mapWanikaniReview);
-}
-
-
 export default {
     saveApiKey: saveApiKey,
     apiKey: apiKey,
     flushCache: flushCache,
 
-
     login: attemptLogin,
     getUser: getUser,
     getSummary: getSummary,
-    getSrsSystems: getSrsSystems,
     getResets: getResets,
     getLevelProgress: getLevelProgress,
-    getAssignmentsForLevel: getAssignmentsForLevel,
-    getReviewStatistics: () => getFromMemoryCacheOrFetchMultiPageRequest('/v2/review_statistics'),
     getAllAssignments: getAllAssignments,
     getSubjects: getSubjects,
     getReviews: getReviews,
     getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,
     getPendingLessonsAndReviews: async (): Promise<{ lessons: number, reviews: number }> => {
         const summary = await getSummary();
-        let lessons = 0;
-        for (const group of summary.data.lessons) {
-            if (new Date(group['available_at']).getTime() < Date.now()) {
-                lessons += group['subject_ids'].length;
-            }
-        }
-
-        let reviews = 0;
-        for (const group of summary.data.reviews) {
-            if (new Date(group['available_at']).getTime() < Date.now()) {
-                reviews += group['subject_ids'].length;
-            }
-        }
-        return {
-            lessons,
-            reviews
-        };
+        return getPendingLessonsAndReviews(summary);
     }
 }

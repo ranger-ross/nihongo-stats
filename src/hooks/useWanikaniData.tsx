@@ -8,6 +8,7 @@ import {WanikaniSummary} from "../wanikani/models/WanikaniSummary";
 import WanikaniApiService from "../wanikani/service/WanikaniApiService";
 import {EVENT_STATUS, MultiPageObservableEvent} from "../wanikani/service/WanikaniApiServiceRxJs";
 import {WanikaniReset} from "../wanikani/models/WanikaniReset";
+import create from "zustand";
 
 // Simple wrapper for data arrays that can be empty
 // For example, resets can be empty, so `array.length > 0` can not be used to check if the data is loaded
@@ -15,6 +16,45 @@ type Loadable<T> = {
     isLoaded: boolean,
     data: T
 }
+
+type LoadingScreenState = {
+    subjects: WanikaniSubject[],
+    user: WanikaniUser | undefined,
+    resets: Loadable<WanikaniReset[]>,
+    assignments: WanikaniAssignment[]
+    reviews: WanikaniReview[]
+    summary: WanikaniSummary | undefined
+    levelProgress: WanikaniLevelProgression[]
+
+    setUser: (data: WanikaniUser) => void
+    setResets: (data: WanikaniReset[]) => void
+    setSubjects: (data: WanikaniSubject[]) => void
+    setLevelProgress: (data: WanikaniLevelProgression[]) => void
+    setAssignments: (data: WanikaniAssignment[]) => void
+    setReviews: (data: WanikaniReview[]) => void
+    setSummary: (data: WanikaniSummary) => void
+};
+
+const useLoadingScreenState = create<LoadingScreenState>((set) => ({
+    user: undefined,
+    summary: undefined,
+    resets: {
+        isLoaded: false,
+        data: []
+    },
+    subjects: [],
+    reviews: [],
+    levelProgress: [],
+    assignments: [],
+
+    setUser: (data: WanikaniUser) => set(() => ({user: data})),
+    setResets: (data: WanikaniReset[]) => set(() => ({resets: {isLoaded: true, data: data}})),
+    setSubjects: (data: WanikaniSubject[]) => set(() => ({subjects: data})),
+    setReviews: (data: WanikaniReview[]) => set(() => ({reviews: data})),
+    setAssignments: (data: WanikaniAssignment[]) => set(() => ({assignments: data})),
+    setLevelProgress: (data: WanikaniLevelProgression[]) => set(() => ({levelProgress: data})),
+    setSummary: (data: WanikaniSummary) => set(() => ({summary: data})),
+}));
 
 
 export type WanikaniDataConfig = {
@@ -28,16 +68,15 @@ export type WanikaniDataConfig = {
 };
 
 export function useWanikaniData(config: WanikaniDataConfig) {
-    const [user, setUser] = useState<WanikaniUser>();
-    const [subjects, setSubjects] = useState<WanikaniSubject[]>([]);
-    const [levelProgress, setLevelProgress] = useState<WanikaniLevelProgression[]>([]);
-    const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
-    const [reviews, setReviews] = useState<WanikaniReview[]>([]);
-    const [summary, setSummary] = useState<WanikaniSummary>();
-    const [resets, setResets] = useState<Loadable<WanikaniReset[]>>({
-        isLoaded: false,
-        data: []
-    });
+    const {
+        user, setUser,
+        subjects, setSubjects,
+        resets, setResets,
+        levelProgress, setLevelProgress,
+        assignments, setAssignments,
+        reviews, setReviews,
+        summary, setSummary,
+    } = useLoadingScreenState();
 
     const [reviewsProgress, setReviewsProgress] = useState<number>(-1.0);
     const [reviewsIsRateLimited, setReviewsIsRateLimited] = useState(false);
@@ -53,7 +92,7 @@ export function useWanikaniData(config: WanikaniDataConfig) {
     useEffect(() => {
         let isSubscribed = true;
 
-        if (config.user) {
+        if (config.user && !user) {
             WanikaniApiService.getUser()
                 .then(data => {
                     if (!isSubscribed)
@@ -62,7 +101,7 @@ export function useWanikaniData(config: WanikaniDataConfig) {
                 });
         }
 
-        if (config.summary) {
+        if (config.summary && !summary) {
             WanikaniApiService.getSummary()
                 .then(data => {
                     if (!isSubscribed)
@@ -71,7 +110,7 @@ export function useWanikaniData(config: WanikaniDataConfig) {
                 });
         }
 
-        if (config.subjects) {
+        if (config.subjects && subjects.length === 0) {
             WanikaniApiService.getSubjects()
                 .then(data => {
                     if (!isSubscribed)
@@ -80,7 +119,7 @@ export function useWanikaniData(config: WanikaniDataConfig) {
                 });
         }
 
-        if (config.levelProgress) {
+        if (config.levelProgress && levelProgress.length === 0) {
             WanikaniApiService.getLevelProgress()
                 .then(data => {
                     if (!isSubscribed)
@@ -89,19 +128,16 @@ export function useWanikaniData(config: WanikaniDataConfig) {
                 });
         }
 
-        if (config.resets) {
+        if (config.resets && !resets.isLoaded) {
             WanikaniApiService.getResets()
                 .then(data => {
                     if (!isSubscribed)
                         return;
-                    setResets({
-                        isLoaded: true,
-                        data: data
-                    });
+                    setResets(data);
                 });
         }
 
-        if (config.assignments) {
+        if (config.assignments && assignments.length === 0) {
             WanikaniApiService.getAllAssignments()
                 .then(data => {
                     if (!isSubscribed)
@@ -110,7 +146,7 @@ export function useWanikaniData(config: WanikaniDataConfig) {
                 });
         }
 
-        if (config.reviews) {
+        if (config.reviews && reviews.length === 0) {
             WanikaniApiService.getReviewAsObservable()
                 .subscribe((event: MultiPageObservableEvent<WanikaniReview>) => {
                     if (event.status === EVENT_STATUS.IN_PROGRESS) {

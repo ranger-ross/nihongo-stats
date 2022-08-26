@@ -3,6 +3,7 @@ import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataU
 import {getWanikaniSrsStageDescription} from "../service/WanikaniDataUtil";
 import {CSSProperties} from "react";
 import {WanikaniSubjectReading} from "../models/WanikaniSubject";
+import {WANIKANI_COLORS_WITH_BLACK_TEXT} from "../../Constants";
 
 function useTileStyle(color: string, size: number): CSSProperties { // 10 is base
     const topPadding = (size / 2) + 'px';
@@ -16,7 +17,7 @@ function useTileStyle(color: string, size: number): CSSProperties { // 10 is bas
         borderRadius: Math.max(size / 2, 5) + 'px',
         boxShadow: 'rgba(0, 0, 0, 0.3) 5px 4px 10px',
         border: 'solid #303030 1px',
-        color: 'white',
+        color: WANIKANI_COLORS_WITH_BLACK_TEXT.has(color) ? 'black' : 'white',
         textDecoration: 'none',
         background: color,
     };

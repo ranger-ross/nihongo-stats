@@ -1,32 +1,32 @@
-import {WanikaniColors} from "../../Constants";
+import {WANIKANI_COLORS} from "../../Constants";
 
 export function getColorByWanikaniSrsStage(stage?: number | null) {
     if (!stage && stage !== 0) {
-        return WanikaniColors.lockedGray;
+        return WANIKANI_COLORS.lockedGray;
     }
 
     if (stage === 0) {
-        return WanikaniColors.lessonGray;
+        return WANIKANI_COLORS.lessonGray;
     }
 
     if (stage > 0 && stage < 5) {
-        return WanikaniColors.pink;
+        return WANIKANI_COLORS.apprenticeGradient();
     }
 
     if (stage === 5 || stage === 6) {
-        return WanikaniColors.purple;
+        return WANIKANI_COLORS.guruGradient();
     }
 
     if (stage === 7) {
-        return WanikaniColors.masterBlue;
+        return WANIKANI_COLORS.masterGradient();
     }
 
     if (stage === 8) {
-        return WanikaniColors.enlightenedBlue;
+        return WANIKANI_COLORS.enlightenedGradient();
     }
 
     if (stage === 9) {
-        return WanikaniColors.burnedGray;
+        return WANIKANI_COLORS.burnedGradient();
     }
     return null;
 }
@@ -34,11 +34,11 @@ export function getColorByWanikaniSrsStage(stage?: number | null) {
 
 export function getColorByWanikaniSubjectType(subjectType: 'radical' | 'kanji' | 'vocabulary') {
     if (subjectType === 'radical')
-        return WanikaniColors.blue;
+        return WANIKANI_COLORS.radicalGradient();
     else if (subjectType === 'kanji')
-        return WanikaniColors.pink;
+        return WANIKANI_COLORS.kanjiGradient();
     else
-        return WanikaniColors.purple;
+        return WANIKANI_COLORS.vocabularyGradient();
 }
 
 export function getColorByJLPTLevel(level: 'N5' | 'N4' | 'N3' | 'N2' | 'N1') {

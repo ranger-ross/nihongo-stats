@@ -75,8 +75,14 @@ function WanikaniItemTile({
     const frequency = kanjiFrequencyLookupMap[text];
     const jlptLevel = kanjiJLPTLookupMap[text];
 
+    // Add delay to make the tooltip not appear when user quick hovers over multiple tiles
+    // With this, it's a bit annoying to navigate because the tooltip gets in the way of other tiles
+    const tooltipDelay = 125;
+
     return (
         <Tooltip
+            enterDelay={tooltipDelay}
+            enterNextDelay={tooltipDelay}
             title={
                 <div style={{minWidth: '265px'}}>
                     <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>

@@ -54,15 +54,15 @@ no longer needed in the pull request description.
 
 #### Installing Dependencies
 
-Run `make install` to install NPM dependencies
+Run `npm install` to install NPM dependencies
 
 #### Starting the Application
 
-Run `make start` to start application in Docker and serve it on `localhost:5173`
+Run `npm run dev` to start application in Docker and serve it on `localhost:5173`
 
 #### Running Tests
 
-Run `make test` to run the Jest tests
+Run `npm test` to run the Vitest tests
 
 #### Help
 

@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {PropsWithChildren, useEffect, useState} from "react";
 import {CircularProgress} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
 import BunProApiService from "../service/BunProApiService";
@@ -38,7 +38,7 @@ function LoadingItem({text, isLoading}: LoadingItemProps) {
     );
 }
 
-function BunProPreloadedData({children}: React.PropsWithChildren<any>) {
+function BunProPreloadedData({children}: PropsWithChildren<any>) {
     const [grammarPoints, setGrammarPoints] = useState(false);
     const [allReviews, setAllReviews] = useState(false);
     const {status, setStatus} = useBunProPreloadStatus();

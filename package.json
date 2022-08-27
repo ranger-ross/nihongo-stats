@@ -13,9 +13,9 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@devexpress/dx-react-chart": "3.0.3",
-    "@devexpress/dx-react-chart-material-ui": "3.0.3",
-    "@devexpress/dx-react-core": "3.0.3",
+    "@devexpress/dx-react-chart": "3.0.5",
+    "@devexpress/dx-react-chart-material-ui": "3.0.5",
+    "@devexpress/dx-react-core": "3.0.5",
     "@emotion/react": "11.7.1",
     "@emotion/styled": "11.6.0",
     "@mui/icons-material": "5.6.2",

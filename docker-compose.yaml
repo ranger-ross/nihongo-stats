@@ -2,7 +2,7 @@ version: "3.9"
 services:
   webapp:
     container_name: nihongo-stats-webapp
-    image: 'node:16-alpine'
+    image: 'node:18-alpine'
     volumes:
       - ./:/app
     working_dir: /app

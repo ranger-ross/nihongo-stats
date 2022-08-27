@@ -1,16 +1,5 @@
 version: "3.9"
 services:
-  webapp:
-    container_name: nihongo-stats-webapp
-    image: 'node:18-alpine'
-    volumes:
-      - ./:/app
-    working_dir: /app
-    entrypoint: "sh -c '[ ! -f \"assets/version.txt\" ] && echo \"local-dev\" > assets/version.txt; npm install; npm run dev'"
-    tty: true
-    ports:
-      - "3000:3000"
-
   api-proxy:
     container_name: nihongo-stats-proxy
     image: redocly/cors-anywhere

@@ -22,7 +22,7 @@ jobs:
       - run: echo $GITHUB_REF_NAME > assets/version.txt
       - run: npm install
       - run: npm run build
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: react-app
           path: dist

@@ -1,6 +1,6 @@
 import create from 'zustand'
 import {persist} from "zustand/middleware";
-import {AppNames} from "../Constants";
+import {APP_NAMES} from "../Constants";
 
 
 type GlobalPreferences = {
@@ -16,7 +16,7 @@ type WanikaniPreferences = {
 };
 
 const globalDefaultPreferences: GlobalPreferences = {
-    defaultDashboard: AppNames.overview
+    defaultDashboard: APP_NAMES.overview
 };
 const ankiDefaultPreferences: AnkiPreferences = {};
 const bunProDefaultPreferences: BunProPreferences = {};
@@ -24,7 +24,21 @@ const wanikaniDefaultPreferences: WanikaniPreferences = {
     showPreviousLevelByDefault: true,
 };
 
-export const useUserPreferences = create(persist(
+type UserPreferences = {
+    globalPreferences: GlobalPreferences,
+    updateGlobalPreferences: (preferences: GlobalPreferences) => void,
+
+    ankiPreferences: AnkiPreferences,
+    updateAnkiPreferences: (preferences: AnkiPreferences) => void,
+
+    bunProPreferences: BunProPreferences,
+    updateBunProPreferences: (preferences: BunProPreferences) => void,
+
+    wanikaniPreferences: WanikaniPreferences,
+    updateWanikaniPreferences: (preferences: WanikaniPreferences) => void,
+};
+
+export const useUserPreferences = create<UserPreferences>()(persist(
     (set) => ({
 
         globalPreferences: globalDefaultPreferences,

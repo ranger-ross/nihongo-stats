@@ -67,6 +67,7 @@ export const WanikaniColors = WANIKANI_COLORS;
 
 export const WANIKANI_COLORS_WITH_BLACK_TEXT = new Set([
     WANIKANI_COLORS.burnedGradient(),
+    WANIKANI_COLORS.lockedGray
 ]);
 
 

@@ -58,7 +58,7 @@ Run `make install` to install NPM dependencies
 
 #### Starting the Application
 
-Run `make start` to start application in Docker and serve it on `localhost:3000`
+Run `make start` to start application in Docker and serve it on `localhost:5173`
 
 #### Running Tests
 

@@ -136,6 +136,7 @@ async function getAllReviews(): Promise<BunProReviewsResponse> {
     return mapBunProReviewResponse(response);
 }
 
+// TODO: Map to non-raw data type
 async function getPendingReviews() {
     return await joinAndSendCacheableRequest(
         {

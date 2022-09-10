@@ -1,4 +1,4 @@
-import {BunProReview} from "../service/BunProReview";
+import {BunProReview} from "./BunProReview";
 
 export interface BunProReviewsResponse {
     ghostReviews: BunProReview[], // TODO: Create dedicated GhostReview type since it has less fields

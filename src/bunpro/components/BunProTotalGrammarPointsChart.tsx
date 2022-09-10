@@ -10,7 +10,7 @@ import useWindowDimensions from "../../hooks/useWindowDimensions";
 import BunProApiService from "../service/BunProApiService";
 import {createGrammarPointsLookupMap, BunProGrammarPointLookupMap} from "../service/BunProDataUtil";
 import { scaleBand } from '../../util/ChartUtils';
-import {BunProReview} from "../service/BunProReview";
+import {BunProReview} from "../models/BunProReview";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 

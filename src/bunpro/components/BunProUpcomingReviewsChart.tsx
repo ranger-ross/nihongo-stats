@@ -30,7 +30,7 @@ import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {AppStyles} from "../../util/TypeUtils";
 import {scaleBand} from "../../util/ChartUtils";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
-import {BunProReview} from "../service/BunProReview";
+import {BunProReview} from "../models/BunProReview";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 

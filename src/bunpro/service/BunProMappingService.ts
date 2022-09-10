@@ -3,7 +3,7 @@ import {RawBunProUser} from "../models/raw/RawBunProUser";
 import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 import {RawBunProReview, RawBunProReviewHistory} from "../models/raw/RawBunProReview";
-import {BunProReview, BunProReviewHistory} from "./BunProReview";
+import {BunProReview, BunProReviewHistory} from "../models/BunProReview";
 import {RawBunProReviewsResponse} from "../models/raw/RawBunProReviewsResponse";
 import {BunProReviewsResponse} from "../models/BunProReviewsResponse";
 

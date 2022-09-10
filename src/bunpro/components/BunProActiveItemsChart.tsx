@@ -6,7 +6,7 @@ import {BUNPRO_COLORS} from "../../Constants";
 import GradientLinearProgress from "../../shared/GradientLinearProgress";
 import {BunProUser} from "../models/BunProUser";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
-import {BunProReview} from "../service/BunProReview";
+import {BunProReview} from "../models/BunProReview";
 
 type GpByLessonIdMap = { [lessonId: string]: BunProGrammarPoint[] };
 

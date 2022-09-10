@@ -1,6 +1,6 @@
 import BunProApiService from "./BunProApiService";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
-import {BunProReview} from "./BunProReview";
+import {BunProReview} from "../models/BunProReview";
 
 export type BunProGrammarPointLookupMap = { [id: string]: BunProGrammarPoint }
 

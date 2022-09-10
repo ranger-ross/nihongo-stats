@@ -40,7 +40,7 @@ import {AppStyles} from "../../util/TypeUtils";
 import {scaleBand} from "../../util/ChartUtils";
 import {AnkiReview} from "../../anki/models/AnkiReview";
 import {WanikaniAssignment} from "../../wanikani/models/WanikaniAssignment";
-import {BunProReview} from "../../bunpro/service/BunProReview";
+import {BunProReview} from "../../bunpro/models/BunProReview";
 
 const maxDaysIntoFuture = 31;
 

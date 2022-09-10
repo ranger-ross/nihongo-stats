@@ -5,10 +5,13 @@ import BunProReviewsHistoryChart from "./components/BunProReviewsHistoryChart";
 import BunProTotalReviewsChart from "./components/BunProTotalReviewsChart";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import BunProTotalGrammarPointsChart from "./components/BunProTotalGrammarPointsChart";
+import {useBunProData} from "../hooks/useBunProData";
 
 
 function BunProHistory() {
     const {apiKey} = useBunProApiKey();
+
+    const {grammarPoints, user, reviewData, pendingReviewsCount} = useBunProData()
 
     return (
         <RequireOrRedirect resource={apiKey}
@@ -21,7 +24,10 @@ function BunProHistory() {
 
                     <BunProTotalReviewsChart/>
 
-                    <BunProTotalGrammarPointsChart/>
+                    <BunProTotalGrammarPointsChart
+                        grammarPoints={grammarPoints}
+                        reviews={reviewData?.reviews}
+                    />
 
                 </div>
             </BunProPreloadedData>

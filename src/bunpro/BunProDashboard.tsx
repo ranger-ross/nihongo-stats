@@ -8,6 +8,11 @@ import RequireOrRedirect from "../shared/RequireOrRedirect";
 import {useDeviceInfo} from "../hooks/useDeviceInfo";
 import BunProActiveItemsChart from "./components/BunProActiveItemsChart";
 import {AppStyles} from "../util/TypeUtils";
+import {useEffect, useState} from "react";
+import BunProApiService from "./service/BunProApiService";
+import {BunProUser} from "./models/BunProUser";
+import {BunProGrammarPoint} from "./models/BunProGrammarPoint";
+import {BunProReview} from "./models/BunProReview";
 
 const styles: AppStyles = {
     container: {
@@ -33,9 +38,54 @@ const styles: AppStyles = {
     },
 };
 
+function useBunProData() {
+    const [user, setUser] = useState<BunProUser>();
+    const [grammarPoints, setGrammarPoints] = useState<BunProGrammarPoint[]>();
+    const [reviews, setReviews] = useState<BunProReview[]>();
+
+
+    useEffect(() => {
+        let isSubscribed = true;
+
+        BunProApiService.getUser()
+            .then(user => {
+                if (!isSubscribed)
+                    return;
+                setUser(user);
+            });
+
+        BunProApiService.getGrammarPoints()
+            .then(gp => {
+                if (!isSubscribed)
+                    return;
+                setGrammarPoints(gp);
+            });
+
+        BunProApiService.getAllReviews()
+            .then(resp => {
+                if (!isSubscribed)
+                    return;
+                setReviews(resp.reviews);
+            });
+
+        return () => {
+            isSubscribed = false;
+        };
+    }, [])
+
+
+    return {
+        user: user,
+        grammarPoints: grammarPoints,
+        reviews: reviews
+    }
+}
+
 function BunProDashboard() {
     const {apiKey} = useBunProApiKey();
     const {isMobile} = useDeviceInfo();
+
+    const {grammarPoints, user, reviews} = useBunProData()
 
     return (
         <RequireOrRedirect resource={apiKey}
@@ -50,7 +100,12 @@ function BunProDashboard() {
                             <div style={{...styles.leftPanel, minWidth: !isMobile ? '500px' : undefined}}>
                                 <BunProWelcomeTile/>
 
-                                <BunProJLPTTile showXpProgress={true}/>
+                                <BunProJLPTTile
+                                    showXpProgress={true}
+                                    grammarPoints={grammarPoints}
+                                    reviews={reviews}
+                                    user={user}
+                                />
                             </div>
 
                             <div style={styles.rightPanel}>

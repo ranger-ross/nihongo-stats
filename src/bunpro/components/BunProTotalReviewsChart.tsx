@@ -6,9 +6,11 @@ import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSerie
 import {daysSinceDate, daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {fetchAllBunProReviews, BunProFlattenedReviewWithLevel} from "../service/BunProDataUtil";
+import {fetchAllBunProReviews, BunProFlattenedReviewWithLevel, flattenBunProReviews} from "../service/BunProDataUtil";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
-import { scaleBand } from '../../util/ChartUtils';
+import {scaleBand} from '../../util/ChartUtils';
+import {BunProReview} from "../models/BunProReview";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -57,9 +59,11 @@ function aggregateReviewByDay(reviews: BunProFlattenedReviewWithLevel[]): DataPo
     return days;
 }
 
-async function fetchData() {
-    const reviews = await fetchAllBunProReviews();
-    return aggregateReviewByDay(reviews)
+function useData(reviews?: BunProReview[], grammarPoints?: BunProGrammarPoint[]) {
+    const _reviews = flattenBunProReviews(grammarPoints, reviews);
+    if (!_reviews)
+        return undefined;
+    return aggregateReviewByDay(_reviews)
 }
 
 function useOptions(rawData?: DataPoint[]) {
@@ -81,38 +85,24 @@ function useOptions(rawData?: DataPoint[]) {
     return options;
 }
 
-function BunProTotalReviewsChart() {
-    const [rawData, setRawData] = useState<DataPoint[]>();
-    const [isLoading, setIsLoading] = useState(false);
+type BunProTotalReviewsChartProps = {
+    reviews?: BunProReview[]
+    grammarPoints?: BunProGrammarPoint[]
+};
+
+function BunProTotalReviewsChart({reviews, grammarPoints}: BunProTotalReviewsChartProps) {
+    const rawData = useData(reviews, grammarPoints);
+    const isLoading = !grammarPoints || !reviews;
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
     const {width} = useWindowDimensions();
     const isMobile = width < 400;
     const options = useOptions(rawData)
 
     useEffect(() => {
-        let isSubscribed = true;
-
-        setIsLoading(true);
-        fetchData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-
-                if (data.length > 0) {
-                    setDaysToLookBack(daysSinceDate(data[0].date));
-                }
-                setRawData(data);
-            })
-            .finally(() => {
-                if (!isSubscribed)
-                    return;
-                setIsLoading(false);
-            });
-
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
+        if (!!rawData && rawData.length > 0) {
+            setDaysToLookBack(daysSinceDate(rawData[0].date));
+        }
+    }, [rawData]);
 
     const chartData = useMemo(() => rawData?.filter(day => day.date.getTime() > Date.now() - (daysToMillis(daysToLookBack))), [rawData, daysToLookBack]);
 

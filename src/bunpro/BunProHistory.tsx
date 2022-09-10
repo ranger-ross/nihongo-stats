@@ -25,7 +25,10 @@ function BunProHistory() {
                         grammarPoints={grammarPoints}
                     />
 
-                    <BunProTotalReviewsChart/>
+                    <BunProTotalReviewsChart
+                        reviews={reviewData?.reviews}
+                        grammarPoints={grammarPoints}
+                    />
 
                     <BunProTotalGrammarPointsChart
                         grammarPoints={grammarPoints}

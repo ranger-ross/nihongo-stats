@@ -11,7 +11,10 @@ import {useBunProData} from "../hooks/useBunProData";
 function BunProHistory() {
     const {apiKey} = useBunProApiKey();
 
-    const {grammarPoints, user, reviewData, pendingReviewsCount} = useBunProData()
+    const {grammarPoints, reviewData} = useBunProData({
+        reviews: true,
+        grammarPoints: true,
+    })
 
     return (
         <RequireOrRedirect resource={apiKey}

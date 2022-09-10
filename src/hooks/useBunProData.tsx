@@ -4,7 +4,14 @@ import {BunProGrammarPoint} from "../bunpro/models/BunProGrammarPoint";
 import BunProApiService from "../bunpro/service/BunProApiService";
 import {BunProReviewsResponse} from "../bunpro/models/BunProReviewsResponse";
 
-export function useBunProData() {
+type BunProDataConfig = {
+    user?: boolean,
+    grammarPoints?: boolean
+    reviews?: boolean,
+    pendingReviews?: boolean,
+};
+
+export function useBunProData(config: BunProDataConfig) {
     const [user, setUser] = useState<BunProUser>();
     const [grammarPoints, setGrammarPoints] = useState<BunProGrammarPoint[]>();
     const [reviewData, setReviewData] = useState<BunProReviewsResponse>();
@@ -14,34 +21,41 @@ export function useBunProData() {
     useEffect(() => {
         let isSubscribed = true;
 
-        BunProApiService.getUser()
-            .then(user => {
-                if (!isSubscribed)
-                    return;
-                setUser(user);
-            });
+        if (config.user) {
+            BunProApiService.getUser()
+                .then(user => {
+                    if (!isSubscribed)
+                        return;
+                    setUser(user);
+                });
+        }
 
-        BunProApiService.getGrammarPoints()
-            .then(gp => {
-                if (!isSubscribed)
-                    return;
-                setGrammarPoints(gp);
-            });
+        if (config.grammarPoints) {
+            BunProApiService.getGrammarPoints()
+                .then(gp => {
+                    if (!isSubscribed)
+                        return;
+                    setGrammarPoints(gp);
+                });
+        }
 
-        BunProApiService.getAllReviews()
-            .then(resp => {
-                if (!isSubscribed)
-                    return;
-                setReviewData(resp);
-            });
+        if (config.reviews) {
+            BunProApiService.getAllReviews()
+                .then(resp => {
+                    if (!isSubscribed)
+                        return;
+                    setReviewData(resp);
+                });
+        }
 
-        BunProApiService.getPendingReviews()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setPendingReviewsCount(data.length);
-            });
-
+        if (config.pendingReviews) {
+            BunProApiService.getPendingReviews()
+                .then(data => {
+                    if (!isSubscribed)
+                        return;
+                    setPendingReviewsCount(data.length);
+                });
+        }
         return () => {
             isSubscribed = false;
         };

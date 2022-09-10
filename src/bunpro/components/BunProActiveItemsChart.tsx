@@ -1,6 +1,5 @@
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
-import React, {useEffect, useState} from "react";
-import BunProApiService from "../service/BunProApiService";
+import React from "react";
 import {lightenDarkenColor} from "../../util/CssUtils";
 import {BUNPRO_COLORS} from "../../Constants";
 import GradientLinearProgress from "../../shared/GradientLinearProgress";
@@ -90,11 +89,15 @@ function getBunProOrderActiveItems(user: BunProUser, grammarPoints: BunProGramma
     };
 }
 
-async function fetchData(): Promise<FormattedData> {
-    const user = await BunProApiService.getUser();
-    const grammarPoints = await BunProApiService.getGrammarPoints();
-    const reviews = (await BunProApiService.getAllReviews()).reviews;
+const defaultData: FormattedData = {
+    isLoading: true,
+    data: [],
+    title: ''
+}
 
+function useData(user?: BunProUser, reviews?: BunProReview[], grammarPoints?: BunProGrammarPoint[]): FormattedData {
+    if (!user || !reviews || !grammarPoints)
+        return defaultData;
 
     const path = user.primaryTextbook;
     if (path?.toLowerCase() === 'none') {
@@ -106,11 +109,6 @@ async function fetchData(): Promise<FormattedData> {
     }
 }
 
-const defaultData: FormattedData = {
-    isLoading: true,
-    data: [],
-    title: ''
-}
 
 type GrammarPointTileProps = {
     grammarPoint: BunProGrammarPoint,
@@ -140,21 +138,15 @@ function GrammarPointTile({grammarPoint, review}: GrammarPointTileProps) {
     )
 }
 
-function BunProActiveItemsChart({showBunProHeader = false}) {
-    const [data, setData] = useState<FormattedData>(defaultData);
+type BunProActiveItemsChartProps = {
+    showBunProHeader: boolean
+    user?: BunProUser
+    grammarPoints?: BunProGrammarPoint[]
+    reviews?: BunProReview[]
+};
 
-    useEffect(() => {
-        let isSubscribed = true;
-        fetchData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setData(data)
-            });
-        return () => {
-            isSubscribed = false;
-        };
-    }, [])
+function BunProActiveItemsChart({reviews, user, grammarPoints, showBunProHeader = false}: BunProActiveItemsChartProps) {
+    const data = useData(user, reviews, grammarPoints);
 
     const percentage = data.isLoading ? 0.0 : (
         (data.data.filter(gp => !!gp.review).length) / (data.data.length)

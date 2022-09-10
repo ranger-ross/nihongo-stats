@@ -38,7 +38,12 @@ function BunProDashboard() {
     const {apiKey} = useBunProApiKey();
     const {isMobile} = useDeviceInfo();
 
-    const {grammarPoints, user, reviewData, pendingReviewsCount} = useBunProData()
+    const {grammarPoints, user, reviewData, pendingReviewsCount} = useBunProData({
+        reviews: true,
+        pendingReviews: true,
+        grammarPoints: true,
+        user: true
+    });
 
     return (
         <RequireOrRedirect resource={apiKey}
@@ -76,7 +81,12 @@ function BunProDashboard() {
                         </div>
 
                         <div>
-                            <BunProActiveItemsChart/>
+                            <BunProActiveItemsChart
+                                showBunProHeader={false}
+                                grammarPoints={grammarPoints}
+                                reviews={reviewData?.reviews}
+                                user={user}
+                            />
                         </div>
                     </div>
                 </BunProPreloadedData>

@@ -6,7 +6,7 @@ import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSerie
 import {daysSinceDate, daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {fetchAllBunProReviews, BunProFlattenedReviewWithLevel, flattenBunProReviews} from "../service/BunProDataUtil";
+import {BunProFlattenedReviewWithLevel, flattenBunProReviews} from "../service/BunProDataUtil";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import {scaleBand} from '../../util/ChartUtils';
 import {BunProReview} from "../models/BunProReview";

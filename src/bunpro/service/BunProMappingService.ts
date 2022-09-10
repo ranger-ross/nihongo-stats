@@ -1,5 +1,7 @@
 import {BunProUser} from "../models/BunProUser";
 import {RawBunProUser} from "../models/raw/RawBunProUser";
+import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 
 export function mapBunProUser(user: RawBunProUser): BunProUser {
     return {
@@ -46,5 +48,32 @@ export function mapBunProUser(user: RawBunProUser): BunProUser {
         wanikaniApiKey: user.data.attributes["wanikani-api-key"],
 
 
+    };
+}
+
+export function mapBunProGrammarPoint(gp: RawBunProGrammarPoint): BunProGrammarPoint {
+    return {
+        id: gp.id,
+        caution: gp.attributes.caution,
+        grammarOrder: gp.attributes["grammar-order"],
+        incomplete: gp.attributes.incomplete,
+        lessonId: gp.attributes["lesson-id"],
+        level: gp.attributes.level,
+        meaning: gp.attributes.meaning,
+        nuance: gp.attributes.nuance,
+        structure: gp.attributes.structure,
+        title: gp.attributes.title,
+        yomikata: gp.attributes.yomikata,
+        casualStructure: gp.attributes["casual-structure"],
+        createdAt: new Date(gp.attributes["created-at"]),
+        updatedAt: gp.attributes["updated-at"] && gp.attributes["updated-at"].length > 0 ? new Date(gp.attributes["updated-at"]) : null,
+        discourseLink: gp.attributes["discourse-link"],
+        formal: gp.attributes.formal,
+        metadata: gp.attributes.metadata,
+        partOfSpeech: gp.attributes["part-of-speech"],
+        politeStructure: gp.attributes["polite-structure"],
+        register: gp.attributes.register,
+        slug: gp.attributes.slug,
+        wordType: gp.attributes["word-type"],
     };
 }

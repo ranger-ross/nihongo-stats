@@ -4,6 +4,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import BunProApiService from "../service/BunProApiService";
 import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus";
 import {AppStyles} from "../../util/TypeUtils";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import {BunProReviewsResponse} from "../models/BunProReviewsResponse";
 
 const styles: AppStyles = {
     loadingItem: {
@@ -37,6 +39,39 @@ function LoadingItem({text, isLoading}: LoadingItemProps) {
         </div>
     );
 }
+
+type BunProLoadingScreenProps = {
+    config: {
+        grammarPoints: boolean
+        reviews: boolean
+    }
+    grammarPoints?: BunProGrammarPoint[]
+    reviews?: BunProReviewsResponse
+};
+
+export function BunProLoadingScreen({config, grammarPoints, reviews}: BunProLoadingScreenProps) {
+    return (
+        <>
+            <div style={styles.loadingItemsContainer}>
+                <div style={styles.loadingItemsColumn}>
+                    <strong>Loading BunPro Data...</strong>
+                    <br/>
+                    {config.grammarPoints ? (
+                        <LoadingItem text={'Grammar Points'} isLoading={!grammarPoints}/>
+                    ) : null}
+                    {config.reviews ? (
+                        <LoadingItem text={'Reviews'} isLoading={!reviews}/>
+                    ) : null}
+                </div>
+            </div>
+
+            <p style={{textAlign: 'center'}}>
+                This may take a few minutes.
+            </p>
+        </>
+    );
+}
+
 
 function BunProPreloadedData({children}: PropsWithChildren<any>) {
     const [grammarPoints, setGrammarPoints] = useState(false);

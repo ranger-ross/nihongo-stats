@@ -1,7 +1,7 @@
 import {RoutePaths} from "../Routes";
 import {useBunProApiKey} from "../hooks/useBunProApiKey";
 import {BunProWelcomeTile} from "./components/BunProWelcomeTile";
-import BunProPreloadedData from "./components/BunProPreloadedData";
+import {BunProLoadingScreen} from "./components/BunProPreloadedData";
 import {BunProJLPTTile} from "./components/BunProJLPTTile";
 import BunProUpcomingReviewsChart from "./components/BunProUpcomingReviewsChart";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
@@ -34,8 +34,7 @@ const styles: AppStyles = {
     },
 };
 
-function BunProDashboard() {
-    const {apiKey} = useBunProApiKey();
+function BunProDashboardContent() {
     const {isMobile} = useDeviceInfo();
 
     const {grammarPoints, user, reviewData, pendingReviewsCount} = useBunProData({
@@ -45,54 +44,72 @@ function BunProDashboard() {
         user: true
     });
 
+    const isLoading = !grammarPoints || !reviewData;
+
+    if (isLoading) {
+        return (
+            <BunProLoadingScreen
+                config={{
+                    reviews: true,
+                    grammarPoints: true
+                }}
+                grammarPoints={grammarPoints}
+                reviews={reviewData}
+            />
+        );
+    }
+
+    return (
+        <div style={styles.container}>
+            <div style={styles.container}>
+                <div style={styles.innerContainer}>
+                    <div style={{...styles.leftPanel, minWidth: !isMobile ? '500px' : undefined}}>
+                        <BunProWelcomeTile
+                            user={user}
+                            pendingReviewsCount={pendingReviewsCount}
+                        />
+
+                        <BunProJLPTTile
+                            showXpProgress={true}
+                            grammarPoints={grammarPoints}
+                            reviews={reviewData?.reviews}
+                            user={user}
+                        />
+                    </div>
+
+                    <div style={styles.rightPanel}>
+                        <BunProUpcomingReviewsChart
+                            reviews={reviewData?.reviews}
+                            grammarPoints={grammarPoints}
+                            ghostReviews={reviewData?.ghostReviews}
+                            pendingReviewsCount={pendingReviewsCount}
+                        />
+                    </div>
+
+                </div>
+
+                <div>
+                    <BunProActiveItemsChart
+                        showBunProHeader={false}
+                        grammarPoints={grammarPoints}
+                        reviews={reviewData?.reviews}
+                        user={user}
+                    />
+                </div>
+            </div>
+
+        </div>
+    );
+}
+
+function BunProDashboard() {
+    const {apiKey} = useBunProApiKey();
     return (
         <RequireOrRedirect resource={apiKey}
                            redirectPath={RoutePaths.bunproLogin.path}
         >
-            <div style={styles.container}>
-                <BunProPreloadedData>
-                    <div style={styles.container}>
-
-                        <div style={styles.innerContainer}>
-
-                            <div style={{...styles.leftPanel, minWidth: !isMobile ? '500px' : undefined}}>
-                                <BunProWelcomeTile
-                                    user={user}
-                                    pendingReviewsCount={pendingReviewsCount}
-                                />
-
-                                <BunProJLPTTile
-                                    showXpProgress={true}
-                                    grammarPoints={grammarPoints}
-                                    reviews={reviewData?.reviews}
-                                    user={user}
-                                />
-                            </div>
-
-                            <div style={styles.rightPanel}>
-                                <BunProUpcomingReviewsChart
-                                    reviews={reviewData?.reviews}
-                                    grammarPoints={grammarPoints}
-                                    ghostReviews={reviewData?.ghostReviews}
-                                    pendingReviewsCount={pendingReviewsCount}
-                                />
-                            </div>
-
-                        </div>
-
-                        <div>
-                            <BunProActiveItemsChart
-                                showBunProHeader={false}
-                                grammarPoints={grammarPoints}
-                                reviews={reviewData?.reviews}
-                                user={user}
-                            />
-                        </div>
-                    </div>
-                </BunProPreloadedData>
-            </div>
+            <BunProDashboardContent/>
         </RequireOrRedirect>
-
     );
 }
 

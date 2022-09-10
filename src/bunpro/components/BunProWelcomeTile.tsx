@@ -2,7 +2,7 @@ import {Card, CardContent, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
 import BunProApiService from "../service/BunProApiService";
 import BunProPendingReviews from "./BunProPendingReviews";
-import {RawBunProUser} from "../models/raw/RawBunProUser";
+import {BunProUser} from "../models/BunProUser";
 
 const styles = {
     welcomeText: {
@@ -13,7 +13,7 @@ const styles = {
 
 export function BunProWelcomeTile() {
 
-    const [user, setUser] = useState<RawBunProUser>();
+    const [user, setUser] = useState<BunProUser>();
     const [pendingReviews, setPendingReviews] = useState(0);
 
     useEffect(() => {
@@ -42,7 +42,7 @@ export function BunProWelcomeTile() {
         <Card>
             <CardContent>
                 <Typography variant={'h5'} style={styles.welcomeText}>
-                    Welcome {user?.data?.attributes?.username}
+                    Welcome {user?.username}
                 </Typography>
 
                 <div style={{display: 'flex', gap: '10px', marginTop: '10px', width: '260px'}}>

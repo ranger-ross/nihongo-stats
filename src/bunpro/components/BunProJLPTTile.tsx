@@ -99,13 +99,12 @@ async function fetchData() {
             total: 0,
         })
 
-    const userData = await BunProApiService.getUser();
-    const user = userData.data['attributes'];
+    const user = await BunProApiService.getUser();
 
     data.userLevel = {
         level: user.level,
-        nextLevelXp: user['next-level-xp'],
-        prevLevelXp: user['prev-level-xp'],
+        nextLevelXp: user.nextLevelXp,
+        prevLevelXp: user.prevLevelXp,
         xp: user.xp,
     };
 

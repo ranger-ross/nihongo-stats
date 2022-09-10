@@ -2,11 +2,11 @@ import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import React, {useEffect, useState} from "react";
 import BunProApiService from "../service/BunProApiService";
 import {lightenDarkenColor} from "../../util/CssUtils";
-import {BunProColors} from "../../Constants";
+import {BUNPRO_COLORS} from "../../Constants";
 import GradientLinearProgress from "../../shared/GradientLinearProgress";
 import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
-import {RawBunProUserData} from "../models/raw/RawBunProUser";
 import {RawBunProReview} from "../models/raw/RawBunProReview";
+import {BunProUser} from "../models/BunProUser";
 
 type GpByLessonIdMap = { [lessonId: string]: RawBunProGrammarPoint[] };
 
@@ -66,8 +66,8 @@ type FormattedData = {
     data: JoinedGPReview[],
 };
 
-function getBunProOrderActiveItems(user: RawBunProUserData, grammarPoints: RawBunProGrammarPoint[], reviews: RawBunProReview[]): FormattedData {
-    const jlptLevel = user.attributes['study-level'];
+function getBunProOrderActiveItems(user: BunProUser, grammarPoints: RawBunProGrammarPoint[], reviews: RawBunProReview[]): FormattedData {
+    const jlptLevel = user.studyLevel
     grammarPoints = grammarPoints.filter(gp => gp.attributes['level'] === jlptLevel);
 
     const grammarPointsByLesson = getBunProGrammarPointsGroupedByLesson(grammarPoints)
@@ -91,12 +91,12 @@ function getBunProOrderActiveItems(user: RawBunProUserData, grammarPoints: RawBu
 }
 
 async function fetchData(): Promise<FormattedData> {
-    const user = (await BunProApiService.getUser()).data;
+    const user = await BunProApiService.getUser();
     const grammarPoints = await BunProApiService.getGrammarPoints();
     const reviews = (await BunProApiService.getAllReviews()).reviews;
 
 
-    const path = user.attributes['primary-textbook'];
+    const path = user.primaryTextbook;
     if (path?.toLowerCase() === 'none') {
         return getBunProOrderActiveItems(user, grammarPoints, reviews);
     } else {
@@ -167,9 +167,9 @@ function BunProActiveItemsChart({showBunProHeader = false}) {
                 <div style={{position: 'relative', top: -16, left: -16, width: `calc(100% + 32px)`}}>
                     <GradientLinearProgress variant="determinate"
                                             value={percentage * 100}
-                                            lineStartColor={lightenDarkenColor(BunProColors.blue, 30)}
-                                            lineEndColor={lightenDarkenColor(BunProColors.blue, -30)}
-                                            backgroundLineColor={lightenDarkenColor(BunProColors.blue, -120)}
+                                            lineStartColor={lightenDarkenColor(BUNPRO_COLORS.blue, 30)}
+                                            lineEndColor={lightenDarkenColor(BUNPRO_COLORS.blue, -30)}
+                                            backgroundLineColor={lightenDarkenColor(BUNPRO_COLORS.blue, -120)}
                     />
                 </div>
 

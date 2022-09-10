@@ -1,7 +1,8 @@
 import {describe, expect, it} from "vitest";
 import {RawBunProUser} from "../../models/raw/RawBunProUser";
-import {mapBunProGrammarPoint, mapBunProUser} from "../BunProMappingService";
+import {mapBunProGrammarPoint, mapBunProReview, mapBunProUser} from "../BunProMappingService";
 import {RawBunProGrammarPoint} from "../../models/raw/RawBunProGrammarPoint";
+import {RawBunProReview} from "../../models/raw/RawBunProReview";
 
 
 describe('BunProMappingService', () => {
@@ -165,6 +166,110 @@ describe('BunProMappingService', () => {
 
             expect(result.createdAt.getTime()).toBe(1507869413000);
             expect(result.updatedAt?.getTime()).toBe(1661668223000);
+
+        });
+
+    });
+
+    describe('mapBunProReview', () => {
+
+        it('should map review properly', () => {
+
+            const input: RawBunProReview = {
+                "id": 4885870,
+                "user_id": 50627,
+                "study_question_id": 8082,
+                "grammar_point_id": 629,
+                "times_correct": 13,
+                "times_incorrect": 2,
+                "streak": 9,
+                "next_review": "2022-09-10T08:00:00.000Z",
+                "created_at": "2022-03-19T21:27:00.078Z",
+                "updated_at": "2022-07-10T09:51:06.555Z",
+                "readings": [],
+                "complete": true,
+                "last_studied_at": "2022-07-10T09:51:06.554Z",
+                "was_correct": true,
+                "self_study": false,
+                "review_misses": 0,
+                "history": [
+                    {
+                        "id": 8077,
+                        "time": "2022-03-19 21:00:00 +0000",
+                        "status": true,
+                        "attempts": 1,
+                        "streak": 1
+                    },
+                    {
+                        "id": 8078,
+                        "time": "2022-03-20 02:00:00 +0000",
+                        "status": true,
+                        "attempts": 1,
+                        "streak": 2
+                    },
+                ],
+                "missed_question_ids": [
+                    8082,
+                    8085,
+                ],
+                "studied_question_ids": [
+                    8077,
+                    8078,
+                ],
+                "review_type": "standard",
+                "max_streak": 9,
+                "started_studying_at": "2022-03-19T21:00:00.000Z",
+                "reviewable_type": "GrammarPoint",
+                "reviewable_id": 629,
+                "default_input_type": "Manual Input",
+                "user_synonyms": ""
+            }
+
+            const result = mapBunProReview(input);
+
+            expect(result.id).toBe(4885870);
+            expect(result.createdAt.getTime()).toBe(1647725220078);
+            expect(result.updatedAt?.getTime()).toBe(1657446666555);
+            expect(result.lastStudiedAt?.getTime()).toBe(1657446666554);
+            expect(result.startedStudyingAt?.getTime()).toBe(1647723600000);
+            expect(result.nextReview?.getTime()).toBe(1662796800000);
+            expect(result.userId).toBe(50627);
+            expect(result.studyQuestionId).toBe(8082);
+            expect(result.grammarPointId).toBe(629);
+            expect(result.timesCorrect).toBe(13);
+            expect(result.timesIncorrect).toBe(2);
+            expect(result.streak).toBe(9);
+            expect(result.complete).toBe(true);
+            expect(result.wasCorrect).toBe(true);
+            expect(result.selfStudy).toBe(false);
+            expect(result.reviewMisses).toBe(0);
+            expect(result.reviewType).toBe("standard");
+            expect(result.maxStreak).toBe(9);
+            expect(result.reviewableType).toBe("GrammarPoint");
+            expect(result.reviewableId).toBe(629);
+            expect(result.defaultInputType).toBe("Manual Input");
+            expect(result.userSynonyms).toBe("");
+            expect(result.readings.length).toBe(0);
+            expect(result.missedQuestionIds.length).toBe(2);
+            expect(result.missedQuestionIds[0]).toBe(8082);
+            expect(result.missedQuestionIds[1]).toBe(8085);
+            expect(result.studiedQuestionIds.length).toBe(2);
+            expect(result.studiedQuestionIds[0]).toBe(8077);
+            expect(result.studiedQuestionIds[1]).toBe(8078);
+
+            expect(result.history.length).toBe(2);
+
+            expect(result.history[0].id).toBe(8077);
+            expect(result.history[0].attempts).toBe(1);
+            expect(result.history[0].streak).toBe(1);
+            expect(result.history[0].status).toBe(true);
+            expect(result.history[0].time.getTime()).toBe(1647723600000);
+
+            expect(result.history[1].id).toBe(8078);
+            expect(result.history[1].attempts).toBe(1);
+            expect(result.history[1].streak).toBe(2);
+            expect(result.history[1].status).toBe(true);
+            expect(result.history[1].time.getTime()).toBe(1647741600000);
 
         });
 

@@ -2,6 +2,8 @@ import {BunProUser} from "../models/BunProUser";
 import {RawBunProUser} from "../models/raw/RawBunProUser";
 import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import {RawBunProReview, RawBunProReviewHistory} from "../models/raw/RawBunProReview";
+import {BunProReview, BunProReviewHistory} from "./BunProReview";
 
 export function mapBunProUser(user: RawBunProUser): BunProUser {
     return {
@@ -77,3 +79,46 @@ export function mapBunProGrammarPoint(gp: RawBunProGrammarPoint): BunProGrammarP
         wordType: gp.attributes["word-type"],
     };
 }
+
+export function mapBunProReview(review: RawBunProReview): BunProReview {
+    return {
+        id: review.id,
+        createdAt: new Date(review.created_at),
+        updatedAt: review.updated_at ? new Date(review.updated_at) : null,
+        lastStudiedAt: review.last_studied_at ? new Date(review.last_studied_at) : null,
+        nextReview: review.next_review ? new Date(review.next_review) : null,
+        missedQuestionIds: review.missed_question_ids,
+        studiedQuestionIds: review.studied_question_ids,
+        readings: review.readings,
+        reviewType: review.review_type,
+        grammarPointId: review.grammar_point_id,
+        reviewMisses: review.review_misses,
+        complete: review.complete,
+        streak: review.streak,
+        studyQuestionId: review.study_question_id,
+        timesCorrect: review.times_correct,
+        timesIncorrect: review.times_incorrect,
+        userId: review.user_id,
+        selfStudy: review.self_study,
+        wasCorrect: review.was_correct,
+        history: review.history?.map(mapBunProReviewHistory) ?? [],
+        defaultInputType: review.default_input_type,
+        maxStreak: review.max_streak,
+        reviewableId: review.reviewable_id,
+        reviewableType: review.reviewable_type,
+        startedStudyingAt: review.started_studying_at ? new Date(review.started_studying_at) : null,
+        userSynonyms: review.user_synonyms
+    };
+}
+
+function mapBunProReviewHistory(history: RawBunProReviewHistory): BunProReviewHistory {
+    return {
+        attempts: history.attempts,
+        id: history.id,
+        status: history.status,
+        streak: history.streak,
+        time: new Date(history.time)
+    };
+}
+
+

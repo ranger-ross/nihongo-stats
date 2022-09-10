@@ -3,7 +3,7 @@ import {useEffect, useMemo, useState} from 'react';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
-import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
+import {daysSinceDate, daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
@@ -74,11 +74,6 @@ async function fetchData() {
     const reviews = await BunProApiService.getAllReviews();
     const grammarPoints = await fetchGrammarPoints();
     return aggregateReviewByDay(reviews.reviews, grammarPoints);
-}
-
-function daysSinceDate(date: Date | number) {
-    const millis = truncDate(Date.now()).getTime() - truncDate(date).getTime();
-    return millisToDays(millis);
 }
 
 function useOptions(rawData?: DataPoint[]) {

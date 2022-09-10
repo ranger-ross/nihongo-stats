@@ -78,3 +78,8 @@ export function getMonthName(date: Date, isShort = false) {
     const shortMonths = ["Jan", "Feb", "Mar", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
     return isShort ? shortMonths[date.getMonth()] : months[date.getMonth()];
 }
+
+export function daysSinceDate(date: Date | number) {
+    const millis = truncDate(Date.now()).getTime() - truncDate(date).getTime();
+    return millisToDays(millis);
+}

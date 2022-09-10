@@ -3,7 +3,7 @@ import {useEffect, useMemo, useState} from 'react';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
-import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
+import {daysSinceDate, daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {fetchAllBunProReviews, BunProFlattenedReviewWithLevel} from "../service/BunProDataUtil";
@@ -72,7 +72,6 @@ function useOptions(rawData?: DataPoint[]) {
     ];
 
     if (!!rawData && rawData.length > 0) {
-        console.log(rawData[0].date);
         options.push({
             value: millisToDays(Date.now() - rawData[0].date),
             text: 'All'
@@ -98,7 +97,10 @@ function BunProTotalReviewsChart() {
             .then(data => {
                 if (!isSubscribed)
                     return;
-                setDaysToLookBack(data.length)
+
+                if (data.length > 0) {
+                    setDaysToLookBack(daysSinceDate(data[0].date));
+                }
                 setRawData(data);
             })
             .finally(() => {

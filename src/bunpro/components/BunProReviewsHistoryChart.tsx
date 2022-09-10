@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useMemo, useState} from 'react';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, MenuItem, Select, Typography} from "@mui/material";
 import {
@@ -11,9 +11,11 @@ import {
 import {daysToMillis, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {fetchAllBunProReviews, BunProFlattenedReviewWithLevel} from "../service/BunProDataUtil";
+import {flattenBunProReviews, BunProFlattenedReviewWithLevel} from "../service/BunProDataUtil";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import ToolTipLabel from "../../shared/ToolTipLabel";
+import {BunProReview} from "../models/BunProReview";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -141,36 +143,20 @@ function useOptions(rawData?: BunProFlattenedReviewWithLevel[]) {
     return options;
 }
 
-function BunProReviewsHistoryChart() {
-    const [rawData, setRawData] = useState<BunProFlattenedReviewWithLevel[]>();
-    const [isLoading, setIsLoading] = useState(false);
+type BunProReviewsHistoryChartProps = {
+    reviews?: BunProReview[]
+    grammarPoints?: BunProGrammarPoint[]
+};
+
+function BunProReviewsHistoryChart({reviews, grammarPoints}:BunProReviewsHistoryChartProps) {
+    const rawData = flattenBunProReviews(grammarPoints, reviews);
+    const isLoading = !grammarPoints || !reviews;
     const [unit, setUnit] = useState(units.days);
     const [daysToLookBack, setDaysToLookBack] = useState(60);
     const {width} = useWindowDimensions();
     const isMobile = width < 400;
     const options = useOptions(rawData);
 
-
-    useEffect(() => {
-        let isSubscribed = true;
-
-        setIsLoading(true);
-        fetchAllBunProReviews()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setRawData(data);
-            })
-            .finally(() => {
-                if (!isSubscribed)
-                    return;
-                setIsLoading(false);
-            });
-
-        return () => {
-            isSubscribed = false;
-        }
-    }, []);
 
     const aggregatedDate = useMemo(() => rawData ? aggregateReviewByUnit(rawData, unit) : [], [rawData, unit.key])
     const chartData = useMemo(() => aggregatedDate?.filter(day => day.date.getTime() > Date.now() - (daysToMillis(daysToLookBack))), [aggregatedDate, daysToLookBack]);

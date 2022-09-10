@@ -20,7 +20,10 @@ function BunProHistory() {
             <BunProPreloadedData>
                 <div>
 
-                    <BunProReviewsHistoryChart/>
+                    <BunProReviewsHistoryChart
+                        reviews={reviewData?.reviews}
+                        grammarPoints={grammarPoints}
+                    />
 
                     <BunProTotalReviewsChart/>
 

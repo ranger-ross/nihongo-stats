@@ -42,6 +42,9 @@ export type BunProFlattenedReviewWithLevel = BunProFlattenedReview & {
     level: string
 };
 
+/**
+ * @deprecated use flattenBunProReviews instead.
+ */
 export async function fetchAllBunProReviews(grammarPoints: BunProGrammarPoint[] | null = null): Promise<BunProFlattenedReviewWithLevel[]> {
     const needToFetchGrammarPoints = !grammarPoints;
 
@@ -74,6 +77,28 @@ export async function fetchAllBunProReviews(grammarPoints: BunProGrammarPoint[] 
 
     return reviews;
 }
+
+
+export function flattenBunProReviews(grammarPoints?: BunProGrammarPoint[], reviewsData?: BunProReview[]): BunProFlattenedReviewWithLevel[] | undefined {
+    if (!grammarPoints || !reviewsData)
+        return undefined;
+    const grammarPointsLookupMap = createGrammarPointsLookupMap(grammarPoints as BunProGrammarPoint[]);
+
+    const reviews: BunProFlattenedReviewWithLevel[] = [];
+
+    for (const review of reviewsData) {
+        const grammarPoint = grammarPointsLookupMap[review.grammarPointId];
+        for (const flatReview of flattenReview(review)) {
+            reviews.push({
+                ...flatReview,
+                level: grammarPoint.level.replace('JLPT', 'N')
+            });
+        }
+    }
+
+    return reviews;
+}
+
 
 export function filterDeadGhostReviews(review: BunProReview) {
     const fiveYearsFromNow = Date.now() + (1000 * 60 * 60 * 24 * 365 * 5)

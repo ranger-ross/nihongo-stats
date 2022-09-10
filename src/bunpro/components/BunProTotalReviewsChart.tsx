@@ -6,7 +6,7 @@ import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSerie
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {fetchAllBunProReviews, RawBunProFlattenedReviewWithLevel} from "../service/BunProDataUtil";
+import {fetchAllBunProReviews, BunProFlattenedReviewWithLevel} from "../service/BunProDataUtil";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import { scaleBand } from '../../util/ChartUtils';
 
@@ -27,7 +27,7 @@ function dataPoint(date: Date, previousDataPoint?: DataPoint): DataPoint {
 
     dp.date = truncDate(date);
 
-    dp.addReview = (review: RawBunProFlattenedReviewWithLevel) => {
+    dp.addReview = (review: BunProFlattenedReviewWithLevel) => {
         dp.total += 1;
 
         const level = review.level;
@@ -41,7 +41,7 @@ function dataPoint(date: Date, previousDataPoint?: DataPoint): DataPoint {
 }
 
 
-function aggregateReviewByDay(reviews: RawBunProFlattenedReviewWithLevel[]): DataPoint[] {
+function aggregateReviewByDay(reviews: BunProFlattenedReviewWithLevel[]): DataPoint[] {
     const orderedReviews = reviews.sort((a, b,) => a.current.time.getTime() - b.current.time.getTime());
 
     const days = [dataPoint(orderedReviews[0].current.time)];

@@ -11,7 +11,7 @@ import {
 import {daysToMillis, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {fetchAllBunProReviews, RawBunProFlattenedReviewWithLevel} from "../service/BunProDataUtil";
+import {fetchAllBunProReviews, BunProFlattenedReviewWithLevel} from "../service/BunProDataUtil";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 
@@ -72,13 +72,13 @@ function UnitSelector({options, unit, onChange}: UnitSelectorProps) {
 type DataPoint = {
     date: Date,
     total: number,
-    reviews: RawBunProFlattenedReviewWithLevel[],
+    reviews: BunProFlattenedReviewWithLevel[],
     N5: number,
     N4: number,
     N3: number,
     N2: number,
     N1: number,
-    addReview: (review: RawBunProFlattenedReviewWithLevel) => void
+    addReview: (review: BunProFlattenedReviewWithLevel) => void
 };
 
 
@@ -106,7 +106,7 @@ function dataPoint(date: Date, unit: ReviewUnit) {
     return dp;
 }
 
-function aggregateReviewByUnit(reviews: RawBunProFlattenedReviewWithLevel[], unit: ReviewUnit) {
+function aggregateReviewByUnit(reviews: BunProFlattenedReviewWithLevel[], unit: ReviewUnit) {
     const orderedReviews = reviews.sort((a, b,) => a.current.time.getTime() - b.current.time.getTime());
 
     const days = [dataPoint(orderedReviews[0].current.time, unit)];
@@ -122,7 +122,7 @@ function aggregateReviewByUnit(reviews: RawBunProFlattenedReviewWithLevel[], uni
     return days;
 }
 
-function useOptions(rawData?: RawBunProFlattenedReviewWithLevel[]) {
+function useOptions(rawData?: BunProFlattenedReviewWithLevel[]) {
     const options = [
         {value: 30, text: '1 Mon'},
         {value: 60, text: '2 Mon'},
@@ -133,7 +133,7 @@ function useOptions(rawData?: RawBunProFlattenedReviewWithLevel[]) {
 
     if (!!rawData && rawData.length > 0) {
         options.push({
-            value: millisToDays(Date.now() - new Date(rawData[0]['created_at']).getTime()),
+            value: millisToDays(Date.now() - rawData[0].createdAt.getTime()),
             text: 'All'
         });
     }
@@ -142,7 +142,7 @@ function useOptions(rawData?: RawBunProFlattenedReviewWithLevel[]) {
 }
 
 function BunProReviewsHistoryChart() {
-    const [rawData, setRawData] = useState<RawBunProFlattenedReviewWithLevel[]>();
+    const [rawData, setRawData] = useState<BunProFlattenedReviewWithLevel[]>();
     const [isLoading, setIsLoading] = useState(false);
     const [unit, setUnit] = useState(units.days);
     const [daysToLookBack, setDaysToLookBack] = useState(60);

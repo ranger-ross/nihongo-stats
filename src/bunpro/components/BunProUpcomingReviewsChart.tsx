@@ -29,8 +29,8 @@ import {
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {AppStyles} from "../../util/TypeUtils";
 import {scaleBand} from "../../util/ChartUtils";
-import {RawBunProReview} from "../models/raw/RawBunProReview";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import {BunProReview} from "../service/BunProReview";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -70,7 +70,7 @@ function aggregateData(reviews: BpReviewAndGp[], unit: UpcomingReviewUnit, perio
 
     for (let i = 0; i < period; i++) {
         const date = addTimeToDate(getChartStartTime(), unit, i);
-        const reviewsInPeriod = reviews.filter(review => unit.isPeriodTheSame(unit.trunc(new Date(review['next_review'])), date));
+        const reviewsInPeriod = reviews.filter(review => unit.isPeriodTheSame(unit.trunc(review.nextReview ?? new Date()), date));
 
         const dp = createEmptyDataPoint(date);
 
@@ -96,7 +96,7 @@ function aggregateData(reviews: BpReviewAndGp[], unit: UpcomingReviewUnit, perio
     return data;
 }
 
-type BpReviewAndGp = RawBunProReview & {
+type BpReviewAndGp = BunProReview & {
     grammarPoint: BunProGrammarPoint
 };
 
@@ -105,15 +105,14 @@ async function fetchData(): Promise<BpReviewAndGp[]> {
     const gp = await BunProApiService.getGrammarPoints();
     const grammarPointsMap = createGrammarPointsLookupMap(gp);
 
-    const reviews = [...reviewData['reviews'], ...reviewData['ghost_reviews']]
+    const reviews = [...reviewData.reviews, ...reviewData.ghostReviews]
         .filter(filterDeadGhostReviews)
-        .map((review: RawBunProReview) => ({
+        .map((review: BunProReview) => ({
             ...review,
-            grammarPoint: grammarPointsMap[review['grammar_point_id']]
+            grammarPoint: grammarPointsMap[review.grammarPointId]
         }));
 
-    return reviews.sort((a, b) =>
-        new Date(a['next_review']).getTime() - new Date(b['next_review']).getTime());
+    return reviews.sort((a, b) => (a.nextReview?.getTime() ?? 0) - (b.nextReview?.getTime() ?? 0));
 }
 
 function BunProUpcomingReviewsChart() {

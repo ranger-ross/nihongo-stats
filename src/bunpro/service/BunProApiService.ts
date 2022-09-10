@@ -1,11 +1,11 @@
 import * as localForage from "localforage"
 import {APP_URLS} from "../../Constants";
 import {PromiseCache} from "../../util/PromiseCache";
-import {RawBunProReviewsResponse} from "../models/raw/RawBunProReviewsResponse";
 import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
-import {mapBunProGrammarPoint, mapBunProUser} from "./BunProMappingService";
+import {mapBunProGrammarPoint, mapBunProReviewResponse, mapBunProUser} from "./BunProMappingService";
 import {BunProUser} from "../models/BunProUser";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import { BunProReviewsResponse } from "../models/BunProReviewsResponse";
 
 const {apiProxy, bunproApi} = APP_URLS;
 
@@ -123,8 +123,8 @@ async function getUserProgress() {
     );
 }
 
-async function getAllReviews(): Promise<RawBunProReviewsResponse> {
-    return await joinAndSendCacheableRequest(
+async function getAllReviews(): Promise<BunProReviewsResponse> {
+    const response = await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v5/reviews/all_reviews_total`,
             options: {headers: bunproHeaders()}
@@ -132,6 +132,8 @@ async function getAllReviews(): Promise<RawBunProReviewsResponse> {
         cacheKeys.allReviews,
         1000 * 60 * 3
     );
+
+    return mapBunProReviewResponse(response);
 }
 
 async function getPendingReviews() {

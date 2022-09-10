@@ -4,9 +4,9 @@ import BunProApiService from "../service/BunProApiService";
 import {lightenDarkenColor} from "../../util/CssUtils";
 import {BUNPRO_COLORS} from "../../Constants";
 import GradientLinearProgress from "../../shared/GradientLinearProgress";
-import {RawBunProReview} from "../models/raw/RawBunProReview";
 import {BunProUser} from "../models/BunProUser";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import {BunProReview} from "../service/BunProReview";
 
 type GpByLessonIdMap = { [lessonId: string]: BunProGrammarPoint[] };
 
@@ -28,13 +28,13 @@ function getBunProGrammarPointsGroupedByLesson(grammarPoints: BunProGrammarPoint
     return map;
 }
 
-type ReviewByGpIdMap = { [gpId: string]: RawBunProReview };
+type ReviewByGpIdMap = { [gpId: string]: BunProReview };
 
-function getReviewsByGrammarPointId(reviews: RawBunProReview[]) {
+function getReviewsByGrammarPointId(reviews: BunProReview[]) {
     const map: ReviewByGpIdMap = {};
 
     for (const r of reviews) {
-        map[r['grammar_point_id']] = r;
+        map[r.grammarPointId] = r;
     }
 
     return map;
@@ -57,7 +57,7 @@ function getActiveLessonId(grammarPointsByLesson: GpByLessonIdMap, reviewsByGram
 
 type JoinedGPReview = {
     grammarPoint: BunProGrammarPoint,
-    review: RawBunProReview,
+    review: BunProReview,
 }
 
 type FormattedData = {
@@ -66,7 +66,7 @@ type FormattedData = {
     data: JoinedGPReview[],
 };
 
-function getBunProOrderActiveItems(user: BunProUser, grammarPoints: BunProGrammarPoint[], reviews: RawBunProReview[]): FormattedData {
+function getBunProOrderActiveItems(user: BunProUser, grammarPoints: BunProGrammarPoint[], reviews: BunProReview[]): FormattedData {
     const jlptLevel = user.studyLevel
     grammarPoints = grammarPoints.filter(gp => gp.level === jlptLevel);
 
@@ -114,7 +114,7 @@ const defaultData: FormattedData = {
 
 type GrammarPointTileProps = {
     grammarPoint: BunProGrammarPoint,
-    review: RawBunProReview
+    review: BunProReview
 };
 
 function GrammarPointTile({grammarPoint, review}: GrammarPointTileProps) {

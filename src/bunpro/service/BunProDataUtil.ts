@@ -1,6 +1,6 @@
 import BunProApiService from "./BunProApiService";
-import {RawBunProReview} from "../models/raw/RawBunProReview";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import {BunProReview} from "./BunProReview";
 
 export type BunProGrammarPointLookupMap = { [id: string]: BunProGrammarPoint }
 
@@ -12,7 +12,7 @@ export function createGrammarPointsLookupMap(grammarPoints: BunProGrammarPoint[]
     return map;
 }
 
-export type RawBunProFlattenedReview = RawBunProReview & {
+export type BunProFlattenedReview = BunProReview & {
     current: {
         id: number
         status: boolean
@@ -22,20 +22,15 @@ export type RawBunProFlattenedReview = RawBunProReview & {
     }
 }
 
-// Needed because Safari new Date() with dashes does not work
-function formatDate(time: string) {
-    return new Date(time.replace(/-/g, "/"));
-}
-
-export function flattenReview(review: RawBunProReview): RawBunProFlattenedReview[] {
-    const data: RawBunProFlattenedReview[] = [];
+export function flattenReview(review: BunProReview): BunProFlattenedReview[] {
+    const data: BunProFlattenedReview[] = [];
 
     for (const history of review.history) {
         data.push({
             ...review,
             current: {
                 ...history,
-                time: formatDate(history.time)
+                time: history.time
             }
         })
     }
@@ -43,11 +38,11 @@ export function flattenReview(review: RawBunProReview): RawBunProFlattenedReview
     return data;
 }
 
-export type RawBunProFlattenedReviewWithLevel = RawBunProFlattenedReview & {
+export type BunProFlattenedReviewWithLevel = BunProFlattenedReview & {
     level: string
 };
 
-export async function fetchAllBunProReviews(grammarPoints: BunProGrammarPoint[] | null = null): Promise<RawBunProFlattenedReviewWithLevel[]> {
+export async function fetchAllBunProReviews(grammarPoints: BunProGrammarPoint[] | null = null): Promise<BunProFlattenedReviewWithLevel[]> {
     const needToFetchGrammarPoints = !grammarPoints;
 
     let reviewsData;
@@ -65,10 +60,10 @@ export async function fetchAllBunProReviews(grammarPoints: BunProGrammarPoint[] 
 
     const grammarPointsLookupMap = createGrammarPointsLookupMap(grammarPoints as BunProGrammarPoint[]);
 
-    const reviews: RawBunProFlattenedReviewWithLevel[] = [];
+    const reviews: BunProFlattenedReviewWithLevel[] = [];
 
     for (const review of reviewsData.reviews) {
-        const grammarPoint = grammarPointsLookupMap[review['grammar_point_id']];
+        const grammarPoint = grammarPointsLookupMap[review.grammarPointId];
         for (const flatReview of flattenReview(review)) {
             reviews.push({
                 ...flatReview,
@@ -80,7 +75,7 @@ export async function fetchAllBunProReviews(grammarPoints: BunProGrammarPoint[] 
     return reviews;
 }
 
-export function filterDeadGhostReviews(review: RawBunProReview) {
+export function filterDeadGhostReviews(review: BunProReview) {
     const fiveYearsFromNow = Date.now() + (1000 * 60 * 60 * 24 * 365 * 5)
-    return new Date(review['next_review']).getTime() < fiveYearsFromNow;
+    return review.nextReview && review.nextReview.getTime() < fiveYearsFromNow;
 }

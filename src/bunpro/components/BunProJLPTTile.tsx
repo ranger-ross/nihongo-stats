@@ -19,7 +19,7 @@ async function fetchCurrentReviewProgress(grammarPoints: BunProGrammarPoint[]) {
     };
 
     for (const review of reviewData.reviews) {
-        const grammarPoint = grammarPointsMap[review['grammar_point_id']];
+        const grammarPoint = grammarPointsMap[review.grammarPointId];
         data[grammarPoint.level] += 1;
     }
 

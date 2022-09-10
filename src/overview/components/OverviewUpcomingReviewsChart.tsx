@@ -39,8 +39,8 @@ import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {AppStyles} from "../../util/TypeUtils";
 import {scaleBand} from "../../util/ChartUtils";
 import {AnkiReview} from "../../anki/models/AnkiReview";
-import {RawBunProReview} from "../../bunpro/models/raw/RawBunProReview";
 import {WanikaniAssignment} from "../../wanikani/models/WanikaniAssignment";
+import {BunProReview} from "../../bunpro/service/BunProReview";
 
 const maxDaysIntoFuture = 31;
 
@@ -97,15 +97,15 @@ function dataPoint(date: Date, unit: UpcomingReviewUnit, reviews: any[], previou
     return dp;
 }
 
-type BunProDateReview = RawBunProReview & {
+type BunProDateReview = BunProReview & {
     date: Date
 }
 
 async function getBunProReviews(): Promise<BunProDateReview[]> {
     const reviewData = await BunProApiService.getAllReviews();
-    return [...reviewData['reviews'], ...reviewData['ghost_reviews']]
+    return [...reviewData.reviews, ...reviewData.ghostReviews]
         .filter(filterDeadGhostReviews)
-        .map(review => ({...review, date: new Date(review['next_review'])}));
+        .map(review => ({...review, date: review.nextReview as Date}));
 }
 
 type AnkiDateReview = { date: Date, review: AnkiReview }

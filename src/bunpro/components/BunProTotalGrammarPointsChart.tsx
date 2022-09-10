@@ -9,8 +9,8 @@ import PeriodSelector from "../../shared/PeriodSelector";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import BunProApiService from "../service/BunProApiService";
 import {createGrammarPointsLookupMap, BunProGrammarPointLookupMap} from "../service/BunProDataUtil";
-import {RawBunProReview} from "../models/raw/RawBunProReview";
 import { scaleBand } from '../../util/ChartUtils';
+import {BunProReview} from "../service/BunProReview";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -41,11 +41,11 @@ function dataPoint(date: Date, previousDataPoint?: DataPoint): DataPoint {
     return dp;
 }
 
-function aggregateReviewByDay(reviews: RawBunProReview[], grammarPoints: BunProGrammarPointLookupMap) {
+function aggregateReviewByDay(reviews: BunProReview[], grammarPoints: BunProGrammarPointLookupMap) {
     const orderedReviews = reviews
         .map(review => ({
             ...review,
-            createdAt: new Date(review['created_at'])
+            createdAt: review.createdAt
         }))
         .sort((a, b,) => a.createdAt.getTime() - b.createdAt.getTime());
 
@@ -58,7 +58,7 @@ function aggregateReviewByDay(reviews: RawBunProReview[], grammarPoints: BunProG
             days.push(dataPoint(review.createdAt, lastDay));
             lastDay = days[days.length - 1];
         }
-        const gp = grammarPoints[review['grammar_point_id']]
+        const gp = grammarPoints[review.grammarPointId]
         lastDay.addReview(gp.level.replace('JLPT', 'N'));
     }
 

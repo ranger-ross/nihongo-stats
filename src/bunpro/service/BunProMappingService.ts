@@ -4,6 +4,8 @@ import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 import {RawBunProReview, RawBunProReviewHistory} from "../models/raw/RawBunProReview";
 import {BunProReview, BunProReviewHistory} from "./BunProReview";
+import {RawBunProReviewsResponse} from "../models/raw/RawBunProReviewsResponse";
+import {BunProReviewsResponse} from "../models/BunProReviewsResponse";
 
 export function mapBunProUser(user: RawBunProUser): BunProUser {
     return {
@@ -117,8 +119,23 @@ function mapBunProReviewHistory(history: RawBunProReviewHistory): BunProReviewHi
         id: history.id,
         status: history.status,
         streak: history.streak,
-        time: new Date(history.time)
+        time: formatDate(history.time)
     };
 }
+
+// Needed because Safari new Date() with dashes does not work
+function formatDate(time: string) {
+    return new Date(time.replace(/-/g, "/"));
+}
+
+
+export function mapBunProReviewResponse(response: RawBunProReviewsResponse): BunProReviewsResponse {
+    return {
+        ghostReviews: response.ghost_reviews.map(mapBunProReview),
+        reviews: response.reviews.map(mapBunProReview),
+        selfStudyReviews: response.self_study_reviews.map(mapBunProReview),
+    };
+}
+
 
 

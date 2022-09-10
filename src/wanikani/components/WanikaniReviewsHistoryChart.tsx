@@ -127,7 +127,10 @@ function aggregateDate(rawData: WanikaniSubjectReview[], daysToLookBack: number,
         }
     }
 
-    const aggregatedData: DataPoint[] = [dataPoint(truncDate(dataForTimeRange[0].review.createdAt))];
+    // If user selects 'All' we need to set the first review date.
+    const firstLessonDate = daysToLookBack > 365 ? unit.trunc(dataForTimeRange[0].review.createdAt) : new Date(startDate);
+
+    const aggregatedData: DataPoint[] = [dataPoint(firstLessonDate)];
     for (const data of dataForTimeRange) {
         if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.review.createdAt)) {
             fillInEmptyPeriodsIfNeeded(aggregatedData, data.review.createdAt);
@@ -135,6 +138,12 @@ function aggregateDate(rawData: WanikaniSubjectReview[], daysToLookBack: number,
         }
 
         aggregatedData[aggregatedData.length - 1].push(data);
+    }
+
+    // Fill in DataPoints if there are no reviews between last DataPoint and the current period
+    const currentPeriod = unit.trunc(new Date());
+    if (currentPeriod.getTime() !== aggregatedData[aggregatedData.length - 1].date.getTime()) {
+        fillInEmptyPeriodsIfNeeded(aggregatedData, currentPeriod);
     }
 
     return aggregatedData;

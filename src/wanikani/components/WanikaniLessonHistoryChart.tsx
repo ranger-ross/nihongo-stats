@@ -9,7 +9,7 @@ import {
     Tooltip as TooltipBase,
     ValueAxis as ValueAxisBase,
 } from "@devexpress/dx-react-chart";
-import {WanikaniColors} from '../../Constants';
+import {WANIKANI_COLORS} from '../../Constants';
 import {Card, CardContent, CircularProgress, Grid, MenuItem, Select, Typography} from "@mui/material";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
@@ -127,7 +127,10 @@ function aggregateDate(rawData: WanikaniSubjectAssignment[], daysToLookBack: num
         }
     }
 
-    const aggregatedData: DataPoint[] = [dataPoint(truncDate(dataForTimeRange[0].assignment.createdAt))];
+    // If user selects 'All' we need to set the first lesson date.
+    const firstLessonDate = daysToLookBack > 365 ? unit.trunc(dataForTimeRange[0].assignment.createdAt) : new Date(startDate);
+
+    const aggregatedData: DataPoint[] = [dataPoint(firstLessonDate)];
     for (const data of dataForTimeRange) {
         if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.assignment.createdAt)) {
             fillInEmptyPeriodsIfNeeded(aggregatedData, data.assignment.createdAt);
@@ -135,6 +138,12 @@ function aggregateDate(rawData: WanikaniSubjectAssignment[], daysToLookBack: num
         }
 
         aggregatedData[aggregatedData.length - 1].push(data);
+    }
+
+    // Fill in DataPoints if there are no lessons between last DataPoint and the current period
+    const currentPeriod = unit.trunc(new Date());
+    if (currentPeriod.getTime() !== aggregatedData[aggregatedData.length - 1].date.getTime()) {
+        fillInEmptyPeriodsIfNeeded(aggregatedData, currentPeriod);
     }
 
     return aggregatedData;
@@ -302,21 +311,21 @@ function WanikaniLessonHistoryChart({assignments, subjects}: WanikaniLessonHisto
                                     name="radicals"
                                     valueField="radicals"
                                     argumentField="date"
-                                    color={WanikaniColors.blue}
+                                    color={WANIKANI_COLORS.blue}
                                 />
 
                                 <BarSeries
                                     name="kanji"
                                     valueField="kanji"
                                     argumentField="date"
-                                    color={WanikaniColors.pink}
+                                    color={WANIKANI_COLORS.pink}
                                 />
 
                                 <BarSeries
                                     name="vocabulary"
                                     valueField="vocabulary"
                                     argumentField="date"
-                                    color={WanikaniColors.purple}
+                                    color={WANIKANI_COLORS.purple}
                                 />
 
                                 <Stack

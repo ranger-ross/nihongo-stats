@@ -51,7 +51,10 @@ function BunProDashboard() {
                         <div style={styles.innerContainer}>
 
                             <div style={{...styles.leftPanel, minWidth: !isMobile ? '500px' : undefined}}>
-                                <BunProWelcomeTile/>
+                                <BunProWelcomeTile
+                                    user={user}
+                                    pendingReviewsCount={pendingReviewsCount}
+                                />
 
                                 <BunProJLPTTile
                                     showXpProgress={true}

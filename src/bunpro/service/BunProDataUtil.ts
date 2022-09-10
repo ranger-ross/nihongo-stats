@@ -1,11 +1,11 @@
 import BunProApiService from "./BunProApiService";
-import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
 import {RawBunProReview} from "../models/raw/RawBunProReview";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 
-export type RawBunProGrammarPointLookupMap = { [id: string]: RawBunProGrammarPoint }
+export type BunProGrammarPointLookupMap = { [id: string]: BunProGrammarPoint }
 
-export function createGrammarPointsLookupMap(grammarPoints: RawBunProGrammarPoint[]): RawBunProGrammarPointLookupMap {
-    const map: RawBunProGrammarPointLookupMap = {};
+export function createGrammarPointsLookupMap(grammarPoints: BunProGrammarPoint[]): BunProGrammarPointLookupMap {
+    const map: BunProGrammarPointLookupMap = {};
     for (const grammarPoint of grammarPoints) {
         map[grammarPoint.id] = grammarPoint;
     }
@@ -47,7 +47,7 @@ export type RawBunProFlattenedReviewWithLevel = RawBunProFlattenedReview & {
     level: string
 };
 
-export async function fetchAllBunProReviews(grammarPoints: RawBunProGrammarPoint[] | null = null): Promise<RawBunProFlattenedReviewWithLevel[]> {
+export async function fetchAllBunProReviews(grammarPoints: BunProGrammarPoint[] | null = null): Promise<RawBunProFlattenedReviewWithLevel[]> {
     const needToFetchGrammarPoints = !grammarPoints;
 
     let reviewsData;
@@ -63,7 +63,7 @@ export async function fetchAllBunProReviews(grammarPoints: RawBunProGrammarPoint
         reviewsData = await BunProApiService.getAllReviews();
     }
 
-    const grammarPointsLookupMap = createGrammarPointsLookupMap(grammarPoints as RawBunProGrammarPoint[]);
+    const grammarPointsLookupMap = createGrammarPointsLookupMap(grammarPoints as BunProGrammarPoint[]);
 
     const reviews: RawBunProFlattenedReviewWithLevel[] = [];
 
@@ -72,7 +72,7 @@ export async function fetchAllBunProReviews(grammarPoints: RawBunProGrammarPoint
         for (const flatReview of flattenReview(review)) {
             reviews.push({
                 ...flatReview,
-                level: grammarPoint.attributes.level.replace('JLPT', 'N')
+                level: grammarPoint.level.replace('JLPT', 'N')
             });
         }
     }

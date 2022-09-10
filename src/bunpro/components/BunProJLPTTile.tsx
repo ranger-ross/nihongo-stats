@@ -2,10 +2,10 @@ import {Card, CardContent, CircularProgress, LinearProgress, Typography} from "@
 import React, {useEffect, useState} from "react";
 import BunProApiService from "../service/BunProApiService";
 import {createGrammarPointsLookupMap} from "../service/BunProDataUtil";
-import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 
 
-async function fetchCurrentReviewProgress(grammarPoints: RawBunProGrammarPoint[]) {
+async function fetchCurrentReviewProgress(grammarPoints: BunProGrammarPoint[]) {
 
     const grammarPointsMap = createGrammarPointsLookupMap(grammarPoints);
     const reviewData = await BunProApiService.getAllReviews();
@@ -20,13 +20,13 @@ async function fetchCurrentReviewProgress(grammarPoints: RawBunProGrammarPoint[]
 
     for (const review of reviewData.reviews) {
         const grammarPoint = grammarPointsMap[review['grammar_point_id']];
-        data[grammarPoint.attributes.level] += 1;
+        data[grammarPoint.level] += 1;
     }
 
     return data;
 }
 
-function getJLPTTotals(grammarPoints: RawBunProGrammarPoint[]) {
+function getJLPTTotals(grammarPoints: BunProGrammarPoint[]) {
 
     const data: { [key: string]: number } = {
         JLPT5: 0,
@@ -37,7 +37,7 @@ function getJLPTTotals(grammarPoints: RawBunProGrammarPoint[]) {
     };
 
     for (const grammarPoint of grammarPoints) {
-        data[grammarPoint.attributes.level] += 1;
+        data[grammarPoint.level] += 1;
     }
 
     return data;

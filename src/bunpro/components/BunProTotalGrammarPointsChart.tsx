@@ -8,7 +8,7 @@ import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import BunProApiService from "../service/BunProApiService";
-import {createGrammarPointsLookupMap, RawBunProGrammarPointLookupMap} from "../service/BunProDataUtil";
+import {createGrammarPointsLookupMap, BunProGrammarPointLookupMap} from "../service/BunProDataUtil";
 import {RawBunProReview} from "../models/raw/RawBunProReview";
 import { scaleBand } from '../../util/ChartUtils';
 
@@ -41,7 +41,7 @@ function dataPoint(date: Date, previousDataPoint?: DataPoint): DataPoint {
     return dp;
 }
 
-function aggregateReviewByDay(reviews: RawBunProReview[], grammarPoints: RawBunProGrammarPointLookupMap) {
+function aggregateReviewByDay(reviews: RawBunProReview[], grammarPoints: BunProGrammarPointLookupMap) {
     const orderedReviews = reviews
         .map(review => ({
             ...review,
@@ -59,7 +59,7 @@ function aggregateReviewByDay(reviews: RawBunProReview[], grammarPoints: RawBunP
             lastDay = days[days.length - 1];
         }
         const gp = grammarPoints[review['grammar_point_id']]
-        lastDay.addReview(gp.attributes.level.replace('JLPT', 'N'));
+        lastDay.addReview(gp.level.replace('JLPT', 'N'));
     }
 
     return days;

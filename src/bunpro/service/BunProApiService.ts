@@ -1,12 +1,13 @@
 import * as localForage from "localforage"
-import {AppUrls} from "../../Constants";
+import {APP_URLS} from "../../Constants";
 import {PromiseCache} from "../../util/PromiseCache";
 import {RawBunProReviewsResponse} from "../models/raw/RawBunProReviewsResponse";
 import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
-import {mapBunProUser} from "./BunProMappingService";
+import {mapBunProGrammarPoint, mapBunProUser} from "./BunProMappingService";
 import {BunProUser} from "../models/BunProUser";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 
-const {apiProxy, bunproApi} = AppUrls;
+const {apiProxy, bunproApi} = APP_URLS;
 
 type BunProRequest = {
     url: string,
@@ -99,7 +100,7 @@ function joinAndSendCacheableRequest(request: BunProRequest, cacheKey: string, t
     return promise
 }
 
-async function getGrammarPoints(): Promise<RawBunProGrammarPoint[]> {
+async function getGrammarPoints(): Promise<BunProGrammarPoint[]> {
     const response = await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v5/grammar_points`,
@@ -108,7 +109,7 @@ async function getGrammarPoints(): Promise<RawBunProGrammarPoint[]> {
         cacheKeys.grammarPoints,
         1000 * 60 * 60 * 24 * 3
     );
-    return response.data;
+    return response.data.map((gp: RawBunProGrammarPoint) => mapBunProGrammarPoint(gp));
 }
 
 async function getUserProgress() {

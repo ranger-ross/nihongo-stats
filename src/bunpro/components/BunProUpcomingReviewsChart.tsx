@@ -30,7 +30,7 @@ import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {AppStyles} from "../../util/TypeUtils";
 import {scaleBand} from "../../util/ChartUtils";
 import {RawBunProReview} from "../models/raw/RawBunProReview";
-import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -75,7 +75,7 @@ function aggregateData(reviews: BpReviewAndGp[], unit: UpcomingReviewUnit, perio
         const dp = createEmptyDataPoint(date);
 
         for (const review of reviewsInPeriod) {
-            const level = review.grammarPoint.attributes.level.replace('JLPT', 'N');
+            const level = review.grammarPoint.level.replace('JLPT', 'N');
             if (!!dp[level]) {
                 dp[level] += 1;
             } else {
@@ -97,7 +97,7 @@ function aggregateData(reviews: BpReviewAndGp[], unit: UpcomingReviewUnit, perio
 }
 
 type BpReviewAndGp = RawBunProReview & {
-    grammarPoint: RawBunProGrammarPoint
+    grammarPoint: BunProGrammarPoint
 };
 
 async function fetchData(): Promise<BpReviewAndGp[]> {

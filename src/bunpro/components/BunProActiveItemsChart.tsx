@@ -4,16 +4,16 @@ import BunProApiService from "../service/BunProApiService";
 import {lightenDarkenColor} from "../../util/CssUtils";
 import {BUNPRO_COLORS} from "../../Constants";
 import GradientLinearProgress from "../../shared/GradientLinearProgress";
-import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
 import {RawBunProReview} from "../models/raw/RawBunProReview";
 import {BunProUser} from "../models/BunProUser";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 
-type GpByLessonIdMap = { [lessonId: string]: RawBunProGrammarPoint[] };
+type GpByLessonIdMap = { [lessonId: string]: BunProGrammarPoint[] };
 
-function getBunProGrammarPointsGroupedByLesson(grammarPoints: RawBunProGrammarPoint[]) {
+function getBunProGrammarPointsGroupedByLesson(grammarPoints: BunProGrammarPoint[]) {
     const map: GpByLessonIdMap = {};
     for (const gp of grammarPoints) {
-        const lessonId = gp.attributes['lesson-id'];
+        const lessonId = gp.lessonId;
         if (!map[lessonId]) {
             map[lessonId] = [];
         }
@@ -23,7 +23,7 @@ function getBunProGrammarPointsGroupedByLesson(grammarPoints: RawBunProGrammarPo
 
     for (const key of Object.keys(map)) {
         const array = map[key];
-        map[key] = array.sort((a, b) => a.attributes['grammar-order'] - b.attributes['grammar-order'])
+        map[key] = array.sort((a, b) => a.grammarOrder - b.grammarOrder)
     }
     return map;
 }
@@ -56,7 +56,7 @@ function getActiveLessonId(grammarPointsByLesson: GpByLessonIdMap, reviewsByGram
 }
 
 type JoinedGPReview = {
-    grammarPoint: RawBunProGrammarPoint,
+    grammarPoint: BunProGrammarPoint,
     review: RawBunProReview,
 }
 
@@ -66,9 +66,9 @@ type FormattedData = {
     data: JoinedGPReview[],
 };
 
-function getBunProOrderActiveItems(user: BunProUser, grammarPoints: RawBunProGrammarPoint[], reviews: RawBunProReview[]): FormattedData {
+function getBunProOrderActiveItems(user: BunProUser, grammarPoints: BunProGrammarPoint[], reviews: RawBunProReview[]): FormattedData {
     const jlptLevel = user.studyLevel
-    grammarPoints = grammarPoints.filter(gp => gp.attributes['level'] === jlptLevel);
+    grammarPoints = grammarPoints.filter(gp => gp.level === jlptLevel);
 
     const grammarPointsByLesson = getBunProGrammarPointsGroupedByLesson(grammarPoints)
     const reviewsByGrammarPointId = getReviewsByGrammarPointId(reviews);
@@ -113,7 +113,7 @@ const defaultData: FormattedData = {
 }
 
 type GrammarPointTileProps = {
-    grammarPoint: RawBunProGrammarPoint,
+    grammarPoint: BunProGrammarPoint,
     review: RawBunProReview
 };
 
@@ -135,7 +135,7 @@ function GrammarPointTile({grammarPoint, review}: GrammarPointTileProps) {
             href={'https://www.bunpro.jp/grammar_points/' + grammarPoint.id}
             target="_blank" rel="noreferrer"
         >
-            {grammarPoint.attributes['title']}
+            {grammarPoint.title}
         </a>
     )
 }

@@ -1,11 +1,11 @@
-import {Card, CardContent} from "@mui/material";
-import {useEffect, useState} from "react";
+import {Card, CardContent, CircularProgress} from "@mui/material";
 import AnkiApiService from "../service/AnkiApiService";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
 import {Chart, PieSeries, Legend, Title} from '@devexpress/dx-react-chart-material-ui';
-import {AnkiColors} from "../../Constants";
+import {ANKI_COLORS} from "../../Constants";
 import * as React from "react";
 import {Legend as LegendBase} from "@devexpress/dx-react-chart";
+import {useQuery} from "@tanstack/react-query";
 
 type StageBreakDown = {
     type: string,
@@ -25,11 +25,11 @@ async function fetchCardBreakDownData(decks: string[]): Promise<StageBreakDown[]
     const relearningCards = await AnkiApiService.findCards(`(${query}) ("is:review" AND "is:learn")`);
 
     return [
-        {type: 'New', color: AnkiColors.blue, count: newCards.length},
-        {type: 'Learning', color: AnkiColors.lightOrange, count: learningCards.length},
-        {type: 'Relearning', color: AnkiColors.redOrange, count: relearningCards.length},
-        {type: 'Young', color: AnkiColors.lightGreen, count: youngCards.length},
-        {type: 'Mature', color: AnkiColors.darkGreen, count: matureCards.length},
+        {type: 'New', color: ANKI_COLORS.blue, count: newCards.length},
+        {type: 'Learning', color: ANKI_COLORS.lightOrange, count: learningCards.length},
+        {type: 'Relearning', color: ANKI_COLORS.redOrange, count: relearningCards.length},
+        {type: 'Young', color: ANKI_COLORS.lightGreen, count: youngCards.length},
+        {type: 'Mature', color: ANKI_COLORS.darkGreen, count: matureCards.length},
     ];
 }
 
@@ -37,22 +37,34 @@ type LegendMarkerProps = object & { className?: string; style?: React.CSSPropert
 
 function AnkiCardBreakDownChart() {
     const {selectedDecks} = useSelectedAnkiDecks();
-    const [data, setData] = useState<StageBreakDown[]>([]);
 
-    useEffect(() => {
-        let isSubscribed = true;
-        if (selectedDecks) {
-            fetchCardBreakDownData(selectedDecks)
-                .then(_data => {
-                    if (!isSubscribed)
-                        return;
-                    setData(_data);
-                });
-        }
-        return () => {
-            isSubscribed = false;
-        }
-    }, [selectedDecks]);
+    const {data, error, isLoading} = useQuery(['anki'], () => fetchCardBreakDownData(selectedDecks), {
+        enabled: !!selectedDecks
+    });
+
+    if (error) {
+        return (
+            <Card>
+                <CardContent>
+                    <div style={{height: '400px', textAlign: 'center'}}>
+                        An error occurred, try reloading the page
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    if (isLoading || !data) {
+        return (
+            <Card>
+                <CardContent>
+                    <div style={{height: '400px', textAlign: 'center'}}>
+                        <CircularProgress style={{margin: '100px'}}/>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
 
     return (
         <Card>

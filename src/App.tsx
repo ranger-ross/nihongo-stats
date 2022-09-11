@@ -5,6 +5,7 @@ import AppHeader from './header/AppHeader'
 import {AppRoutes} from './Routes'
 import {AppThemeProvider} from './Theme'
 import {useTheme} from "@mui/material";
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 
 function AppContainer({children}: React.PropsWithChildren<any>) {
     const theme = useTheme();
@@ -23,15 +24,19 @@ function AppContainer({children}: React.PropsWithChildren<any>) {
     );
 }
 
+const queryClient = new QueryClient()
+
 function App() {
     return (
         <AppThemeProvider>
             <BrowserRouter>
-                <AppContainer>
-                    <AppHeader/>
-                    <AppNav/>
-                    <AppRoutes/>
-                </AppContainer>
+                <QueryClientProvider client={queryClient}>
+                    <AppContainer>
+                        <AppHeader/>
+                        <AppNav/>
+                        <AppRoutes/>
+                    </AppContainer>
+                </QueryClientProvider>
             </BrowserRouter>
         </AppThemeProvider>
     );

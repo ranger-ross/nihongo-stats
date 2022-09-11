@@ -21,7 +21,7 @@ export function useAnkiCardBreakdown(decks: string[]) {
 }
 
 export function useAnkiUpcomingReviews(decks: string[], days: number) {
-    return useQuery(['ankiUpcomingReviews', ...decks], () => fetchAnkiUpcomingReviewData(decks, days), {
+    return useQuery(['ankiUpcomingReviews', ...decks, days], () => fetchAnkiUpcomingReviewData(decks, days), {
         enabled: !!decks && decks.length > 0,
     });
 }

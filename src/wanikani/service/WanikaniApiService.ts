@@ -363,6 +363,9 @@ export default {
     getSubjects: getSubjects,
     getReviews: getReviews,
     getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,
+    /**
+     * @deprecated use getSummary instead.
+     */
     getPendingLessonsAndReviews: async (): Promise<{ lessons: number, reviews: number }> => {
         const summary = await getSummary();
         return getPendingLessonsAndReviews(summary);

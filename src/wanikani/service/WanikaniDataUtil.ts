@@ -2,7 +2,7 @@
 import kanji from "kanji";
 import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil";
 import {getColorByJLPTLevel, getColorByWanikaniSrsStage, getColorByWanikaniSubjectType} from "./WanikaniStyleUtil";
-import {WanikaniColors} from "../../Constants";
+import {WANIKANI_COLORS} from "../../Constants";
 import {WanikaniSubject, WanikaniSubjectType} from "../models/WanikaniSubject";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {WanikaniSummary} from "../models/WanikaniSummary";
@@ -342,10 +342,10 @@ export const colorByOptions: { [key: string]: WKColorByOption } = {
         displayText: 'Item Type',
         color: (subject: JoinedRawWKAssignmentAndSubject) => {
             if (!subject.srsStage && subject.srsStage !== 0)
-                return WanikaniColors.lockedGray;
+                return WANIKANI_COLORS.lockedGray;
 
             if (subject.srsStage === 0)
-                return WanikaniColors.lessonGray;
+                return WANIKANI_COLORS.lessonGray;
 
             return getColorByWanikaniSubjectType(subject.subjectType)
         }

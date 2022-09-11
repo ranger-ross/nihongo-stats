@@ -12,10 +12,10 @@ import {
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {UpcomingReviewDataPoint} from "../service/AnkiDataUtil";
+import {UpcomingAnkiReviewDataPoint} from "../service/AnkiDataUtil";
 import {useAnkiUpcomingReviews} from "../service/AnkiQueries";
 
-type ChartData = { data: UpcomingReviewDataPoint[], decks: string[] }
+type ChartData = { data: UpcomingAnkiReviewDataPoint[], decks: string[] }
 
 function AnkiUpcomingReviewsChart() {
     const {selectedDecks} = useSelectedAnkiDecks();

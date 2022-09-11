@@ -115,7 +115,7 @@ function WanikaniHistoryContent() {
                 <WanikaniStagesHistoryChart
                     reviews={reviews}
                     subjects={subjects}
-                    resets={resets.data}
+                    resets={resets}
                 />
             </LoadableChart>
 

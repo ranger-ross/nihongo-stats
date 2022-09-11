@@ -1,8 +1,7 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {addDays, daysToMillis, truncDate} from "../../util/DateUtils";
+import {daysToMillis} from "../../util/DateUtils";
 import {useMemo, useState} from "react";
-import AnkiApiService from "../service/AnkiApiService";
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {AreaSeries, ArgumentScale, EventTracker, Stack, ValueAxis as ValueAxisBase} from "@devexpress/dx-react-chart";

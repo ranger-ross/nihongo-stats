@@ -62,6 +62,8 @@ export function useWanikaniData(config: WanikaniDataConfig) {
         if (config.reviews && reviews.length === 0) {
             WanikaniApiService.getReviewAsObservable()
                 .subscribe((event: MultiPageObservableEvent<WanikaniReview>) => {
+                    if (!isSubscribed)
+                        return
                     if (event.status === EVENT_STATUS.IN_PROGRESS) {
                         setReviewsProgress((event.progress as number) / (event.size as number));
                     }

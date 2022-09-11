@@ -76,7 +76,7 @@ export async function fetchCardBreakDownData(decks: string[]): Promise<StageBrea
     ];
 }
 
-export type UpcomingReviewDataPoint = {
+export type UpcomingAnkiReviewDataPoint = {
     [deck: string]: number
 } & {
     day: number
@@ -84,7 +84,7 @@ export type UpcomingReviewDataPoint = {
     addDueCards: (deck: string, cards: any[]) => void
 };
 
-function upcomingReviewDataPoint(day: number): UpcomingReviewDataPoint {
+function upcomingReviewDataPoint(day: number): UpcomingAnkiReviewDataPoint {
     const data: any = {
         day,
         date: truncDate(Date.now() + (1000 * 60 * 60 * 24 * day)),
@@ -97,7 +97,7 @@ function upcomingReviewDataPoint(day: number): UpcomingReviewDataPoint {
     return data;
 }
 
-export async function fetchAnkiUpcomingReviewData(decks: string[], numberOfDays: number): Promise<UpcomingReviewDataPoint[]> {
+export async function fetchAnkiUpcomingReviewData(decks: string[], numberOfDays: number): Promise<UpcomingAnkiReviewDataPoint[]> {
     const actions = [];
     for (let i = 0; i < numberOfDays; i++) {
         for (const deck of decks) {

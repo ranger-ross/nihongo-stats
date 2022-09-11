@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useMemo, useState} from "react";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addDays, addHours, daysToMillis, truncDate, truncMinutes} from '../../util/DateUtils';
 import PeriodSelector from "../../shared/PeriodSelector";
@@ -16,7 +16,7 @@ import AnkiApiService from "../../anki/service/AnkiApiService";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey";
-import {createAnkiCardsDueQuery, fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil";
+import {createAnkiCardsDueQuery} from "../../anki/service/AnkiDataUtil";
 import {ANKI_COLORS, APP_NAMES, BUNPRO_COLORS, WANIKANI_COLORS} from "../../Constants";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection";
 import {
@@ -43,6 +43,8 @@ import {useWanikaniData} from "../../hooks/useWanikaniData";
 import {getPendingLessonsAndReviews} from "../../wanikani/service/WanikaniDataUtil";
 import {useBunProData} from "../../hooks/useBunProData";
 import {BunProReviewsResponse} from "../../bunpro/models/BunProReviewsResponse";
+import {useAnkiDeckSummaries} from "../../anki/service/AnkiQueries";
+import {useQuery} from "@tanstack/react-query";
 
 const maxDaysIntoFuture = 31;
 
@@ -113,8 +115,8 @@ type AnkiDateReview = { date: Date, review: AnkiReview }
 
 async function getAnkiReviews(decks: string[]) {
     const actions = [];
-    for (let i = 0; i < maxDaysIntoFuture; i++) {       // <== Use 31 days since it is more that the max,
-        for (const deck of decks) {      //     we don't want to constantly reload this when user changes period
+    for (let i = 0; i < maxDaysIntoFuture; i++) { // <== Use 31 days since it is more that the max,
+        for (const deck of decks) {               //     we don't want to constantly reload this when user changes period
             actions.push(createAnkiCardsDueQuery(deck, i));
         }
     }
@@ -175,10 +177,10 @@ function getWanikaniReviews(assignments: WanikaniAssignment[]): WanikaniDateRevi
         .map(assignment => ({...assignment, date: assignment.availableAt as Date}));
 }
 
-function useWanikaniReviews() {
+function useWanikaniReviews(wanikaniApiKey: string | null) {
     const {assignments, summary, isLoading} = useWanikaniData({
-        assignments: true,
-        summary: true,
+        assignments: !!wanikaniApiKey,
+        summary: !!wanikaniApiKey,
     });
 
     const initialReviewCount = summary ? getPendingLessonsAndReviews(summary).reviews : 0;
@@ -188,7 +190,7 @@ function useWanikaniReviews() {
 
 function useBunProReviews(bunProApiKey?: string | null) {
     const {pendingReviewsCount, reviewData, isLoading} = useBunProData({
-        pendingReviews: true
+        pendingReviews: !!bunProApiKey
     })
 
     const bunProReviews = reviewData ? getBunProReviews(reviewData) : null;
@@ -199,40 +201,24 @@ function useBunProReviews(bunProApiKey?: string | null) {
 
 function useAnkiReviews(isAnkiConnected: boolean) {
     const {selectedDecks: ankiSelectedDecks} = useSelectedAnkiDecks();
-    const [ankiReviews, setAnkiReviews] = useState<AnkiDateReview[] | null>(null);
-    const [isAnkiLoading, setIsAnkiLoading] = useState(false);
-    const [initialReviewCount, setInitialReviewCount] = useState(0);
 
-    useEffect(() => {
-        if (!isAnkiConnected || !ankiSelectedDecks || ankiSelectedDecks.length === 0) {
-            setAnkiReviews(null);
-            return;
-        }
-        setIsAnkiLoading(true);
-        let isSubscribed = true;
+    const {data: ankiReviews, error: error1, isLoading: isReviewsLoading} =
+        useQuery(['overviewAnkiUpcomingReviews'], () => getAnkiReviews(ankiSelectedDecks), {
+            enabled: isAnkiConnected
+        })
+    error1 && console.error(error1);
 
-        Promise.all([
-            getAnkiReviews(ankiSelectedDecks),
-            fetchAnkiDeckSummaries(ankiSelectedDecks),
-        ])
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setAnkiReviews(data[0] as AnkiDateReview[]);
-                const totalDue = data[1].map(deck => deck.dueCards).reduce((a, c) => a + c);
-                setInitialReviewCount(totalDue);
-            })
-            .finally(() => {
-                if (!isSubscribed)
-                    return;
-                setIsAnkiLoading(false);
-            });
-        return () => {
-            isSubscribed = false;
-        };
-    }, [isAnkiConnected, ankiSelectedDecks]);
+    const {
+        data: deckSummaries,
+        error: error2,
+        isLoading: isDeckSummariesLoading
+    } = useAnkiDeckSummaries(ankiSelectedDecks);
+    error2 && console.error(error2);
+    const initialReviewCount = deckSummaries?.map(deck => deck.dueCards).reduce((a, c) => a + c) ?? 0;
 
-    return {ankiReviews, initialReviewCount, isAnkiLoading};
+    const isLoading = isReviewsLoading || isDeckSummariesLoading;
+
+    return {ankiReviews, initialReviewCount, isAnkiLoading: isLoading};
 }
 
 const ankiSeriesName = 'Anki';
@@ -249,7 +235,11 @@ function OverviewUpcomingReviewsChart() {
     const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
     const {apiKey: bunProApiKey} = useBunProApiKey();
 
-    const {ankiReviews, initialReviewCount: ankiInitialReviewCount, isAnkiLoading} = useAnkiReviews(isAnkiConnected);
+    const {
+        ankiReviews,
+        initialReviewCount: ankiInitialReviewCount,
+        isAnkiLoading
+    } = useAnkiReviews(isAnkiConnected);
     const {
         bunProReviews,
         initialReviewCount: bunProInitialReviewCount,
@@ -259,7 +249,7 @@ function OverviewUpcomingReviewsChart() {
         wanikaniReviews,
         initialReviewCount: wanikaniInitialReviewCount,
         isWanikaniLoading
-    } = useWanikaniReviews();
+    } = useWanikaniReviews(wanikaniApiKey);
 
     const isLoading = isAnkiLoading || isWanikaniLoading || isBunProLoading;
     const noAppsConnected = !ankiReviews && !bunProReviews && !wanikaniReviews;

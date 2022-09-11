@@ -1,35 +1,33 @@
-import {Card, CardContent} from "@mui/material";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
-import {useEffect, useState} from "react";
 import AnkiDeckSummaries from "./AnkiDeckSummaries";
-import {AnkiDeckSummary, fetchAnkiDeckSummaries} from "../service/AnkiDataUtil";
+import {SimpleCard} from "../../shared/SimpleCard";
+import {useAnkiDeckSummaries} from "../service/AnkiQueries";
 
 
 function AnkiDeckSummariesTile() {
     const {selectedDecks} = useSelectedAnkiDecks();
-    const [deckData, setDeckData] = useState<AnkiDeckSummary[]>([]);
+    const {data, error, isLoading} = useAnkiDeckSummaries(selectedDecks);
 
-    useEffect(() => {
-        let isSubscribed = true;
+    if (error) {
+        return (
+            <SimpleCard title={'Deck Summary'}>
+                An error occurred
+            </SimpleCard>
+        );
+    }
 
-        fetchAnkiDeckSummaries(selectedDecks)
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setDeckData(data);
-            });
-        return () => {
-            isSubscribed = false;
-        };
-    }, [selectedDecks]);
-
+    if (isLoading) {
+        return (
+            <SimpleCard title={'Deck Summary'}>
+                Loading...
+            </SimpleCard>
+        );
+    }
 
     return (
-        <Card title={'Deck Summary'}>
-            <CardContent>
-                <AnkiDeckSummaries deckData={deckData}/>
-            </CardContent>
-        </Card>
+        <SimpleCard title={'Deck Summary'}>
+            <AnkiDeckSummaries deckData={data ?? []}/>
+        </SimpleCard>
     );
 }
 

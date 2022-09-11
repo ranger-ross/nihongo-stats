@@ -1,10 +1,9 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
 import {RoutePaths} from "../Routes";
-import {useEffect, useMemo, useState} from "react";
+import {useMemo, useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import {Card, CardContent, Typography} from "@mui/material";
 import WanikaniItemTile from "./components/WanikaniItemTile";
-import WanikaniApiService from "./service/WanikaniApiService";
 import {
     combineAssignmentAndSubject,
     createAssignmentMap,
@@ -17,6 +16,9 @@ import {
 import WanikaniItemsControlPanel, {useWanikaniItemControls} from "./components/WanikaniItemsControlPanel";
 import VisibilitySensor from "react-visibility-sensor";
 import {AppStyles} from "../util/TypeUtils";
+import {WanikaniSubject} from "./models/WanikaniSubject";
+import {WanikaniAssignment} from "./models/WanikaniAssignment";
+import {useWanikaniData} from "../hooks/useWanikaniData";
 
 const styles: AppStyles = {
     container: {
@@ -137,9 +139,7 @@ function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortR
     );
 }
 
-async function fetchItems() {
-    const subjects = await WanikaniApiService.getSubjects();
-    const assignments = await WanikaniApiService.getAllAssignments();
+function formatItems(subjects: WanikaniSubject[], assignments: WanikaniAssignment[]) {
     const assignmentMap = createAssignmentMap(assignments);
 
     return subjects
@@ -156,31 +156,18 @@ function filterSubjectsByType(subjects: JoinedRawWKAssignmentAndSubject[], types
     return subjects.filter(subject => lookupMap[subject.subjectType.toLowerCase()]);
 }
 
-function useSubjects() {
-    const [subjects, setSubjects] = useState<JoinedRawWKAssignmentAndSubject[]>([]);
-
-    useEffect(() => {
-        let isSubscribed = true;
-        fetchItems()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setSubjects(data);
-            });
-        return () => {
-            isSubscribed = false;
-        }
-    }, []);
-
-    return subjects;
-}
-
 function WanikaniItems() {
     const {apiKey} = useWanikaniApiKey();
-    const subjects = useSubjects();
+
+    const {subjects, assignments} = useWanikaniData({
+        subjects: true,
+        assignments: true,
+    });
+
+    const formattedSubjects = useMemo(() => formatItems(subjects, assignments) ?? [], [subjects, assignments])
     const {control, set} = useWanikaniItemControls();
 
-    const subjectsToShow = useMemo(() => filterSubjectsByType(subjects, control.typesToShow), [subjects, control.typesToShow]);
+    const subjectsToShow = useMemo(() => filterSubjectsByType(formattedSubjects, control.typesToShow), [formattedSubjects, control.typesToShow]);
 
     const groups = useMemo(() => control.primaryGroupBy.group(subjectsToShow, {
         frequencyGroupingSize: control.frequencyGroupingSize,

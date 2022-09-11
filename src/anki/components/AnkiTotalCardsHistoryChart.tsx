@@ -3,11 +3,12 @@ import PeriodSelector from "../../shared/PeriodSelector";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
-import {useEffect, useMemo, useState} from "react";
-import AnkiApiService from "../service/AnkiApiService";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import {AnkiReview} from "../models/AnkiReview";
-import { scaleBand } from "../../util/ChartUtils";
+import {scaleBand} from "../../util/ChartUtils";
+import {DeckReviews} from "../service/AnkiDataUtil";
+import {useAnkiReviewsByDeck} from "../service/AnkiQueries";
 
 type DataPoint = any;
 
@@ -68,7 +69,7 @@ function formatMultiDeckReviewData(decks: DeckReviews[]): DataPoint[] {
             lastDay = days[days.length - 1];
         }
 
-        if (!!cards[review.cardId]) {
+        if (cards[review.cardId]) {
             continue;
         }
         cards[review.cardId] = true;
@@ -97,46 +98,26 @@ function useOptions(cardData?: DataPoint[]) {
     return options;
 }
 
-type DeckReviews = {
-    deckName: string,
-    reviews: AnkiReview[]
-};
-
 type AnkiTotalCardsHistoryChartProps = {
     deckNames: string[]
 };
 
 function AnkiTotalCardsHistoryChart({deckNames}: AnkiTotalCardsHistoryChartProps) {
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
-    const [isLoading, setIsLoading] = useState(true);
-    const [decksToDisplay, setDecksToDisplay] = useState<string[]>([]);
-    const [cardData, setCardData] = useState<DataPoint[]>();
+    const isFirstLoad = useRef(true);
+    const {data, error, isLoading} = useAnkiReviewsByDeck(deckNames);
+    const cardData = data ? formatMultiDeckReviewData(data) : undefined;
+
     const options = useOptions(cardData);
 
-    useEffect(() => {
-        let isSubscribed = true;
+    error && console.error(error);
 
-        const reviewPromises: Promise<AnkiReview[]>[] = [];
-        deckNames.forEach((name: string) => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
-        setIsLoading(true);
-        Promise.all(reviewPromises)
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                const deckData: DeckReviews[] = data.map(((value, index) => ({
-                    deckName: deckNames[index],
-                    reviews: value
-                })));
-                const formattedData = formatMultiDeckReviewData(deckData);
-                setCardData(formattedData);
-                setDaysToLookBack(millisToDays(Date.now() - formattedData[0].date))
-                setDecksToDisplay(deckNames);
-            })
-            .finally(() => setIsLoading(false));
-        return () => {
-            isSubscribed = false;
-        };
-    }, [deckNames]);
+    useEffect(() => {
+        if (isFirstLoad.current && cardData && cardData.length > 0) {
+            setDaysToLookBack(millisToDays(Date.now() - cardData[0].date))
+            isFirstLoad.current = false;
+        }
+    }, [data]);
 
     const chartData = useMemo(() => (cardData ?? [])
             .filter(dp => dp.date.getTime() >= Date.now() - daysToMillis(daysToLookBack)),
@@ -197,7 +178,7 @@ function AnkiTotalCardsHistoryChart({deckNames}: AnkiTotalCardsHistoryChartProps
                         <CircularProgress style={{margin: '100px'}}/>
                     </div>
                 ) : (
-                    !!decksToDisplay && chartData ? (
+                    chartData ? (
                         // @ts-ignore
                         <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
@@ -209,7 +190,7 @@ function AnkiTotalCardsHistoryChart({deckNames}: AnkiTotalCardsHistoryChartProps
                                         argumentField="date"
                             />
 
-                            {decksToDisplay?.map((name, idx) => (
+                            {deckNames.map((name, idx) => (
                                 <LineSeries key={idx}
                                             name={name}
                                             valueField={`total_${name}`}

@@ -1,10 +1,10 @@
-import {useEffect, useState} from "react";
+import {PropsWithChildren, useEffect, useState} from "react";
 import AnkiApiService from "../service/AnkiApiService";
 import {RoutePaths} from "../../Routes";
 import {useNavigate} from "react-router";
 import {CircularProgress} from "@mui/material";
 
-function AnkiApiProvider({children}: React.PropsWithChildren<any>) {
+function AnkiApiProvider({children}: PropsWithChildren<any>) {
     const navigate = useNavigate();
     const [isConnected, setIsConnected] = useState(false);
 

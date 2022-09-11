@@ -6,11 +6,8 @@ import BunProActiveItemsChart from "../bunpro/components/BunProActiveItemsChart"
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
 import {useBunProApiKey} from "../hooks/useBunProApiKey";
 import {AppStyles} from "../util/TypeUtils";
-import {useEffect, useState} from "react";
-import {WanikaniUser} from "../wanikani/models/WanikaniUser";
-import {WanikaniSubject} from "../wanikani/models/WanikaniSubject";
-import {WanikaniAssignment} from "../wanikani/models/WanikaniAssignment";
-import WanikaniApiService from "../wanikani/service/WanikaniApiService";
+import {useWanikaniData} from "../hooks/useWanikaniData";
+import {useBunProData} from "../hooks/useBunProData";
 
 const styles: AppStyles = {
     container: {
@@ -47,38 +44,17 @@ function OverviewDashboard() {
     const {apiKey: bunProApiKey} = useBunProApiKey();
     const {isMobile} = useDeviceInfo();
 
-    const [user, setUser] = useState<WanikaniUser>();
-    const [subjects, setSubjects] = useState<WanikaniSubject[]>([]);
-    const [assignments, setAssignments] = useState<WanikaniAssignment[]>([]);
+    const {user: wanikaniUser, assignments, subjects} = useWanikaniData({
+        assignments: !!wanikaniApiKey,
+        user: !!wanikaniApiKey,
+        subjects: !!wanikaniApiKey,
+    })
 
-    useEffect(() => {
-        let isSubscribed = true;
-
-        WanikaniApiService.getUser()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setUser(data);
-            });
-
-        WanikaniApiService.getSubjects()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setSubjects(data);
-            });
-
-        WanikaniApiService.getAllAssignments()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setAssignments(data);
-            });
-
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
+    const {user: bunProUser, grammarPoints, reviewData} = useBunProData({
+        user: !!bunProApiKey,
+        grammarPoints: !!bunProApiKey,
+        reviews: !!bunProApiKey,
+    });
 
     return (
 
@@ -101,11 +77,16 @@ function OverviewDashboard() {
                         showWanikaniHeader={true}
                         assignments={assignments}
                         subjects={subjects}
-                        user={user}
+                        user={wanikaniUser}
                     />
                 ) : null}
                 {bunProApiKey ? (
-                    <BunProActiveItemsChart showBunProHeader={true}/>
+                    <BunProActiveItemsChart
+                        showBunProHeader={true}
+                        user={bunProUser}
+                        reviews={reviewData?.reviews}
+                        grammarPoints={grammarPoints}
+                    />
                 ) : null}
             </div>
 

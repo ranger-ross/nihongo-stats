@@ -1,11 +1,13 @@
 import * as localForage from "localforage"
-import {AppUrls} from "../../Constants";
+import {APP_URLS} from "../../Constants";
 import {PromiseCache} from "../../util/PromiseCache";
-import {RawBunProReviewsResponse} from "../models/raw/RawBunProReviewsResponse";
 import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
-import {RawBunProUser} from "../models/raw/RawBunProUser";
+import {mapBunProGrammarPoint, mapBunProReviewResponse, mapBunProUser} from "./BunProMappingService";
+import {BunProUser} from "../models/BunProUser";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import { BunProReviewsResponse } from "../models/BunProReviewsResponse";
 
-const {apiProxy, bunproApi} = AppUrls;
+const {apiProxy, bunproApi} = APP_URLS;
 
 type BunProRequest = {
     url: string,
@@ -98,7 +100,7 @@ function joinAndSendCacheableRequest(request: BunProRequest, cacheKey: string, t
     return promise
 }
 
-async function getGrammarPoints(): Promise<RawBunProGrammarPoint[]> {
+async function getGrammarPoints(): Promise<BunProGrammarPoint[]> {
     const response = await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v5/grammar_points`,
@@ -107,7 +109,7 @@ async function getGrammarPoints(): Promise<RawBunProGrammarPoint[]> {
         cacheKeys.grammarPoints,
         1000 * 60 * 60 * 24 * 3
     );
-    return response.data;
+    return response.data.map((gp: RawBunProGrammarPoint) => mapBunProGrammarPoint(gp));
 }
 
 async function getUserProgress() {
@@ -121,8 +123,8 @@ async function getUserProgress() {
     );
 }
 
-async function getAllReviews(): Promise<RawBunProReviewsResponse> {
-    return await joinAndSendCacheableRequest(
+async function getAllReviews(): Promise<BunProReviewsResponse> {
+    const response = await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v5/reviews/all_reviews_total`,
             options: {headers: bunproHeaders()}
@@ -130,8 +132,11 @@ async function getAllReviews(): Promise<RawBunProReviewsResponse> {
         cacheKeys.allReviews,
         1000 * 60 * 3
     );
+
+    return mapBunProReviewResponse(response);
 }
 
+// TODO: Map to non-raw data type
 async function getPendingReviews() {
     return await joinAndSendCacheableRequest(
         {
@@ -143,8 +148,8 @@ async function getPendingReviews() {
     );
 }
 
-async function getBunProUser(): Promise<RawBunProUser> {
-    return await joinAndSendCacheableRequest(
+async function getBunProUser(): Promise<BunProUser> {
+    const rawUser = await joinAndSendCacheableRequest(
         {
             url: `${baseBunProUrl}/v5/user`,
             options: {headers: bunproHeaders()}
@@ -152,6 +157,7 @@ async function getBunProUser(): Promise<RawBunProUser> {
         cacheKeys.user,
         1000 * 60
     );
+    return mapBunProUser(rawUser);
 }
 
 async function login(apiKey: string) {

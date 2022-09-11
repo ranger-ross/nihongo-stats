@@ -1,19 +1,18 @@
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
-import React, {useEffect, useState} from "react";
-import BunProApiService from "../service/BunProApiService";
+import React from "react";
 import {lightenDarkenColor} from "../../util/CssUtils";
-import {BunProColors} from "../../Constants";
+import {BUNPRO_COLORS} from "../../Constants";
 import GradientLinearProgress from "../../shared/GradientLinearProgress";
-import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
-import {RawBunProUserData} from "../models/raw/RawBunProUser";
-import {RawBunProReview} from "../models/raw/RawBunProReview";
+import {BunProUser} from "../models/BunProUser";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import {BunProReview} from "../models/BunProReview";
 
-type GpByLessonIdMap = { [lessonId: string]: RawBunProGrammarPoint[] };
+type GpByLessonIdMap = { [lessonId: string]: BunProGrammarPoint[] };
 
-function getBunProGrammarPointsGroupedByLesson(grammarPoints: RawBunProGrammarPoint[]) {
+function getBunProGrammarPointsGroupedByLesson(grammarPoints: BunProGrammarPoint[]) {
     const map: GpByLessonIdMap = {};
     for (const gp of grammarPoints) {
-        const lessonId = gp.attributes['lesson-id'];
+        const lessonId = gp.lessonId;
         if (!map[lessonId]) {
             map[lessonId] = [];
         }
@@ -23,18 +22,18 @@ function getBunProGrammarPointsGroupedByLesson(grammarPoints: RawBunProGrammarPo
 
     for (const key of Object.keys(map)) {
         const array = map[key];
-        map[key] = array.sort((a, b) => a.attributes['grammar-order'] - b.attributes['grammar-order'])
+        map[key] = array.sort((a, b) => a.grammarOrder - b.grammarOrder)
     }
     return map;
 }
 
-type ReviewByGpIdMap = { [gpId: string]: RawBunProReview };
+type ReviewByGpIdMap = { [gpId: string]: BunProReview };
 
-function getReviewsByGrammarPointId(reviews: RawBunProReview[]) {
+function getReviewsByGrammarPointId(reviews: BunProReview[]) {
     const map: ReviewByGpIdMap = {};
 
     for (const r of reviews) {
-        map[r['grammar_point_id']] = r;
+        map[r.grammarPointId] = r;
     }
 
     return map;
@@ -56,8 +55,8 @@ function getActiveLessonId(grammarPointsByLesson: GpByLessonIdMap, reviewsByGram
 }
 
 type JoinedGPReview = {
-    grammarPoint: RawBunProGrammarPoint,
-    review: RawBunProReview,
+    grammarPoint: BunProGrammarPoint,
+    review: BunProReview,
 }
 
 type FormattedData = {
@@ -66,9 +65,9 @@ type FormattedData = {
     data: JoinedGPReview[],
 };
 
-function getBunProOrderActiveItems(user: RawBunProUserData, grammarPoints: RawBunProGrammarPoint[], reviews: RawBunProReview[]): FormattedData {
-    const jlptLevel = user.attributes['study-level'];
-    grammarPoints = grammarPoints.filter(gp => gp.attributes['level'] === jlptLevel);
+function getBunProOrderActiveItems(user: BunProUser, grammarPoints: BunProGrammarPoint[], reviews: BunProReview[]): FormattedData {
+    const jlptLevel = user.studyLevel
+    grammarPoints = grammarPoints.filter(gp => gp.level === jlptLevel);
 
     const grammarPointsByLesson = getBunProGrammarPointsGroupedByLesson(grammarPoints)
     const reviewsByGrammarPointId = getReviewsByGrammarPointId(reviews);
@@ -90,13 +89,17 @@ function getBunProOrderActiveItems(user: RawBunProUserData, grammarPoints: RawBu
     };
 }
 
-async function fetchData(): Promise<FormattedData> {
-    const user = (await BunProApiService.getUser()).data;
-    const grammarPoints = await BunProApiService.getGrammarPoints();
-    const reviews = (await BunProApiService.getAllReviews()).reviews;
+const defaultData: FormattedData = {
+    isLoading: true,
+    data: [],
+    title: ''
+}
 
+function useData(user?: BunProUser, reviews?: BunProReview[], grammarPoints?: BunProGrammarPoint[]): FormattedData {
+    if (!user || !reviews || !grammarPoints)
+        return defaultData;
 
-    const path = user.attributes['primary-textbook'];
+    const path = user.primaryTextbook;
     if (path?.toLowerCase() === 'none') {
         return getBunProOrderActiveItems(user, grammarPoints, reviews);
     } else {
@@ -106,15 +109,10 @@ async function fetchData(): Promise<FormattedData> {
     }
 }
 
-const defaultData: FormattedData = {
-    isLoading: true,
-    data: [],
-    title: ''
-}
 
 type GrammarPointTileProps = {
-    grammarPoint: RawBunProGrammarPoint,
-    review: RawBunProReview
+    grammarPoint: BunProGrammarPoint,
+    review: BunProReview
 };
 
 function GrammarPointTile({grammarPoint, review}: GrammarPointTileProps) {
@@ -135,26 +133,20 @@ function GrammarPointTile({grammarPoint, review}: GrammarPointTileProps) {
             href={'https://www.bunpro.jp/grammar_points/' + grammarPoint.id}
             target="_blank" rel="noreferrer"
         >
-            {grammarPoint.attributes['title']}
+            {grammarPoint.title}
         </a>
     )
 }
 
-function BunProActiveItemsChart({showBunProHeader = false}) {
-    const [data, setData] = useState<FormattedData>(defaultData);
+type BunProActiveItemsChartProps = {
+    showBunProHeader: boolean
+    user?: BunProUser
+    grammarPoints?: BunProGrammarPoint[]
+    reviews?: BunProReview[]
+};
 
-    useEffect(() => {
-        let isSubscribed = true;
-        fetchData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setData(data)
-            });
-        return () => {
-            isSubscribed = false;
-        };
-    }, [])
+function BunProActiveItemsChart({reviews, user, grammarPoints, showBunProHeader = false}: BunProActiveItemsChartProps) {
+    const data = useData(user, reviews, grammarPoints);
 
     const percentage = data.isLoading ? 0.0 : (
         (data.data.filter(gp => !!gp.review).length) / (data.data.length)
@@ -167,9 +159,9 @@ function BunProActiveItemsChart({showBunProHeader = false}) {
                 <div style={{position: 'relative', top: -16, left: -16, width: `calc(100% + 32px)`}}>
                     <GradientLinearProgress variant="determinate"
                                             value={percentage * 100}
-                                            lineStartColor={lightenDarkenColor(BunProColors.blue, 30)}
-                                            lineEndColor={lightenDarkenColor(BunProColors.blue, -30)}
-                                            backgroundLineColor={lightenDarkenColor(BunProColors.blue, -120)}
+                                            lineStartColor={lightenDarkenColor(BUNPRO_COLORS.blue, 30)}
+                                            lineEndColor={lightenDarkenColor(BUNPRO_COLORS.blue, -30)}
+                                            backgroundLineColor={lightenDarkenColor(BUNPRO_COLORS.blue, -120)}
                     />
                 </div>
 

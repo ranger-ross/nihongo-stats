@@ -18,7 +18,13 @@ export interface RawBunProReview {
     history: RawBunProReviewHistory[]
     missed_question_ids: number[]
     studied_question_ids: number[]
-    review_type: string
+    review_type: string,
+    max_streak: number
+    started_studying_at: string | null
+    reviewable_type: string
+    reviewable_id: number,
+    default_input_type: string,
+    user_synonyms: string
 }
 
 export interface RawBunProReviewHistory {

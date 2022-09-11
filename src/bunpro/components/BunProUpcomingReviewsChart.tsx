@@ -1,8 +1,7 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useMemo, useState} from "react";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addHours, truncMinutes} from '../../util/DateUtils';
 import PeriodSelector from "../../shared/PeriodSelector";
-import BunProApiService from "../service/BunProApiService";
 import {createGrammarPointsLookupMap, filterDeadGhostReviews} from "../service/BunProDataUtil";
 import {ArgumentAxis, Chart, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {
@@ -29,8 +28,8 @@ import {
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {AppStyles} from "../../util/TypeUtils";
 import {scaleBand} from "../../util/ChartUtils";
-import {RawBunProReview} from "../models/raw/RawBunProReview";
-import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import {BunProReview} from "../models/BunProReview";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -70,12 +69,12 @@ function aggregateData(reviews: BpReviewAndGp[], unit: UpcomingReviewUnit, perio
 
     for (let i = 0; i < period; i++) {
         const date = addTimeToDate(getChartStartTime(), unit, i);
-        const reviewsInPeriod = reviews.filter(review => unit.isPeriodTheSame(unit.trunc(new Date(review['next_review'])), date));
+        const reviewsInPeriod = reviews.filter(review => unit.isPeriodTheSame(unit.trunc(review.nextReview ?? new Date()), date));
 
         const dp = createEmptyDataPoint(date);
 
         for (const review of reviewsInPeriod) {
-            const level = review.grammarPoint.attributes.level.replace('JLPT', 'N');
+            const level = review.grammarPoint.level.replace('JLPT', 'N');
             if (!!dp[level]) {
                 dp[level] += 1;
             } else {
@@ -96,56 +95,46 @@ function aggregateData(reviews: BpReviewAndGp[], unit: UpcomingReviewUnit, perio
     return data;
 }
 
-type BpReviewAndGp = RawBunProReview & {
-    grammarPoint: RawBunProGrammarPoint
+type BpReviewAndGp = BunProReview & {
+    grammarPoint: BunProGrammarPoint
 };
 
-async function fetchData(): Promise<BpReviewAndGp[]> {
-    const reviewData = await BunProApiService.getAllReviews();
-    const gp = await BunProApiService.getGrammarPoints();
-    const grammarPointsMap = createGrammarPointsLookupMap(gp);
+function useData(grammarPoints?: BunProGrammarPoint[], reviews?: BunProReview[], ghostReviews?: BunProReview[]): BpReviewAndGp[] {
+    if (!grammarPoints || !reviews || !ghostReviews)
+        return [];
+    const grammarPointsMap = createGrammarPointsLookupMap(grammarPoints);
 
-    const reviews = [...reviewData['reviews'], ...reviewData['ghost_reviews']]
+    return [...reviews, ...ghostReviews]
         .filter(filterDeadGhostReviews)
-        .map((review: RawBunProReview) => ({
+        .map((review: BunProReview) => ({
             ...review,
-            grammarPoint: grammarPointsMap[review['grammar_point_id']]
-        }));
-
-    return reviews.sort((a, b) =>
-        new Date(a['next_review']).getTime() - new Date(b['next_review']).getTime());
+            grammarPoint: grammarPointsMap[review.grammarPointId]
+        }))
+        .sort((a, b) => (a.nextReview?.getTime() ?? 0) - (b.nextReview?.getTime() ?? 0));
 }
 
-function BunProUpcomingReviewsChart() {
-    const [pendingReviews, setPendingReviews] = useState(0);
-    const [rawData, setRawData] = useState<BpReviewAndGp[]>([]);
+type BunProUpcomingReviewsChartProps = {
+    grammarPoints?: BunProGrammarPoint[],
+    reviews?: BunProReview[],
+    ghostReviews?: BunProReview[],
+    pendingReviewsCount: number
+};
+
+function BunProUpcomingReviewsChart({
+                                        reviews,
+                                        grammarPoints,
+                                        ghostReviews,
+                                        pendingReviewsCount
+                                    }: BunProUpcomingReviewsChartProps) {
+    const rawData = useData(grammarPoints, reviews, ghostReviews);
     const [targetItem, setTargetItem] = useState<SeriesRef>();
     const [period, setPeriod] = useState(UpcomingReviewUnits.hours.default);
     const [unit, setUnit] = useState(UpcomingReviewUnits.hours);
     const {isMobile} = useDeviceInfo();
 
-    useEffect(() => {
-        let isSubscribed = true;
-        fetchData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setRawData(data);
-            });
-        BunProApiService.getPendingReviews()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setPendingReviews(data.length);
-            });
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
-
     const chartData = useMemo(
-        () => aggregateData(rawData, unit, period, pendingReviews),
-        [rawData, period, unit, pendingReviews]
+        () => aggregateData(rawData, unit, period, pendingReviewsCount),
+        [rawData, period, unit, pendingReviewsCount]
     );
 
     const maxScale = useMemo(() => {

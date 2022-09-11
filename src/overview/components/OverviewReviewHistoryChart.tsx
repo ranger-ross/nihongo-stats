@@ -16,7 +16,7 @@ import WanikaniApiService from "../../wanikani/service/WanikaniApiService";
 import {daysToMillis, truncDate} from "../../util/DateUtils";
 import AnkiApiService from "../../anki/service/AnkiApiService";
 import {useAnkiDecks} from "../../hooks/useAnkiDecks";
-import {fetchAllBunProReviews, RawBunProFlattenedReviewWithLevel} from "../../bunpro/service/BunProDataUtil";
+import {fetchAllBunProReviews, BunProFlattenedReviewWithLevel} from "../../bunpro/service/BunProDataUtil";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection";
 import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil";
 import {AnkiReview} from "../../anki/models/AnkiReview";
@@ -149,7 +149,7 @@ async function fetchAnkiReviews(ankiDecks: string[]): Promise<AnkiDateReview[]> 
         }));
 }
 
-type BPData = RawBunProFlattenedReviewWithLevel & {
+type BPData = BunProFlattenedReviewWithLevel & {
     date: Date
 };
 

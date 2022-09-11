@@ -1,14 +1,13 @@
 import {Card, CardContent, CircularProgress, LinearProgress, Typography} from "@mui/material";
 import React, {useEffect, useState} from "react";
-import BunProApiService from "../service/BunProApiService";
 import {createGrammarPointsLookupMap} from "../service/BunProDataUtil";
-import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import {BunProReview} from "../models/BunProReview";
+import {BunProUser} from "../models/BunProUser";
 
 
-async function fetchCurrentReviewProgress(grammarPoints: RawBunProGrammarPoint[]) {
-
+function getCurrentReviewProgress(grammarPoints: BunProGrammarPoint[], reviews: BunProReview[]) {
     const grammarPointsMap = createGrammarPointsLookupMap(grammarPoints);
-    const reviewData = await BunProApiService.getAllReviews();
 
     const data: { [key: string]: number } = {
         JLPT5: 0,
@@ -18,15 +17,15 @@ async function fetchCurrentReviewProgress(grammarPoints: RawBunProGrammarPoint[]
         JLPT1: 0,
     };
 
-    for (const review of reviewData.reviews) {
-        const grammarPoint = grammarPointsMap[review['grammar_point_id']];
-        data[grammarPoint.attributes.level] += 1;
+    for (const review of reviews) {
+        const grammarPoint = grammarPointsMap[review.grammarPointId];
+        data[grammarPoint.level] += 1;
     }
 
     return data;
 }
 
-function getJLPTTotals(grammarPoints: RawBunProGrammarPoint[]) {
+function getJLPTTotals(grammarPoints: BunProGrammarPoint[]) {
 
     const data: { [key: string]: number } = {
         JLPT5: 0,
@@ -37,7 +36,7 @@ function getJLPTTotals(grammarPoints: RawBunProGrammarPoint[]) {
     };
 
     for (const grammarPoint of grammarPoints) {
-        data[grammarPoint.attributes.level] += 1;
+        data[grammarPoint.level] += 1;
     }
 
     return data;
@@ -63,10 +62,10 @@ type FormattedData = {
     }
 };
 
-async function fetchData() {
-    const grammarPoints = await BunProApiService.getGrammarPoints();
-
-    const currentProgress = await fetchCurrentReviewProgress(grammarPoints);
+function useData(user?: BunProUser, grammarPoints?: BunProGrammarPoint[], reviews?: BunProReview[]) {
+    if (!user || !grammarPoints || !reviews)
+        return null;
+    const currentProgress = getCurrentReviewProgress(grammarPoints, reviews);
     const totals = getJLPTTotals(grammarPoints);
 
     function formatData(level: string) {
@@ -99,13 +98,10 @@ async function fetchData() {
             total: 0,
         })
 
-    const userData = await BunProApiService.getUser();
-    const user = userData.data['attributes'];
-
     data.userLevel = {
         level: user.level,
-        nextLevelXp: user['next-level-xp'],
-        prevLevelXp: user['prev-level-xp'],
+        nextLevelXp: user.nextLevelXp,
+        prevLevelXp: user.prevLevelXp,
         xp: user.xp,
     };
 
@@ -161,26 +157,14 @@ function XpProgress({current, total}: XpProgressProps) {
 }
 
 type BunProJLPTTileProps = {
+    user?: BunProUser
+    reviews?: BunProReview[]
+    grammarPoints?: BunProGrammarPoint[]
     showXpProgress: boolean
 };
 
-export function BunProJLPTTile({showXpProgress}: BunProJLPTTileProps) {
-
-    const [data, setData] = useState<FormattedData>();
-
-    useEffect(() => {
-        let isSubscribed = true;
-
-        fetchData()
-            .then(_data => {
-                if (!isSubscribed)
-                    return;
-                setData(_data);
-            });
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
+export function BunProJLPTTile({showXpProgress, user, grammarPoints, reviews}: BunProJLPTTileProps) {
+    const data = useData(user, grammarPoints, reviews);
 
     return (
         <Card style={{minHeight: '465px'}}>

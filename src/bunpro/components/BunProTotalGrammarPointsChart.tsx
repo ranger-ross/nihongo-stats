@@ -3,14 +3,14 @@ import {useEffect, useMemo, useState} from 'react';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
-import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
+import {daysSinceDate, daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
-import BunProApiService from "../service/BunProApiService";
-import {createGrammarPointsLookupMap, RawBunProGrammarPointLookupMap} from "../service/BunProDataUtil";
-import {RawBunProReview} from "../models/raw/RawBunProReview";
-import { scaleBand } from '../../util/ChartUtils';
+import {createGrammarPointsLookupMap, BunProGrammarPointLookupMap} from "../service/BunProDataUtil";
+import {scaleBand} from '../../util/ChartUtils';
+import {BunProReview} from "../models/BunProReview";
+import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -41,11 +41,11 @@ function dataPoint(date: Date, previousDataPoint?: DataPoint): DataPoint {
     return dp;
 }
 
-function aggregateReviewByDay(reviews: RawBunProReview[], grammarPoints: RawBunProGrammarPointLookupMap) {
+function aggregateReviewByDay(reviews: BunProReview[], grammarPoints: BunProGrammarPointLookupMap) {
     const orderedReviews = reviews
         .map(review => ({
             ...review,
-            createdAt: new Date(review['created_at'])
+            createdAt: review.createdAt
         }))
         .sort((a, b,) => a.createdAt.getTime() - b.createdAt.getTime());
 
@@ -58,27 +58,18 @@ function aggregateReviewByDay(reviews: RawBunProReview[], grammarPoints: RawBunP
             days.push(dataPoint(review.createdAt, lastDay));
             lastDay = days[days.length - 1];
         }
-        const gp = grammarPoints[review['grammar_point_id']]
-        lastDay.addReview(gp.attributes.level.replace('JLPT', 'N'));
+        const gp = grammarPoints[review.grammarPointId]
+        lastDay.addReview(gp.level.replace('JLPT', 'N'));
     }
 
     return days;
 }
 
-async function fetchGrammarPoints() {
-    const gp = await BunProApiService.getGrammarPoints();
-    return createGrammarPointsLookupMap(gp);
-}
-
-async function fetchData() {
-    const reviews = await BunProApiService.getAllReviews();
-    const grammarPoints = await fetchGrammarPoints();
-    return aggregateReviewByDay(reviews.reviews, grammarPoints);
-}
-
-function daysSinceDate(date: Date | number) {
-    const millis = truncDate(Date.now()).getTime() - truncDate(date).getTime();
-    return millisToDays(millis);
+function useData(reviews?: BunProReview[], grammarPoints?: BunProGrammarPoint[]) {
+    if (!reviews || !grammarPoints)
+        return [];
+    const grammarPointsMap = createGrammarPointsLookupMap(grammarPoints);
+    return aggregateReviewByDay(reviews, grammarPointsMap);
 }
 
 function useOptions(rawData?: DataPoint[]) {
@@ -90,7 +81,7 @@ function useOptions(rawData?: DataPoint[]) {
         {value: 365, text: '1 Yr'}
     ];
 
-    if (!!rawData) {
+    if (!!rawData && rawData.length > 0) {
         options.push({
             value: millisToDays(Date.now() - rawData[0].date),
             text: 'All'
@@ -100,38 +91,24 @@ function useOptions(rawData?: DataPoint[]) {
     return options
 }
 
-function BunProTotalGrammarPointsChart() {
-    const [rawData, setRawData] = useState<DataPoint[]>();
-    const [isLoading, setIsLoading] = useState(false);
+type BunProTotalGrammarPointsChartProps = {
+    grammarPoints?: BunProGrammarPoint[]
+    reviews?: BunProReview[]
+};
+
+function BunProTotalGrammarPointsChart({reviews, grammarPoints}: BunProTotalGrammarPointsChartProps) {
+    const rawData = useMemo(() => useData(reviews, grammarPoints), [reviews, grammarPoints]);
+    const isLoading = !grammarPoints || !reviews;
     const [daysToLookBack, setDaysToLookBack] = useState(60);
     const {width} = useWindowDimensions();
     const isMobile = width < 400;
     const options = useOptions(rawData);
 
     useEffect(() => {
-        let isSubscribed = true;
-
-        setIsLoading(true);
-        fetchData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-
-                if (data.length > 0) {
-                    setDaysToLookBack(daysSinceDate(data[0].date));
-                }
-                setRawData(data);
-            })
-            .finally(() => {
-                if (!isSubscribed)
-                    return;
-                setIsLoading(false);
-            });
-
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
+        if (!!rawData && rawData.length > 0) {
+            setDaysToLookBack(daysSinceDate(rawData[0].date));
+        }
+    }, [rawData]);
 
     const chartData = useMemo(() => rawData?.filter(day => day.date.getTime() > Date.now() - (daysToMillis(daysToLookBack))), [rawData, daysToLookBack]);
 
@@ -196,7 +173,7 @@ function BunProTotalGrammarPointsChart() {
                         <CircularProgress style={{margin: '100px'}}/>
                     </div>
                 ) : (
-                    !!chartData ? (
+                    !!chartData && chartData.length > 0 ? (
                         // @ts-ignore
                         <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>

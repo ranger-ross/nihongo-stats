@@ -1,8 +1,5 @@
-import {PropsWithChildren, useEffect, useState} from "react";
 import {CircularProgress} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
-import BunProApiService from "../service/BunProApiService";
-import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus";
 import {AppStyles} from "../../util/TypeUtils";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 import {BunProReviewsResponse} from "../models/BunProReviewsResponse";
@@ -71,56 +68,3 @@ export function BunProLoadingScreen({config, grammarPoints, reviews}: BunProLoad
         </>
     );
 }
-
-
-function BunProPreloadedData({children}: PropsWithChildren<any>) {
-    const [grammarPoints, setGrammarPoints] = useState(false);
-    const [allReviews, setAllReviews] = useState(false);
-    const {status, setStatus} = useBunProPreloadStatus();
-
-    useEffect(() => {
-        if (status) {
-            return;
-        }
-        console.log('Preloading BunPro Data');
-
-        Promise.all([
-            BunProApiService.getGrammarPoints()
-                .then(() => setGrammarPoints(true)),
-            BunProApiService.getAllReviews()
-                .then(() => setAllReviews(true)),
-        ])
-            .then(() => {
-                console.log('BunPro Data preloaded');
-                setStatus(true);
-            });
-    }, []);
-
-    const isLoaded = status || (grammarPoints && allReviews);
-
-    return (
-        <>
-            {isLoaded ? (
-                children
-            ) : (
-                <>
-                    <div style={styles.loadingItemsContainer}>
-                        <div style={styles.loadingItemsColumn}>
-                            <strong>Loading BunPro Data...</strong>
-                            <br/>
-                            <LoadingItem text={'Grammar Points'} isLoading={!grammarPoints}/>
-                            <LoadingItem text={'Reviews'} isLoading={!allReviews}/>
-                        </div>
-                    </div>
-
-                    <p style={{textAlign: 'center'}}>
-                        This may take a few minutes.
-                    </p>
-
-                </>
-            )}
-        </>
-    );
-}
-
-export default BunProPreloadedData;

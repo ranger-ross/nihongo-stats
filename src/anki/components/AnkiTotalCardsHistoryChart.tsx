@@ -3,7 +3,6 @@ import PeriodSelector from "../../shared/PeriodSelector";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
-import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
 import AnkiApiService from "../service/AnkiApiService";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";

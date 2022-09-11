@@ -1,7 +1,6 @@
 import {CircularProgress} from "@mui/material";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
 import {Chart, Legend, PieSeries, Title} from '@devexpress/dx-react-chart-material-ui';
-import * as React from "react";
 import {Legend as LegendBase} from "@devexpress/dx-react-chart";
 import {SimpleCard} from "../../shared/SimpleCard";
 import {useAnkiCardBreakdown} from "../service/AnkiQueries";

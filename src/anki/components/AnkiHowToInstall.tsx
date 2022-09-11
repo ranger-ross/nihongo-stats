@@ -1,5 +1,4 @@
 import {Accordion, AccordionSummary, Button, Link, ToggleButton, ToggleButtonGroup, Typography} from "@mui/material";
-import * as React from "react";
 import {useState} from "react";
 import macosAnkiAddOns from '../../../assets/anki/macos/anki-add-ons.png'
 import macosAnkiGetAddOns from '../../../assets/anki/macos/anki-get-add-ons.png'

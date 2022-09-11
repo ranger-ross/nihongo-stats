@@ -75,11 +75,6 @@ export const BUNPRO_COLORS = {
     blue: '#5babf2',
 }
 
-/**
- * @deprecated use BUNPRO_COLORS instead
- */
-export const BunProColors = BUNPRO_COLORS;
-
 export const ANKI_COLORS = {
     blue: '#77ccff',
     lightGreen: '#74c464',
@@ -87,8 +82,3 @@ export const ANKI_COLORS = {
     lightOrange: '#fd8d3c',
     redOrange: '#fb6a4a',
 }
-
-/**
- * @deprecated use ANKI_COLORS instead
- */
-export const AnkiColors = ANKI_COLORS;

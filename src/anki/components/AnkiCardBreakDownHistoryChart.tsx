@@ -1,13 +1,12 @@
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {addDays, daysToMillis, truncDate} from "../../util/DateUtils";
-import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
 import AnkiApiService from "../service/AnkiApiService";
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {AreaSeries, ArgumentScale, EventTracker, Stack, ValueAxis as ValueAxisBase} from "@devexpress/dx-react-chart";
-import {AnkiColors} from "../../Constants";
+import {ANKI_COLORS} from "../../Constants";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {AnkiReview} from "../models/AnkiReview";
 import Area from "../../shared/Area";
@@ -272,7 +271,7 @@ function AnkiCardBreakDownHistoryChart({deckNames}: AnkiCardBreakDownHistoryChar
                                 name="Mature"
                                 valueField="matureCount"
                                 argumentField="date"
-                                color={AnkiColors.darkGreen}
+                                color={ANKI_COLORS.darkGreen}
                                 seriesComponent={Area}
                             />
 
@@ -280,7 +279,7 @@ function AnkiCardBreakDownHistoryChart({deckNames}: AnkiCardBreakDownHistoryChar
                                 name="Learning"
                                 valueField="learningCount"
                                 argumentField="date"
-                                color={AnkiColors.lightOrange}
+                                color={ANKI_COLORS.lightOrange}
                                 seriesComponent={Area}
                             />
 
@@ -288,7 +287,7 @@ function AnkiCardBreakDownHistoryChart({deckNames}: AnkiCardBreakDownHistoryChar
                                 name="Relearning"
                                 valueField="relearningCount"
                                 argumentField="date"
-                                color={AnkiColors.redOrange}
+                                color={ANKI_COLORS.redOrange}
                                 seriesComponent={Area}
                             />
 
@@ -296,7 +295,7 @@ function AnkiCardBreakDownHistoryChart({deckNames}: AnkiCardBreakDownHistoryChar
                                 name="Young"
                                 valueField="youngCount"
                                 argumentField="date"
-                                color={AnkiColors.lightGreen}
+                                color={ANKI_COLORS.lightGreen}
                                 seriesComponent={Area}
                             />
 
@@ -304,7 +303,7 @@ function AnkiCardBreakDownHistoryChart({deckNames}: AnkiCardBreakDownHistoryChar
                                 name="New"
                                 valueField="newCount"
                                 argumentField="date"
-                                color={AnkiColors.blue}
+                                color={ANKI_COLORS.blue}
                                 seriesComponent={Area}
                             />
 

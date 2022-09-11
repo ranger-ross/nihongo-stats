@@ -1,6 +1,6 @@
 import * as localForage from "localforage";
 import InMemoryCache from "../../util/InMemoryCache";
-import {AppUrls} from "../../Constants";
+import {APP_URLS} from "../../Constants";
 import {Observable, Subject} from "rxjs";
 import {WanikaniReview} from "../models/WanikaniReview";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
@@ -9,7 +9,7 @@ import {mapWanikaniReview} from "./WanikaniMappingService";
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
 
-const wanikaniApiUrl = AppUrls.wanikaniApi;
+const wanikaniApiUrl = APP_URLS.wanikaniApi;
 const cacheKeys = {
     apiKey: 'wanikani-api-key',
     reviews: 'wanikani-reviews',

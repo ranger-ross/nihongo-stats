@@ -8,7 +8,7 @@ import {
     SeriesRef,
     Stack
 } from "@devexpress/dx-react-chart";
-import {AnkiColors, AppNames, BunProColors, WanikaniColors} from '../../Constants';
+import {ANKI_COLORS, APP_NAMES, BUNPRO_COLORS, WANIKANI_COLORS} from '../../Constants';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
@@ -101,9 +101,9 @@ function addAppNameToReviewData(data: any[], appName: string) {
 
 function aggregateDate(ankiReviews: any[], bunProReviews: any[], wanikaniReviews: any[], daysToLookBack: number) {
     const reviews = [
-        ...(bunProReviews ? addAppNameToReviewData(bunProReviews, AppNames.bunpro) : []),
-        ...(ankiReviews ? addAppNameToReviewData(ankiReviews, AppNames.anki) : []),
-        ...(wanikaniReviews ? addAppNameToReviewData(wanikaniReviews, AppNames.wanikani) : []),
+        ...(bunProReviews ? addAppNameToReviewData(bunProReviews, APP_NAMES.bunpro) : []),
+        ...(ankiReviews ? addAppNameToReviewData(ankiReviews, APP_NAMES.anki) : []),
+        ...(wanikaniReviews ? addAppNameToReviewData(wanikaniReviews, APP_NAMES.wanikani) : []),
     ]
         .filter(review => review.date > truncDate(Date.now() - daysToMillis(daysToLookBack)))
         .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -121,11 +121,11 @@ function aggregateDate(ankiReviews: any[], bunProReviews: any[], wanikaniReviews
 
         const lastDay = aggregatedDate[aggregatedDate.length - 1];
 
-        if (data.appName === AppNames.wanikani) {
+        if (data.appName === APP_NAMES.wanikani) {
             lastDay.addWanikani(data);
-        } else if (data.appName === AppNames.anki) {
+        } else if (data.appName === APP_NAMES.anki) {
             lastDay.addAnki(data);
-        } else if (data.appName === AppNames.bunpro) {
+        } else if (data.appName === APP_NAMES.bunpro) {
             lastDay.addBunPro(data);
         }
     }
@@ -369,7 +369,7 @@ function OverviewReviewsHistoryChart() {
                                         name="Anki"
                                         valueField="anki"
                                         argumentField="date"
-                                        color={AnkiColors.lightGreen}
+                                        color={ANKI_COLORS.lightGreen}
                                     />
                                 ) : null}
 
@@ -378,7 +378,7 @@ function OverviewReviewsHistoryChart() {
                                         name="BunPro"
                                         valueField="bunPro"
                                         argumentField="date"
-                                        color={BunProColors.blue}
+                                        color={BUNPRO_COLORS.blue}
                                     />
                                 ) : null}
 
@@ -387,7 +387,7 @@ function OverviewReviewsHistoryChart() {
                                         name="Wanikani"
                                         valueField="wanikani"
                                         argumentField="date"
-                                        color={WanikaniColors.pink}
+                                        color={WANIKANI_COLORS.pink}
                                     />
                                 ) : null}
 

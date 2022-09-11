@@ -91,7 +91,7 @@ type BunProTotalReviewsChartProps = {
 };
 
 function BunProTotalReviewsChart({reviews, grammarPoints}: BunProTotalReviewsChartProps) {
-    const rawData = useData(reviews, grammarPoints);
+    const rawData = useMemo(() => useData(reviews, grammarPoints), [reviews, grammarPoints]);
     const isLoading = !grammarPoints || !reviews;
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
     const {width} = useWindowDimensions();

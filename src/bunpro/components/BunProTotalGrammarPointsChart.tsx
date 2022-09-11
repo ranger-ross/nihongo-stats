@@ -97,7 +97,7 @@ type BunProTotalGrammarPointsChartProps = {
 };
 
 function BunProTotalGrammarPointsChart({reviews, grammarPoints}: BunProTotalGrammarPointsChartProps) {
-    const rawData = useData(reviews, grammarPoints);
+    const rawData = useMemo(() => useData(reviews, grammarPoints), [reviews, grammarPoints]);
     const isLoading = !grammarPoints || !reviews;
     const [daysToLookBack, setDaysToLookBack] = useState(60);
     const {width} = useWindowDimensions();

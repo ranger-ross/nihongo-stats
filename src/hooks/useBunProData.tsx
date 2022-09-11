@@ -1,8 +1,34 @@
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 import {BunProUser} from "../bunpro/models/BunProUser";
 import {BunProGrammarPoint} from "../bunpro/models/BunProGrammarPoint";
 import BunProApiService from "../bunpro/service/BunProApiService";
 import {BunProReviewsResponse} from "../bunpro/models/BunProReviewsResponse";
+import create from "zustand";
+
+type LoadingScreenState = {
+    user: BunProUser | undefined,
+    reviews: BunProReviewsResponse | undefined
+    grammarPoints: BunProGrammarPoint[] | undefined,
+    pendingReviewsCount: number | undefined,
+
+    setUser: (data: BunProUser) => void
+    setReview: (data: BunProReviewsResponse) => void
+    setGrammarPoints: (data: BunProGrammarPoint[]) => void
+    setPendingReviewsCount: (data: number) => void
+};
+
+const useLoadingScreenState = create<LoadingScreenState>((set) => ({
+    user: undefined,
+    reviews: undefined,
+    grammarPoints: undefined,
+    pendingReviewsCount: undefined,
+
+    setUser: (data: BunProUser) => set(() => ({user: data})),
+    setReview: (data: BunProReviewsResponse) => set(() => ({reviews: data})),
+    setGrammarPoints: (data: BunProGrammarPoint[]) => set(() => ({grammarPoints: data})),
+    setPendingReviewsCount: (data: number) => set(() => ({pendingReviewsCount: data})),
+
+}));
 
 type BunProDataConfig = {
     user?: boolean,
@@ -12,16 +38,17 @@ type BunProDataConfig = {
 };
 
 export function useBunProData(config: BunProDataConfig) {
-    const [user, setUser] = useState<BunProUser>();
-    const [grammarPoints, setGrammarPoints] = useState<BunProGrammarPoint[]>();
-    const [reviewData, setReviewData] = useState<BunProReviewsResponse>();
-    const [pendingReviewsCount, setPendingReviewsCount] = useState<number>(0);
-
+    const {
+        user, setUser,
+        reviews: reviewData, setReview: setReviewData,
+        grammarPoints, setGrammarPoints,
+        pendingReviewsCount, setPendingReviewsCount,
+    } = useLoadingScreenState();
 
     useEffect(() => {
         let isSubscribed = true;
 
-        if (config.user) {
+        if (config.user && !user) {
             BunProApiService.getUser()
                 .then(user => {
                     if (!isSubscribed)
@@ -30,7 +57,7 @@ export function useBunProData(config: BunProDataConfig) {
                 });
         }
 
-        if (config.grammarPoints) {
+        if (config.grammarPoints && !grammarPoints) {
             BunProApiService.getGrammarPoints()
                 .then(gp => {
                     if (!isSubscribed)
@@ -39,7 +66,7 @@ export function useBunProData(config: BunProDataConfig) {
                 });
         }
 
-        if (config.reviews) {
+        if (config.reviews && !reviewData) {
             BunProApiService.getAllReviews()
                 .then(resp => {
                     if (!isSubscribed)
@@ -48,7 +75,7 @@ export function useBunProData(config: BunProDataConfig) {
                 });
         }
 
-        if (config.pendingReviews) {
+        if (config.pendingReviews && !pendingReviewsCount && pendingReviewsCount !== 0) {
             BunProApiService.getPendingReviews()
                 .then(data => {
                     if (!isSubscribed)
@@ -66,6 +93,6 @@ export function useBunProData(config: BunProDataConfig) {
         user: user,
         grammarPoints: grammarPoints,
         reviewData: reviewData,
-        pendingReviewsCount: pendingReviewsCount
+        pendingReviewsCount: pendingReviewsCount ?? 0
     }
 }

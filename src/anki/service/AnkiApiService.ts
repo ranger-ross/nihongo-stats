@@ -1,10 +1,10 @@
 import * as localForage from "localforage"
-import {AppUrls} from "../../Constants";
+import {APP_URLS} from "../../Constants";
 import {AnkiDeck} from "../models/AnkiDeck";
 import {AnkiReview} from "../models/AnkiReview";
 import {AnkiCard} from "../models/AnkiCard";
 
-const ankiConnectApiUrl = AppUrls.ankiApi;
+const ankiConnectApiUrl = APP_URLS.ankiApi;
 
 const cacheKeys = {
     decks: 'anki-deck-names-and-ids',
@@ -114,13 +114,18 @@ async function getAllReviewsByDeck(deckName: string): Promise<AnkiReview[]> {
     return reviews;
 }
 
+async function getDeckNamesAndIdsWithoutCache(): Promise<AnkiDeck[]> {
+    let data = await invoke("deckNamesAndIds", 6).then(convertDeckMapToArray);
+    data = data.filter(deck => deck.name.toLowerCase() !== 'default')
+    return data;
+}
+
 async function getDeckNamesAndIds(): Promise<AnkiDeck[]> {
     const cachedValue: any = await localForage.getItem(cacheKeys.decks);
     if (!!cachedValue && cachedValue.lastUpdate > Date.now() - 1000 * 60 * 60 * 5) {
         return cachedValue.data;
     }
-    let data = await invoke("deckNamesAndIds", 6).then(convertDeckMapToArray);
-    data = data.filter(deck => deck.name.toLowerCase() !== 'default')
+    const data = getDeckNamesAndIdsWithoutCache();
     localForage.setItem(cacheKeys.decks, {
         data: data,
         lastUpdate: Date.now()
@@ -206,6 +211,7 @@ export default {
     getDecks: getDeckNames,
     flushCache: flushCache,
     getDeckNamesAndIds: getDeckNamesAndIds,
+    getDeckNamesAndIdsWithoutCache: getDeckNamesAndIdsWithoutCache,
     getNumCardsReviewedByDay: () => invoke("getNumCardsReviewedByDay", 6),
     getCollectionStatsHtml: () => invoke("getCollectionStatsHTML", 6),
     getCardReviews: getCardReviews,

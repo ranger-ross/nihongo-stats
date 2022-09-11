@@ -1,5 +1,5 @@
-import {AnkiColors} from "../../Constants";
 import {AnkiDeckSummary} from "../service/AnkiDataUtil";
+import {ANKI_COLORS} from "../../Constants";
 
 type AnkiDeckSummariesProps = {
     deckData: AnkiDeckSummary[]
@@ -17,9 +17,9 @@ function AnkiDeckSummaries({deckData}: AnkiDeckSummariesProps) {
                     <p style={{marginTop: '3px', marginBottom: '10px'}}>
                         <strong>
                     <span style={{color: 'lightgray'}}>Reviews: <span
-                        style={{color: AnkiColors.lightGreen}}>{data.dueCards}</span></span>
+                        style={{color: ANKI_COLORS.lightGreen}}>{data.dueCards}</span></span>
                             <span style={{marginLeft: '15px', color: 'lightgray'}}>New: <span
-                                style={{color: AnkiColors.blue}}>{data.newCards}</span></span>
+                                style={{color: ANKI_COLORS.blue}}>{data.newCards}</span></span>
                         </strong>
                     </p>
                 </div>

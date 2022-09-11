@@ -1,6 +1,6 @@
 import * as localForage from "localforage";
 import InMemoryCache from "../../util/InMemoryCache";
-import {AppUrls} from "../../Constants";
+import {APP_URLS} from "../../Constants";
 import {PromiseCache} from "../../util/PromiseCache";
 import WanikaniApiServiceRxJs, {EVENT_STATUS} from "./WanikaniApiServiceRxJs";
 import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
@@ -28,7 +28,7 @@ const memoryCache = new InMemoryCache<any>();
 // @ts-ignore
 const promiseCache = new PromiseCache();
 
-const wanikaniApiUrl = AppUrls.wanikaniApi;
+const wanikaniApiUrl = APP_URLS.wanikaniApi;
 const cacheKeys: { [key: string]: string } = {
     apiKey: 'wanikani-api-key',
     reviews: 'wanikani-reviews',

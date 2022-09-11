@@ -1,5 +1,4 @@
-import * as React from 'react';
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {
@@ -11,10 +10,12 @@ import {
     Stack
 } from "@devexpress/dx-react-chart";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
-import AnkiApiService from "../service/AnkiApiService";
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {AnkiReview} from "../models/AnkiReview";
+import {useAnkiReviewsByDeck} from "../service/AnkiQueries";
+import {DeckReviews} from "../service/AnkiDataUtil";
+
 
 type DataPoint = any;
 
@@ -49,10 +50,6 @@ function dataPoint(date: number, previousDataPoint?: DataPoint): DataPoint {
     return dp;
 }
 
-type DeckReviews = {
-    deckName: string,
-    reviews: AnkiReview[]
-};
 
 function formatMultiDeckReviewData(decks: DeckReviews[]): DataPoint[] {
     const reviews = [];
@@ -103,36 +100,21 @@ type AnkiReviewsChartProps = {
 };
 
 function AnkiReviewsChart({deckNames, showTotals}: AnkiReviewsChartProps) {
-    const [reviewsByDeck, setReviewsByDeck] = useState<DataPoint[]>();
-    const [decksToDisplay, setDecksToDisplay] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const {data, error, isLoading} = useAnkiReviewsByDeck(deckNames);
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
+    const isFirstLoad = useRef(true);
+
+    error && console.error(error);
+
+    const reviewsByDeck = data ? formatMultiDeckReviewData(data) : undefined;
     const options = useOptions(reviewsByDeck);
 
     useEffect(() => {
-        let isSubscribed = true;
-
-        const reviewPromises: Promise<AnkiReview[]>[] = [];
-        deckNames.forEach(name => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
-        setIsLoading(true);
-        Promise.all(reviewPromises)
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                const deckData: DeckReviews[] = data.map(((value, index) => ({
-                    deckName: deckNames[index],
-                    reviews: value
-                })));
-                const formattedData = formatMultiDeckReviewData(deckData)
-                setReviewsByDeck(formattedData);
-                setDaysToLookBack(millisToDays(Date.now() - formattedData[0].date))
-                setDecksToDisplay(deckNames);
-            })
-            .finally(() => setIsLoading(false));
-        return () => {
-            isSubscribed = false;
+        if (isFirstLoad.current && reviewsByDeck && reviewsByDeck.length > 0) {
+            setDaysToLookBack(millisToDays(Date.now() - reviewsByDeck[0].date))
+            isFirstLoad.current = false;
         }
-    }, [deckNames]);
+    }, [data]);
 
     const chartData = useMemo(() =>
             !!reviewsByDeck ? reviewsByDeck.filter(dp => dp.date.getTime() >= Date.now() - daysToMillis(daysToLookBack)) : null,
@@ -170,6 +152,12 @@ function AnkiReviewsChart({deckNames, showTotals}: AnkiReviewsChartProps) {
         );
     }
 
+    // Create a key that is unique the selected decks.
+    // If the selected decks change, without this key the React Chart will crash due to a bug.
+    // This key will force the Chart element to be re-rendered a new component
+    // https://github.com/DevExpress/devextreme-reactive/issues/3570
+    const key = deckNames.reduce((a, c) => a + c, '');
+
     return (
         <Card>
             <CardContent>
@@ -194,9 +182,9 @@ function AnkiReviewsChart({deckNames, showTotals}: AnkiReviewsChartProps) {
                         <CircularProgress style={{margin: '100px'}}/>
                     </div>
                 ) : (
-                    !!decksToDisplay && chartData ? (
+                    chartData ? (
                         // @ts-ignore
-                        <Chart data={chartData}>
+                        <Chart key={key} data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
                             <ValueAxis/>
@@ -208,7 +196,7 @@ function AnkiReviewsChart({deckNames, showTotals}: AnkiReviewsChartProps) {
                                 />
                             ) : null}
 
-                            {decksToDisplay?.map((name, idx) => (
+                            {deckNames.map((name, idx) => (
                                 showTotals ? (
                                     <LineSeries key={idx}
                                                 name={name}
@@ -225,7 +213,7 @@ function AnkiReviewsChart({deckNames, showTotals}: AnkiReviewsChartProps) {
 
                             {!showTotals ? (
                                 <Stack
-                                    stacks={[{series: decksToDisplay}]}
+                                    stacks={[{series: deckNames}]}
                                 />
                             ) : null}
 

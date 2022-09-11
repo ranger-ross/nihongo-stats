@@ -18,7 +18,7 @@ import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey";
 import {createAnkiCardsDueQuery, fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil";
-import {AnkiColors, AppNames, BunProColors, WanikaniColors} from "../../Constants";
+import {ANKI_COLORS, APP_NAMES, BUNPRO_COLORS, WANIKANI_COLORS} from "../../Constants";
 import WanikaniApiService from "../../wanikani/service/WanikaniApiService";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection";
 import {
@@ -82,11 +82,11 @@ function dataPoint(date: Date, unit: UpcomingReviewUnit, reviews: any[], previou
         dp.total += previousDataPoint.total;
 
     dp.addReview = (appName) => {
-        if (appName === AppNames.anki)
+        if (appName === APP_NAMES.anki)
             dp.ankiCount += 1;
-        else if (appName === AppNames.bunpro)
+        else if (appName === APP_NAMES.bunpro)
             dp.bunProCount += 1;
-        else if (appName === AppNames.wanikani)
+        else if (appName === APP_NAMES.wanikani)
             dp.wanikaniCount += 1;
     };
 
@@ -144,9 +144,9 @@ function getChartStartTime() { // Start chart at the beginning of the next hour
 function aggregateData(ankiReviews: AnkiDateReview[], bunProReviews: BunProDateReview[], wanikaniReviews: WanikaniDateReview[],
                        period: number, unit: UpcomingReviewUnit, ankiInitialReviewCount: number, bunProInitialReviewCount: number, wanikaniInitialReviewCount: number) {
     const reviews = [
-        ...(bunProReviews ? addAppNameToReviewData(bunProReviews, AppNames.bunpro) : []),
-        ...(ankiReviews ? addAppNameToReviewData(ankiReviews, AppNames.anki) : []),
-        ...(wanikaniReviews ? addAppNameToReviewData(wanikaniReviews, AppNames.wanikani) : []),
+        ...(bunProReviews ? addAppNameToReviewData(bunProReviews, APP_NAMES.bunpro) : []),
+        ...(ankiReviews ? addAppNameToReviewData(ankiReviews, APP_NAMES.anki) : []),
+        ...(wanikaniReviews ? addAppNameToReviewData(wanikaniReviews, APP_NAMES.wanikani) : []),
     ]
         .filter(review => review.date >= unit.trunc(Date.now()) && review.date < unit.trunc(Date.now() + daysToMillis(maxDaysIntoFuture)))
         .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -472,7 +472,7 @@ function OverviewUpcomingReviewsChart() {
                                         valueField="ankiCount"
                                         argumentField="date"
                                         scaleName="daily"
-                                        color={AnkiColors.lightGreen}
+                                        color={ANKI_COLORS.lightGreen}
                                         pointComponent={BarWithLabel}
                                     />
                                 ) : null}
@@ -483,7 +483,7 @@ function OverviewUpcomingReviewsChart() {
                                         valueField="bunProCount"
                                         argumentField="date"
                                         scaleName="daily"
-                                        color={BunProColors.blue}
+                                        color={BUNPRO_COLORS.blue}
                                         pointComponent={BarWithLabel}
                                     />
                                 ) : null}
@@ -494,7 +494,7 @@ function OverviewUpcomingReviewsChart() {
                                         valueField="wanikaniCount"
                                         argumentField="date"
                                         scaleName="daily"
-                                        color={WanikaniColors.pink}
+                                        color={WANIKANI_COLORS.pink}
                                         pointComponent={BarWithLabel}
                                     />
                                 ) : null}

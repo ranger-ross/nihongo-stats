@@ -1,6 +1,5 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
 import {RoutePaths} from "../Routes";
-import * as React from "react";
 import {useEffect, useMemo, useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import {Card, CardContent, Typography} from "@mui/material";

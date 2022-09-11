@@ -10,7 +10,6 @@ import {
     ToggleButtonGroup,
     Typography
 } from "@mui/material";
-import * as React from "react";
 import {useMemo, useState} from "react";
 import {
     colorByOptions,

@@ -85,4 +85,4 @@ jobs:
           credentials_json: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 
       - name: Deploy to Cloud Run
-        run: gcloud run deploy nihongo-stats --region us-central1 --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME
+        run: gcloud run deploy nihongo-stats --region asia-northeast1 --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$GITHUB_REF_NAME

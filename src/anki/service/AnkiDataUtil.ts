@@ -1,6 +1,7 @@
 import AnkiApiService from "./AnkiApiService";
 import {ANKI_COLORS} from "../../Constants";
 import {truncDate} from "../../util/DateUtils";
+import {AnkiReview} from "../models/AnkiReview";
 
 export function createAnkiCardsDueQuery(deck: string, day: number) {
     return {
@@ -116,3 +117,20 @@ export async function fetchAnkiUpcomingReviewData(decks: string[], numberOfDays:
     }
     return data;
 }
+
+export type DeckReviews = {
+    deckName: string,
+    reviews: AnkiReview[]
+};
+
+export async function fetchAnkiReviewsByDeck(deckNames: string[]): Promise<DeckReviews[]> {
+    const reviewPromises: Promise<AnkiReview[]>[] = [];
+    deckNames.forEach(name => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
+    const data = await Promise.all(reviewPromises);
+    return data.map(((value, index) => ({
+        deckName: deckNames[index],
+        reviews: value
+    })));
+}
+
+

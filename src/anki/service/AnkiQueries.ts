@@ -3,7 +3,7 @@ import {
     AnkiDeckSummary,
     fetchAnkiDeckSummaries,
     fetchAnkiReviewsByDeck,
-    fetchAnkiUpcomingReviewData,
+    fetchAnkiUpcomingReviewData, fetchBreakDownHistoryData,
     fetchCardBreakDownData
 } from "./AnkiDataUtil";
 
@@ -28,6 +28,12 @@ export function useAnkiUpcomingReviews(decks: string[], days: number) {
 
 export function useAnkiReviewsByDeck(decks: string[]) {
     return useQuery(['ankiAnkiReviewsByDeck', ...decks], () => fetchAnkiReviewsByDeck(decks), {
+        enabled: !!decks && decks.length > 0,
+    });
+}
+
+export function useAnkiBreakDownHistory(decks: string[]) {
+    return useQuery(['ankiBreakDownHistory', ...decks], () => fetchBreakDownHistoryData(decks), {
         enabled: !!decks && decks.length > 0,
     });
 }

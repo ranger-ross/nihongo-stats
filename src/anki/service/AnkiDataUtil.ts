@@ -1,7 +1,8 @@
 import AnkiApiService from "./AnkiApiService";
 import {ANKI_COLORS} from "../../Constants";
-import {truncDate} from "../../util/DateUtils";
+import {addDays, truncDate} from "../../util/DateUtils";
 import {AnkiReview} from "../models/AnkiReview";
+import {AnkiCard} from "../models/AnkiCard";
 
 export function createAnkiCardsDueQuery(deck: string, day: number) {
     return {
@@ -132,5 +133,152 @@ export async function fetchAnkiReviewsByDeck(deckNames: string[]): Promise<DeckR
         reviews: value
     })));
 }
+
+function createCardTimestampMap(cards: AnkiCard[]) {
+    const map: { [key: number]: AnkiCard[] } = {};
+    for (const card of cards) {
+        const date = truncDate(card.note).getTime();
+        if (!!map[date]) {
+            map[date].push(card);
+        } else {
+            map[date] = [card];
+        }
+    }
+    return map;
+}
+
+function createReviewTimestampMap(reviews: AnkiReview[]) {
+    const map: { [key: number]: AnkiReview[] } = {};
+    for (const review of reviews) {
+        const date = truncDate(review.reviewTime).getTime();
+        if (!!map[date]) {
+            map[date].push(review);
+        } else {
+            map[date] = [review];
+        }
+    }
+    return map;
+}
+
+export type AnkiBreakDownHistoryDataPoint = {
+    date: number,
+    newCount: number,
+    learningCount: number,
+    relearningCount: number,
+    youngCount: number,
+    matureCount: number,
+};
+
+export async function fetchBreakDownHistoryData(decks: string[]) {
+    // Fetch all the cards
+    const cardIdPromises = decks.map(deck => AnkiApiService.getAllCardIdsByDeck(deck));
+    const cardIdResults = await Promise.all(cardIdPromises);
+    const cardIds = cardIdResults.flat();
+    const cards = await AnkiApiService.getCardInfo(Array.from(new Set(cardIds)));
+
+    // Fetch all the reviews
+    const reviewPromises = decks.map(deck => AnkiApiService.getAllReviewsByDeck(deck));
+    const reviewResults = await Promise.all(reviewPromises);
+    const reviews = reviewResults.flat().sort((a, b) => a.reviewTime - b.reviewTime);
+
+    const reviewsMap = createReviewTimestampMap(reviews);
+
+    const firstDay = truncDate(reviews[0].reviewTime).getTime();
+    const lastDay = Date.now();
+
+    const tsMap = createCardTimestampMap(cards);
+
+    const statusMap: { [cardId: number]: { newInterval: number, reviewType: number } } = {};
+
+    // Add any cards that were created before the first review day
+    Object.entries(tsMap)
+        .filter(([key]) => parseInt(key) < firstDay)
+        .forEach(([, value]) => {
+            for (const card of (value as AnkiCard[])) {
+                statusMap[card.cardId] = {
+                    newInterval: 0,
+                    reviewType: 0,
+                };
+            }
+        })
+
+
+    const data: AnkiBreakDownHistoryDataPoint[] = [];
+
+    function snapshot() {
+        let newCount = 0;
+        let youngCount = 0;
+        let matureCount = 0
+        let learningCount = 0;
+        let relearningCount = 0;
+
+
+        for (const value of Object.values(statusMap)) {
+            if (value.newInterval >= 21) {
+                matureCount += 1;
+                continue;
+            }
+            if (value.newInterval > 0) {
+                youngCount += 1;
+                continue;
+            }
+            if (value.newInterval == 0) {
+                newCount += 1;
+                continue;
+            }
+            if (value.reviewType == 2) {
+                relearningCount += 1;
+            } else {
+                learningCount += 1;
+            }
+        }
+        return {
+            newCount,
+            learningCount,
+            relearningCount,
+            youngCount,
+            matureCount
+        };
+    }
+
+    let currentDay = firstDay;
+    while (currentDay <= lastDay) {
+
+        // Add any newly created cards to the status map
+        const cardsCreatedOnCurrentDay = tsMap[currentDay];
+        if (cardsCreatedOnCurrentDay) {
+            for (const card of cardsCreatedOnCurrentDay) {
+                statusMap[card.cardId] = {
+                    newInterval: 0,
+                    reviewType: 0,
+                };
+            }
+        }
+
+        // Update the card interval for any cards reviewed on current day
+        const reviewsOnCurrentDay = reviewsMap[currentDay];
+        if (reviewsOnCurrentDay) {
+            for (const review of reviewsOnCurrentDay) {
+                statusMap[review.cardId] = {
+                    newInterval: review.newInterval,
+                    reviewType: review.reviewType,
+                };
+            }
+        }
+
+        // Take a snapshot of the card counts on current day
+        data.push({
+            date: currentDay,
+            ...snapshot()
+        })
+
+        // Advance to the next day
+        currentDay = addDays(currentDay, 1).getTime();
+    }
+
+    return data;
+}
+
+
 
 

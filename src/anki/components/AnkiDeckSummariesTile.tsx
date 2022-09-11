@@ -6,9 +6,11 @@ import {useAnkiDeckSummaries} from "../service/AnkiQueries";
 
 function AnkiDeckSummariesTile() {
     const {selectedDecks} = useSelectedAnkiDecks();
-    const {data, error, isLoading} = useAnkiDeckSummaries(selectedDecks);
+    const {data, isSuccess, error, isLoading} = useAnkiDeckSummaries(selectedDecks);
 
-    if (error) {
+    error && console.error(error);
+
+    if (!isSuccess) {
         return (
             <SimpleCard title={'Deck Summary'}>
                 An error occurred
@@ -26,7 +28,7 @@ function AnkiDeckSummariesTile() {
 
     return (
         <SimpleCard title={'Deck Summary'}>
-            <AnkiDeckSummaries deckData={data ?? []}/>
+            <AnkiDeckSummaries deckData={data}/>
         </SimpleCard>
     );
 }

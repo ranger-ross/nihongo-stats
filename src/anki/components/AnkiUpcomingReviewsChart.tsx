@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {
@@ -10,80 +10,31 @@ import {
     EventTracker,
     Stack
 } from "@devexpress/dx-react-chart";
-import AnkiApiService from "../service/AnkiApiService";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
-import {truncDate} from "../../util/DateUtils";
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {createAnkiCardsDueQuery} from "../service/AnkiDataUtil";
+import {UpcomingReviewDataPoint} from "../service/AnkiDataUtil";
+import {useAnkiUpcomingReviews} from "../service/AnkiQueries";
 
-type DataPoint = any;
-
-function dataPoint(day: number): DataPoint {
-    const data: DataPoint = {
-        day,
-        date: truncDate(Date.now() + (1000 * 60 * 60 * 24 * day))
-    };
-
-    data.addDueCards = (deck: string, cards: any[]) => {
-        data[deck] = cards.length;
-    };
-
-    return data;
-}
-
-async function fetchData(decks: string[], numberOfDays: number): Promise<DataPoint[]> {
-    const actions = [];
-    for (let i = 0; i < numberOfDays; i++) {
-        for (const deck of decks) {
-            actions.push(createAnkiCardsDueQuery(deck, i));
-        }
-    }
-
-    const listOfListDueCards = await AnkiApiService.sendMultiRequest(actions);
-
-    const data = [dataPoint(0)];
-    for (let i = 0; i < listOfListDueCards.length; i++) {
-        if (i % decks.length === 0 && i != 0) {
-            data.push(dataPoint(data[data.length - 1].day + 1));
-        }
-        const dp = data[data.length - 1];
-        const deck = decks[i % decks.length];
-        dp.addDueCards(deck, listOfListDueCards[i]);
-    }
-    return data;
-}
-
-type ChartData = { data: DataPoint[], decks: string[]}
+type ChartData = { data: UpcomingReviewDataPoint[], decks: string[] }
 
 function AnkiUpcomingReviewsChart() {
     const {selectedDecks} = useSelectedAnkiDecks();
     const [days, setDays] = useState(14);
-    const [chartData, setChartData] = useState<ChartData>();
 
-    useEffect(() => {
-        let isSubscribed = true;
+    const {data, isLoading, error} = useAnkiUpcomingReviews(selectedDecks, days);
 
-        if (!selectedDecks || selectedDecks.length === 0)
-            return;
+    error && console.error(error);
 
-        if (selectedDecks?.length != chartData?.decks?.length) {
-            setChartData(undefined);
-        }
+    // Create a key that is unique the selected decks.
+    // If the selected decks change, without this key the React Chart will crash due to a bug.
+    // This key will force the Chart element to be re-rendered a new component
+    const key = selectedDecks.reduce((a, c) => a + c, '');
 
-        fetchData(selectedDecks, days)
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setChartData({
-                    data: data,
-                    decks: selectedDecks
-                });
-            });
-        return () => {
-            isSubscribed = false;
-        };
-    }, [selectedDecks, days]);
+    const chartData: ChartData = {
+        data: data ?? [],
+        decks: selectedDecks
+    };
 
     const visibleLabelIndices = getVisibleLabelIndices(chartData?.data ?? [], 20);
 
@@ -146,18 +97,18 @@ function AnkiUpcomingReviewsChart() {
                 </Grid>
 
 
-                {!chartData ? (
+                {isLoading ? (
                     <div style={{height: '300px', textAlign: 'center'}}>
                         <CircularProgress style={{margin: '100px'}}/>
                     </div>
                 ) : (
                     // @ts-ignore
-                    <Chart data={(chartData as ChartData).data} height={800}>
+                    <Chart key={key} data={chartData.data} height={800}>
                         <ArgumentScale factory={scaleBand}/>
                         <ArgumentAxis labelComponent={LabelWithDate}/>
                         <ValueAxis/>
 
-                        {(chartData as ChartData).decks?.map(deck => (
+                        {chartData.decks.map(deck => (
                             <BarSeries
                                 key={deck}
                                 name={deck}
@@ -167,7 +118,7 @@ function AnkiUpcomingReviewsChart() {
                         ))}
 
                         <Stack
-                            stacks={[{series: (chartData as ChartData).decks}]}
+                            stacks={[{series: chartData.decks}]}
                         />
 
                         <Animation/>

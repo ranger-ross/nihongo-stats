@@ -12,23 +12,26 @@ type LegendMarkerProps = object & { className?: string; style?: React.CSSPropert
 function AnkiCardBreakDownChart() {
     const {selectedDecks} = useSelectedAnkiDecks();
 
-    const {data, error, isLoading} = useAnkiCardBreakdown(selectedDecks);
+    const {data, error, isLoading, isSuccess} = useAnkiCardBreakdown(selectedDecks);
 
-    if (error) {
+    error && console.error(error);
+
+    if (isLoading) {
         return (
             <SimpleCard>
                 <div style={{height: '400px', textAlign: 'center'}}>
-                    An error occurred, try reloading the page
+                    <CircularProgress style={{margin: '100px'}}/>
                 </div>
             </SimpleCard>
         );
     }
 
-    if (isLoading || !data) {
+    if (!isSuccess) {
+        console.error(error);
         return (
             <SimpleCard>
                 <div style={{height: '400px', textAlign: 'center'}}>
-                    <CircularProgress style={{margin: '100px'}}/>
+                    An error occurred, try reloading the page
                 </div>
             </SimpleCard>
         );

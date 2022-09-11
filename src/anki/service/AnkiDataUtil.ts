@@ -1,5 +1,6 @@
 import AnkiApiService from "./AnkiApiService";
 import {ANKI_COLORS} from "../../Constants";
+import {truncDate} from "../../util/DateUtils";
 
 export function createAnkiCardsDueQuery(deck: string, day: number) {
     return {
@@ -73,3 +74,45 @@ export async function fetchCardBreakDownData(decks: string[]): Promise<StageBrea
     ];
 }
 
+export type UpcomingReviewDataPoint = {
+    [deck: string]: number
+} & {
+    day: number
+    date: Date,
+    addDueCards: (deck: string, cards: any[]) => void
+};
+
+function upcomingReviewDataPoint(day: number): UpcomingReviewDataPoint {
+    const data: any = {
+        day,
+        date: truncDate(Date.now() + (1000 * 60 * 60 * 24 * day)),
+    };
+
+    data.addDueCards = (deck: string, cards: any[]) => {
+        data[deck] = cards.length;
+    };
+
+    return data;
+}
+
+export async function fetchAnkiUpcomingReviewData(decks: string[], numberOfDays: number): Promise<UpcomingReviewDataPoint[]> {
+    const actions = [];
+    for (let i = 0; i < numberOfDays; i++) {
+        for (const deck of decks) {
+            actions.push(createAnkiCardsDueQuery(deck, i));
+        }
+    }
+
+    const listOfListDueCards = await AnkiApiService.sendMultiRequest(actions);
+
+    const data = [upcomingReviewDataPoint(0)];
+    for (let i = 0; i < listOfListDueCards.length; i++) {
+        if (i % decks.length === 0 && i != 0) {
+            data.push(upcomingReviewDataPoint(data[data.length - 1].day + 1));
+        }
+        const dp = data[data.length - 1];
+        const deck = decks[i % decks.length];
+        dp.addDueCards(deck, listOfListDueCards[i]);
+    }
+    return data;
+}

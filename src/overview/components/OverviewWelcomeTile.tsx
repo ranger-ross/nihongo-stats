@@ -1,19 +1,20 @@
 import {Card, CardContent, IconButton, Menu, MenuItem, Typography} from "@mui/material";
 import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import AnkiDeckSummaries from "../../anki/components/AnkiDeckSummaries";
 import WanikaniPendingLessonsAndReviews from "../../wanikani/components/WanikaniPendingLessonAndReviews";
 import BunProPendingReviews from "../../bunpro/components/BunProPendingReviews";
-import BunProApiService from "../../bunpro/service/BunProApiService";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey";
 import {Add} from "@mui/icons-material";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection";
-import {AppNames} from "../../Constants";
+import {APP_NAMES} from "../../Constants";
 import {useSelectedApp} from "../../hooks/useSelectedApp";
-import WanikaniApiService from "../../wanikani/service/WanikaniApiService";
-import {AnkiDeckSummary, fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil";
 import {AppStyles} from "../../util/TypeUtils";
+import {useAnkiDeckSummaries} from "../../anki/service/AnkiQueries";
+import {useBunProPendingReviews} from "../../bunpro/service/BunProQueries";
+import {useWanikaniSummary} from "../../wanikani/service/WanikaniQueries";
+import {getPendingLessonsAndReviews} from "../../wanikani/service/WanikaniDataUtil";
 
 const styles: AppStyles = {
     titleText: {
@@ -35,20 +36,8 @@ const styles: AppStyles = {
 
 function AnkiSection() {
     const {selectedDecks} = useSelectedAnkiDecks();
-    const [ankiDeckData, setAnkiDeckData] = useState<AnkiDeckSummary[]>([]);
-
-    useEffect(() => {
-        let isSubscribed = true;
-        fetchAnkiDeckSummaries(selectedDecks)
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setAnkiDeckData(data);
-            });
-        return () => {
-            isSubscribed = false;
-        }
-    }, [selectedDecks]);
+    const {data: ankiDeckData, error} = useAnkiDeckSummaries(selectedDecks);
+    error && console.error(error);
 
     return (
         <>
@@ -57,28 +46,16 @@ function AnkiSection() {
             </Typography>
 
             <div style={{marginBottom: '15px', marginLeft: '10px'}}>
-                <AnkiDeckSummaries deckData={ankiDeckData}/>
+                <AnkiDeckSummaries deckData={ankiDeckData ?? []}/>
             </div>
         </>
     );
 }
 
 function WanikaniSection() {
-    const [wanikaniStudyData, setWanikaniStudyData] = useState<{ lessons: number, reviews: number }>();
-
-    useEffect(() => {
-        let isSubscribed = true;
-        WanikaniApiService.getPendingLessonsAndReviews()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setWanikaniStudyData(data);
-            });
-        return () => {
-            isSubscribed = false;
-        }
-    }, [])
-
+    const {data, error} = useWanikaniSummary();
+    error && console.error(error);
+    const wanikaniStudyData = data ? getPendingLessonsAndReviews(data) : null;
     return (
         <>
             <Typography variant={'h6'} style={styles.titleText}>
@@ -96,21 +73,8 @@ function WanikaniSection() {
 }
 
 function BunProSection() {
-    const [pendingReviews, setPendingReviews] = useState(0);
-
-    useEffect(() => {
-        let isSubscribed = true;
-        BunProApiService.getPendingReviews()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setPendingReviews(data.length);
-            });
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
-
+    const {data, error} = useBunProPendingReviews();
+    error && console.error(error);
     return (
         <>
             <Typography variant={'h6'} style={styles.titleText}>
@@ -118,7 +82,7 @@ function BunProSection() {
             </Typography>
 
             <div style={styles.buttonContainer}>
-                <BunProPendingReviews count={pendingReviews}/>
+                <BunProPendingReviews count={data?.length ?? 0}/>
             </div>
         </>
     );
@@ -146,19 +110,19 @@ function AddAppDropdown({showAnki, showBunPro, showWanikani}: AddAppDropdownProp
                 onClose={() => setAnchorEl(null)}
             >
                 {showAnki ? (
-                    <MenuItem onClick={() => setSelectedApp(AppNames.anki)}>
+                    <MenuItem onClick={() => setSelectedApp(APP_NAMES.anki)}>
                         Add Anki
                     </MenuItem>
                 ) : null}
 
                 {showBunPro ? (
-                    <MenuItem onClick={() => setSelectedApp(AppNames.bunpro)}>
+                    <MenuItem onClick={() => setSelectedApp(APP_NAMES.bunpro)}>
                         Add BunPro
                     </MenuItem>
                 ) : null}
 
                 {showWanikani ? (
-                    <MenuItem onClick={() => setSelectedApp(AppNames.wanikani)}>
+                    <MenuItem onClick={() => setSelectedApp(APP_NAMES.wanikani)}>
                         Add Wanikani
                     </MenuItem>
                 ) : null}

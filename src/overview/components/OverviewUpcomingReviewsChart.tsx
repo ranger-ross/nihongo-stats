@@ -2,7 +2,6 @@ import React, {useEffect, useMemo, useState} from "react";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addDays, addHours, daysToMillis, truncDate, truncMinutes} from '../../util/DateUtils';
 import PeriodSelector from "../../shared/PeriodSelector";
-import BunProApiService from "../../bunpro/service/BunProApiService";
 import {ArgumentAxis, Chart, ScatterSeries, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {
     ArgumentScale,
@@ -19,7 +18,6 @@ import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey";
 import {createAnkiCardsDueQuery, fetchAnkiDeckSummaries} from "../../anki/service/AnkiDataUtil";
 import {ANKI_COLORS, APP_NAMES, BUNPRO_COLORS, WANIKANI_COLORS} from "../../Constants";
-import WanikaniApiService from "../../wanikani/service/WanikaniApiService";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection";
 import {
     addTimeToDate,
@@ -41,6 +39,10 @@ import {scaleBand} from "../../util/ChartUtils";
 import {AnkiReview} from "../../anki/models/AnkiReview";
 import {WanikaniAssignment} from "../../wanikani/models/WanikaniAssignment";
 import {BunProReview} from "../../bunpro/models/BunProReview";
+import {useWanikaniData} from "../../hooks/useWanikaniData";
+import {getPendingLessonsAndReviews} from "../../wanikani/service/WanikaniDataUtil";
+import {useBunProData} from "../../hooks/useBunProData";
+import {BunProReviewsResponse} from "../../bunpro/models/BunProReviewsResponse";
 
 const maxDaysIntoFuture = 31;
 
@@ -101,8 +103,7 @@ type BunProDateReview = BunProReview & {
     date: Date
 }
 
-async function getBunProReviews(): Promise<BunProDateReview[]> {
-    const reviewData = await BunProApiService.getAllReviews();
+function getBunProReviews(reviewData: BunProReviewsResponse): BunProDateReview[] {
     return [...reviewData.reviews, ...reviewData.ghostReviews]
         .filter(filterDeadGhostReviews)
         .map(review => ({...review, date: review.nextReview as Date}));
@@ -113,7 +114,7 @@ type AnkiDateReview = { date: Date, review: AnkiReview }
 async function getAnkiReviews(decks: string[]) {
     const actions = [];
     for (let i = 0; i < maxDaysIntoFuture; i++) {       // <== Use 31 days since it is more that the max,
-        for (const deck of decks) {      //     we dont want to constantly reload this when user changes period
+        for (const deck of decks) {      //     we don't want to constantly reload this when user changes period
             actions.push(createAnkiCardsDueQuery(deck, i));
         }
     }
@@ -168,80 +169,32 @@ function aggregateData(ankiReviews: AnkiDateReview[], bunProReviews: BunProDateR
 type WanikaniDateReview = WanikaniAssignment & { date: Date }
 
 
-async function fetchWanikaniReviews(): Promise<WanikaniDateReview[]> {
-    const rawData = await WanikaniApiService.getAllAssignments()
-    const data = rawData.filter(assignment => !assignment.burnedAt || !assignment.availableAt);
-
-    return data
+function getWanikaniReviews(assignments: WanikaniAssignment[]): WanikaniDateReview[] {
+    return assignments.filter(assignment => !assignment.burnedAt || !assignment.availableAt)
         .filter(assignment => !!assignment.availableAt && assignment.availableAt > addDays(new Date(), -1))
         .map(assignment => ({...assignment, date: assignment.availableAt as Date}));
 }
 
-function useWanikaniReviews(wanikaniApiKey?: string | null) {
-    const [wanikaniReviews, setWanikaniReviews] = useState<WanikaniDateReview[] | null>(null);
-    const [isWanikaniLoading, setIsWanikaniLoading] = useState(false);
-    const [initialReviewCount, setInitialReviewCount] = useState(0);
+function useWanikaniReviews() {
+    const {assignments, summary, isLoading} = useWanikaniData({
+        assignments: true,
+        summary: true,
+    });
 
-    useEffect(() => {
-        if (!wanikaniApiKey)
-            return;
-        setIsWanikaniLoading(true);
-        let isSubscribed = true;
-        Promise.all([
-            fetchWanikaniReviews(),
-            WanikaniApiService.getPendingLessonsAndReviews(),
-        ])
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setWanikaniReviews(data[0] as WanikaniDateReview[]);
-                setInitialReviewCount(data[1].reviews);
-            })
-            .finally(() => {
-                if (!isSubscribed)
-                    return;
-                setIsWanikaniLoading(false);
-            });
-        return () => {
-            isSubscribed = false;
-        };
-    }, [wanikaniApiKey]);
-
-    return {wanikaniReviews, initialReviewCount, isWanikaniLoading};
+    const initialReviewCount = summary ? getPendingLessonsAndReviews(summary).reviews : 0;
+    const wanikaniReviews = assignments && assignments.length > 0 ? getWanikaniReviews(assignments) : null;
+    return {wanikaniReviews, initialReviewCount, isWanikaniLoading: isLoading};
 }
 
 function useBunProReviews(bunProApiKey?: string | null) {
-    const [bunProReviews, setBunProReviews] = useState<BunProDateReview[] | null>(null);
-    const [isBunProLoading, setIsBunProLoading] = useState(false);
-    const [initialReviewCount, setInitialReviewCount] = useState(0);
+    const {pendingReviewsCount, reviewData, isLoading} = useBunProData({
+        pendingReviews: true
+    })
 
-    useEffect(() => {
-        if (!bunProApiKey)
-            return;
-        setIsBunProLoading(true);
-        let isSubscribed = true;
+    const bunProReviews = reviewData ? getBunProReviews(reviewData) : null;
+    const initialReviewCount = pendingReviewsCount ?? 0
 
-        Promise.all([
-            getBunProReviews(),
-            BunProApiService.getPendingReviews()
-        ])
-            .then(([reviews, pendingReviews]) => {
-                if (!isSubscribed)
-                    return;
-                setBunProReviews(reviews as BunProDateReview[]);
-                setInitialReviewCount(pendingReviews.length);
-            })
-            .finally(() => {
-                if (!isSubscribed)
-                    return;
-                setIsBunProLoading(false);
-            });
-        return () => {
-            isSubscribed = false;
-        };
-    }, [bunProApiKey]);
-
-    return {bunProReviews, initialReviewCount, isBunProLoading};
+    return {bunProReviews, initialReviewCount, isBunProLoading: isLoading};
 }
 
 function useAnkiReviews(isAnkiConnected: boolean) {
@@ -306,7 +259,7 @@ function OverviewUpcomingReviewsChart() {
         wanikaniReviews,
         initialReviewCount: wanikaniInitialReviewCount,
         isWanikaniLoading
-    } = useWanikaniReviews(wanikaniApiKey);
+    } = useWanikaniReviews();
 
     const isLoading = isAnkiLoading || isWanikaniLoading || isBunProLoading;
     const noAppsConnected = !ankiReviews && !bunProReviews && !wanikaniReviews;

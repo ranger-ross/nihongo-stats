@@ -30,12 +30,12 @@ type JlptLevelType = 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
 
 class DataPoint {
 
-    data: any[] = [];
-    N5: number = 0;
-    N4: number = 0;
-    N3: number = 0;
-    N2: number = 0;
-    N1: number = 0;
+    data: BunProGrammarPoint[] = [];
+    N5 = 0;
+    N4 = 0;
+    N3 = 0;
+    N2 = 0;
+    N1 = 0;
 
     constructor(public date: Date) {
     }

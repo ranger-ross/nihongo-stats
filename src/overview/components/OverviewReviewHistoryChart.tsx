@@ -1,5 +1,5 @@
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useMemo, useState} from "react";
 import {
     ArgumentAxis as ArgumentAxisBase,
     ArgumentScale,
@@ -12,19 +12,26 @@ import {ANKI_COLORS, APP_NAMES, BUNPRO_COLORS, WANIKANI_COLORS} from '../../Cons
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import WanikaniApiService from "../../wanikani/service/WanikaniApiService";
 import {daysToMillis, truncDate} from "../../util/DateUtils";
-import AnkiApiService from "../../anki/service/AnkiApiService";
 import {useAnkiDecks} from "../../hooks/useAnkiDecks";
-import {fetchAllBunProReviews, BunProFlattenedReviewWithLevel} from "../../bunpro/service/BunProDataUtil";
+import {
+    BunProFlattenedReviewWithLevel,
+    flattenBunProReviews
+} from "../../bunpro/service/BunProDataUtil";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection";
 import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil";
 import {AnkiReview} from "../../anki/models/AnkiReview";
-import { scaleBand } from '../../util/ChartUtils';
+import {scaleBand} from '../../util/ChartUtils';
 import {WanikaniSubject} from "../../wanikani/models/WanikaniSubject";
 import {WanikaniReview} from "../../wanikani/models/WanikaniReview";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey";
+import {useAnkiReviewsByDeck} from "../../anki/service/AnkiQueries";
+import {DeckReviews} from "../../anki/service/AnkiDataUtil";
+import {useWanikaniData} from "../../hooks/useWanikaniData";
+import {useBunProData} from "../../hooks/useBunProData";
+import {BunProReview} from "../../bunpro/models/BunProReview";
+import {BunProGrammarPoint} from "../../bunpro/models/BunProGrammarPoint";
 
 type DataPoint = {
     date: Date,
@@ -80,15 +87,14 @@ type WKData = {
     subject: WanikaniSubject
 };
 
-async function fetchWanikaniData(): Promise<WKData[]> {
-    const reviews = await WanikaniApiService.getReviews();
-    const subjects = createSubjectMap(await WanikaniApiService.getSubjects());
+function formatWanikaniData(reviews: WanikaniReview[], subjects: WanikaniSubject[]): WKData[] {
+    const subjectsMap = createSubjectMap(subjects);
     const data: WKData[] = [];
     for (const review of reviews) {
         data.push({
             date: review.dataUpdatedAt,
             review: review,
-            subject: subjects[review.subjectId]
+            subject: subjectsMap[review.subjectId]
         });
     }
 
@@ -137,12 +143,12 @@ type AnkiDateReview = AnkiReview & {
     date: Date
 }
 
-async function fetchAnkiReviews(ankiDecks: string[]): Promise<AnkiDateReview[]> {
-    const reviewPromises: Promise<AnkiReview[]>[] = [];
-    ankiDecks.forEach(name => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
-    const data = await Promise.all(reviewPromises)
+function formatAnkiData(reviews: DeckReviews[]): AnkiDateReview[] {
+    const data = reviews
+        .map(x => x.reviews)
+        .reduce((a, c) => [...a, ...c], []);
+
     return data
-        .reduce((a, c) => [...a, ...c], [])
         .map(review => ({
             ...review,
             date: new Date(review.reviewTime),
@@ -153,9 +159,9 @@ type BPData = BunProFlattenedReviewWithLevel & {
     date: Date
 };
 
-async function fetchBunProData(): Promise<BPData[]> {
-    const reviews = await fetchAllBunProReviews();
-    return reviews
+function formatBunProData(grammarPoints?: BunProGrammarPoint[], reviews?: BunProReview[]): BPData[] {
+    const data = flattenBunProReviews(grammarPoints, reviews) ?? [];
+    return data
         .map(review => ({...review, date: new Date(review.current.time)}))
         .sort((a, b,) => a.date.getTime() - b.date.getTime());
 }
@@ -179,83 +185,31 @@ function OverviewReviewsHistoryChart() {
     const [daysToLookBack, setDaysToLookBack] = useState(30);
     const {decks: ankiDecks} = useAnkiDecks();
 
-    const [ankiReviews, setAnkiReviews] = useState<AnkiDateReview[]>([]);
-    const [bunProReviews, setBunProReviews] = useState<BPData[]>([]);
-    const [wanikaniReviews, setWanikaniReviews] = useState<WKData[]>([]);
+    // Anki
+    const {data: ankiRawData, isLoading: isAnkiLoading, error: ankiError} = useAnkiReviewsByDeck(ankiDecks);
+    ankiError && console.error(ankiError);
+    const ankiReviews = ankiRawData ? formatAnkiData(ankiRawData) : [];
 
-    const [isAnkiLoading, setIsAnkiLoading] = useState(false);
-    const [isBunProLoading, setIsBunProLoading] = useState(false);
-    const [isWanikaniLoading, setIsWanikaniLoading] = useState(false);
+    const {grammarPoints, reviewData, isLoading: isBunProLoading} = useBunProData({
+        grammarPoints: !!bpApiKey,
+        reviews: !!bpApiKey,
+    })
+    const bunProReviews = formatBunProData(grammarPoints, reviewData?.reviews);
 
-    const isLoading = isAnkiLoading || isWanikaniLoading || isBunProLoading;
+    // Wanikani
+    const {reviews, subjects, isLoading: isWanikaniLoading} = useWanikaniData({
+        reviews: !!wkApiKey,
+        subjects: !!wkApiKey,
+    });
+    const wanikaniReviews = formatWanikaniData(reviews, subjects);
 
+
+    const isLoading = (isAnkiLoading && isAnkiConnected) || isWanikaniLoading || isBunProLoading;
 
     const chartData = useMemo(
         () => aggregateDate(ankiReviews, bunProReviews, wanikaniReviews, daysToLookBack),
         [wanikaniReviews, bunProReviews, ankiReviews, daysToLookBack]
     );
-
-
-    useEffect(() => {
-        if (!wkApiKey) {
-            return;
-        }
-        setIsWanikaniLoading(true);
-        let isSubscribed = true;
-        fetchWanikaniData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setWanikaniReviews(data);
-                setIsWanikaniLoading(false);
-            })
-            .catch(console.error);
-        return () => {
-            isSubscribed = false;
-        };
-    }, []);
-
-
-    useEffect(() => {
-        if (!bpApiKey) {
-            return;
-        }
-        setIsBunProLoading(true);
-        let isSubscribed = true;
-        fetchBunProData()
-            .then(data => {
-                if (!isSubscribed)
-                    return;
-                setBunProReviews(data);
-                setIsBunProLoading(false);
-            })
-            .catch(console.error);
-        return () => {
-            isSubscribed = false;
-        }
-    }, []);
-
-    useEffect(() => {
-        if (!isAnkiConnected) {
-            if (ankiReviews?.length > 0) {
-                setAnkiReviews([]);
-            }
-            return;
-        }
-
-        let isSubscribed = true;
-        setIsAnkiLoading(true);
-        fetchAnkiReviews(ankiDecks)
-            .then(reviews => {
-                if (!isSubscribed)
-                    return;
-                setAnkiReviews(reviews);
-            })
-            .finally(() => setIsAnkiLoading(false));
-        return () => {
-            isSubscribed = false;
-        };
-    }, [ankiDecks, isAnkiConnected]);
 
     const showAnkiSeries = isAnkiConnected && !!ankiReviews && ankiReviews.length > 0;
     const showBunProSeries = !!bunProReviews && bunProReviews.length > 0;

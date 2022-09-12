@@ -1,4 +1,3 @@
-import BunProApiService from "./BunProApiService";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 import {BunProReview} from "../models/BunProReview";
 
@@ -41,43 +40,6 @@ export function flattenReview(review: BunProReview): BunProFlattenedReview[] {
 export type BunProFlattenedReviewWithLevel = BunProFlattenedReview & {
     level: string
 };
-
-/**
- * @deprecated use flattenBunProReviews instead.
- */
-export async function fetchAllBunProReviews(grammarPoints: BunProGrammarPoint[] | null = null): Promise<BunProFlattenedReviewWithLevel[]> {
-    const needToFetchGrammarPoints = !grammarPoints;
-
-    let reviewsData;
-    if (needToFetchGrammarPoints) {
-        const data = await Promise.all([
-            BunProApiService.getAllReviews(),
-            BunProApiService.getGrammarPoints()
-        ]);
-
-        reviewsData = data[0];
-        grammarPoints = data[1];
-    } else {
-        reviewsData = await BunProApiService.getAllReviews();
-    }
-
-    const grammarPointsLookupMap = createGrammarPointsLookupMap(grammarPoints as BunProGrammarPoint[]);
-
-    const reviews: BunProFlattenedReviewWithLevel[] = [];
-
-    for (const review of reviewsData.reviews) {
-        const grammarPoint = grammarPointsLookupMap[review.grammarPointId];
-        for (const flatReview of flattenReview(review)) {
-            reviews.push({
-                ...flatReview,
-                level: grammarPoint.level.replace('JLPT', 'N')
-            });
-        }
-    }
-
-    return reviews;
-}
-
 
 export function flattenBunProReviews(grammarPoints?: BunProGrammarPoint[], reviewsData?: BunProReview[]): BunProFlattenedReviewWithLevel[] | undefined {
     if (!grammarPoints || !reviewsData)

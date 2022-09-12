@@ -251,7 +251,7 @@ function OverviewUpcomingReviewsChart() {
         isWanikaniLoading
     } = useWanikaniReviews(wanikaniApiKey);
 
-    const isLoading = isAnkiLoading || isWanikaniLoading || isBunProLoading;
+    const isLoading = (isAnkiLoading && isAnkiConnected) || isWanikaniLoading || isBunProLoading;
     const noAppsConnected = !ankiReviews && !bunProReviews && !wanikaniReviews;
 
     const chartData = useMemo(

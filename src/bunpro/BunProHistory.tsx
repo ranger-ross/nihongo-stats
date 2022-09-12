@@ -6,6 +6,7 @@ import BunProTotalReviewsChart from "./components/BunProTotalReviewsChart";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import BunProTotalGrammarPointsChart from "./components/BunProTotalGrammarPointsChart";
 import {useBunProData} from "../hooks/useBunProData";
+import BunProLessonHistoryChart from "./components/BunProLessonHistoryChart";
 
 function BunProHistoryContent() {
     const {grammarPoints, reviewData} = useBunProData({
@@ -32,6 +33,11 @@ function BunProHistoryContent() {
         <div>
 
             <BunProReviewsHistoryChart
+                reviews={reviewData?.reviews}
+                grammarPoints={grammarPoints}
+            />
+
+            <BunProLessonHistoryChart
                 reviews={reviewData?.reviews}
                 grammarPoints={grammarPoints}
             />

@@ -12,12 +12,11 @@ import {
     Stack,
     Tooltip as TooltipBase
 } from "@devexpress/dx-react-chart";
-import {WanikaniColors} from "../../Constants";
+import {WANIKANI_COLORS} from "../../Constants";
 import ToolTipLabel from "../../shared/ToolTipLabel";
-import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import {WanikaniReset} from "../models/WanikaniReset";
 import Area from "../../shared/Area";
-import {scaleBand} from "../../util/ChartUtils";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 import {WanikaniReview} from "../models/WanikaniReview";
@@ -49,177 +48,159 @@ const units: { [key: string]: StageHistoryUnit } = {
 
 type SubjectMap = { [id: string]: WanikaniSubject };
 
-type DataPoint = {
-    date: Date,
-    apprentice: number,
-    guru: number,
-    master: number,
-    enlightened: number,
-    burned: number,
-    apprenticeItems: SubjectMap,
-    guruItems: SubjectMap,
-    masterItems: SubjectMap,
-    enlightenedItems: SubjectMap,
-    burnedItems: SubjectMap,
-    push: (data: any) => void,
-    reset: (reset: WanikaniReset) => void
-};
+class DataPoint {
+    apprentice: number = 0
+    guru: number = 0
+    master: number = 0
+    enlightened: number = 0
+    burned: number = 0
+    apprenticeItems: SubjectMap = {}
+    guruItems: SubjectMap = {}
+    masterItems: SubjectMap = {}
+    enlightenedItems: SubjectMap = {}
+    burnedItems: SubjectMap = {}
 
-function dataPoint(date: Date, previousDataPoint = {}) {
-    const data: DataPoint = {
-        // Keep Track of what subjects in what stage
-        apprenticeItems: {},
-        guruItems: {},
-        masterItems: {},
-        enlightenedItems: {},
-        burnedItems: {},
+    constructor(
+        public date: Date,
+        previousDataPoint?: DataPoint
+    ) {
+        if (previousDataPoint) {
+            this.apprentice = previousDataPoint.apprentice;
+            this.guru = previousDataPoint.guru;
+            this.master = previousDataPoint.master;
+            this.enlightened = previousDataPoint.enlightened;
+            this.burned = previousDataPoint.burned;
+            this.apprenticeItems = previousDataPoint.apprenticeItems;
+            this.guruItems = previousDataPoint.guruItems;
+            this.masterItems = previousDataPoint.masterItems;
+            this.enlightenedItems = previousDataPoint.enlightenedItems;
+            this.burnedItems = previousDataPoint.burnedItems;
+        }
+    }
 
-        // Counts, used to keep runtime low.
-        // Calling Object.keys().length on the lists above is slow
-        apprentice: 0,
-        guru: 0,
-        master: 0,
-        enlightened: 0,
-        burned: 0,
-
-        ...previousDataPoint, // Continue counts from previous day
-        date: date,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        reset: reset => {// TODO: fix dummy method, this is added to fix typing
-        },
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        push: data => {// TODO: fix dummy method, this is added to fix typing
-        },
-    };
-
-    function isApprentice(stage: number) {
+    #isApprentice(stage: number) {
         return [2, 3, 4].includes(stage);
     }
 
-    function isGuru(stage: number) {
+    #isGuru(stage: number) {
         return [5, 6].includes(stage);
     }
 
-    function isMaster(stage: number) {
+    #isMaster(stage: number) {
         return [7].includes(stage);
     }
 
-    function isEnlightened(stage: number) {
+    #isEnlightened(stage: number) {
         return [8].includes(stage);
     }
 
-    function isBurned(stage: number) {
+    #isBurned(stage: number) {
         return [9].includes(stage);
     }
 
-    function decrement(stage: number, subject: WanikaniSubject) {
+    #decrement(stage: number, subject: WanikaniSubject) {
         if (stage === 0) {
             return;
         }
 
-        if (isApprentice(stage)) {
-            if (data.apprenticeItems[subject.id]) {
-                data['apprentice'] -= 1;
-                delete data.apprenticeItems[subject.id];
+        if (this.#isApprentice(stage)) {
+            if (this.apprenticeItems[subject.id]) {
+                this['apprentice'] -= 1;
+                delete this.apprenticeItems[subject.id];
             }
-        } else if (isGuru(stage)) {
-            if (data.guruItems[subject.id]) {
-                data['guru'] -= 1;
-                delete data.guruItems[subject.id];
+        } else if (this.#isGuru(stage)) {
+            if (this.guruItems[subject.id]) {
+                this['guru'] -= 1;
+                delete this.guruItems[subject.id];
             }
-        } else if (isMaster(stage)) {
-            if (data.masterItems[subject.id]) {
-                data['master'] -= 1;
-                delete data.masterItems[subject.id];
+        } else if (this.#isMaster(stage)) {
+            if (this.masterItems[subject.id]) {
+                this['master'] -= 1;
+                delete this.masterItems[subject.id];
             }
-        } else if (isEnlightened(stage)) {
-            if (data.enlightenedItems[subject.id]) {
-                data['enlightened'] -= 1;
-                delete data.enlightenedItems[subject.id];
+        } else if (this.#isEnlightened(stage)) {
+            if (this.enlightenedItems[subject.id]) {
+                this['enlightened'] -= 1;
+                delete this.enlightenedItems[subject.id];
             }
-        } else if (isBurned(stage)) {
-            if (data.burnedItems[subject.id]) {
-                data['burned'] -= 1;
-                delete data.burnedItems[subject.id];
-            }
-        }
-    }
-
-    function increment(stage: number, subject: WanikaniSubject) {
-        if (isApprentice(stage)) {
-            if (!data.apprenticeItems[subject.id]) {
-                data['apprentice'] += 1;
-                data.apprenticeItems[subject.id] = subject;
-            }
-        } else if (isGuru(stage)) {
-            if (!data.guruItems[subject.id]) {
-                data['guru'] += 1;
-                data.guruItems[subject.id] = subject;
-            }
-        } else if (isMaster(stage)) {
-            if (!data.masterItems[subject.id]) {
-                data['master'] += 1;
-                data.masterItems[subject.id] = subject;
-            }
-        } else if (isEnlightened(stage)) {
-            if (!data.enlightenedItems[subject.id]) {
-                data['enlightened'] += 1;
-                data.enlightenedItems[subject.id] = subject;
-            }
-        } else if (isBurned(stage)) {
-            if (!data.burnedItems[subject.id]) {
-                data['burned'] += 1;
-                data.burnedItems[subject.id] = subject;
+        } else if (this.#isBurned(stage)) {
+            if (this.burnedItems[subject.id]) {
+                this['burned'] -= 1;
+                delete this.burnedItems[subject.id];
             }
         }
     }
 
-    function areSameStage(stage1: number, stage2: number) {
+    #increment(stage: number, subject: WanikaniSubject) {
+        if (this.#isApprentice(stage)) {
+            if (!this.apprenticeItems[subject.id]) {
+                this['apprentice'] += 1;
+                this.apprenticeItems[subject.id] = subject;
+            }
+        } else if (this.#isGuru(stage)) {
+            if (!this.guruItems[subject.id]) {
+                this['guru'] += 1;
+                this.guruItems[subject.id] = subject;
+            }
+        } else if (this.#isMaster(stage)) {
+            if (!this.masterItems[subject.id]) {
+                this['master'] += 1;
+                this.masterItems[subject.id] = subject;
+            }
+        } else if (this.#isEnlightened(stage)) {
+            if (!this.enlightenedItems[subject.id]) {
+                this['enlightened'] += 1;
+                this.enlightenedItems[subject.id] = subject;
+            }
+        } else if (this.#isBurned(stage)) {
+            if (!this.burnedItems[subject.id]) {
+                this['burned'] += 1;
+                this.burnedItems[subject.id] = subject;
+            }
+        }
+    }
+
+    #areSameStage(stage1: number, stage2: number) {
         return (
-            (isApprentice(stage1) && isApprentice(stage2)) ||
-            (isGuru(stage1) && isGuru(stage2)) ||
-            (isMaster(stage1) && isMaster(stage2)) ||
-            (isEnlightened(stage1) && isEnlightened(stage2)) ||
-            (isBurned(stage1) && isBurned(stage2))
+            (this.#isApprentice(stage1) && this.#isApprentice(stage2)) ||
+            (this.#isGuru(stage1) && this.#isGuru(stage2)) ||
+            (this.#isMaster(stage1) && this.#isMaster(stage2)) ||
+            (this.#isEnlightened(stage1) && this.#isEnlightened(stage2)) ||
+            (this.#isBurned(stage1) && this.#isBurned(stage2))
         );
     }
 
-    // Add a review, check the start/end stages and increment and decrement accordingly
-    data.push = (d: WanikaniSubjectReview) => {
-        const startingStage = d.review.startingSrsStage;
-        const endingStage = d.review.endingSrsStage;
-
-        if (areSameStage(startingStage, endingStage)) {
-            return; // Do nothing, the stage didn't change
-        }
-
-        decrement(startingStage, d.subject);
-        increment(endingStage, d.subject);
-
-    };
-
-    function resetStage(stageKey: string, stageItemsKey: string, targetLevel: number) {
+    #resetStage(stageKey: string, stageItemsKey: string, targetLevel: number) {
         // @ts-ignore
-        for (const [key, subject] of Object.entries(data[stageItemsKey])) {
+        for (const [key, subject] of Object.entries(this[stageItemsKey])) {
             if ((subject as WanikaniSubject).level >= targetLevel) {
                 // @ts-ignore
-                delete data[stageItemsKey][key];
+                delete this[stageItemsKey][key];
             }
         }
         // @ts-ignore
         data[stageKey] = Object.keys(data[stageItemsKey]).length;
     }
 
-    // Remove items and reset counts for levels that have been reset
-    data.reset = (reset: WanikaniReset) => {
-        resetStage('apprentice', 'apprenticeItems', reset.targetLevel);
-        resetStage('guru', 'guruItems', reset.targetLevel);
-        resetStage('master', 'masterItems', reset.targetLevel);
-        resetStage('enlightened', 'enlightenedItems', reset.targetLevel);
-        resetStage('burned', 'burnedItems', reset.targetLevel);
-    };
+    push(data: WanikaniSubjectReview) {
+        const startingStage = data.review.startingSrsStage;
+        const endingStage = data.review.endingSrsStage;
 
-    return data;
+        if (this.#areSameStage(startingStage, endingStage)) {
+            return; // Do nothing, the stage didn't change
+        }
+
+        this.#decrement(startingStage, data.subject);
+        this.#increment(endingStage, data.subject);
+    }
+
+    reset(reset: WanikaniReset) {
+        this.#resetStage('apprentice', 'apprenticeItems', reset.targetLevel);
+        this.#resetStage('guru', 'guruItems', reset.targetLevel);
+        this.#resetStage('master', 'masterItems', reset.targetLevel);
+        this.#resetStage('enlightened', 'enlightenedItems', reset.targetLevel);
+        this.#resetStage('burned', 'burnedItems', reset.targetLevel);
+    }
 }
 
 function formatData(subjects: WanikaniSubject[], reviews: WanikaniReview[]) {
@@ -245,12 +226,12 @@ function aggregateDate(rawData: WanikaniSubjectReview[] | null, resets: Wanikani
         const dayBeforeReview = addDays(truncDate(reviewDate), -1);
         let lastDataPoint = aggregatedData[aggregatedData.length - 1];
         while (lastDataPoint.date.getTime() < dayBeforeReview.getTime()) {
-            aggregatedData.push(dataPoint(addDays(lastDataPoint.date, 1), lastDataPoint));
+            aggregatedData.push(new DataPoint(addDays(lastDataPoint.date, 1), lastDataPoint));
             lastDataPoint = aggregatedData[aggregatedData.length - 1];
         }
     }
 
-    const aggregatedData: DataPoint[] = [dataPoint(truncDate(rawData[0].review.createdAt))];
+    const aggregatedData: DataPoint[] = [new DataPoint(truncDate(rawData[0].review.createdAt))];
     let nextReset = resets[0];
     for (const data of rawData) {
 
@@ -258,7 +239,7 @@ function aggregateDate(rawData: WanikaniSubjectReview[] | null, resets: Wanikani
         if (nextReset && nextReset.confirmedAt.getTime() < data.review.createdAt.getTime()) {
             if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, nextReset.confirmedAt.getTime())) {
                 fillInEmptyDaysIfNeeded(aggregatedData, nextReset.confirmedAt);
-                aggregatedData.push(dataPoint(unit.trunc(nextReset.confirmedAt), aggregatedData[aggregatedData.length - 1]));
+                aggregatedData.push(new DataPoint(unit.trunc(nextReset.confirmedAt), aggregatedData[aggregatedData.length - 1]));
             }
 
             aggregatedData[aggregatedData.length - 1].reset(nextReset);
@@ -270,7 +251,7 @@ function aggregateDate(rawData: WanikaniSubjectReview[] | null, resets: Wanikani
         // Add new DataPoints for each day
         if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.review.createdAt)) {
             fillInEmptyDaysIfNeeded(aggregatedData, data.review.createdAt);
-            aggregatedData.push(dataPoint(unit.trunc(data.review.createdAt), aggregatedData[aggregatedData.length - 1]));
+            aggregatedData.push(new DataPoint(unit.trunc(data.review.createdAt), aggregatedData[aggregatedData.length - 1]));
         }
 
         // Add the data to the current day/DataPoint
@@ -361,7 +342,7 @@ function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesH
                             name="Apprentice"
                             valueField="apprentice"
                             argumentField="date"
-                            color={WanikaniColors.pink}
+                            color={WANIKANI_COLORS.pink}
                             seriesComponent={Area}
                         />
 
@@ -369,7 +350,7 @@ function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesH
                             name="Guru"
                             valueField="guru"
                             argumentField="date"
-                            color={WanikaniColors.purple}
+                            color={WANIKANI_COLORS.purple}
                             seriesComponent={Area}
                         />
 
@@ -377,7 +358,7 @@ function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesH
                             name="Master"
                             valueField="master"
                             argumentField="date"
-                            color={WanikaniColors.masterBlue}
+                            color={WANIKANI_COLORS.masterBlue}
                             seriesComponent={Area}
                         />
 
@@ -385,7 +366,7 @@ function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesH
                             name="Enlightened"
                             valueField="enlightened"
                             argumentField="date"
-                            color={WanikaniColors.enlightenedBlue}
+                            color={WANIKANI_COLORS.enlightenedBlue}
                             seriesComponent={Area}
                         />
 
@@ -394,7 +375,7 @@ function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesH
                             name="Burned"
                             valueField="burned"
                             argumentField="date"
-                            color={WanikaniColors.burnedGray}
+                            color={WANIKANI_COLORS.burnedGray}
                             seriesComponent={Area}
                         />
 

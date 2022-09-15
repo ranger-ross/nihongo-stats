@@ -5,12 +5,6 @@ export const APP_NAMES = {
     wanikani: 'wanikani',
 };
 
-/**
- * @deprecated use APP_NAMES instead
- */
-export const AppNames = APP_NAMES;
-
-
 export const APP_URLS = {
     apiProxy: 'https://api-proxy.nihongostats.com',
 

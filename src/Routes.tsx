@@ -1,6 +1,6 @@
 import React from "react";
 import {Route, Routes} from "react-router-dom";
-import {AppNames} from "./Constants";
+import {APP_NAMES} from "./Constants";
 
 const AnkiDashboard = React.lazy(() => import("./anki/AnkiDashboard"));
 const AnkiConnectLogin = React.lazy(() => import("./anki/AnkiConnectLogin"));
@@ -30,24 +30,24 @@ export const RoutePaths: { [key: string]: AppRoute } = {
     landingPage: {path: '/', hideNav: true, appName: null},
 
     // Overview
-    overviewDashboard: {path: '/dashboard', appName: AppNames.overview},
-    overviewHistory: {path: '/history', appName: AppNames.overview},
+    overviewDashboard: {path: '/dashboard', appName: APP_NAMES.overview},
+    overviewHistory: {path: '/history', appName: APP_NAMES.overview},
 
     // Wanikani
-    wanikaniDashboard: {path: '/wanikani-dashboard', appName: AppNames.wanikani},
-    wanikaniLogin: {path: '/wanikani-login', appName: AppNames.wanikani},
-    wanikaniHistory: {path: '/wanikani-history', appName: AppNames.wanikani},
-    wanikaniItems: {path: '/wanikani-items', appName: AppNames.wanikani},
+    wanikaniDashboard: {path: '/wanikani-dashboard', appName: APP_NAMES.wanikani},
+    wanikaniLogin: {path: '/wanikani-login', appName: APP_NAMES.wanikani},
+    wanikaniHistory: {path: '/wanikani-history', appName: APP_NAMES.wanikani},
+    wanikaniItems: {path: '/wanikani-items', appName: APP_NAMES.wanikani},
 
     // Anki
-    ankiConnect: {path: '/anki-connect', appName: AppNames.anki},
-    ankiDashboard: {path: '/anki-dashboard', appName: AppNames.anki},
-    ankiHistory: {path: '/anki-history', appName: AppNames.anki},
+    ankiConnect: {path: '/anki-connect', appName: APP_NAMES.anki},
+    ankiDashboard: {path: '/anki-dashboard', appName: APP_NAMES.anki},
+    ankiHistory: {path: '/anki-history', appName: APP_NAMES.anki},
 
     // BunPro
-    bunproDashboard: {path: '/bunpro-dashboard', appName: AppNames.bunpro},
-    bunproHistory: {path: '/bunpro-history', appName: AppNames.bunpro},
-    bunproLogin: {path: '/bunpro-login', appName: AppNames.bunpro},
+    bunproDashboard: {path: '/bunpro-dashboard', appName: APP_NAMES.bunpro},
+    bunproHistory: {path: '/bunpro-history', appName: APP_NAMES.bunpro},
+    bunproLogin: {path: '/bunpro-login', appName: APP_NAMES.bunpro},
 
     // About
     aboutPage: {path: '/about', appName: null},
@@ -92,13 +92,13 @@ export function AppRoutes() {
 
 export function convertAppNameToDashboardRoute(appName: string) {
     switch (appName) {
-        case AppNames.overview:
+        case APP_NAMES.overview:
             return RoutePaths.overviewDashboard
-        case AppNames.wanikani:
+        case APP_NAMES.wanikani:
             return RoutePaths.wanikaniDashboard;
-        case AppNames.anki:
+        case APP_NAMES.anki:
             return RoutePaths.ankiDashboard
-        case AppNames.bunpro:
+        case APP_NAMES.bunpro:
             return RoutePaths.bunproDashboard
     }
 }

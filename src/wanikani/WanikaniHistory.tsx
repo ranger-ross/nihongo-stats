@@ -8,7 +8,7 @@ import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryCh
 import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart";
 import WanikaniLoadingScreen from "./components/WanikaniLoadingScreen";
 import ReactVisibilitySensor from "react-visibility-sensor";
-import React, {useState} from "react";
+import React, {ReactNode, useState} from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart";
 import WanikaniLessonHistoryChart from "./components/WanikaniLessonHistoryChart";
@@ -16,7 +16,8 @@ import {useWanikaniData} from "../hooks/useWanikaniData";
 
 type LoadableChartProps = {
     placeholderTitle: string
-} & React.PropsWithChildren<any>;
+    children: ReactNode
+};
 
 function LoadableChart({placeholderTitle, children}: LoadableChartProps) {
     const [isLoaded, setIsLoaded] = useState(false)

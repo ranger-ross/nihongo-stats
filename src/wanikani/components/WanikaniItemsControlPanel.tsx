@@ -10,7 +10,7 @@ import {
     ToggleButtonGroup,
     Typography
 } from "@mui/material";
-import {useMemo, useState} from "react";
+import {ReactNode, useMemo, useState} from "react";
 import {
     colorByOptions,
     groupByOptions,
@@ -129,7 +129,9 @@ function GroupByToggle({title, options, groupBy, setGroupBy, disableOptions}: Gr
     );
 }
 
-function ControlContainer({children}: React.PropsWithChildren<any>) {
+type ControlContainerProps = { children: ReactNode }
+
+function ControlContainer({children}: ControlContainerProps) {
     return (
         <Paper elevation={2} style={styles.groupingPaper}>
             {children}

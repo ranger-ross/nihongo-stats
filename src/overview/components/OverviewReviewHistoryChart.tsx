@@ -10,18 +10,14 @@ import {
 } from "@devexpress/dx-react-chart";
 import {ANKI_COLORS, APP_NAMES, BUNPRO_COLORS, WANIKANI_COLORS} from '../../Constants';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {daysToMillis, truncDate} from "../../util/DateUtils";
 import {useAnkiDecks} from "../../hooks/useAnkiDecks";
-import {
-    BunProFlattenedReviewWithLevel,
-    flattenBunProReviews
-} from "../../bunpro/service/BunProDataUtil";
+import {BunProFlattenedReviewWithLevel, flattenBunProReviews} from "../../bunpro/service/BunProDataUtil";
 import {useAnkiConnection} from "../../hooks/useAnkiConnection";
 import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil";
 import {AnkiReview} from "../../anki/models/AnkiReview";
-import {scaleBand} from '../../util/ChartUtils';
 import {WanikaniSubject} from "../../wanikani/models/WanikaniSubject";
 import {WanikaniReview} from "../../wanikani/models/WanikaniReview";
 import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey";
@@ -33,52 +29,32 @@ import {useBunProData} from "../../hooks/useBunProData";
 import {BunProReview} from "../../bunpro/models/BunProReview";
 import {BunProGrammarPoint} from "../../bunpro/models/BunProGrammarPoint";
 
-type DataPoint = {
-    date: Date,
-    ankiData: any[],
-    anki: number,
-    bunProData: any[],
-    bunPro: number,
-    wanikaniData: any[],
-    wanikani: number,
-    addAnki: (d: any) => void,
-    addBunPro: (d: any) => void,
-    addWanikani: (d: any) => void,
-};
+class DataPoint {
 
-function dataPoint(date: Date): DataPoint {
-    const data: DataPoint = {
-        date: date,
-        ankiData: [],
-        anki: 0,
-        bunProData: [],
-        bunPro: 0,
-        wanikaniData: [],
-        wanikani: 0,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        addAnki: (d: any) => null,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        addBunPro: (d: any) => null,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        addWanikani: (d: any) => null,
-    };
+    ankiData: any[] = [];
+    anki: number = 0;
+    bunProData: any[] = [];
+    bunPro: number = 0;
+    wanikaniData: any[] = [];
+    wanikani: number = 0;
 
-    data.addAnki = (d) => {
-        data.ankiData.push(d);
-        data.anki = data.ankiData.length;
-    };
+    constructor(public date: Date) {
+    }
 
-    data.addBunPro = (d) => {
-        data.bunProData.push(d);
-        data.bunPro = data.bunProData.length;
-    };
+    addAnki(d: any) {
+        this.ankiData.push(d);
+        this.anki = this.ankiData.length;
+    }
 
-    data.addWanikani = (d) => {
-        data.wanikaniData.push(d);
-        data.wanikani = data.wanikaniData.length;
-    };
+    addBunPro(d: any) {
+        this.bunProData.push(d);
+        this.bunPro = this.bunProData.length;
+    }
 
-    return data;
+    addWanikani(d: any) {
+        this.wanikaniData.push(d);
+        this.wanikani = this.wanikaniData.length;
+    }
 }
 
 type WKData = {
@@ -119,10 +95,10 @@ function aggregateDate(ankiReviews: any[], bunProReviews: any[], wanikaniReviews
         return [];
     }
 
-    const aggregatedDate = [dataPoint(truncDate(reviews[0].date))];
+    const aggregatedDate = [new DataPoint(truncDate(reviews[0].date))];
     for (const data of reviews) {
         if (aggregatedDate[aggregatedDate.length - 1].date.getTime() != truncDate(data.date).getTime()) {
-            aggregatedDate.push(dataPoint(truncDate(data.date)));
+            aggregatedDate.push(new DataPoint(truncDate(data.date)));
         }
 
         const lastDay = aggregatedDate[aggregatedDate.length - 1];

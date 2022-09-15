@@ -190,7 +190,7 @@ export const groupByOptions: { [key: string]: WKGroupByOption } = {
                 toMap(kanji.jlpt.n1),
             ];
 
-            const map: { [idx: number]: any[] } = {};
+            const map: { [idx: number]: JoinedRawWKAssignmentAndSubject[] } = {};
 
             for (const subject of subjects) {
                 const idx = jtlp.findIndex(lvl => lvl[subject['slug']]);

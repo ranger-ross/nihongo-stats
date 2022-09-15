@@ -11,7 +11,7 @@ import {
 import {daysToMillis, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {flattenBunProReviews, BunProFlattenedReviewWithLevel} from "../service/BunProDataUtil";
+import {BunProFlattenedReviewWithLevel, flattenBunProReviews} from "../service/BunProDataUtil";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {BunProReview} from "../models/BunProReview";
@@ -71,52 +71,38 @@ function UnitSelector({options, unit, onChange}: UnitSelectorProps) {
     );
 }
 
-type DataPoint = {
-    date: Date,
-    total: number,
-    reviews: BunProFlattenedReviewWithLevel[],
-    N5: number,
-    N4: number,
-    N3: number,
-    N2: number,
-    N1: number,
-    addReview: (review: BunProFlattenedReviewWithLevel) => void
-};
+class DataPoint {
 
+    reviews: BunProFlattenedReviewWithLevel[] = [];
+    total: number = 0;
+    N5: number = 0;
+    N4: number = 0;
+    N3: number = 0;
+    N2: number = 0;
+    N1: number = 0;
 
-function dataPoint(date: Date, unit: ReviewUnit) {
-    const dp: DataPoint = {
-        date: unit.trunc(date),
-        total: 0,
-        reviews: [],
-        N5: 0,
-        N4: 0,
-        N3: 0,
-        N2: 0,
-        N1: 0,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        addReview: (review) => null
-    };
+    constructor(public date: Date) {
+    }
 
-    dp.addReview = (review) => {
-        dp.reviews.push(review);
-        dp.total = dp.reviews.length;
+    addReview(review: BunProFlattenedReviewWithLevel) {
+        this.reviews.push(review);
+        this.total = this.reviews.length;
 
         const level = review.level as JlptLevelType;
-        dp[level] += 1;
-    };
-    return dp;
+        this[level] += 1;
+    }
+
 }
 
 function aggregateReviewByUnit(reviews: BunProFlattenedReviewWithLevel[], unit: ReviewUnit) {
     const orderedReviews = reviews.sort((a, b,) => a.current.time.getTime() - b.current.time.getTime());
 
-    const days = [dataPoint(orderedReviews[0].current.time, unit)];
+    const days = [new DataPoint(unit.trunc(orderedReviews[0].current.time))];
 
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
         if (lastDay.date.getTime() !== unit.trunc(review.current.time).getTime()) {
-            days.push(dataPoint(review.current.time, unit));
+            days.push(new DataPoint(unit.trunc(review.current.time)));
             lastDay = days[days.length - 1];
         }
         lastDay.addReview(review);
@@ -148,7 +134,7 @@ type BunProReviewsHistoryChartProps = {
     grammarPoints?: BunProGrammarPoint[]
 };
 
-function BunProReviewsHistoryChart({reviews, grammarPoints}:BunProReviewsHistoryChartProps) {
+function BunProReviewsHistoryChart({reviews, grammarPoints}: BunProReviewsHistoryChartProps) {
     const rawData = flattenBunProReviews(grammarPoints, reviews);
     const isLoading = !grammarPoints || !reviews;
     const [unit, setUnit] = useState(units.days);

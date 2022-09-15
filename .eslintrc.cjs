@@ -32,6 +32,7 @@ module.exports = {
         'react/prop-types': 'off',
         'react/no-unescaped-entities': 'off',
         '@typescript-eslint/ban-ts-comment': 'off',
+        '@typescript-eslint/no-inferrable-types': 'off',
         '@typescript-eslint/no-explicit-any': 'off', // TODO: ReEnable when project is cleaned up and better migrated to TypeScript
     },
     'settings': {

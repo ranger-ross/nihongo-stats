@@ -1,6 +1,6 @@
 import {Box, Card, CardContent, CircularProgress, Grid, Stack, Tooltip, Typography} from "@mui/material";
 import {millisToDays, millisToHours} from '../../util/DateUtils';
-import {WanikaniColors} from "../../Constants";
+import {WANIKANI_COLORS} from "../../Constants";
 import {AppStyles} from "../../util/TypeUtils";
 import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
 import {WanikaniUser} from "../models/WanikaniUser";
@@ -9,9 +9,9 @@ import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {createSubjectMap} from "../service/WanikaniDataUtil";
 
 
-const racialColor = WanikaniColors.blue;
-const kanjiColor = WanikaniColors.pink;
-const vocabularyColor = WanikaniColors.purple;
+const racialColor = WANIKANI_COLORS.blue;
+const kanjiColor = WANIKANI_COLORS.pink;
+const vocabularyColor = WANIKANI_COLORS.purple;
 
 const styles: AppStyles = {
     container: {

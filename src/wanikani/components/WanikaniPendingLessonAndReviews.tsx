@@ -1,4 +1,4 @@
-import {WanikaniColors} from "../../Constants";
+import {WANIKANI_COLORS} from "../../Constants";
 import {ColoredButton, ColoredButtonProps} from "../../shared/ColoredButton";
 
 type WanikaniCountButtonProps = {
@@ -33,16 +33,16 @@ function WanikaniPendingLessonsAndReviews({lessons, reviews}: WanikaniPendingLes
         <>
             <WanikaniCountButton variant={'contained'}
                                  label="Lessons"
-                                 color={WanikaniColors.pink}
-                                 emptyColor={WanikaniColors.lockedGray}
+                                 color={WANIKANI_COLORS.pink}
+                                 emptyColor={WANIKANI_COLORS.lockedGray}
                                  onClick={() => window.open("https://www.wanikani.com/lesson", "_blank")}
                                  count={lessons}
             />
 
             <WanikaniCountButton variant={'contained'}
                                  label="Reviews"
-                                 color={WanikaniColors.blue}
-                                 emptyColor={WanikaniColors.lockedGray}
+                                 color={WANIKANI_COLORS.blue}
+                                 emptyColor={WANIKANI_COLORS.lockedGray}
                                  onClick={() => window.open("https://www.wanikani.com/review", "_blank")}
                                  count={reviews}
             />

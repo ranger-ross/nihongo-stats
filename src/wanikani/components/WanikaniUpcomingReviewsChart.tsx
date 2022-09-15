@@ -10,7 +10,7 @@ import React, {useMemo, useState} from "react";
 import {ArgumentScale, EventTracker, LineSeries, SeriesRef, Stack, ValueScale} from "@devexpress/dx-react-chart";
 import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
 import {addHours, truncMinutes} from '../../util/DateUtils';
-import {WanikaniColors} from '../../Constants';
+import {WANIKANI_COLORS} from '../../Constants';
 import PeriodSelector from "../../shared/PeriodSelector";
 import {scaleBand} from '../../util/ChartUtils'
 import {
@@ -223,7 +223,7 @@ function WanikaniUpcomingReviewsChart({assignments, summary}: WanikaniUpcomingRe
                                     name="radicals"
                                     valueField="radicals"
                                     argumentField="time"
-                                    color={WanikaniColors.blue}
+                                    color={WANIKANI_COLORS.blue}
                                     pointComponent={BarWithLabel}
                                     scaleName="daily"
                                 />
@@ -232,7 +232,7 @@ function WanikaniUpcomingReviewsChart({assignments, summary}: WanikaniUpcomingRe
                                     name="kanji"
                                     valueField="kanji"
                                     argumentField="time"
-                                    color={WanikaniColors.pink}
+                                    color={WANIKANI_COLORS.pink}
                                     pointComponent={BarWithLabel}
                                     scaleName="daily"
                                 />
@@ -241,7 +241,7 @@ function WanikaniUpcomingReviewsChart({assignments, summary}: WanikaniUpcomingRe
                                     name="vocabulary"
                                     valueField="vocabulary"
                                     argumentField="time"
-                                    color={WanikaniColors.purple}
+                                    color={WANIKANI_COLORS.purple}
                                     pointComponent={BarWithLabel}
                                     scaleName="daily"
                                 />

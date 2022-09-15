@@ -29,11 +29,6 @@ export const APP_URLS = {
 
 };
 
-/**
- * @deprecated use APP_URLS instead
- */
-export const AppUrls = APP_URLS;
-
 export const WANIKANI_COLORS = {
     blue: '#00a1f1',
     pink: '#f100a1',
@@ -58,12 +53,6 @@ export const WANIKANI_COLORS = {
     enlightenedGradient: () => `linear-gradient(-30deg, ${WANIKANI_COLORS.enlightenedBlue}, rgb(122 201 241))`,
     burnedGradient: () => `linear-gradient(-30deg, ${WANIKANI_COLORS.burnedOrange}, ${WANIKANI_COLORS.burnedYellow})`,
 }
-
-/**
- * @deprecated use WANIKANI_COLORS instead
- */
-export const WanikaniColors = WANIKANI_COLORS;
-
 
 export const WANIKANI_COLORS_WITH_BLACK_TEXT = new Set([
     WANIKANI_COLORS.burnedGradient(),

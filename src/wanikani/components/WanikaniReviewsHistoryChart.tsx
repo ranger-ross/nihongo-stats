@@ -9,7 +9,7 @@ import {
     Tooltip as TooltipBase,
     ValueAxis as ValueAxisBase,
 } from "@devexpress/dx-react-chart";
-import {WanikaniColors} from '../../Constants';
+import {WANIKANI_COLORS} from '../../Constants';
 import {Card, CardContent, CircularProgress, Grid, MenuItem, Select, Typography} from "@mui/material";
 import {getVisibleLabelIndices} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
@@ -311,21 +311,21 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
                                     name="radicals"
                                     valueField="radicals"
                                     argumentField="date"
-                                    color={WanikaniColors.blue}
+                                    color={WANIKANI_COLORS.blue}
                                 />
 
                                 <BarSeries
                                     name="kanji"
                                     valueField="kanji"
                                     argumentField="date"
-                                    color={WanikaniColors.pink}
+                                    color={WANIKANI_COLORS.pink}
                                 />
 
                                 <BarSeries
                                     name="vocabulary"
                                     valueField="vocabulary"
                                     argumentField="date"
-                                    color={WanikaniColors.purple}
+                                    color={WANIKANI_COLORS.purple}
                                 />
 
                                 <Stack

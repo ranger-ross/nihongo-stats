@@ -9,14 +9,13 @@ import {
     Tooltip as TooltipBase,
     ValueAxis as ValueAxisBase,
 } from "@devexpress/dx-react-chart";
-import {WanikaniColors} from '../../Constants';
+import {WANIKANI_COLORS} from '../../Constants';
 import {Card, CardContent, CircularProgress, Grid, MenuItem, Select, Typography} from "@mui/material";
-import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
 import {createSubjectMap} from "../service/WanikaniDataUtil";
 import ToolTipLabel from "../../shared/ToolTipLabel";
-import {scaleBand} from '../../util/ChartUtils';
 import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniReview} from "../models/WanikaniReview";
@@ -45,46 +44,33 @@ const units: { [key: string]: PeriodUnit } = {
     },
 };
 
-type DataPoint = {
-    date: Date,
-    data: any[],
-    total: number,
-    radicals: number,
-    kanji: number,
-    vocabulary: number,
-    push: (d: any) => void,
-};
+class DataPoint {
 
-function dataPoint(date: Date) {
-    const data: DataPoint = {
-        date: date,
-        data: [],
-        total: 0,
-        radicals: 0,
-        kanji: 0,
-        vocabulary: 0,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        push: (_: any) => null,
-    };
+    data: WanikaniSubjectReview[] = [];
+    total: number = 0
+    radicals: number = 0
+    kanji: number = 0
+    vocabulary: number = 0
 
-    data.push = (d) => {
-        data.data.push(d);
-        data.total = data.data.length;
+    constructor(public date: Date) {
+    }
+
+    push(d: WanikaniSubjectReview) {
+        this.data.push(d);
+        this.total = this.data.length;
 
         switch (d.subject?.object) {
             case 'radical':
-                data.radicals += 1;
+                this.radicals += 1;
                 break;
             case 'kanji':
-                data.kanji += 1;
+                this.kanji += 1;
                 break;
             case 'vocabulary':
-                data.vocabulary += 1;
+                this.vocabulary += 1;
                 break;
         }
-    };
-
-    return data;
+    }
 }
 
 function formatData(reviews: WanikaniReview[], subjects: WanikaniSubject[]) {
@@ -122,7 +108,7 @@ function aggregateDate(rawData: WanikaniSubjectReview[], daysToLookBack: number,
         const dayBeforeReview = unit.trunc(unit.trunc(reviewDate).getTime() - 1);
         let lastDataPoint = aggregatedData[aggregatedData.length - 1];
         while (lastDataPoint.date.getTime() < dayBeforeReview.getTime()) {
-            aggregatedData.push(dataPoint(addPeriod(lastDataPoint.date)));
+            aggregatedData.push(new DataPoint(addPeriod(lastDataPoint.date)));
             lastDataPoint = aggregatedData[aggregatedData.length - 1];
         }
     }
@@ -130,11 +116,11 @@ function aggregateDate(rawData: WanikaniSubjectReview[], daysToLookBack: number,
     // If user selects 'All' we need to set the first review date.
     const firstLessonDate = daysToLookBack > 365 ? unit.trunc(dataForTimeRange[0].review.createdAt) : new Date(startDate);
 
-    const aggregatedData: DataPoint[] = [dataPoint(firstLessonDate)];
+    const aggregatedData: DataPoint[] = [new DataPoint(firstLessonDate)];
     for (const data of dataForTimeRange) {
         if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.review.createdAt)) {
             fillInEmptyPeriodsIfNeeded(aggregatedData, data.review.createdAt);
-            aggregatedData.push(dataPoint(unit.trunc(data.review.createdAt)));
+            aggregatedData.push(new DataPoint(unit.trunc(data.review.createdAt)));
         }
 
         aggregatedData[aggregatedData.length - 1].push(data);
@@ -311,21 +297,21 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
                                     name="radicals"
                                     valueField="radicals"
                                     argumentField="date"
-                                    color={WanikaniColors.blue}
+                                    color={WANIKANI_COLORS.blue}
                                 />
 
                                 <BarSeries
                                     name="kanji"
                                     valueField="kanji"
                                     argumentField="date"
-                                    color={WanikaniColors.pink}
+                                    color={WANIKANI_COLORS.pink}
                                 />
 
                                 <BarSeries
                                     name="vocabulary"
                                     valueField="vocabulary"
                                     argumentField="date"
-                                    color={WanikaniColors.purple}
+                                    color={WANIKANI_COLORS.purple}
                                 />
 
                                 <Stack

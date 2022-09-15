@@ -8,7 +8,7 @@ import {RoutePaths} from "../../Routes";
 import {useNavigate} from "react-router";
 import {useBunProApiKey} from "../../hooks/useBunProApiKey";
 import {useAppVersion} from "../../hooks/useAppVersion";
-import {AppUrls} from "../../Constants";
+import {APP_URLS} from "../../Constants";
 import {AccountCircle, Replay} from "@mui/icons-material";
 import {ClearCacheDialog} from "./ClearCacheDialog";
 import UserPreferencesDialog from "./UserPreferencesDialog";
@@ -126,7 +126,7 @@ function HeaderOptionMenu() {
                         {version}
                     </span>
                     <Link target="_blank"
-                          href={AppUrls.githubReleasesPage}
+                          href={APP_URLS.githubReleasesPage}
                           style={styles.whatsNewText}>
                         What's New
                     </Link>

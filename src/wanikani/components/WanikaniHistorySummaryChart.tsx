@@ -1,4 +1,4 @@
-import {WanikaniColors} from '../../Constants';
+import {WANIKANI_COLORS} from '../../Constants';
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {sortAndGetMedian} from "../../util/MathUtils";
 import {createSubjectMap} from "../service/WanikaniDataUtil";
@@ -186,15 +186,15 @@ function WanikaniHistorySummaryChart({user, subjects, reviews, levelProgress}: W
                             />
                             <TotalLabel label={'Radicals Reviews'}
                                         count={totalsData.radicals}
-                                        color={WanikaniColors.blue}
+                                        color={WANIKANI_COLORS.blue}
                             />
                             <TotalLabel label={'Kanji Reviews'}
                                         count={totalsData.kanji}
-                                        color={WanikaniColors.pink}
+                                        color={WANIKANI_COLORS.pink}
                             />
                             <TotalLabel label={'Vocabulary Reviews'}
                                         count={totalsData.vocabulary}
-                                        color={WanikaniColors.purple}
+                                        color={WANIKANI_COLORS.purple}
                             />
                         </Grid>
 
@@ -203,15 +203,15 @@ function WanikaniHistorySummaryChart({user, subjects, reviews, levelProgress}: W
                             <Grid item xs={6}/>
                             <TotalLabel label={'Radicals'}
                                         count={totalsData.radicalsDistinct}
-                                        color={WanikaniColors.blue}
+                                        color={WANIKANI_COLORS.blue}
                             />
                             <TotalLabel label={'Kanji'}
                                         count={totalsData.kanjiDistinct}
-                                        color={WanikaniColors.pink}
+                                        color={WANIKANI_COLORS.pink}
                             />
                             <TotalLabel label={'Vocabulary'}
                                         count={totalsData.vocabularyDistinct}
-                                        color={WanikaniColors.purple}
+                                        color={WANIKANI_COLORS.purple}
                             />
                         </Grid>
 
@@ -220,15 +220,15 @@ function WanikaniHistorySummaryChart({user, subjects, reviews, levelProgress}: W
                             <Grid item xs={6}/>
                             <TotalLabel label={'Radicals'}
                                         count={totalsData.radicalsBurned}
-                                        color={WanikaniColors.blue}
+                                        color={WANIKANI_COLORS.blue}
                             />
                             <TotalLabel label={'Kanji'}
                                         count={totalsData.kanjiBurned}
-                                        color={WanikaniColors.pink}
+                                        color={WANIKANI_COLORS.pink}
                             />
                             <TotalLabel label={'Vocabulary'}
                                         count={totalsData.vocabularyBurned}
-                                        color={WanikaniColors.purple}
+                                        color={WANIKANI_COLORS.purple}
                             />
                         </Grid>
 

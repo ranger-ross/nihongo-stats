@@ -1,7 +1,7 @@
 import {Button, Card, CardContent, Container, Typography} from "@mui/material";
 import {Navigate} from "react-router";
 import {useSelectedApp} from "../hooks/useSelectedApp";
-import {AppNames} from "../Constants";
+import {APP_NAMES} from "../Constants";
 import create from "zustand";
 import {useUserPreferences} from "../hooks/useUserPreferences";
 import {convertAppNameToDashboardRoute} from "../Routes";
@@ -41,7 +41,7 @@ function LandingPage() {
     const {globalPreferences} = useUserPreferences();
 
     if (isLandingPageRead) {
-        const defaultDashboard = globalPreferences.defaultDashboard ?? AppNames.overview;
+        const defaultDashboard = globalPreferences.defaultDashboard ?? APP_NAMES.overview;
 
         if (selectedApp === defaultDashboard) {
             const dashboardRoute = convertAppNameToDashboardRoute(defaultDashboard);

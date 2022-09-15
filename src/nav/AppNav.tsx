@@ -9,7 +9,7 @@ import AnkiNav from "./navbars/AnkiNav";
 import BunProNav from "./navbars/BunProNav";
 import {useBunProApiKey} from "../hooks/useBunProApiKey";
 import OverviewNav from "./navbars/OverviewNav";
-import {AppNames} from "../Constants";
+import {APP_NAMES} from "../Constants";
 import {useSelectedApp} from "../hooks/useSelectedApp";
 import ankiIcon from '../../assets/icons/anki-icon.png';
 import bunProIcon from '../../assets/icons/bunpro-icon.png';
@@ -29,10 +29,10 @@ const styles: AppStyles = {
 };
 
 const appOptions: AppOption[] = [
-    {appName: AppNames.overview, displayName: 'Overview', icon: BarChart, iconStyle: {color: '#21bcff'}},
-    {appName: AppNames.anki, displayName: 'Anki', icon: ankiIcon},
-    {appName: AppNames.bunpro, displayName: 'BunPro', icon: bunProIcon, iconStyle: {marginLeft: '-4px'}},
-    {appName: AppNames.wanikani, displayName: 'Wanikani', icon: wanikaniIcon},
+    {appName: APP_NAMES.overview, displayName: 'Overview', icon: BarChart, iconStyle: {color: '#21bcff'}},
+    {appName: APP_NAMES.anki, displayName: 'Anki', icon: ankiIcon},
+    {appName: APP_NAMES.bunpro, displayName: 'BunPro', icon: bunProIcon, iconStyle: {marginLeft: '-4px'}},
+    {appName: APP_NAMES.wanikani, displayName: 'Wanikani', icon: wanikaniIcon},
 ]
 
 function AppNav() {
@@ -80,10 +80,10 @@ function AppNav() {
                 </Grid>
 
                 <Box sx={{flexGrow: 1}}>
-                    {selectedApp === AppNames.overview ? (<OverviewNav/>) : null}
-                    {selectedApp === AppNames.anki ? (<AnkiNav/>) : null}
-                    {selectedApp === AppNames.bunpro && !!bunProApiKey ? (<BunProNav/>) : null}
-                    {selectedApp === AppNames.wanikani && !!wanikaniApiKey ? (<WanikaniNav/>) : null}
+                    {selectedApp === APP_NAMES.overview ? (<OverviewNav/>) : null}
+                    {selectedApp === APP_NAMES.anki ? (<AnkiNav/>) : null}
+                    {selectedApp === APP_NAMES.bunpro && !!bunProApiKey ? (<BunProNav/>) : null}
+                    {selectedApp === APP_NAMES.wanikani && !!wanikaniApiKey ? (<WanikaniNav/>) : null}
                 </Box>
             </Grid>
         )

@@ -5,12 +5,6 @@ export const APP_NAMES = {
     wanikani: 'wanikani',
 };
 
-/**
- * @deprecated use APP_NAMES instead
- */
-export const AppNames = APP_NAMES;
-
-
 export const APP_URLS = {
     apiProxy: 'https://api-proxy.nihongostats.com',
 
@@ -28,11 +22,6 @@ export const APP_URLS = {
     wanikaniHistory: 'https://saraqael-m.github.io/WaniKaniMiscStats',
 
 };
-
-/**
- * @deprecated use APP_URLS instead
- */
-export const AppUrls = APP_URLS;
 
 export const WANIKANI_COLORS = {
     blue: '#00a1f1',
@@ -58,12 +47,6 @@ export const WANIKANI_COLORS = {
     enlightenedGradient: () => `linear-gradient(-30deg, ${WANIKANI_COLORS.enlightenedBlue}, rgb(122 201 241))`,
     burnedGradient: () => `linear-gradient(-30deg, ${WANIKANI_COLORS.burnedOrange}, ${WANIKANI_COLORS.burnedYellow})`,
 }
-
-/**
- * @deprecated use WANIKANI_COLORS instead
- */
-export const WanikaniColors = WANIKANI_COLORS;
-
 
 export const WANIKANI_COLORS_WITH_BLACK_TEXT = new Set([
     WANIKANI_COLORS.burnedGradient(),

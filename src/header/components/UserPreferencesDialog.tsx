@@ -17,13 +17,13 @@ import {
 import React, {useState} from "react";
 import {useUserPreferences} from "../../hooks/useUserPreferences";
 import {HelpOutline} from "@mui/icons-material";
-import {AppNames} from "../../Constants";
+import {APP_NAMES} from "../../Constants";
 
 const defaultDashboardOptions = [
-    {key: AppNames.overview, text: 'Overview'},
-    {key: AppNames.anki, text: 'Anki'},
-    {key: AppNames.bunpro, text: 'BunPro'},
-    {key: AppNames.wanikani, text: 'Wanikani'},
+    {key: APP_NAMES.overview, text: 'Overview'},
+    {key: APP_NAMES.anki, text: 'Anki'},
+    {key: APP_NAMES.bunpro, text: 'BunPro'},
+    {key: APP_NAMES.wanikani, text: 'Wanikani'},
 ];
 
 function NihongoStatsPreferences() {

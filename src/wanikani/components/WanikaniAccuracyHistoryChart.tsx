@@ -7,10 +7,9 @@ import {
     SplineSeries,
     ValueScale
 } from "@devexpress/dx-react-chart";
-import {WanikaniColors} from '../../Constants';
+import {WANIKANI_COLORS} from '../../Constants';
 import {Card, CardContent, Grid, Typography} from "@mui/material";
 import _ from 'lodash';
-// @ts-ignore
 import {scaleLinear} from 'd3-scale';
 import PeriodSelector from "../../shared/PeriodSelector";
 import {createSubjectMap} from "../service/WanikaniDataUtil";
@@ -45,7 +44,7 @@ function PercentageLabel(props: PercentageLabelProps) {
     );
 }
 
-function calculateRollingAverageOfDaysInQueue(queue: any[]) {
+function calculateRollingAverageOfDaysInQueue(queue: DayDataPoint[]) {
     let total = 0;
     let incorrectCount = 0;
 
@@ -94,7 +93,7 @@ function fetchData(reviews: WanikaniReview[], subjects: WanikaniSubject[]) {
     });
 
     // Calculate 7 day rolling average
-    const queue = [];
+    const queue: DayDataPoint[] = [];
     for (const day of result) {
         queue.push(day);
 
@@ -188,7 +187,7 @@ function WanikaniAccuracyHistoryChart({subjects, reviews}: WanikaniAccuracyHisto
                                 name="Daily Accuracy"
                                 valueField="ratio"
                                 argumentField="date"
-                                color={WanikaniColors.blue}
+                                color={WANIKANI_COLORS.blue}
                             />
 
                             <SplineSeries

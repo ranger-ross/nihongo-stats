@@ -11,12 +11,11 @@ import {
 } from "@devexpress/dx-react-chart";
 import {WANIKANI_COLORS} from '../../Constants';
 import {Card, CardContent, CircularProgress, Grid, MenuItem, Select, Typography} from "@mui/material";
-import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
 import {createSubjectMap} from "../service/WanikaniDataUtil";
 import ToolTipLabel from "../../shared/ToolTipLabel";
-import {scaleBand} from '../../util/ChartUtils';
 import {WanikaniSubjectAssignment} from "../models/WanikaniSubjectAssignment";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
@@ -45,46 +44,32 @@ const units: { [key: string]: PeriodUnit } = {
     },
 };
 
-type DataPoint = {
-    date: Date,
-    data: any[],
-    total: number,
-    radicals: number,
-    kanji: number,
-    vocabulary: number,
-    push: (d: any) => void,
-};
+class DataPoint {
+    data: WanikaniSubjectAssignment[] = []
+    total: number = 0
+    radicals: number = 0
+    kanji: number = 0
+    vocabulary: number = 0
 
-function dataPoint(date: Date) {
-    const data: DataPoint = {
-        date: date,
-        data: [],
-        total: 0,
-        radicals: 0,
-        kanji: 0,
-        vocabulary: 0,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        push: (_: any) => null,
-    };
+    constructor(public date: Date) {
+    }
 
-    data.push = (d) => {
-        data.data.push(d);
-        data.total = data.data.length;
+    push(d: WanikaniSubjectAssignment) {
+        this.data.push(d);
+        this.total = this.data.length;
 
         switch (d.subject?.object) {
             case 'radical':
-                data.radicals += 1;
+                this.radicals += 1;
                 break;
             case 'kanji':
-                data.kanji += 1;
+                this.kanji += 1;
                 break;
             case 'vocabulary':
-                data.vocabulary += 1;
+                this.vocabulary += 1;
                 break;
         }
-    };
-
-    return data;
+    }
 }
 
 function formatData(assignments: WanikaniAssignment[], subjects: WanikaniSubject[]) {
@@ -122,7 +107,7 @@ function aggregateDate(rawData: WanikaniSubjectAssignment[], daysToLookBack: num
         const dayBeforeLesson = unit.trunc(unit.trunc(lessonDate).getTime() - 1);
         let lastDataPoint = aggregatedData[aggregatedData.length - 1];
         while (lastDataPoint.date.getTime() < dayBeforeLesson.getTime()) {
-            aggregatedData.push(dataPoint(addPeriod(lastDataPoint.date)));
+            aggregatedData.push(new DataPoint(addPeriod(lastDataPoint.date)));
             lastDataPoint = aggregatedData[aggregatedData.length - 1];
         }
     }
@@ -130,11 +115,11 @@ function aggregateDate(rawData: WanikaniSubjectAssignment[], daysToLookBack: num
     // If user selects 'All' we need to set the first lesson date.
     const firstLessonDate = daysToLookBack > 365 ? unit.trunc(dataForTimeRange[0].assignment.createdAt) : new Date(startDate);
 
-    const aggregatedData: DataPoint[] = [dataPoint(firstLessonDate)];
+    const aggregatedData: DataPoint[] = [new DataPoint(firstLessonDate)];
     for (const data of dataForTimeRange) {
         if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.assignment.createdAt)) {
             fillInEmptyPeriodsIfNeeded(aggregatedData, data.assignment.createdAt);
-            aggregatedData.push(dataPoint(unit.trunc(data.assignment.createdAt)));
+            aggregatedData.push(new DataPoint(unit.trunc(data.assignment.createdAt)));
         }
 
         aggregatedData[aggregatedData.length - 1].push(data);

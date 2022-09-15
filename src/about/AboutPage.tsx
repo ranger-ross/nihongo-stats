@@ -1,5 +1,5 @@
 import {Card, CardContent, Typography} from "@mui/material";
-import {AppUrls} from "../Constants";
+import {APP_URLS} from "../Constants";
 import NewTabLink from "../shared/NewTabLink";
 import {ReactNode} from "react";
 
@@ -42,7 +42,7 @@ function AboutPage() {
                     Nihongo Stats is a stats aggregation tool for Japanese language learning apps.
 
                     <p>
-                        It was inspired by <NewTabLink href={AppUrls.wkStats}>Wanikani Stats</NewTabLink> (aka WK
+                        It was inspired by <NewTabLink href={APP_URLS.wkStats}>Wanikani Stats</NewTabLink> (aka WK
                         Stats).<br/>
                         WK Stats is still a great website for tracking your Japanese progression but the project now
                         longer appears to be maintained.
@@ -60,12 +60,12 @@ function AboutPage() {
                     Anki, BunPro, and Wanikani are the currently supported apps, but I am hoping for that number
                     to grow. <br/>
                     If you would like to request an app to be added, please raise an issue in the <NewTabLink
-                    href={AppUrls.githubIssuesPage}>GitHub Issues</NewTabLink> page.
+                    href={APP_URLS.githubIssuesPage}>GitHub Issues</NewTabLink> page.
                 </ContentSection>
 
                 <ContentSection title={'Open Source Project'}>
                     Nihongo Stats is an Open Source project hosted on <NewTabLink
-                    href={AppUrls.githubPage}>GitHub</NewTabLink>.<br/>
+                    href={APP_URLS.githubPage}>GitHub</NewTabLink>.<br/>
                     Feel free to look through the source code and consider contributing if you are interested.
 
                 </ContentSection>
@@ -74,12 +74,12 @@ function AboutPage() {
                     Below are some other great tools created by various community members.
 
                     <li>
-                        <NewTabLink href={AppUrls.wkStats}>Wanikani Statistics</NewTabLink>&nbsp;
+                        <NewTabLink href={APP_URLS.wkStats}>Wanikani Statistics</NewTabLink>&nbsp;
                         - Original WK Stats website.
                     </li>
 
                     <li>
-                        <NewTabLink href={AppUrls.wanikaniHistory}>Wanikani History</NewTabLink>&nbsp;
+                        <NewTabLink href={APP_URLS.wanikaniHistory}>Wanikani History</NewTabLink>&nbsp;
                         - An alternative Wanikani Stats visualization tool similar to Nihongo Stats
                     </li>
 

@@ -1,5 +1,5 @@
 import {Card, CardContent, CircularProgress, Tooltip, Typography} from "@mui/material";
-import {WanikaniColors} from "../../Constants";
+import {WANIKANI_COLORS} from "../../Constants";
 import {AppStyles} from "../../util/TypeUtils";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 
@@ -135,13 +135,13 @@ function WanikaniItemCountsChart({assignments}: WanikaniItemCountsChartProps) {
                             <CountTile
                                 label={'Apprentice'}
                                 data={data?.apprentice}
-                                color={WanikaniColors.pink}
+                                color={WANIKANI_COLORS.pink}
                             />
 
                             <CountTile
                                 label={'Guru'}
                                 data={data?.guru}
-                                color={WanikaniColors.purple}
+                                color={WANIKANI_COLORS.purple}
                             />
                         </div>
 

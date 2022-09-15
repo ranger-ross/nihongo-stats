@@ -8,7 +8,7 @@ import {
     JoinedRawWKAssignmentAndSubject
 } from "../service/WanikaniDataUtil";
 import {getColorByWanikaniSubjectType} from "../service/WanikaniStyleUtil";
-import {WanikaniColors} from "../../Constants";
+import {WANIKANI_COLORS} from "../../Constants";
 import {useUserPreferences} from "../../hooks/useUserPreferences";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 import {lightenDarkenColor} from "../../util/CssUtils";
@@ -139,9 +139,9 @@ function getTileColor(subject: JoinedRawWKAssignmentAndSubject) {
     if (subject.startedAt) {
         return getColorByWanikaniSubjectType(subject.subjectType);
     } else if (subject.hasAssignment) {
-        return WanikaniColors.lessonGray;
+        return WANIKANI_COLORS.lessonGray;
     }
-    return WanikaniColors.lockedGray;
+    return WANIKANI_COLORS.lockedGray;
 }
 
 function SubjectTile({subject, isMobile}: { subject: JoinedRawWKAssignmentAndSubject, isMobile: boolean }) {
@@ -217,9 +217,9 @@ function WanikaniActiveItemsChart({
                 <div style={{position: 'relative', top: -16, left: -16, width: `calc(100% + 32px)`}}>
                     <GradientLinearProgress variant="determinate"
                                             value={percentage * 100}
-                                            lineStartColor={lightenDarkenColor(WanikaniColors.pink, 30)}
-                                            lineEndColor={lightenDarkenColor(WanikaniColors.pink, -30)}
-                                            backgroundLineColor={lightenDarkenColor(WanikaniColors.pink, -120)}
+                                            lineStartColor={lightenDarkenColor(WANIKANI_COLORS.pink, 30)}
+                                            lineEndColor={lightenDarkenColor(WANIKANI_COLORS.pink, -30)}
+                                            backgroundLineColor={lightenDarkenColor(WANIKANI_COLORS.pink, -120)}
                     />
                 </div>
 

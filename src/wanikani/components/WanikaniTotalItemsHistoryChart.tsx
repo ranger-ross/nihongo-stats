@@ -1,7 +1,7 @@
 import {ArgumentAxis, Chart, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
 import React, {useEffect, useMemo, useState} from "react";
 import {EventTracker, LineSeries, Tooltip as TooltipBase, ValueAxis as ValueAxisBase} from "@devexpress/dx-react-chart";
-import {WanikaniColors} from '../../Constants';
+import {WANIKANI_COLORS} from '../../Constants';
 import {Card, CardContent, Checkbox, FormControlLabel, Grid, Typography} from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
@@ -214,21 +214,21 @@ function WanikaniTotalItemsHistoryChart({assignments}: WanikaniTotalItemsHistory
                                 name="radicals"
                                 valueField="radicals"
                                 argumentField="date"
-                                color={WanikaniColors.blue}
+                                color={WANIKANI_COLORS.blue}
                             />
 
                             <LineSeries
                                 name="kanji"
                                 valueField="kanji"
                                 argumentField="date"
-                                color={WanikaniColors.pink}
+                                color={WANIKANI_COLORS.pink}
                             />
 
                             <LineSeries
                                 name="vocabulary"
                                 valueField="vocabulary"
                                 argumentField="date"
-                                color={WanikaniColors.purple}
+                                color={WANIKANI_COLORS.purple}
                             />
 
                             <EventTracker/>

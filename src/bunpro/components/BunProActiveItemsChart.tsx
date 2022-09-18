@@ -153,7 +153,11 @@ function GrammarPointTile({grammarPoint, review}: GrammarPointTileProps) {
                     ) : null}
                     {grammarPoint.discourseLink ? (
                         <ValueLabel label={'Discussion'} value={
-                            <a href={grammarPoint.discourseLink} target={'_blank'}>Link</a>
+                            <a
+                                href={grammarPoint.discourseLink}
+                                target={'_blank'}
+                                rel="noreferrer"
+                            >Link</a>
                         }/>
                     ) : null}
                 </div>

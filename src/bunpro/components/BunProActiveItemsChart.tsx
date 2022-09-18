@@ -1,5 +1,5 @@
-import {Card, CardContent, CircularProgress, Typography} from "@mui/material";
-import React from "react";
+import {Card, CardContent, CircularProgress, Tooltip, Typography} from "@mui/material";
+import React, {ReactNode} from "react";
 import {lightenDarkenColor} from "../../util/CssUtils";
 import {BUNPRO_COLORS} from "../../Constants";
 import GradientLinearProgress from "../../shared/GradientLinearProgress";
@@ -109,6 +109,15 @@ function useData(user?: BunProUser, reviews?: BunProReview[], grammarPoints?: Bu
     }
 }
 
+function ValueLabel({label, value}: { label: string, value?: string | number | ReactNode | null }) {
+    return (
+        <div style={{display: 'flex', justifyContent: 'space-between', gap: '10px'}}>
+            <div style={{fontSize: 'large'}}>{label}</div>
+            <div style={{fontSize: 'large'}}>{value}</div>
+        </div>
+    );
+}
+
 
 type GrammarPointTileProps = {
     grammarPoint: BunProGrammarPoint,
@@ -118,24 +127,61 @@ type GrammarPointTileProps = {
 function GrammarPointTile({grammarPoint, review}: GrammarPointTileProps) {
     const isStarted = !!review;
     const softWhite = '#b5b5b5';
+
+    // Add delay to make the tooltip not appear when user quick hovers over multiple tiles
+    // With this, it's a bit annoying to navigate because the tooltip gets in the way of other tiles
+    const tooltipDelay = 125;
+
     return (
-        <a
-            style={{
-                background: isStarted ? 'rgb(32 32 32)' : 'rgb(45 45 45)',
-                fontSize: 26,
-                fontWeight: 'bold',
-                padding: '10px',
-                borderRadius: '10px',
-                border: `solid ${softWhite}`,
-                color: isStarted ? 'white' : 'rgb(115 114 114)',
-                textDecoration: 'none',
-            }}
-            href={'https://www.bunpro.jp/grammar_points/' + grammarPoint.id}
-            target="_blank" rel="noreferrer"
+        <Tooltip
+            enterDelay={tooltipDelay}
+            enterNextDelay={tooltipDelay}
+            title={
+                <div style={{minWidth: '265px'}}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                        <div style={{fontSize: 'xx-large', fontWeight: 'bold'}}>{grammarPoint.title}</div>
+                    </div>
+                    {!!grammarPoint.meaning ? (<ValueLabel label={grammarPoint.meaning}/>) : null}
+                    <br/>
+                    <ValueLabel label={'JLPT'} value={grammarPoint.level.replace('JLPT', 'N')}/>
+                    {review ? (
+                        <>
+                            <ValueLabel label={'Times Studied'} value={review.history?.length ?? 0}/>
+                            <ValueLabel label={'First Studied'} value={review.startedStudyingAt?.toLocaleDateString()}/>
+                            <ValueLabel label={'SRS Stage'} value={review.history?.length ?? 0}/>
+                        </>
+                    ) : null}
+                    {grammarPoint.discourseLink ? (
+                        <ValueLabel label={'Discussion'} value={
+                            <a
+                                href={grammarPoint.discourseLink}
+                                target={'_blank'}
+                                rel="noreferrer"
+                            >Link</a>
+                        }/>
+                    ) : null}
+                </div>
+            }
+            placement={'top'}
         >
-            {grammarPoint.title}
-        </a>
-    )
+            <a
+                style={{
+                    background: isStarted ? 'rgb(32 32 32)' : 'rgb(45 45 45)',
+                    fontSize: 26,
+                    fontWeight: 'bold',
+                    padding: '10px',
+                    borderRadius: '10px',
+                    border: `solid ${softWhite}`,
+                    color: isStarted ? 'white' : 'rgb(115 114 114)',
+                    textDecoration: 'none',
+                }}
+                href={'https://www.bunpro.jp/grammar_points/' + grammarPoint.id}
+                target="_blank" rel="noreferrer"
+            >
+                {grammarPoint.title}
+            </a>
+        </Tooltip>
+    );
 }
 
 type BunProActiveItemsChartProps = {

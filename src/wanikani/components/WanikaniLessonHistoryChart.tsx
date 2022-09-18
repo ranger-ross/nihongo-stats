@@ -88,7 +88,9 @@ function formatData(assignments: WanikaniAssignment[], subjects: WanikaniSubject
 function aggregateDate(rawData: WanikaniSubjectAssignment[], daysToLookBack: number, unit: PeriodUnit): DataPoint[] {
     const areDatesDifferent = (date1: Date, date2: Date) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
     const startDate = unit.trunc(Date.now() - (1000 * 60 * 60 * 24 * (daysToLookBack - 1))).getTime();
-    const dataForTimeRange = rawData.filter(data => data.assignment.createdAt.getTime() > startDate);
+    const dataForTimeRange = rawData
+        .filter(data => data.assignment.startedAt && data.assignment.startedAt.getTime() > startDate)
+        .sort((a, b) => a.assignment.startedAt!.getTime() - b.assignment.startedAt!.getTime());
 
     function addPeriod(date: Date): Date {
         let temp = new Date(date);
@@ -113,13 +115,13 @@ function aggregateDate(rawData: WanikaniSubjectAssignment[], daysToLookBack: num
     }
 
     // If user selects 'All' we need to set the first lesson date.
-    const firstLessonDate = daysToLookBack > 365 ? unit.trunc(dataForTimeRange[0].assignment.createdAt) : new Date(startDate);
+    const firstLessonDate = daysToLookBack > 365 ? unit.trunc(dataForTimeRange[0].assignment.startedAt!) : new Date(startDate);
 
     const aggregatedData: DataPoint[] = [new DataPoint(firstLessonDate)];
     for (const data of dataForTimeRange) {
-        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.assignment.createdAt)) {
-            fillInEmptyPeriodsIfNeeded(aggregatedData, data.assignment.createdAt);
-            aggregatedData.push(new DataPoint(unit.trunc(data.assignment.createdAt)));
+        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.assignment.startedAt!)) {
+            fillInEmptyPeriodsIfNeeded(aggregatedData, data.assignment.startedAt!);
+            aggregatedData.push(new DataPoint(unit.trunc(data.assignment.startedAt!)));
         }
 
         aggregatedData[aggregatedData.length - 1].push(data);

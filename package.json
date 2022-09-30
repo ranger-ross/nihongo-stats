@@ -33,7 +33,7 @@
     "react-dom": "18.2.0",
     "react-router-dom": "6.4.0",
     "react-visibility-sensor": "5.1.1",
-    "rxjs": "7.5.6",
+    "rxjs": "7.5.7",
     "styled-components": "5.3.6",
     "zustand": "4.1.1"
   },

@@ -53,7 +53,7 @@ function formatData(data: WanikaniLevelProgression[], currentLevel: number): For
     }
 
     return Object.values(map)
-        .sort((a, b) => parseInt(a.level) - parseInt(b.level));
+        .sort((a, b) => parseInt(a.level) - parseInt(b.level)) ?? [];
 }
 
 type WanikaniLevelProgressChartProps = {

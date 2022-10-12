@@ -218,7 +218,7 @@ function formatData(subjects: WanikaniSubject[], reviews: WanikaniReview[]) {
 
 function aggregateDate(rawData: WanikaniSubjectReview[] | null, resets: WanikaniReset[], unit: StageHistoryUnit) {
     if (!rawData)
-        return null;
+        return [];
     const areDatesDifferent = (date1: Date | number, date2: Date | number) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
 
     // Make sure to DataPoints for days with no reviews, so there is a gap in the graph

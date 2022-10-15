@@ -178,7 +178,6 @@ function WanikaniAccuracyHistoryChart({subjects, reviews}: WanikaniAccuracyHisto
                     </Grid>
 
                     <div style={{flexGrow: '1'}}>
-                        {/* @ts-ignore */}
                         <Chart data={data}>
                             <ValueScale factory={scale} modifyDomain={modifyDomain}/>
                             <ValueAxis labelComponent={PercentageLabel}/>

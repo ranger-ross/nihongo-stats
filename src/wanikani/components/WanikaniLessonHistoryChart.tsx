@@ -288,7 +288,6 @@ function WanikaniLessonHistoryChart({assignments, subjects}: WanikaniLessonHisto
 
                     {!isLoading ? (
                         <div style={{flexGrow: '1'}}>
-                            {/*@ts-ignore*/}
                             <Chart data={chartData}>
                                 <ArgumentScale factory={scaleBand}/>
                                 <ArgumentAxis labelComponent={LabelWithDate}/>

@@ -240,7 +240,6 @@ function BunProUpcomingReviewsChart({
                         </div>
                     ) : (
                         <div style={{flexGrow: '1'}}>
-                            {/*@ts-ignore*/}
                             <Chart data={chartData}>
 
                                 <ValueScale name="total"

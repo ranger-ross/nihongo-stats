@@ -1,5 +1,4 @@
 import {Grid, Typography, useTheme} from "@mui/material";
-// @ts-ignore
 import HeaderOptionMenu from './components/HeaderOptionMenu'
 
 const useStyles = (theme: any) => ({

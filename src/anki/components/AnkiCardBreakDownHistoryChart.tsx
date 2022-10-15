@@ -97,7 +97,6 @@ function AnkiCardBreakDownHistoryChart({deckNames}: AnkiCardBreakDownHistoryChar
                     </div>
                 ) : (
                     !!deckNames && chartData ? (
-                        // @ts-ignore
                         <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

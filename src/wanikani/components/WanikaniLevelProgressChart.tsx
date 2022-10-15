@@ -28,6 +28,9 @@ function LevelToolTip({text}: { text: string }) {
 type FormattedData = { level: string, days: number, startedAt: number };
 
 function formatData(data: WanikaniLevelProgression[], currentLevel: number): FormattedData[] {
+    if (!data || data.length == 0)
+        return [];
+
     const rawData = data
         .filter(level => !level.abandonedAt && level.level <= currentLevel);
 
@@ -112,7 +115,6 @@ function WanikaniLevelProgressChart({levelProgress, user}: WanikaniLevelProgress
     }
 
     return (
-        // @ts-ignore
         <Chart data={data}>
             <ValueAxis/>
             <ArgumentAxis/>

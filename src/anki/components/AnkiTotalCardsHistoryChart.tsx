@@ -179,7 +179,6 @@ function AnkiTotalCardsHistoryChart({deckNames}: AnkiTotalCardsHistoryChartProps
                     </div>
                 ) : (
                     chartData ? (
-                        // @ts-ignore
                         <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

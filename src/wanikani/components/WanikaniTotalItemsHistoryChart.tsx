@@ -204,7 +204,6 @@ function WanikaniTotalItemsHistoryChart({assignments}: WanikaniTotalItemsHistory
                     </Grid>
 
                     <div style={{flexGrow: '1'}}>
-                        {/*@ts-ignore*/}
                         <Chart data={chartData}>
                             <ValueAxis/>
                             <ArgumentAxis

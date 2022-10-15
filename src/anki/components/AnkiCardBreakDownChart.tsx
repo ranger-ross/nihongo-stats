@@ -38,7 +38,6 @@ function AnkiCardBreakDownChart() {
 
     return (
         <SimpleCard>
-            {/*@ts-ignore*/}
             <Chart data={data} height={600}>
                 <Title text={'Card Breakdown'}/>
                 <PieSeries

@@ -397,7 +397,6 @@ function OverviewUpcomingReviewsChart() {
                         </div>
                     ) : (
                         <div style={{flexGrow: '1'}}>
-                            {/*@ts-ignore*/}
                             <Chart data={chartData} {...(isMobile ? {height: 400} : {})}>
                                 <ValueScale name="total"
                                             modifyDomain={() => [0, chartData.length > 0 ? chartData[chartData.length - 1].total : 1]}/>

@@ -205,7 +205,6 @@ function WanikaniUpcomingReviewsChart({assignments, summary}: WanikaniUpcomingRe
                         </div>
                     ) : (
                         <div style={{flexGrow: '1'}}>
-                            {/*@ts-ignore*/}
                             <Chart data={chartData} {...(isMobile ? {height: 200} : {})}>
 
                                 <ValueScale name="total"

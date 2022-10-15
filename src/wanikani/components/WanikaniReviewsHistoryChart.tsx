@@ -287,7 +287,6 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
 
                     {!isLoading ? (
                         <div style={{flexGrow: '1'}}>
-                            {/*@ts-ignore*/}
                             <Chart data={chartData}>
                                 <ArgumentScale factory={scaleBand}/>
                                 <ArgumentAxis labelComponent={LabelWithDate}/>

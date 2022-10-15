@@ -48,6 +48,9 @@ const units: { [key: string]: StageHistoryUnit } = {
 
 type SubjectMap = { [id: string]: WanikaniSubject };
 
+type StageName = 'apprentice' | 'guru' | 'master' | 'enlightened' | 'burned';
+type StageItemKey = 'apprenticeItems' | 'guruItems' | 'masterItems' | 'enlightenedItems' | 'burnedItems'
+
 class DataPoint {
     apprentice: number = 0
     guru: number = 0
@@ -170,16 +173,13 @@ class DataPoint {
         );
     }
 
-    #resetStage(stageKey: string, stageItemsKey: string, targetLevel: number) {
-        // @ts-ignore
+    #resetStage(stageKey: StageName, stageItemsKey: StageItemKey, targetLevel: number) {
         for (const [key, subject] of Object.entries(this[stageItemsKey])) {
             if ((subject as WanikaniSubject).level >= targetLevel) {
-                // @ts-ignore
                 delete this[stageItemsKey][key];
             }
         }
-        // @ts-ignore
-        data[stageKey] = Object.keys(data[stageItemsKey]).length;
+        this[stageKey] = Object.keys(this[stageItemsKey]).length;
     }
 
     push(data: WanikaniSubjectReview) {
@@ -332,7 +332,6 @@ function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesH
                 </Grid>
 
                 <div style={{flexGrow: '1'}}>
-                    {/*@ts-ignore*/}
                     <Chart data={data}>
                         <ArgumentScale factory={scaleBand}/>
                         <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

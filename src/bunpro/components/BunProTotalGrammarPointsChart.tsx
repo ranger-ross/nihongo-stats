@@ -173,7 +173,6 @@ function BunProTotalGrammarPointsChart({reviews, grammarPoints}: BunProTotalGram
                     </div>
                 ) : (
                     !!chartData && chartData.length > 0 ? (
-                        // @ts-ignore
                         <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

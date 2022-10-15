@@ -183,7 +183,6 @@ function AnkiReviewsChart({deckNames, showTotals}: AnkiReviewsChartProps) {
                     </div>
                 ) : (
                     chartData ? (
-                        // @ts-ignore
                         <Chart key={key} data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

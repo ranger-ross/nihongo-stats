@@ -232,7 +232,6 @@ function BunProReviewsHistoryChart({reviews, grammarPoints}: BunProReviewsHistor
                     </div>
                 ) : (
                     !!chartData ? (
-                        // @ts-ignore
                         <Chart data={chartData}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>

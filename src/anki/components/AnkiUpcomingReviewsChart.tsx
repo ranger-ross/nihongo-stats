@@ -102,7 +102,6 @@ function AnkiUpcomingReviewsChart() {
                         <CircularProgress style={{margin: '100px'}}/>
                     </div>
                 ) : (
-                    // @ts-ignore
                     <Chart key={key} data={chartData.data} height={800}>
                         <ArgumentScale factory={scaleBand}/>
                         <ArgumentAxis labelComponent={LabelWithDate}/>

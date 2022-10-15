@@ -112,7 +112,6 @@ function WanikaniLevelProgressChart({levelProgress, user}: WanikaniLevelProgress
     }
 
     return (
-        // @ts-ignore
         <Chart data={data}>
             <ValueAxis/>
             <ArgumentAxis/>

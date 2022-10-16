@@ -156,12 +156,6 @@ function AnkiReviewsChart({deckNames, showTotals}: AnkiReviewsChartProps) {
         );
     }
 
-    // Create a key that is unique the selected decks.
-    // If the selected decks change, without this key the React Chart will crash due to a bug.
-    // This key will force the Chart element to be re-rendered a new component
-    // https://github.com/DevExpress/devextreme-reactive/issues/3570
-    const key = deckNames.reduce((a, c) => a + c, '');
-
     return (
         <Card>
             <CardContent>
@@ -187,7 +181,7 @@ function AnkiReviewsChart({deckNames, showTotals}: AnkiReviewsChartProps) {
                     </div>
                 ) : (
                     chartData ? (
-                        <Chart key={key} data={chartData.map(d => ({
+                        <Chart data={chartData.map(d => ({
                             ...d,
                             ...d.chartData
                         }))}>

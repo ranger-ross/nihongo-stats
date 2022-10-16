@@ -1,9 +1,9 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Card, CardContent, CircularProgress, FormControlLabel, FormGroup, Switch, Typography} from "@mui/material";
-import WanikaniItemTile from "./WanikaniItemTile";
 import {
     combineAssignmentAndSubject,
-    createAssignmentMap, createSubjectMap,
+    createAssignmentMap,
+    createSubjectMap,
     isSubjectHidden,
     JoinedRawWKAssignmentAndSubject
 } from "../service/WanikaniDataUtil";
@@ -16,6 +16,7 @@ import GradientLinearProgress from "../../shared/GradientLinearProgress";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {WanikaniUser} from "../models/WanikaniUser";
+import WanikaniItemTile from "./WanikaniItemTile";
 
 const styles = {
     showPreviousLevelMobile: {
@@ -147,7 +148,8 @@ function getTileColor(subject: JoinedRawWKAssignmentAndSubject) {
 function SubjectTile({subject, isMobile}: { subject: JoinedRawWKAssignmentAndSubject, isMobile: boolean }) {
     return (
         <WanikaniItemTile
-            text={subject.characters || '?'}
+            text={subject.characters}
+            characterImages={subject.characterImages}
             link={subject.documentUrl}
             meaning={subject.meanings.map(m => m.meaning).join(', ')}
             srsLevel={subject.srsStage}

@@ -1,7 +1,7 @@
 import {Tooltip} from "@mui/material";
 import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil";
 import {getWanikaniSrsStageDescription} from "../service/WanikaniDataUtil";
-import React, {CSSProperties} from "react";
+import {CSSProperties} from "react";
 import {WanikaniSubjectCharacterImage, WanikaniSubjectReading} from "../models/WanikaniSubject";
 import {WANIKANI_COLORS_WITH_BLACK_TEXT} from "../../Constants";
 

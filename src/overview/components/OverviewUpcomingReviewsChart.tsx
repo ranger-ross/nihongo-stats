@@ -62,43 +62,37 @@ const styles: AppStyles = {
     }
 };
 
-type DataPoint = {
-    date: number,
-    bunProCount: number,
-    wanikaniCount: number,
-    ankiCount: number,
-    total: number,
-    addReview: (appName: string) => void
-};
+class DataPoint {
+    date: number
+    bunProCount: number = 0
+    wanikaniCount: number = 0
+    ankiCount: number = 0
+    total: number = 0
 
-function dataPoint(date: Date, unit: UpcomingReviewUnit, reviews: any[], previousDataPoint?: DataPoint) {
-    const dp: DataPoint = {
-        date: unit.trunc(date).getTime(),
-        bunProCount: 0,
-        wanikaniCount: 0,
-        ankiCount: 0,
-        total: reviews.length,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        addReview: (appName: string) => null
-    };
+    constructor(date: Date, unit: UpcomingReviewUnit, reviews: any[], previousDataPoint?: DataPoint) {
+        this.date = unit.trunc(date).getTime();
+        this.total = reviews.length
 
-    if (!!previousDataPoint)
-        dp.total += previousDataPoint.total;
+        if (previousDataPoint) {
+            this.total += previousDataPoint.total;
+        }
 
-    dp.addReview = (appName) => {
-        if (appName === APP_NAMES.anki)
-            dp.ankiCount += 1;
-        else if (appName === APP_NAMES.bunpro)
-            dp.bunProCount += 1;
-        else if (appName === APP_NAMES.wanikani)
-            dp.wanikaniCount += 1;
-    };
 
-    for (const review of reviews) {
-        dp.addReview(review.appName);
+        for (const review of reviews) {
+            this.addReview(review.appName);
+        }
+
     }
 
-    return dp;
+    addReview(appName: string) {
+        if (appName === APP_NAMES.anki)
+            this.ankiCount += 1;
+        else if (appName === APP_NAMES.bunpro)
+            this.bunProCount += 1;
+        else if (appName === APP_NAMES.wanikani)
+            this.wanikaniCount += 1;
+    }
+
 }
 
 type BunProDateReview = BunProReview & {
@@ -158,7 +152,7 @@ function aggregateData(ankiReviews: AnkiDateReview[], bunProReviews: BunProDateR
     for (let i = 0; i < period; i++) {
         const time = addTimeToDate(getChartStartTime(), unit, i);
         const reviewsInPeriod = reviews.filter(review => unit.isPeriodTheSame(unit.trunc(review.date), time));
-        const dp = dataPoint(time, unit, reviewsInPeriod, data[i - 1]);
+        const dp = new DataPoint(time, unit, reviewsInPeriod, data[i - 1]);
 
         if (data.length === 0)
             dp.total += (ankiInitialReviewCount + bunProInitialReviewCount + wanikaniInitialReviewCount);

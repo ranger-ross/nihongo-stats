@@ -3,41 +3,44 @@ import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-r
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
 import {daysSinceDate, daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
-import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
-import {createGrammarPointsLookupMap, BunProGrammarPointLookupMap} from "../service/BunProDataUtil";
-import {scaleBand} from '../../util/ChartUtils';
+import {BunProGrammarPointLookupMap, createGrammarPointsLookupMap} from "../service/BunProDataUtil";
 import {BunProReview} from "../models/BunProReview";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 
-const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
+type JLPTLevel = 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
 
-type DataPoint = any;
+const JLPTLevels: JLPTLevel[] = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
-function dataPoint(date: Date, previousDataPoint?: DataPoint): DataPoint {
-    const createEmptyDataPoint = (): any => ({
-        total: 0,
-    });
+class DataPoint {
 
-    let dp: DataPoint = createEmptyDataPoint();
+    date: Date
+    total: number = 0
+    N5: number | undefined
+    N4: number | undefined
+    N3: number | undefined
+    N2: number | undefined
+    N1: number | undefined
 
-    if (!!previousDataPoint) {
-        dp = {...previousDataPoint};
+    constructor(date: Date, previousDataPoint?: DataPoint) {
+        if (!!previousDataPoint) {
+            Object.assign(this, previousDataPoint)
+        }
+        this.date = truncDate(date);
     }
 
-    dp.date = truncDate(date);
-
-    dp.addReview = (level: string) => {
-        dp.total += 1;
-        if (!!dp[level]) {
-            dp[level] += 1;
+    addReview(level: JLPTLevel) {
+        this.total += 1;
+        const amount = this[level];
+        if (amount) {
+            this[level] = amount + 1;
         } else {
-            dp[level] = 1;
+            this[level] = 1;
         }
-    };
+    }
 
-    return dp;
 }
 
 function aggregateReviewByDay(reviews: BunProReview[], grammarPoints: BunProGrammarPointLookupMap) {
@@ -49,16 +52,16 @@ function aggregateReviewByDay(reviews: BunProReview[], grammarPoints: BunProGram
         .sort((a, b,) => a.createdAt.getTime() - b.createdAt.getTime());
 
 
-    const days: DataPoint[] = [dataPoint(orderedReviews[0].createdAt)];
+    const days: DataPoint[] = [new DataPoint(orderedReviews[0].createdAt)];
 
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
         if (lastDay.date.getTime() !== truncDate(review.createdAt).getTime()) {
-            days.push(dataPoint(review.createdAt, lastDay));
+            days.push(new DataPoint(review.createdAt, lastDay));
             lastDay = days[days.length - 1];
         }
         const gp = grammarPoints[review.grammarPointId]
-        lastDay.addReview(gp.level.replace('JLPT', 'N'));
+        lastDay.addReview(gp.level.replace('JLPT', 'N') as JLPTLevel);
     }
 
     return days;
@@ -82,7 +85,7 @@ function useOptions(rawData?: DataPoint[]) {
 
     if (!!rawData && rawData.length > 0) {
         options.push({
-            value: millisToDays(Date.now() - rawData[0].date),
+            value: millisToDays(Date.now() - rawData[0].date.getTime()),
             text: 'All'
         });
     }
@@ -116,7 +119,7 @@ function BunProTotalGrammarPointsChart({reviews, grammarPoints}: BunProTotalGram
             return <></>;
         }
         const dp = chartData[targetItem.point];
-        const value = targetItem.series.toLowerCase() === 'total' ? dp.total : dp[targetItem.series];
+        const value = targetItem.series.toLowerCase() === 'total' ? dp.total : dp[targetItem.series as JLPTLevel];
         return (
             <>
                 <p>{dp.date.toLocaleDateString()}</p>

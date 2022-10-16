@@ -4,48 +4,52 @@ import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
 import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
 import {useEffect, useMemo, useRef, useState} from "react";
-import {getVisibleLabelIndices} from "../../util/ChartUtils";
-import {AnkiReview} from "../models/AnkiReview";
-import {scaleBand} from "../../util/ChartUtils";
+import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import {DeckReviews} from "../service/AnkiDataUtil";
 import {useAnkiReviewsByDeck} from "../service/AnkiQueries";
+import {AnkiReview} from "../models/AnkiReview";
 
-type DataPoint = any;
+class DataPoint {
+    date: Date
+    totalCount: number
+    cards: { [deck: string]: AnkiReview[] } = {}
+    chartData: { [series: string]: number } = {}
 
-function dataPoint(date: number, previousDataPoint?: DataPoint) {
-    const dp: DataPoint = {
-        date: truncDate(date),
-        cards: {},
-        totalCount: previousDataPoint?.totalCount ?? 0
-    };
+    constructor(date: number, private previousDataPoint?: DataPoint) {
+        this.date = truncDate(date)
+        this.totalCount = previousDataPoint?.totalCount ?? 0
 
-    if (!!previousDataPoint) {
-        const totalKeys = Object.keys(previousDataPoint).filter(key => key.includes('total_'));
-        for (const key of totalKeys) {
-            dp[key] = previousDataPoint[key] ?? 0;
+        if (!!previousDataPoint) {
+            const totalKeys = Object.keys(previousDataPoint.chartData).filter(key => key.includes('total_'));
+            for (const key of totalKeys) {
+                this.chartData[key] = previousDataPoint.chartData[key] ?? 0;
+            }
         }
+
     }
-    dp.addCard = (deck: string, review: AnkiReview) => {
-        if (!dp.cards[deck]) {
-            dp.cards[deck] = [review];
+
+    addCard(deck: string, review: AnkiReview) {
+        if (!this.cards[deck]) {
+            this.cards[deck] = [review];
         } else {
-            dp.cards[deck].push(review);
+            this.cards[deck].push(review);
         }
 
-        if (!!previousDataPoint && !previousDataPoint[`total_${deck}`]) {
-            previousDataPoint[`count_${deck}`] = 0;
-            previousDataPoint[`total_${deck}`] = 0;
+        if (!!this.previousDataPoint && !this.previousDataPoint.chartData[`total_${deck}`]) {
+            this.previousDataPoint.chartData[`count_${deck}`] = 0;
+            this.previousDataPoint.chartData[`total_${deck}`] = 0;
         }
 
-        dp[`count_${deck}`] = dp.cards[deck].length;
-        dp[`total_${deck}`] = (dp[`total_${deck}`] ?? 0) + 1;
-        dp.totalCount = (previousDataPoint?.totalCount ?? 0) + Object.keys(dp)
+        this.chartData[`count_${deck}`] = this.cards[deck].length;
+        this.chartData[`total_${deck}`] = (this.chartData[`total_${deck}`] ?? 0) + 1;
+        this.totalCount = (this.previousDataPoint?.totalCount ?? 0) + Object.keys(this.chartData)
             .filter(key => key.includes('count_'))
             .map(key => key.replace('count_', ''))
-            .map(x => dp.cards[x])
+            .map(x => this.cards[x])
             .reduce((a, c) => a + c.length, 0);
-    };
-    return dp;
+    }
+
+
 }
 
 function formatMultiDeckReviewData(decks: DeckReviews[]): DataPoint[] {
@@ -58,14 +62,14 @@ function formatMultiDeckReviewData(decks: DeckReviews[]): DataPoint[] {
     }
 
     const orderedReviews = reviews.sort((a, b,) => a.reviewTime - b.reviewTime);
-    const dayBeforeStartPoint = dataPoint(orderedReviews[0].reviewTime - daysToMillis(1))
-    const days = [dayBeforeStartPoint, dataPoint(orderedReviews[0].reviewTime, dayBeforeStartPoint)];
+    const dayBeforeStartPoint = new DataPoint(orderedReviews[0].reviewTime - daysToMillis(1))
+    const days = [dayBeforeStartPoint, new DataPoint(orderedReviews[0].reviewTime, dayBeforeStartPoint)];
 
     const cards: { [cardId: number]: boolean } = {};
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
         if (lastDay.date.getTime() !== truncDate(review.reviewTime).getTime()) {
-            days.push(dataPoint(review.reviewTime, lastDay));
+            days.push(new DataPoint(review.reviewTime, lastDay));
             lastDay = days[days.length - 1];
         }
 
@@ -90,7 +94,7 @@ function useOptions(cardData?: DataPoint[]) {
 
     if (!!cardData) {
         options.push({
-            value: millisToDays(Date.now() - cardData[0].date),
+            value: millisToDays(Date.now() - cardData[0].date.getTime()),
             text: 'All'
         });
     }
@@ -114,7 +118,7 @@ function AnkiTotalCardsHistoryChart({deckNames}: AnkiTotalCardsHistoryChartProps
 
     useEffect(() => {
         if (isFirstLoad.current && cardData && cardData.length > 0) {
-            setDaysToLookBack(millisToDays(Date.now() - cardData[0].date))
+            setDaysToLookBack(millisToDays(Date.now() - cardData[0].date.getTime()))
             isFirstLoad.current = false;
         }
     }, [data]);
@@ -179,7 +183,10 @@ function AnkiTotalCardsHistoryChart({deckNames}: AnkiTotalCardsHistoryChartProps
                     </div>
                 ) : (
                     chartData ? (
-                        <Chart data={chartData}>
+                        <Chart data={chartData.map(d => ({
+                            ...d,
+                            ...d.chartData
+                        }))}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
                             <ValueAxis/>

@@ -3,54 +3,57 @@ import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-r
 import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
 import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
 import {daysSinceDate, daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
-import {getVisibleLabelIndices} from "../../util/ChartUtils";
+import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {BunProFlattenedReviewWithLevel, flattenBunProReviews} from "../service/BunProDataUtil";
 import useWindowDimensions from "../../hooks/useWindowDimensions";
-import {scaleBand} from '../../util/ChartUtils';
 import {BunProReview} from "../models/BunProReview";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 
+type JLPTLevel = 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
+
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
-type DataPoint = any;
+class DataPoint {
 
-function dataPoint(date: Date, previousDataPoint?: DataPoint): DataPoint {
-    const createEmptyDataPoint = () => ({
-        total: 0,
-    });
+    date: Date
+    total: number = 0
+    N5: number | undefined
+    N4: number | undefined
+    N3: number | undefined
+    N2: number | undefined
+    N1: number | undefined
 
-    let dp: DataPoint = createEmptyDataPoint();
-
-    if (!!previousDataPoint) {
-        dp = {...previousDataPoint};
+    constructor(date: Date, previousDataPoint?: DataPoint) {
+        if (!!previousDataPoint) {
+            Object.assign(this, previousDataPoint)
+        }
+        this.date = truncDate(date);
     }
 
-    dp.date = truncDate(date);
+    addReview(review: BunProFlattenedReviewWithLevel) {
+        this.total += 1;
 
-    dp.addReview = (review: BunProFlattenedReviewWithLevel) => {
-        dp.total += 1;
-
-        const level = review.level;
-        if (!dp[level]) {
-            dp[level] = 1;
+        const level = review.level as JLPTLevel;
+        const amount = this[level];
+        if (amount) {
+            this[level] = amount + 1;
         } else {
-            dp[level] += 1;
+            this[level] = 1;
         }
-    };
-    return dp;
-}
+    }
 
+}
 
 function aggregateReviewByDay(reviews: BunProFlattenedReviewWithLevel[]): DataPoint[] {
     const orderedReviews = reviews.sort((a, b,) => a.current.time.getTime() - b.current.time.getTime());
 
-    const days = [dataPoint(orderedReviews[0].current.time)];
+    const days = [new DataPoint(orderedReviews[0].current.time)];
 
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
         if (lastDay.date.getTime() !== truncDate(review.current.time).getTime()) {
-            days.push(dataPoint(review.current.time, lastDay));
+            days.push(new DataPoint(review.current.time, lastDay));
             lastDay = days[days.length - 1];
         }
         lastDay.addReview(review);
@@ -76,7 +79,7 @@ function useOptions(rawData?: DataPoint[]) {
 
     if (!!rawData && rawData.length > 0) {
         options.push({
-            value: millisToDays(Date.now() - rawData[0].date),
+            value: millisToDays(Date.now() - rawData[0].date.getTime()),
             text: 'All'
         });
     }
@@ -115,7 +118,7 @@ function BunProTotalReviewsChart({reviews, grammarPoints}: BunProTotalReviewsCha
                 {targetItem.series == 'Total' ? (
                     <p>Total: {(dp.total).toLocaleString()}</p>
                 ) : (
-                    <p>{targetItem.series}: {dp[targetItem.series]}</p>
+                    <p>{targetItem.series}: {dp[targetItem.series as JLPTLevel]}</p>
                 )}
             </>
         );

@@ -29,32 +29,23 @@ function sortByStartedAtDate(a: AssignmentSnippet, b: AssignmentSnippet) {
     return 0;
 }
 
-type DataPoint = {
-    date: Date,
-    radicals: number,
-    kanji: number,
-    vocabulary: number,
-    total: () => number
-};
+class DataPoint {
 
-function dataPoint(date: Date, previousDataPoint?: DataPoint): DataPoint {
-    const data = {
-        date: date,
-        radicals: 0,
-        kanji: 0,
-        vocabulary: 0,
-        total: () => 0
-    };
+    radicals: number = 0
+    kanji: number = 0
+    vocabulary: number = 0
 
-    if (!!previousDataPoint) {
-        data.radicals = previousDataPoint.radicals;
-        data.kanji = previousDataPoint.kanji;
-        data.vocabulary = previousDataPoint.vocabulary;
+    constructor(public date: Date, previousDataPoint?: DataPoint) {
+        if (!!previousDataPoint) {
+            this.radicals = previousDataPoint.radicals;
+            this.kanji = previousDataPoint.kanji;
+            this.vocabulary = previousDataPoint.vocabulary;
+        }
     }
 
-    data.total = () => data.radicals + data.kanji + data.vocabulary;
-
-    return data;
+    total() {
+        return this.radicals + this.kanji + this.vocabulary
+    }
 }
 
 type AssignmentSnippet = {
@@ -74,10 +65,10 @@ function formatData(assignments: WanikaniAssignment[]) {
         .sort(sortByStartedAtDate)
 
 
-    const data: DataPoint[] = [dataPoint(truncDate(orderedAssignments[0].startedAt))];
+    const data: DataPoint[] = [new DataPoint(truncDate(orderedAssignments[0].startedAt))];
     for (const assignment of orderedAssignments) {
         if (data[data.length - 1].date.getTime() != truncDate(assignment.startedAt).getTime()) {
-            data.push(dataPoint(truncDate(assignment.startedAt), data[data.length - 1]));
+            data.push(new DataPoint(truncDate(assignment.startedAt), data[data.length - 1]));
         }
         const _dataPoint = data[data.length - 1];
         if (assignment.type === 'radical') {

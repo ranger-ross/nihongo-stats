@@ -16,38 +16,42 @@ import {AnkiReview} from "../models/AnkiReview";
 import {useAnkiReviewsByDeck} from "../service/AnkiQueries";
 import {DeckReviews} from "../service/AnkiDataUtil";
 
+type ChartData = { [series: string]: number }
 
-type DataPoint = any;
+class DataPoint {
 
-function dataPoint(date: number, previousDataPoint?: DataPoint): DataPoint {
-    const dp: DataPoint = {
-        date: truncDate(date),
-        reviews: {},
-        totalCount: previousDataPoint?.totalCount ?? 0
-    };
+    date: Date
+    totalCount: number
+    reviews: { [deck: string]: AnkiReview[] } = {}
+    chartData: ChartData = {}
 
-    if (!!previousDataPoint) {
-        const totalKeys = Object.keys(previousDataPoint).filter(key => key.includes('total_'));
-        for (const key of totalKeys) {
-            dp[key] = previousDataPoint[key] ?? 0;
+    constructor(date: number, private previousDataPoint?: DataPoint) {
+        this.date = truncDate(date)
+        this.totalCount = previousDataPoint?.totalCount ?? 0
+
+        if (previousDataPoint) {
+            const totalKeys = Object.keys(previousDataPoint.chartData).filter(key => key.includes('total_'));
+            for (const key of totalKeys) {
+                this.chartData[key] = previousDataPoint.chartData[key] ?? 0;
+            }
         }
     }
-    dp.addReview = (deck: string, review: AnkiReview) => {
-        if (!dp.reviews[deck]) {
-            dp.reviews[deck] = [review];
+
+    addReview(deck: string, review: AnkiReview) {
+        if (!this.reviews[deck]) {
+            this.reviews[deck] = [review];
         } else {
-            dp.reviews[deck].push(review);
+            this.reviews[deck].push(review);
         }
 
-        dp[`count_${deck}`] = dp.reviews[deck].length;
-        dp[`total_${deck}`] = (dp[`total_${deck}`] ?? 0) + 1;
-        dp.totalCount = (previousDataPoint?.totalCount ?? 0) + Object.keys(dp)
+        this.chartData[`count_${deck}`] = this.reviews[deck].length;
+        this.chartData[`total_${deck}`] = (this.chartData[`total_${deck}`] ?? 0) + 1;
+        this.totalCount = (this.previousDataPoint?.totalCount ?? 0) + Object.keys(this.chartData)
             .filter(key => key.includes('count_'))
             .map(key => key.replace('count_', ''))
-            .map(x => dp.reviews[x])
+            .map(x => this.reviews[x])
             .reduce((a, c) => a + c.length, 0);
     };
-    return dp;
 }
 
 
@@ -61,12 +65,12 @@ function formatMultiDeckReviewData(decks: DeckReviews[]): DataPoint[] {
     }
 
     const orderedReviews = reviews.sort((a, b,) => a.reviewTime - b.reviewTime);
-    const days = [dataPoint(orderedReviews[0].reviewTime)];
+    const days = [new DataPoint(orderedReviews[0].reviewTime)];
 
     for (const review of orderedReviews) {
         let lastDay = days[days.length - 1];
         if (lastDay.date.getTime() !== truncDate(review.reviewTime).getTime()) {
-            days.push(dataPoint(review.reviewTime, lastDay));
+            days.push(new DataPoint(review.reviewTime, lastDay));
             lastDay = days[days.length - 1];
         }
         lastDay.addReview(review.deckName, review);
@@ -86,7 +90,7 @@ function useOptions(reviewsByDeck?: DataPoint[]) {
 
     if (!!reviewsByDeck) {
         options.push({
-            value: millisToDays(Date.now() - reviewsByDeck[0].date),
+            value: millisToDays(Date.now() - reviewsByDeck[0].date.getTime()),
             text: 'All'
         });
     }
@@ -111,7 +115,7 @@ function AnkiReviewsChart({deckNames, showTotals}: AnkiReviewsChartProps) {
 
     useEffect(() => {
         if (isFirstLoad.current && reviewsByDeck && reviewsByDeck.length > 0) {
-            setDaysToLookBack(millisToDays(Date.now() - reviewsByDeck[0].date))
+            setDaysToLookBack(millisToDays(Date.now() - reviewsByDeck[0].date.getTime()))
             isFirstLoad.current = false;
         }
     }, [data]);
@@ -183,7 +187,10 @@ function AnkiReviewsChart({deckNames, showTotals}: AnkiReviewsChartProps) {
                     </div>
                 ) : (
                     chartData ? (
-                        <Chart key={key} data={chartData}>
+                        <Chart key={key} data={chartData.map(d => ({
+                            ...d,
+                            ...d.chartData
+                        }))}>
                             <ArgumentScale factory={scaleBand}/>
                             <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
                             <ValueAxis/>

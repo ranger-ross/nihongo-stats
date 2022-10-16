@@ -51,7 +51,7 @@ class DataPoint {
             .map(key => key.replace('count_', ''))
             .map(x => this.reviews[x])
             .reduce((a, c) => a + c.length, 0);
-    };
+    }
 }
 
 

@@ -120,7 +120,7 @@ function WanikaniItemTile({
                     text
                 ) : (
                     <img
-                        src={imageUrl!!}
+                        src={imageUrl!}
                         height={20}
                         style={{
                             paddingTop: '5px',

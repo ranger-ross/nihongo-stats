@@ -1,8 +1,8 @@
 import {Tooltip} from "@mui/material";
 import {kanjiFrequencyLookupMap, kanjiJLPTLookupMap} from "../../util/KanjiDataUtil";
 import {getWanikaniSrsStageDescription} from "../service/WanikaniDataUtil";
-import {CSSProperties} from "react";
-import {WanikaniSubjectReading} from "../models/WanikaniSubject";
+import React, {CSSProperties} from "react";
+import {WanikaniSubjectCharacterImage, WanikaniSubjectReading} from "../models/WanikaniSubject";
 import {WANIKANI_COLORS_WITH_BLACK_TEXT} from "../../Constants";
 
 function useTileStyle(color: string, size: number): CSSProperties { // 10 is base
@@ -53,6 +53,7 @@ type WanikaniItemTile = {
     type: string,
     level: number,
     readings?: WanikaniSubjectReading[],
+    characterImages?: WanikaniSubjectCharacterImage[],
     nextReviewDate: Date | null,
     size: number,
 };
@@ -67,6 +68,7 @@ function WanikaniItemTile({
                               level,
                               readings,
                               nextReviewDate,
+                              characterImages,
                               size = 10
                           }: WanikaniItemTile) {
     const style = useTileStyle(color, size);
@@ -78,6 +80,13 @@ function WanikaniItemTile({
     // Add delay to make the tooltip not appear when user quick hovers over multiple tiles
     // With this, it's a bit annoying to navigate because the tooltip gets in the way of other tiles
     const tooltipDelay = 125;
+
+    // Extra logic to fetch character images for radicals that do not have a "characters" attribute
+    const imageUrls = !text ? characterImages?.filter(image => image.contentType === "image/png").map(image => image.url) : null;
+    const imageUrl = imageUrls && imageUrls.length > 0 ? imageUrls[0] : null;
+    const imageFilter = WANIKANI_COLORS_WITH_BLACK_TEXT.has(color)
+        ? 'invert(0%)' // Black
+        : 'invert(100%)'; // White
 
     return (
         <Tooltip
@@ -106,7 +115,21 @@ function WanikaniItemTile({
             }
             placement={'top'}
         >
-            <a href={link} target="_blank" style={style} rel="noreferrer">{text}</a>
+            <a href={link} target="_blank" style={style} rel="noreferrer">
+                {text ? (
+                    text
+                ) : (
+                    <img
+                        src={imageUrl!!}
+                        height={20}
+                        style={{
+                            paddingTop: '5px',
+                            filter: imageFilter
+                        }}
+                        alt="?"
+                    />
+                )}
+            </a>
         </Tooltip>
     );
 }

@@ -40,7 +40,8 @@ type SubjectTileProps = {
 function SubjectTile({subject, colorBy}: SubjectTileProps) {
     return useMemo(() => (
         <WanikaniItemTile
-            text={subject.characters || '?'}
+            text={subject.characters}
+            characterImages={subject.characterImages}
             link={subject.documentUrl}
             meaning={subject?.meanings?.map(m => m.meaning).join(', ')}
             srsLevel={subject.srsStage}

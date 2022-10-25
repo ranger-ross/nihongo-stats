@@ -8,14 +8,7 @@ import {
     EventTracker,
     Stack
 } from "@devexpress/dx-react-chart";
-import {
-    addDays,
-    getMonthName,
-    millisToDays,
-    truncDate,
-    truncMonth,
-    truncWeek
-} from "../../util/DateUtils";
+import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {createGrammarPointsLookupMap} from "../service/BunProDataUtil";
@@ -130,10 +123,15 @@ function useOptions(rawData?: BunProReview[]) {
     ];
 
     if (!!rawData && rawData.length > 0) {
-        options.push({
-            value: millisToDays(Date.now() - rawData[rawData.length - 1].createdAt.getTime()),
-            text: 'All'
-        });
+        const min = rawData
+            .filter(review => review.createdAt)
+            .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())[0];
+        if (min) {
+            options.push({
+                value: millisToDays(Date.now() - min.createdAt.getTime()),
+                text: 'All'
+            });
+        }
     }
 
     return options;

@@ -43,7 +43,7 @@
     "@types/d3-array": "3.0.3",
     "@types/d3-scale": "4.0.2",
     "@types/d3-shape": "3.1.0",
-    "@types/lodash": "4.14.186",
+    "@types/lodash": "4.14.187",
     "@typescript-eslint/eslint-plugin": "5.42.0",
     "@typescript-eslint/parser": "5.42.0",
     "@vitejs/plugin-react": "2.2.0",

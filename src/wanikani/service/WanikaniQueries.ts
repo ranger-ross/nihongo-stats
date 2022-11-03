@@ -49,7 +49,8 @@ export function useWanikaniResets(enabled = true) {
 export function useWanikaniLevelProgress(enabled = true) {
     return useQuery(['wanikaniLevelProgress'], () => WanikaniApiService.getLevelProgress(), {
         enabled: enabled,
-        cacheTime: 0,
+        cacheTime: Infinity,
+        staleTime: 60 * 1000,
         select: (data) => data.data.map(mapWanikaniLevelProgression)
     });
 }

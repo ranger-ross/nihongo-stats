@@ -246,10 +246,6 @@ function joinAndSendCacheableRequest(request: string, cacheKey: string, factory:
     return promise
 }
 
-async function getLevelProgress(): Promise<RawWanikaniLevelProgressionPage> {
-    return await joinAndSendCacheableRequest('/v2/level_progressions', CACHE_KEYS.levelProgression, fetchWithCache, 1000 * 60);
-}
-
 export function getSubjects(): Promise<RawWanikaniSubject[]> {
     return fetchMultiPageRequest('/v2/subjects');
 }
@@ -310,6 +306,13 @@ async function getSummary(): Promise<RawWanikaniSummary> {
     throwIfRateLimited(response);
     return await response.json();
 }
+
+async function getLevelProgress(): Promise<RawWanikaniLevelProgressionPage> {
+    const response = await fetch(APP_URLS.wanikaniApi + '/v2/level_progressions', defaultWanikaniOptions());
+    throwIfRateLimited(response);
+    return await response.json();
+}
+
 
 export default {
     saveApiKey: saveApiKey,

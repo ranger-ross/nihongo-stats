@@ -7,10 +7,7 @@ import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelProgress";
 import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
-import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
-import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
-import {mapWanikaniAssignment} from "./WanikaniMappingService";
-import {WanikaniAssignment} from "../models/WanikaniAssignment";
+import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
 import {WanikaniReview} from "../models/WanikaniReview";
 import {throwIfRateLimited} from "../../util/ReactQueryUtils";
 import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
@@ -127,7 +124,7 @@ async function getFromMemoryCacheOrFetchMultiPageRequest(path: string) {
     return data;
 }
 
-async function getAllRawAssignments(): Promise<RawWanikaniAssignment[]> {
+export async function getAllAssignments(): Promise<RawWanikaniAssignment[]> {
     if (memoryCache.includes(CACHE_KEYS.assignments)) {
         const cachedValue = memoryCache.get(CACHE_KEYS.assignments);
         // Assignments ttl is 5 mins in Mem Cache
@@ -153,10 +150,6 @@ async function getAllRawAssignments(): Promise<RawWanikaniAssignment[]> {
     memoryCache.put(CACHE_KEYS.assignments, cacheObject);
 
     return assignments;
-}
-
-async function getAllAssignments() {
-    return await getAllRawAssignments();
 }
 
 function sortAndDeduplicateAssignments(assignments: RawWanikaniAssignment[]) {
@@ -257,26 +250,15 @@ async function getSummary(): Promise<RawWanikaniSummary> {
     return await joinAndSendCacheableRequest('/v2/summary', CACHE_KEYS.summary, fetchWithCache, 1000 * 60);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getSrsSystems(): Promise<RawWanikaniSrsSystemPage> {
-    return joinAndSendCacheableRequest('/v2/spaced_repetition_systems', CACHE_KEYS.srsSystems, fetchWithCache, 1000 * 60 * 60 * 24 * 7);
-}
-
 async function getResets(): Promise<RawWanikaniResetPage> {
     return await joinAndSendCacheableRequest('/v2/resets', CACHE_KEYS.resets, fetchWithCache, 1000 * 60 * 10);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function getAssignmentsForLevel(level: number): Promise<WanikaniAssignment[]> {
-    const page: RawWanikaniAssignmentPage = await joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, CACHE_KEYS.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
-    return page.data.map(mapWanikaniAssignment);
 }
 
 async function getLevelProgress(): Promise<RawWanikaniLevelProgressionPage> {
     return await joinAndSendCacheableRequest('/v2/level_progressions', CACHE_KEYS.levelProgression, fetchWithCache, 1000 * 60);
 }
 
-function getRawSubjects(): Promise<RawWanikaniSubject[]> {
+export function getSubjects(): Promise<RawWanikaniSubject[]> {
     const fetchSubjects = async () => {
         if (memoryCache.includes(CACHE_KEYS.subjects)) {
             return memoryCache.get(CACHE_KEYS.subjects);
@@ -309,11 +291,6 @@ function getRawSubjects(): Promise<RawWanikaniSubject[]> {
     }
     return promise
 }
-
-async function getSubjects() {
-    return await getRawSubjects();
-}
-
 
 function attemptLogin(apiKey: string) {
     return fetchWanikaniApi('/v2/user', apiKey);

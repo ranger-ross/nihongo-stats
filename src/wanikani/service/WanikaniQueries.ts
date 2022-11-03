@@ -23,7 +23,8 @@ export function useWanikaniSubjects(enabled = true) {
 export function useWanikaniAssignments(enabled = true) {
     return useQuery(['wanikaniAssignments'], () => WanikaniApiService.getAllAssignments(), {
         enabled: enabled,
-        cacheTime: 0,
+        cacheTime: Infinity,
+        staleTime: 5 * 60 * 1000,
         select: (data) => data.map(mapWanikaniAssignment)
     });
 }

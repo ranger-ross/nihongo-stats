@@ -125,31 +125,8 @@ async function getFromMemoryCacheOrFetchMultiPageRequest(path: string) {
 }
 
 export async function getAllAssignments(): Promise<RawWanikaniAssignment[]> {
-    if (memoryCache.includes(CACHE_KEYS.assignments)) {
-        const cachedValue = memoryCache.get(CACHE_KEYS.assignments);
-        // Assignments ttl is 5 mins in Mem Cache
-        if (cachedValue.lastUpdated > (Date.now() - 1000 * 60 * 5)) {
-            return cachedValue.data;
-        }
-    }
-
-    const cachedValue = await localForage.getItem<any>(CACHE_KEYS.assignments);
-    if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 10)) {
-        return cachedValue.data;
-    }
-
-    let assignments = await getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments');
-
-    assignments = sortAndDeduplicateAssignments(assignments);
-
-    const cacheObject = {
-        data: assignments,
-        lastUpdated: new Date().getTime(),
-    };
-    localForage.setItem(CACHE_KEYS.assignments, cacheObject);
-    memoryCache.put(CACHE_KEYS.assignments, cacheObject);
-
-    return assignments;
+    const assignments = await getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments');
+    return sortAndDeduplicateAssignments(assignments);
 }
 
 function sortAndDeduplicateAssignments(assignments: RawWanikaniAssignment[]) {

@@ -168,12 +168,12 @@ function fetchMultiPageRequestObservable(path: string, startingId?: number) {
     return subject.asObservable();
 }
 
-function getReviews(): Observable<MultiPageObservableEvent<WanikaniReview>> {
-    const subject = new Subject<MultiPageObservableEvent<WanikaniReview>>();
+function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReview>> {
+    const subject = new Subject<MultiPageObservableEvent<RawWanikaniReview>>();
 
     const complete = (data: RawWanikaniReview[]) => subject.next({
         status: EVENT_STATUS.COMPLETE,
-        data: data.map(mapWanikaniReview),
+        data: data,
     });
 
     const inProgress = (size: number, progress: number) => subject.next({

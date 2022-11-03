@@ -5,6 +5,7 @@ import {
     mapWanikaniAssignment,
     mapWanikaniLevelProgression,
     mapWanikaniReset,
+    mapWanikaniReview,
     mapWanikaniSubject,
     mapWanikaniSummary,
     mapWanikaniUser
@@ -12,6 +13,9 @@ import {
 import {APP_URLS} from "../../Constants";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {RawWanikaniSubjectResponse} from "../models/raw/RawWanikaniSubjectResponse";
+import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
+import {WanikaniReview} from "../models/WanikaniReview";
+import {EVENT_STATUS, MultiPageObservableEvent} from "./WanikaniApiServiceRxJs";
 
 function buildWanikaniSubjectQueries(firstPageData: RawWanikaniSubjectResponse | undefined): string[] {
     if (!firstPageData) {
@@ -109,5 +113,31 @@ export function useWanikaniUser(enabled = true) {
         staleTime: 30 * 1000,
         retry: alwaysRetryOnRateLimit(3),
         select: (data) => mapWanikaniUser(data)
+    });
+}
+
+type OnProgressCallback = (progress: number) => void;
+type OnRateLimitedCallback = (isRateLimited: boolean) => void;
+
+export function useWanikaniReviews(enabled = true, onProgress: OnProgressCallback, onRateLimited: OnRateLimitedCallback) {
+    return useQuery<RawWanikaniReview[], unknown, WanikaniReview[]>(['wanikaniReviews'], () => {
+        return new Promise<RawWanikaniReview[]>((resolve) => {
+            WanikaniApiService.getReviewAsObservable()
+                .subscribe((event: MultiPageObservableEvent<RawWanikaniReview>) => {
+                    if (event.status === EVENT_STATUS.IN_PROGRESS) {
+                        onProgress((event.progress as number) / (event.size as number));
+                    }
+                    if (event.status === EVENT_STATUS.COMPLETE) {
+                        onProgress(1.0);
+                        resolve(event.data ?? []);
+                    }
+                    onRateLimited(event.status === EVENT_STATUS.RATE_LIMITED);
+                });
+        });
+    }, {
+        enabled: enabled,
+        cacheTime: 7 * 24 * 60 * 60 * 1000,
+        staleTime: 2 * 1000,
+        select: (data) => data.map(mapWanikaniReview)
     });
 }

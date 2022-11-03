@@ -14,7 +14,8 @@ import {
 export function useWanikaniSubjects(enabled = true) {
     return useQuery(['wanikaniSubjects'], () => WanikaniApiService.getSubjects(), {
         enabled: enabled,
-        cacheTime: 0,
+        cacheTime: Infinity,
+        staleTime: 2 * 7 * 24 * 60 * 60 * 1000, // 2 weeks
         select: (data) => data.map(mapWanikaniSubject)
     });
 }

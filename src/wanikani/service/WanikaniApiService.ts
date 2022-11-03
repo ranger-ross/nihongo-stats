@@ -259,37 +259,7 @@ async function getLevelProgress(): Promise<RawWanikaniLevelProgressionPage> {
 }
 
 export function getSubjects(): Promise<RawWanikaniSubject[]> {
-    const fetchSubjects = async () => {
-        if (memoryCache.includes(CACHE_KEYS.subjects)) {
-            return memoryCache.get(CACHE_KEYS.subjects);
-        }
-
-        const cachedValue = await localForage.getItem<any>(CACHE_KEYS.subjects);
-        if (!!cachedValue) {
-            memoryCache.put(CACHE_KEYS.subjects, cachedValue.data);
-            return cachedValue.data;
-        }
-
-        const subjects = await fetchMultiPageRequest('/v2/subjects');
-
-        localForage.setItem(CACHE_KEYS.subjects, {
-            data: subjects,
-            lastUpdated: new Date().getTime(),
-        });
-        memoryCache.put(CACHE_KEYS.subjects, subjects);
-        return subjects;
-    }
-
-
-    const name = 'getSubjects';
-    let promise = promiseCache.get(name);
-    if (!promise) {
-        promise = fetchSubjects()
-        promiseCache.put(name, promise, 60_000)
-    } else {
-        console.debug('joined promise', name)
-    }
-    return promise
+    return fetchMultiPageRequest('/v2/subjects');
 }
 
 function attemptLogin(apiKey: string) {

@@ -10,10 +10,11 @@ import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
 import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
 import {
-    mapWanikaniAssignment, mapWanikaniLevelProgression,
+    mapWanikaniAssignment,
+    mapWanikaniLevelProgression,
     mapWanikaniReset,
-    mapWanikaniSubject, mapWanikaniSummary,
-    mapWanikaniUser
+    mapWanikaniSubject,
+    mapWanikaniSummary
 } from "./WanikaniMappingService";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {WanikaniReset} from "../models/WanikaniReset";
@@ -22,14 +23,22 @@ import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
 import {WanikaniSummary} from "../models/WanikaniSummary";
 import {getPendingLessonsAndReviews} from "./WanikaniDataUtil";
 import {WanikaniReview} from "../models/WanikaniReview";
+import {throwIfRateLimited} from "../../util/ReactQueryUtils";
+import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 
+/**
+ * @deprecated use React Query cache
+ */
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
+/**
+ * @deprecated use React Query cache
+ */
 // @ts-ignore
 const promiseCache = new PromiseCache();
 
 const wanikaniApiUrl = APP_URLS.wanikaniApi;
-const cacheKeys: { [key: string]: string } = {
+const CACHE_KEYS: { [key: string]: string } = {
     apiKey: 'wanikani-api-key',
     reviews: 'wanikani-reviews',
     user: 'wanikani-user',
@@ -42,6 +51,11 @@ const cacheKeys: { [key: string]: string } = {
     resets: 'wanikani-level-resets',
     srsSystems: 'wanikani-srs-systems',
 }
+
+const DEFAULT_WANIKANI_HEADERS = Object.freeze({
+    'pragma': 'no-cache',
+    'cache-control': 'no-cache',
+});
 
 const authHeader = (apiKey: string) => ({'Authorization': `Bearer ${apiKey}`})
 
@@ -81,14 +95,14 @@ async function fetchWanikaniApi(path: string, apiKey: string, headers?: { [key: 
 }
 
 function apiKey(): string {
-    return localStorage.getItem(cacheKeys.apiKey) as string;
+    return localStorage.getItem(CACHE_KEYS.apiKey) as string;
 }
 
 function saveApiKey(key: string | null) {
     if (!key) {
-        localStorage.removeItem(cacheKeys.apiKey);
+        localStorage.removeItem(CACHE_KEYS.apiKey);
     } else {
-        localStorage.setItem(cacheKeys.apiKey, key);
+        localStorage.setItem(CACHE_KEYS.apiKey, key);
     }
 }
 
@@ -125,15 +139,15 @@ async function getFromMemoryCacheOrFetchMultiPageRequest(path: string) {
 }
 
 async function getAllRawAssignments(): Promise<RawWanikaniAssignment[]> {
-    if (memoryCache.includes(cacheKeys.assignments)) {
-        const cachedValue = memoryCache.get(cacheKeys.assignments);
+    if (memoryCache.includes(CACHE_KEYS.assignments)) {
+        const cachedValue = memoryCache.get(CACHE_KEYS.assignments);
         // Assignments ttl is 5 mins in Mem Cache
         if (cachedValue.lastUpdated > (Date.now() - 1000 * 60 * 5)) {
             return cachedValue.data;
         }
     }
 
-    const cachedValue = await localForage.getItem<any>(cacheKeys.assignments);
+    const cachedValue = await localForage.getItem<any>(CACHE_KEYS.assignments);
     if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 10)) {
         return cachedValue.data;
     }
@@ -146,8 +160,8 @@ async function getAllRawAssignments(): Promise<RawWanikaniAssignment[]> {
         data: assignments,
         lastUpdated: new Date().getTime(),
     };
-    localForage.setItem(cacheKeys.assignments, cacheObject);
-    memoryCache.put(cacheKeys.assignments, cacheObject);
+    localForage.setItem(CACHE_KEYS.assignments, cacheObject);
+    memoryCache.put(CACHE_KEYS.assignments, cacheObject);
 
     return assignments;
 }
@@ -174,12 +188,12 @@ function sortAndDeduplicateAssignments(assignments: RawWanikaniAssignment[]) {
 }
 
 async function flushCache() {
-    for (const key of Object.keys(cacheKeys)) {
-        await localForage.removeItem(cacheKeys[key]);
+    for (const key of Object.keys(CACHE_KEYS)) {
+        await localForage.removeItem(CACHE_KEYS[key]);
     }
 
     for (let i = 0; i < 60; i++) {
-        await localForage.removeItem(cacheKeys.assignmentsForLevelPrefix + (i + 1));
+        await localForage.removeItem(CACHE_KEYS.assignmentsForLevelPrefix + (i + 1));
     }
 }
 
@@ -236,6 +250,9 @@ async function fetchWithCache(path: string, cacheKey: string, ttl: number, _apiK
 // only send one request and return the data to all requests
 type FetchFactory = typeof fetchWithCache;
 
+/**
+ * @deprecated Use React Query pattern instead
+ */
 function joinAndSendCacheableRequest(request: string, cacheKey: string, factory: FetchFactory, ttl = 1000, _apiKey?: string) {
     const name = request;
     let promise = promiseCache.get(name);
@@ -248,56 +265,51 @@ function joinAndSendCacheableRequest(request: string, cacheKey: string, factory:
     return promise
 }
 
-async function getUser(): Promise<WanikaniUser> {
-    const user = await joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000 * 60);
-    return mapWanikaniUser(user);
-}
-
 async function getSummary(): Promise<WanikaniSummary> {
-    const summary: RawWanikaniSummary = await joinAndSendCacheableRequest('/v2/summary', cacheKeys.summary, fetchWithCache, 1000 * 60);
+    const summary: RawWanikaniSummary = await joinAndSendCacheableRequest('/v2/summary', CACHE_KEYS.summary, fetchWithCache, 1000 * 60);
     return mapWanikaniSummary(summary)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getSrsSystems(): Promise<RawWanikaniSrsSystemPage> {
-    return joinAndSendCacheableRequest('/v2/spaced_repetition_systems', cacheKeys.srsSystems, fetchWithCache, 1000 * 60 * 60 * 24 * 7);
+    return joinAndSendCacheableRequest('/v2/spaced_repetition_systems', CACHE_KEYS.srsSystems, fetchWithCache, 1000 * 60 * 60 * 24 * 7);
 }
 
 async function getResets(): Promise<WanikaniReset[]> {
-    const page: RawWanikaniResetPage = await joinAndSendCacheableRequest('/v2/resets', cacheKeys.resets, fetchWithCache, 1000 * 60 * 10);
+    const page: RawWanikaniResetPage = await joinAndSendCacheableRequest('/v2/resets', CACHE_KEYS.resets, fetchWithCache, 1000 * 60 * 10);
     return page.data.map(mapWanikaniReset);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getAssignmentsForLevel(level: number): Promise<WanikaniAssignment[]> {
-    const page: RawWanikaniAssignmentPage = await joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
+    const page: RawWanikaniAssignmentPage = await joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, CACHE_KEYS.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
     return page.data.map(mapWanikaniAssignment);
 }
 
 async function getLevelProgress(): Promise<WanikaniLevelProgression[]> {
-    const page: RawWanikaniLevelProgressionPage = await joinAndSendCacheableRequest('/v2/level_progressions', cacheKeys.levelProgression, fetchWithCache, 1000 * 60);
+    const page: RawWanikaniLevelProgressionPage = await joinAndSendCacheableRequest('/v2/level_progressions', CACHE_KEYS.levelProgression, fetchWithCache, 1000 * 60);
     return page.data.map(mapWanikaniLevelProgression);
 }
 
 function getRawSubjects(): Promise<RawWanikaniSubject[]> {
     const fetchSubjects = async () => {
-        if (memoryCache.includes(cacheKeys.subjects)) {
-            return memoryCache.get(cacheKeys.subjects);
+        if (memoryCache.includes(CACHE_KEYS.subjects)) {
+            return memoryCache.get(CACHE_KEYS.subjects);
         }
 
-        const cachedValue = await localForage.getItem<any>(cacheKeys.subjects);
+        const cachedValue = await localForage.getItem<any>(CACHE_KEYS.subjects);
         if (!!cachedValue) {
-            memoryCache.put(cacheKeys.subjects, cachedValue.data);
+            memoryCache.put(CACHE_KEYS.subjects, cachedValue.data);
             return cachedValue.data;
         }
 
         const subjects = await fetchMultiPageRequest('/v2/subjects');
 
-        localForage.setItem(cacheKeys.subjects, {
+        localForage.setItem(CACHE_KEYS.subjects, {
             data: subjects,
             lastUpdated: new Date().getTime(),
         });
-        memoryCache.put(cacheKeys.subjects, subjects);
+        memoryCache.put(CACHE_KEYS.subjects, subjects);
         return subjects;
     }
 
@@ -347,6 +359,17 @@ function getReviews(): Promise<WanikaniReview[]> {
         console.debug('joined promise', name)
     }
     return promise;
+}
+
+async function getUser(): Promise<RawWanikaniUser> {
+    const response = await fetch(APP_URLS.wanikaniApi + '/v2/user', {
+        headers: {
+            ...DEFAULT_WANIKANI_HEADERS,
+            'Authorization': `Bearer ${apiKey()}`
+        }
+    });
+    throwIfRateLimited(response);
+    return await response.json();
 }
 
 export default {

@@ -6,6 +6,7 @@ import {AppRoutes} from './Routes'
 import {AppThemeProvider} from './Theme'
 import {useTheme} from "@mui/material";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+import {persistWithIndexedDB} from "./util/ReactQueryAsyncStorage";
 
 function AppContainer({children}: React.PropsWithChildren<any>) {
     const theme = useTheme();
@@ -16,7 +17,7 @@ function AppContainer({children}: React.PropsWithChildren<any>) {
         const isDark = theme.palette.mode === 'dark';
         document.documentElement.style.setProperty('color-scheme', isDark ? 'dark' : 'light');
     }, [theme]);
-    
+
     return (
         <div>
             {children}
@@ -24,7 +25,9 @@ function AppContainer({children}: React.PropsWithChildren<any>) {
     );
 }
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
+persistWithIndexedDB(queryClient)
+
 
 function App() {
     return (

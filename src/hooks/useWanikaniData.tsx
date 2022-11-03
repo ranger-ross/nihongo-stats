@@ -4,10 +4,12 @@ import WanikaniApiService from "../wanikani/service/WanikaniApiService";
 import {EVENT_STATUS, MultiPageObservableEvent} from "../wanikani/service/WanikaniApiServiceRxJs";
 import create from "zustand";
 import {
-    useWanikaniAssignments, useWanikaniLevelProgress,
+    useWanikaniAssignments,
+    useWanikaniLevelProgress,
     useWanikaniResets,
     useWanikaniSubjects,
-    useWanikaniSummary, useWanikaniUser
+    useWanikaniSummary,
+    useWanikaniUser
 } from "../wanikani/service/WanikaniQueries";
 
 

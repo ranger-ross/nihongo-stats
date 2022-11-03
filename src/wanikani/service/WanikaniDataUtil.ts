@@ -360,6 +360,7 @@ export const colorByOptions: { [key: string]: WKColorByOption } = {
 export function getPendingLessonsAndReviews(summary: WanikaniSummary): { lessons: number, reviews: number } {
     let lessons = 0;
     for (const group of summary.lessons) {
+        console.log(group);
         if (group.availableAt.getTime() < Date.now()) {
             lessons += group.subjectIds.length;
         }

@@ -1,5 +1,7 @@
 import {useQuery} from "@tanstack/react-query";
 import WanikaniApiService from "./WanikaniApiService";
+import {alwaysRetryOnRateLimit} from "../../util/ReactQueryUtils";
+import {mapWanikaniUser} from "./WanikaniMappingService";
 
 
 export function useWanikaniSubjects(enabled = true) {
@@ -26,14 +28,18 @@ export function useWanikaniResets(enabled = true) {
     });
 }
 
-export function useWanikaniUser(enabled = true) {
-    return useQuery(['wanikaniUser'], () => WanikaniApiService.getUser(), {
+export function useWanikaniLevelProgress(enabled = true) {
+    return useQuery(['wanikaniLevelProgress'], () => WanikaniApiService.getLevelProgress(), {
         enabled: enabled
     });
 }
 
-export function useWanikaniLevelProgress(enabled = true) {
-    return useQuery(['wanikaniLevelProgress'], () => WanikaniApiService.getLevelProgress(), {
-        enabled: enabled
+export function useWanikaniUser(enabled = true) {
+    return useQuery(['wanikaniUser'], () => WanikaniApiService.getUser(), {
+        enabled: enabled,
+        cacheTime: 24 * 60 * 60 * 1000,
+        staleTime: 5_000,
+        retry: alwaysRetryOnRateLimit(3),
+        select: (data) => mapWanikaniUser(data)
     });
 }

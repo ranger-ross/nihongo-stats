@@ -155,74 +155,6 @@ async function flushCache() {
     }
 }
 
-function ifModifiedSinceHeader(date: Date | number) {
-    if (!date)
-        return null;
-    return {
-        'If-Modified-Since': new Date(date).toUTCString()
-    };
-}
-
-async function unwrapResponse(response: Response, fallbackValue: any) {
-    if (response.status === 304) {
-        return fallbackValue;
-    }
-    return await response.json();
-}
-
-async function fetchWithCache(path: string, cacheKey: string, ttl: number, _apiKey?: string) {
-    const cachedValue = await localForage.getItem<any>(cacheKey);
-    if (!!cachedValue && cachedValue.lastUpdated > Date.now() - ttl) {
-        return cachedValue.data;
-    }
-
-    try {
-        const key = !!_apiKey ? _apiKey : apiKey();
-        const response = await fetchWanikaniApi(path, key,
-            ifModifiedSinceHeader(cachedValue?.lastUpdated));
-
-        if (response.status >= 400)
-            throw new Error(`Failed load data, Path: ${path}, Response: ${response.status}`);
-
-        const data = await unwrapResponse(response, cachedValue?.data);
-
-        if (data?.code === 401)
-            throw new Error('Failed to authenticate');
-
-        localForage.setItem(cacheKey, {
-            data: data,
-            lastUpdated: new Date().getTime(),
-        });
-        return data;
-    } catch (error) {
-        if (!!cachedValue && !!cachedValue.data) {
-            console.error('failed to fetch new data for ' + path + ', falling back to cached data...');
-            return cachedValue.data;
-        } else {
-            throw error;
-        }
-    }
-}
-
-// Join meaning when multiple requests for the same endpoint come in at the same time,
-// only send one request and return the data to all requests
-type FetchFactory = typeof fetchWithCache;
-
-/**
- * @deprecated Use React Query pattern instead
- */
-function joinAndSendCacheableRequest(request: string, cacheKey: string, factory: FetchFactory, ttl = 1000, _apiKey?: string) {
-    const name = request;
-    let promise = promiseCache.get(name);
-    if (!promise) {
-        promise = factory(request, cacheKey, ttl, _apiKey);
-        promiseCache.put(name, promise, ttl)
-    } else {
-        console.debug('joined promise', request)
-    }
-    return promise
-}
-
 export function getSubjects(): Promise<RawWanikaniSubject[]> {
     return fetchMultiPageRequest('/v2/subjects');
 }
@@ -266,28 +198,26 @@ function defaultWanikaniOptions(): RequestInit {
     }
 }
 
-async function getUser(): Promise<RawWanikaniUser> {
-    const response = await fetch(APP_URLS.wanikaniApi + '/v2/user', defaultWanikaniOptions());
+export async function fetchWanikani(url: string): Promise<any> {
+    const response = await fetch(url, defaultWanikaniOptions());
     throwIfRateLimited(response);
     return await response.json();
+}
+
+async function getUser(): Promise<RawWanikaniUser> {
+    return fetchWanikani(APP_URLS.wanikaniApi + '/v2/user')
 }
 
 async function getResets(): Promise<RawWanikaniResetPage> {
-    const response = await fetch(APP_URLS.wanikaniApi + '/v2/resets', defaultWanikaniOptions());
-    throwIfRateLimited(response);
-    return await response.json();
+    return fetchWanikani(APP_URLS.wanikaniApi + '/v2/resets')
 }
 
 async function getSummary(): Promise<RawWanikaniSummary> {
-    const response = await fetch(APP_URLS.wanikaniApi + '/v2/summary', defaultWanikaniOptions());
-    throwIfRateLimited(response);
-    return await response.json();
+    return fetchWanikani(APP_URLS.wanikaniApi + '/v2/summary')
 }
 
 async function getLevelProgress(): Promise<RawWanikaniLevelProgressionPage> {
-    const response = await fetch(APP_URLS.wanikaniApi + '/v2/level_progressions', defaultWanikaniOptions());
-    throwIfRateLimited(response);
-    return await response.json();
+    return fetchWanikani(APP_URLS.wanikaniApi + '/v2/level_progressions')
 }
 
 

@@ -1,4 +1,5 @@
 import {RetryValue} from "@tanstack/query-core/src/retryer";
+import {UseQueryResult} from "@tanstack/react-query";
 
 export const RATE_LIMIT_ERROR = new Error("Rate-Limited")
 
@@ -26,3 +27,14 @@ export function alwaysRetryOnRateLimit(retries = 3): RetryValue<any> {
         return failureCount < 3;
     }
 }
+
+/**
+ * Util function used to combine list results from useQueries()
+ */
+export const combineResults = <T extends object>(
+    data: UseQueryResult<T[]>[]
+): T[] =>
+    data.reduce((acc, curr) => {
+        if (!curr.data) return acc;
+        return [...acc, ...curr.data];
+    }, [] as T[]);

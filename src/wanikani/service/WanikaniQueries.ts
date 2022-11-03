@@ -24,6 +24,8 @@ function buildWanikaniSubjectQueries(firstPageData: RawWanikaniSubjectResponse |
     const queries = [];
     queries.push(APP_URLS.wanikaniApi + '/v2/subjects');
     for (let i = 1; i < totalPages; i++) {
+        // TODO: be careful here, `i` is technically not the subjectId,
+        //   the index in the list just happens to match the id
         queries.push(APP_URLS.wanikaniApi + '/v2/subjects?page_after_id=' + (i * 1000))
     }
 

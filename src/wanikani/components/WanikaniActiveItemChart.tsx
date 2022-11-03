@@ -202,7 +202,7 @@ function WanikaniActiveItemsChart({
     }, []);
 
     let data = defaultState;
-    if (user) {
+    if (user && assignments.length > 0) {
         const level = isPreviousLevel ? user.level - 1 : user.level;
         data = formatData(subjects, assignments, level);
     }

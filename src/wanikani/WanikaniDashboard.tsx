@@ -42,7 +42,7 @@ const styles: AppStyles = {
 
 
 function DashboardContent() {
-    const {user, levelProgress, summary, subjects, assignments, isLoading} = useWanikaniData({
+    const {user, levelProgress, summary, subjects, assignments, isFetching} = useWanikaniData({
         user: true,
         subjects: true,
         assignments: true,
@@ -50,7 +50,7 @@ function DashboardContent() {
         levelProgress: true,
     });
 
-    if (isLoading) {
+    if (isFetching) {
         return (
             <WanikaniLoadingScreen
                 fetch={{

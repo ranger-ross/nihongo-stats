@@ -1,36 +1,53 @@
 import {useQuery} from "@tanstack/react-query";
 import WanikaniApiService from "./WanikaniApiService";
 import {alwaysRetryOnRateLimit} from "../../util/ReactQueryUtils";
-import {mapWanikaniUser} from "./WanikaniMappingService";
+import {
+    mapWanikaniAssignment,
+    mapWanikaniLevelProgression,
+    mapWanikaniReset,
+    mapWanikaniSubject,
+    mapWanikaniSummary,
+    mapWanikaniUser
+} from "./WanikaniMappingService";
 
 
 export function useWanikaniSubjects(enabled = true) {
     return useQuery(['wanikaniSubjects'], () => WanikaniApiService.getSubjects(), {
-        enabled: enabled
+        enabled: enabled,
+        cacheTime: 0,
+        select: (data) => data.map(mapWanikaniSubject)
     });
 }
 
 export function useWanikaniAssignments(enabled = true) {
     return useQuery(['wanikaniAssignments'], () => WanikaniApiService.getAllAssignments(), {
-        enabled: enabled
+        enabled: enabled,
+        cacheTime: 0,
+        select: (data) => data.map(mapWanikaniAssignment)
     });
 }
 
 export function useWanikaniSummary(enabled = true) {
     return useQuery(['wanikaniSummary'], () => WanikaniApiService.getSummary(), {
-        enabled: enabled
+        enabled: enabled,
+        cacheTime: 0,
+        select: (data) => mapWanikaniSummary(data)
     });
 }
 
 export function useWanikaniResets(enabled = true) {
     return useQuery(['wanikaniResets'], () => WanikaniApiService.getResets(), {
-        enabled: enabled
+        enabled: enabled,
+        cacheTime: 0,
+        select: (data) => data.data.map(mapWanikaniReset)
     });
 }
 
 export function useWanikaniLevelProgress(enabled = true) {
     return useQuery(['wanikaniLevelProgress'], () => WanikaniApiService.getLevelProgress(), {
-        enabled: enabled
+        enabled: enabled,
+        cacheTime: 0,
+        select: (data) => data.data.map(mapWanikaniLevelProgression)
     });
 }
 

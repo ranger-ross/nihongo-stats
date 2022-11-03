@@ -9,19 +9,8 @@ import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelPro
 import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
 import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
 import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
-import {
-    mapWanikaniAssignment,
-    mapWanikaniLevelProgression,
-    mapWanikaniReset,
-    mapWanikaniSubject,
-    mapWanikaniSummary
-} from "./WanikaniMappingService";
+import {mapWanikaniAssignment} from "./WanikaniMappingService";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
-import {WanikaniReset} from "../models/WanikaniReset";
-import {WanikaniUser} from "../models/WanikaniUser";
-import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
-import {WanikaniSummary} from "../models/WanikaniSummary";
-import {getPendingLessonsAndReviews} from "./WanikaniDataUtil";
 import {WanikaniReview} from "../models/WanikaniReview";
 import {throwIfRateLimited} from "../../util/ReactQueryUtils";
 import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
@@ -167,8 +156,7 @@ async function getAllRawAssignments(): Promise<RawWanikaniAssignment[]> {
 }
 
 async function getAllAssignments() {
-    const assignments = await getAllRawAssignments();
-    return assignments.map(mapWanikaniAssignment);
+    return await getAllRawAssignments();
 }
 
 function sortAndDeduplicateAssignments(assignments: RawWanikaniAssignment[]) {
@@ -265,9 +253,8 @@ function joinAndSendCacheableRequest(request: string, cacheKey: string, factory:
     return promise
 }
 
-async function getSummary(): Promise<WanikaniSummary> {
-    const summary: RawWanikaniSummary = await joinAndSendCacheableRequest('/v2/summary', CACHE_KEYS.summary, fetchWithCache, 1000 * 60);
-    return mapWanikaniSummary(summary)
+async function getSummary(): Promise<RawWanikaniSummary> {
+    return await joinAndSendCacheableRequest('/v2/summary', CACHE_KEYS.summary, fetchWithCache, 1000 * 60);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -275,9 +262,8 @@ function getSrsSystems(): Promise<RawWanikaniSrsSystemPage> {
     return joinAndSendCacheableRequest('/v2/spaced_repetition_systems', CACHE_KEYS.srsSystems, fetchWithCache, 1000 * 60 * 60 * 24 * 7);
 }
 
-async function getResets(): Promise<WanikaniReset[]> {
-    const page: RawWanikaniResetPage = await joinAndSendCacheableRequest('/v2/resets', CACHE_KEYS.resets, fetchWithCache, 1000 * 60 * 10);
-    return page.data.map(mapWanikaniReset);
+async function getResets(): Promise<RawWanikaniResetPage> {
+    return await joinAndSendCacheableRequest('/v2/resets', CACHE_KEYS.resets, fetchWithCache, 1000 * 60 * 10);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -286,9 +272,8 @@ async function getAssignmentsForLevel(level: number): Promise<WanikaniAssignment
     return page.data.map(mapWanikaniAssignment);
 }
 
-async function getLevelProgress(): Promise<WanikaniLevelProgression[]> {
-    const page: RawWanikaniLevelProgressionPage = await joinAndSendCacheableRequest('/v2/level_progressions', CACHE_KEYS.levelProgression, fetchWithCache, 1000 * 60);
-    return page.data.map(mapWanikaniLevelProgression);
+async function getLevelProgress(): Promise<RawWanikaniLevelProgressionPage> {
+    return await joinAndSendCacheableRequest('/v2/level_progressions', CACHE_KEYS.levelProgression, fetchWithCache, 1000 * 60);
 }
 
 function getRawSubjects(): Promise<RawWanikaniSubject[]> {
@@ -326,8 +311,7 @@ function getRawSubjects(): Promise<RawWanikaniSubject[]> {
 }
 
 async function getSubjects() {
-    const subjects = await getRawSubjects();
-    return subjects.map(mapWanikaniSubject);
+    return await getRawSubjects();
 }
 
 
@@ -386,11 +370,4 @@ export default {
     getSubjects: getSubjects,
     getReviews: getReviews,
     getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,
-    /**
-     * @deprecated use getSummary instead.
-     */
-    getPendingLessonsAndReviews: async (): Promise<{ lessons: number, reviews: number }> => {
-        const summary = await getSummary();
-        return getPendingLessonsAndReviews(summary);
-    }
 }

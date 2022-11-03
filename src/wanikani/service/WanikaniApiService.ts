@@ -246,14 +246,6 @@ function joinAndSendCacheableRequest(request: string, cacheKey: string, factory:
     return promise
 }
 
-async function getSummary(): Promise<RawWanikaniSummary> {
-    return await joinAndSendCacheableRequest('/v2/summary', CACHE_KEYS.summary, fetchWithCache, 1000 * 60);
-}
-
-async function getResets(): Promise<RawWanikaniResetPage> {
-    return await joinAndSendCacheableRequest('/v2/resets', CACHE_KEYS.resets, fetchWithCache, 1000 * 60 * 10);
-}
-
 async function getLevelProgress(): Promise<RawWanikaniLevelProgressionPage> {
     return await joinAndSendCacheableRequest('/v2/level_progressions', CACHE_KEYS.levelProgression, fetchWithCache, 1000 * 60);
 }
@@ -292,13 +284,29 @@ function getReviews(): Promise<WanikaniReview[]> {
     return promise;
 }
 
-async function getUser(): Promise<RawWanikaniUser> {
-    const response = await fetch(APP_URLS.wanikaniApi + '/v2/user', {
+function defaultWanikaniOptions(): RequestInit {
+    return {
         headers: {
             ...DEFAULT_WANIKANI_HEADERS,
             'Authorization': `Bearer ${apiKey()}`
         }
-    });
+    }
+}
+
+async function getUser(): Promise<RawWanikaniUser> {
+    const response = await fetch(APP_URLS.wanikaniApi + '/v2/user', defaultWanikaniOptions());
+    throwIfRateLimited(response);
+    return await response.json();
+}
+
+async function getResets(): Promise<RawWanikaniResetPage> {
+    const response = await fetch(APP_URLS.wanikaniApi + '/v2/resets', defaultWanikaniOptions());
+    throwIfRateLimited(response);
+    return await response.json();
+}
+
+async function getSummary(): Promise<RawWanikaniSummary> {
+    const response = await fetch(APP_URLS.wanikaniApi + '/v2/summary', defaultWanikaniOptions());
     throwIfRateLimited(response);
     return await response.json();
 }

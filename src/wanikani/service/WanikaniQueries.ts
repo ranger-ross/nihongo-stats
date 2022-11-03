@@ -31,7 +31,8 @@ export function useWanikaniAssignments(enabled = true) {
 export function useWanikaniSummary(enabled = true) {
     return useQuery(['wanikaniSummary'], () => WanikaniApiService.getSummary(), {
         enabled: enabled,
-        cacheTime: 0,
+        cacheTime: Infinity,
+        staleTime: 1000 * 60,
         select: (data) => mapWanikaniSummary(data)
     });
 }
@@ -39,7 +40,8 @@ export function useWanikaniSummary(enabled = true) {
 export function useWanikaniResets(enabled = true) {
     return useQuery(['wanikaniResets'], () => WanikaniApiService.getResets(), {
         enabled: enabled,
-        cacheTime: 0,
+        cacheTime: Infinity,
+        staleTime: 1000 * 60 * 10,
         select: (data) => data.data.map(mapWanikaniReset)
     });
 }
@@ -56,7 +58,7 @@ export function useWanikaniUser(enabled = true) {
     return useQuery(['wanikaniUser'], () => WanikaniApiService.getUser(), {
         enabled: enabled,
         cacheTime: 24 * 60 * 60 * 1000,
-        staleTime: 5_000,
+        staleTime: 30 * 1000,
         retry: alwaysRetryOnRateLimit(3),
         select: (data) => mapWanikaniUser(data)
     });

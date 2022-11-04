@@ -137,7 +137,7 @@ export function useWanikaniReviews(enabled = true, onProgress: OnProgressCallbac
     }, {
         enabled: enabled,
         cacheTime: 7 * 24 * 60 * 60 * 1000,
-        staleTime: 2 * 1000,
+        staleTime: 30 * 1000,
         select: (data) => data.map(mapWanikaniReview)
     });
 }

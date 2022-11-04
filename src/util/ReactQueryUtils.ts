@@ -24,7 +24,7 @@ export function alwaysRetryOnRateLimit(retries = 3): RetryValue<any> {
         if (RATE_LIMIT_ERROR === error) {
             return true;
         }
-        return failureCount < 3;
+        return failureCount < retries;
     }
 }
 

@@ -2,9 +2,7 @@ import * as localForage from "localforage";
 import InMemoryCache from "../../util/InMemoryCache";
 import {APP_URLS} from "../../Constants";
 import {Observable, Subject} from "rxjs";
-import {WanikaniReview} from "../models/WanikaniReview";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
-import {mapWanikaniReview} from "./WanikaniMappingService";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();

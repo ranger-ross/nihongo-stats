@@ -12,12 +12,13 @@ import {
 } from "./WanikaniMappingService";
 import {APP_URLS} from "../../Constants";
 import {WanikaniSubject} from "../models/WanikaniSubject";
-import {RawWanikaniSubjectResponse} from "../models/raw/RawWanikaniSubjectResponse";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {WanikaniReview} from "../models/WanikaniReview";
 import {EVENT_STATUS, MultiPageObservableEvent} from "./WanikaniApiServiceRxJs";
+import {RawWanikaniCollectionResponse} from "../models/raw/RawWanikaniCollectionResponse";
+import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 
-function buildWanikaniSubjectQueries(firstPageData: RawWanikaniSubjectResponse | undefined): string[] {
+function buildWanikaniSubjectQueries(firstPageData: RawWanikaniCollectionResponse<RawWanikaniSubject> | undefined): string[] {
     if (!firstPageData) {
         return [];
     }
@@ -40,7 +41,7 @@ export function useWanikaniSubjects(enabled = true) {
     const staleTime = 2 * 7 * 24 * 60 * 60 * 1000; // 2 weeks
 
     const firstPageUrl = APP_URLS.wanikaniApi + '/v2/subjects';
-    const firstPageQuery = useQuery<RawWanikaniSubjectResponse>(["WanikaniSubjectFirstPage"],
+    const firstPageQuery = useQuery<RawWanikaniCollectionResponse<RawWanikaniSubject>>(["WanikaniSubjectFirstPage"],
         () => fetchWanikani(firstPageUrl), {
             enabled: enabled,
             cacheTime: Infinity,

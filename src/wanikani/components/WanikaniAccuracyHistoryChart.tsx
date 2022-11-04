@@ -17,6 +17,7 @@ import {millisToDays, truncDate} from "../../util/DateUtils";
 import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 import {WanikaniReview} from "../models/WanikaniReview";
 import {WanikaniSubject} from "../models/WanikaniSubject";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 
 const scale = () => scaleLinear();
 const modifyDomain = () => [0, 100];
@@ -132,6 +133,7 @@ type WanikaniAccuracyHistoryChartProps = {
 function WanikaniAccuracyHistoryChart({subjects, reviews}: WanikaniAccuracyHistoryChartProps) {
     const [daysToLookBack, setDaysToLookBack] = useState(90);
     const data = useData(subjects, reviews, daysToLookBack);
+    const {isMobile} = useDeviceInfo();
 
     function AccuracyToolTip({targetItem}: Tooltip.ContentProps) {
         const isAverageSeries = targetItem.series.toLowerCase().includes('average');
@@ -196,7 +198,7 @@ function WanikaniAccuracyHistoryChart({subjects, reviews}: WanikaniAccuracyHisto
                                 color={ROLLING_AVERAGE_LINE_COLOR}
                             />
 
-                            <Legend/>
+                            <Legend position={isMobile ? 'bottom' : 'right'}/>
 
                             <EventTracker/>
                             <Tooltip contentComponent={AccuracyToolTip}/>

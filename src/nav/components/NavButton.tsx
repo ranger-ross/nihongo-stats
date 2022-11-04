@@ -1,6 +1,6 @@
 import {Button} from "@mui/material";
 import React from "react";
-import {useNavigate, useLocation} from "react-router";
+import {useLocation, useNavigate} from "react-router";
 import {AppRoute} from "../../Routes";
 
 const styles = {

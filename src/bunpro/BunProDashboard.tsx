@@ -37,7 +37,7 @@ const styles: AppStyles = {
 function BunProDashboardContent() {
     const {isMobile} = useDeviceInfo();
 
-    const {grammarPoints, user, reviewData, pendingReviewsCount} = useBunProData({
+    const {grammarPoints, user, reviewData, pendingReviewsCount, isLoading: isBpLoading} = useBunProData({
         reviews: true,
         pendingReviews: true,
         grammarPoints: true,

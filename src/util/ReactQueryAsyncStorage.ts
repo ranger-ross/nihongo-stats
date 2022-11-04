@@ -1,5 +1,5 @@
 import {dehydrate, hydrate, QueryClient} from "@tanstack/react-query";
-import {del, get, set} from "idb-keyval";
+import * as localForage from "localforage"
 
 
 // Based off of https://github.com/TanStack/query/discussions/1638
@@ -38,7 +38,7 @@ export async function persistWithIndexedDB(
     {
         IndexedDBKey: indexedDBKey = `REACT_QUERY_OFFLINE_CACHE`,
         throttleTime = 1000,
-        maxAge = 1000 * 60 * 60 * 24 * 7, // 7 days
+        maxAge = 1000 * 60 * 60 * 24 * 90, // 90 days
         buster = "v1"
     }: Options = {}
 ) {
@@ -50,30 +50,28 @@ export async function persistWithIndexedDB(
                 timestamp: Date.now(),
                 cacheState: dehydrate(queryClient)
             };
-            set(indexedDBKey, JSON.stringify(storageCache)); // set in Indexed DB
+            localForage.setItem(indexedDBKey, storageCache); // set in Indexed DB
         }, throttleTime);
 
         queryClient.getQueryCache().subscribe(saveCache);
 
         // Attempt restore
-        const cacheStorage = await get(indexedDBKey); // get from Indexed DB
+        const cache = await localForage.getItem<IndexedDBCache>(indexedDBKey); // get from Indexed DB
 
-        if (!cacheStorage) {
+        if (!cache) {
             return;
         }
-
-        const cache: IndexedDBCache = JSON.parse(cacheStorage);
 
         if (cache.timestamp) {
             const expired = Date.now() - cache.timestamp > maxAge;
             const busted = cache.buster !== buster;
             if (expired || busted) {
-                del(indexedDBKey); // Delete from Indexed DB
+                localForage.removeItem(indexedDBKey); // Delete from Indexed DB
             } else {
                 hydrate(queryClient, cache.cacheState);
             }
         } else {
-            del(indexedDBKey);
+            localForage.removeItem(indexedDBKey)
         }
     }
 }

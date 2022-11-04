@@ -1,22 +1,10 @@
 import * as localForage from "localforage"
 import {APP_URLS} from "../../Constants";
-import {PromiseCache} from "../../util/PromiseCache";
 import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
-import {mapBunProGrammarPoint, mapBunProReviewResponse, mapBunProUser} from "./BunProMappingService";
-import {BunProUser} from "../models/BunProUser";
-import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
-import { BunProReviewsResponse } from "../models/BunProReviewsResponse";
+import {RawBunProReviewsResponse} from "../models/raw/RawBunProReviewsResponse";
+import {RawBunProUser} from "../models/raw/RawBunProUser";
 
 const {apiProxy, bunproApi} = APP_URLS;
-
-type BunProRequest = {
-    url: string,
-    options: RequestInit
-};
-
-// @ts-ignore
-const promiseCache = new PromiseCache<any>();
-
 
 // API Notes
 // https://www.bunpro.jp/api/v4/docs
@@ -60,104 +48,42 @@ function getRawBunProUser(token: string) {
     return fetch(`${baseBunProUrl}/v4/user`, {headers: bunproHeaders(_apiKey)});
 }
 
-// Default timeout is 10 minutes
-// Timeout = -1    =>   never timeout
-async function sendCacheableRequest(request: BunProRequest, cacheKey: string, timeout = 60_000) {
-    const cachedValue = await localForage.getItem<any>(cacheKey);
-    if (!!cachedValue && (timeout !== -1 && cachedValue.lastUpdated > Date.now() - timeout)) {
-        return cachedValue.data;
-    }
+type GrammarPointResponse = { data: RawBunProGrammarPoint[] }
 
-    try {
-        const response = await fetch(request.url, request.options);
-        const data = await response.json();
-
-        localForage.setItem(cacheKey, {
-            lastUpdated: Date.now(),
-            data: data
-        });
-
-        return data;
-    } catch (error) {
-        if (!!cachedValue && !!cachedValue.data) {
-            console.error('failed to fetch new data for ' + request.url + ', falling back to cached data...');
-            return cachedValue.data;
-        } else {
-            throw error;
-        }
-    }
-}
-
-// Join meaning when multiple requests for the same endpoint come in at the same time,
-// only send one request and return the data to all requests
-function joinAndSendCacheableRequest(request: BunProRequest, cacheKey: string, timeout = 60_000, ttl = 1000) {
-    const name = request.url;
-    let promise = promiseCache.get(name);
-    if (!promise) {
-        promise = sendCacheableRequest(request, cacheKey, timeout);
-        promiseCache.put(name, promise, ttl)
-    }
-    return promise
-}
-
-async function getGrammarPoints(): Promise<BunProGrammarPoint[]> {
-    const response = await joinAndSendCacheableRequest(
-        {
-            url: `${baseBunProUrl}/v5/grammar_points`,
-            options: {headers: bunproHeaders()}
-        },
-        cacheKeys.grammarPoints,
-        1000 * 60 * 60 * 24 * 3
-    );
-    return response.data.map((gp: RawBunProGrammarPoint) => mapBunProGrammarPoint(gp));
+async function getGrammarPoints(): Promise<GrammarPointResponse> {
+    const response = await fetch(`${baseBunProUrl}/v5/grammar_points`, {
+        headers: bunproHeaders()
+    });
+    return await response.json();
 }
 
 async function getUserProgress() {
-    return await joinAndSendCacheableRequest(
-        {
-            url: `${baseBunProUrl}/v3/user/progress`,
-            options: {headers: bunproHeaders()}
-        },
-        cacheKeys.userProgress,
-        1000 * 60 * 3
-    );
+    const response = await fetch(`${baseBunProUrl}/v3/user/progress`, {
+        headers: bunproHeaders()
+    });
+    return await response.json();
 }
 
-async function getAllReviews(): Promise<BunProReviewsResponse> {
-    const response = await joinAndSendCacheableRequest(
-        {
-            url: `${baseBunProUrl}/v5/reviews/all_reviews_total`,
-            options: {headers: bunproHeaders()}
-        },
-        cacheKeys.allReviews,
-        1000 * 60 * 3
-    );
-
-    return mapBunProReviewResponse(response);
+async function getAllReviews(): Promise<RawBunProReviewsResponse> {
+    const response = await fetch(`${baseBunProUrl}/v5/reviews/all_reviews_total`, {
+        headers: bunproHeaders()
+    });
+    return await response.json();
 }
 
 // TODO: Map to non-raw data type
 async function getPendingReviews() {
-    return await joinAndSendCacheableRequest(
-        {
-            url: `${baseBunProUrl}/v4/reviews/current_reviews`,
-            options: {headers: bunproHeaders()}
-        },
-        cacheKeys.pendingReviews,
-        1000 * 60 * 3
-    );
+    const response = await fetch(`${baseBunProUrl}/v4/reviews/current_reviews`, {
+        headers: bunproHeaders()
+    });
+    return await response.json();
 }
 
-async function getBunProUser(): Promise<BunProUser> {
-    const rawUser = await joinAndSendCacheableRequest(
-        {
-            url: `${baseBunProUrl}/v5/user`,
-            options: {headers: bunproHeaders()}
-        },
-        cacheKeys.user,
-        1000 * 60
-    );
-    return mapBunProUser(rawUser);
+async function getBunProUser(): Promise<RawBunProUser> {
+    const response = await fetch(`${baseBunProUrl}/v5/user`, {
+        headers: bunproHeaders()
+    });
+    return await response.json();
 }
 
 async function login(apiKey: string) {

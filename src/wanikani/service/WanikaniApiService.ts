@@ -1,35 +1,22 @@
 import * as localForage from "localforage";
-import InMemoryCache from "../../util/InMemoryCache";
 import {APP_URLS} from "../../Constants";
-import {PromiseCache} from "../../util/PromiseCache";
-import WanikaniApiServiceRxJs, {EVENT_STATUS} from "./WanikaniApiServiceRxJs";
+import WanikaniApiServiceRxJs from "./WanikaniApiServiceRxJs";
 import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelProgress";
 import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
-import {RawWanikaniAssignment, RawWanikaniAssignmentPage} from "../models/raw/RawWanikaniAssignment";
-import {RawWanikaniSrsSystemPage} from "../models/raw/RawWanikaniSrsSystem";
-import {
-    mapWanikaniAssignment, mapWanikaniLevelProgression,
-    mapWanikaniReset,
-    mapWanikaniSubject, mapWanikaniSummary,
-    mapWanikaniUser
-} from "./WanikaniMappingService";
-import {WanikaniAssignment} from "../models/WanikaniAssignment";
-import {WanikaniReset} from "../models/WanikaniReset";
-import {WanikaniUser} from "../models/WanikaniUser";
-import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
-import {WanikaniSummary} from "../models/WanikaniSummary";
-import {getPendingLessonsAndReviews} from "./WanikaniDataUtil";
-import {WanikaniReview} from "../models/WanikaniReview";
+import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
+import {sleep, throwIfRateLimited} from "../../util/ReactQueryUtils";
+import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 
-// @ts-ignore
-const memoryCache = new InMemoryCache<any>();
-// @ts-ignore
-const promiseCache = new PromiseCache();
 
 const wanikaniApiUrl = APP_URLS.wanikaniApi;
-const cacheKeys: { [key: string]: string } = {
+
+/**
+ * TODO: many of these keys are being kept simply for backwards compatibility
+ *       After the new react query data fetching layer is deployed+stable, many of these can be deleted
+ */
+const CACHE_KEYS: { [key: string]: string } = {
     apiKey: 'wanikani-api-key',
     reviews: 'wanikani-reviews',
     user: 'wanikani-user',
@@ -43,11 +30,12 @@ const cacheKeys: { [key: string]: string } = {
     srsSystems: 'wanikani-srs-systems',
 }
 
-const authHeader = (apiKey: string) => ({'Authorization': `Bearer ${apiKey}`})
+const DEFAULT_WANIKANI_HEADERS = Object.freeze({
+    'pragma': 'no-cache',
+    'cache-control': 'no-cache',
+});
 
-function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+const authHeader = (apiKey: string) => ({'Authorization': `Bearer ${apiKey}`})
 
 async function fetchWithAutoRetry(input: string, init: RequestInit) {
     let response = await fetch(input, init);
@@ -81,14 +69,14 @@ async function fetchWanikaniApi(path: string, apiKey: string, headers?: { [key: 
 }
 
 function apiKey(): string {
-    return localStorage.getItem(cacheKeys.apiKey) as string;
+    return localStorage.getItem(CACHE_KEYS.apiKey) as string;
 }
 
 function saveApiKey(key: string | null) {
     if (!key) {
-        localStorage.removeItem(cacheKeys.apiKey);
+        localStorage.removeItem(CACHE_KEYS.apiKey);
     } else {
-        localStorage.setItem(cacheKeys.apiKey, key);
+        localStorage.setItem(CACHE_KEYS.apiKey, key);
     }
 }
 
@@ -115,46 +103,9 @@ async function fetchMultiPageRequest(path: string, startingId?: number) {
     return data;
 }
 
-async function getFromMemoryCacheOrFetchMultiPageRequest(path: string) {
-    if (memoryCache.includes(path)) {
-        return memoryCache.get(path);
-    }
-    const data = await fetchMultiPageRequest(path);
-    memoryCache.put(path, data);
-    return data;
-}
-
-async function getAllRawAssignments(): Promise<RawWanikaniAssignment[]> {
-    if (memoryCache.includes(cacheKeys.assignments)) {
-        const cachedValue = memoryCache.get(cacheKeys.assignments);
-        // Assignments ttl is 5 mins in Mem Cache
-        if (cachedValue.lastUpdated > (Date.now() - 1000 * 60 * 5)) {
-            return cachedValue.data;
-        }
-    }
-
-    const cachedValue = await localForage.getItem<any>(cacheKeys.assignments);
-    if (!!cachedValue && cachedValue.lastUpdated > Date.now() - (1000 * 60 * 10)) {
-        return cachedValue.data;
-    }
-
-    let assignments = await getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments');
-
-    assignments = sortAndDeduplicateAssignments(assignments);
-
-    const cacheObject = {
-        data: assignments,
-        lastUpdated: new Date().getTime(),
-    };
-    localForage.setItem(cacheKeys.assignments, cacheObject);
-    memoryCache.put(cacheKeys.assignments, cacheObject);
-
-    return assignments;
-}
-
-async function getAllAssignments() {
-    const assignments = await getAllRawAssignments();
-    return assignments.map(mapWanikaniAssignment);
+export async function getAllAssignments(): Promise<RawWanikaniAssignment[]> {
+    const assignments = await fetchMultiPageRequest('/v2/assignments');
+    return sortAndDeduplicateAssignments(assignments);
 }
 
 function sortAndDeduplicateAssignments(assignments: RawWanikaniAssignment[]) {
@@ -174,180 +125,54 @@ function sortAndDeduplicateAssignments(assignments: RawWanikaniAssignment[]) {
 }
 
 async function flushCache() {
-    for (const key of Object.keys(cacheKeys)) {
-        await localForage.removeItem(cacheKeys[key]);
+    for (const key of Object.keys(CACHE_KEYS)) {
+        await localForage.removeItem(CACHE_KEYS[key]);
     }
 
     for (let i = 0; i < 60; i++) {
-        await localForage.removeItem(cacheKeys.assignmentsForLevelPrefix + (i + 1));
+        await localForage.removeItem(CACHE_KEYS.assignmentsForLevelPrefix + (i + 1));
     }
 }
 
-function ifModifiedSinceHeader(date: Date | number) {
-    if (!date)
-        return null;
-    return {
-        'If-Modified-Since': new Date(date).toUTCString()
-    };
+export function getSubjects(): Promise<RawWanikaniSubject[]> {
+    return fetchMultiPageRequest('/v2/subjects');
 }
-
-async function unwrapResponse(response: Response, fallbackValue: any) {
-    if (response.status === 304) {
-        return fallbackValue;
-    }
-    return await response.json();
-}
-
-async function fetchWithCache(path: string, cacheKey: string, ttl: number, _apiKey?: string) {
-    const cachedValue = await localForage.getItem<any>(cacheKey);
-    if (!!cachedValue && cachedValue.lastUpdated > Date.now() - ttl) {
-        return cachedValue.data;
-    }
-
-    try {
-        const key = !!_apiKey ? _apiKey : apiKey();
-        const response = await fetchWanikaniApi(path, key,
-            ifModifiedSinceHeader(cachedValue?.lastUpdated));
-
-        if (response.status >= 400)
-            throw new Error(`Failed load data, Path: ${path}, Response: ${response.status}`);
-
-        const data = await unwrapResponse(response, cachedValue?.data);
-
-        if (data?.code === 401)
-            throw new Error('Failed to authenticate');
-
-        localForage.setItem(cacheKey, {
-            data: data,
-            lastUpdated: new Date().getTime(),
-        });
-        return data;
-    } catch (error) {
-        if (!!cachedValue && !!cachedValue.data) {
-            console.error('failed to fetch new data for ' + path + ', falling back to cached data...');
-            return cachedValue.data;
-        } else {
-            throw error;
-        }
-    }
-}
-
-// Join meaning when multiple requests for the same endpoint come in at the same time,
-// only send one request and return the data to all requests
-type FetchFactory = typeof fetchWithCache;
-
-function joinAndSendCacheableRequest(request: string, cacheKey: string, factory: FetchFactory, ttl = 1000, _apiKey?: string) {
-    const name = request;
-    let promise = promiseCache.get(name);
-    if (!promise) {
-        promise = factory(request, cacheKey, ttl, _apiKey);
-        promiseCache.put(name, promise, ttl)
-    } else {
-        console.debug('joined promise', request)
-    }
-    return promise
-}
-
-async function getUser(): Promise<WanikaniUser> {
-    const user = await joinAndSendCacheableRequest('/v2/user', cacheKeys.user, fetchWithCache, 1000 * 60);
-    return mapWanikaniUser(user);
-}
-
-async function getSummary(): Promise<WanikaniSummary> {
-    const summary: RawWanikaniSummary = await joinAndSendCacheableRequest('/v2/summary', cacheKeys.summary, fetchWithCache, 1000 * 60);
-    return mapWanikaniSummary(summary)
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getSrsSystems(): Promise<RawWanikaniSrsSystemPage> {
-    return joinAndSendCacheableRequest('/v2/spaced_repetition_systems', cacheKeys.srsSystems, fetchWithCache, 1000 * 60 * 60 * 24 * 7);
-}
-
-async function getResets(): Promise<WanikaniReset[]> {
-    const page: RawWanikaniResetPage = await joinAndSendCacheableRequest('/v2/resets', cacheKeys.resets, fetchWithCache, 1000 * 60 * 10);
-    return page.data.map(mapWanikaniReset);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function getAssignmentsForLevel(level: number): Promise<WanikaniAssignment[]> {
-    const page: RawWanikaniAssignmentPage = await joinAndSendCacheableRequest(`/v2/assignments?levels=${level}`, cacheKeys.assignmentsForLevelPrefix + level, fetchWithCache, 1000 * 60);
-    return page.data.map(mapWanikaniAssignment);
-}
-
-async function getLevelProgress(): Promise<WanikaniLevelProgression[]> {
-    const page: RawWanikaniLevelProgressionPage = await joinAndSendCacheableRequest('/v2/level_progressions', cacheKeys.levelProgression, fetchWithCache, 1000 * 60);
-    return page.data.map(mapWanikaniLevelProgression);
-}
-
-function getRawSubjects(): Promise<RawWanikaniSubject[]> {
-    const fetchSubjects = async () => {
-        if (memoryCache.includes(cacheKeys.subjects)) {
-            return memoryCache.get(cacheKeys.subjects);
-        }
-
-        const cachedValue = await localForage.getItem<any>(cacheKeys.subjects);
-        if (!!cachedValue) {
-            memoryCache.put(cacheKeys.subjects, cachedValue.data);
-            return cachedValue.data;
-        }
-
-        const subjects = await fetchMultiPageRequest('/v2/subjects');
-
-        localForage.setItem(cacheKeys.subjects, {
-            data: subjects,
-            lastUpdated: new Date().getTime(),
-        });
-        memoryCache.put(cacheKeys.subjects, subjects);
-        return subjects;
-    }
-
-
-    const name = 'getSubjects';
-    let promise = promiseCache.get(name);
-    if (!promise) {
-        promise = fetchSubjects()
-        promiseCache.put(name, promise, 60_000)
-    } else {
-        console.debug('joined promise', name)
-    }
-    return promise
-}
-
-async function getSubjects() {
-    const subjects = await getRawSubjects();
-    return subjects.map(mapWanikaniSubject);
-}
-
 
 function attemptLogin(apiKey: string) {
     return fetchWanikaniApi('/v2/user', apiKey);
 }
 
-function getReviews(): Promise<WanikaniReview[]> {
-    const fetchReviews = () => {
-        return new Promise((resolve, reject) => {
-            WanikaniApiServiceRxJs.getReviewAsObservable()
-                .subscribe({
-                    next: event => {
-                        if (event.status === EVENT_STATUS.COMPLETE) {
-                            resolve(event.data);
-                        }
-                    },
-                    error: err => reject(err)
-                });
-        })
+function defaultWanikaniOptions(): RequestInit {
+    return {
+        headers: {
+            ...DEFAULT_WANIKANI_HEADERS,
+            'Authorization': `Bearer ${apiKey()}`
+        }
     }
-
-    const name = 'getReviews';
-    let promise = promiseCache.get(name);
-    if (!promise) {
-        promise = fetchReviews()
-        promiseCache.put(name, promise, 60_000)
-    } else {
-        console.debug('joined promise', name)
-    }
-    return promise;
 }
+
+export async function fetchWanikani(url: string): Promise<any> {
+    const response = await fetch(url, defaultWanikaniOptions());
+    throwIfRateLimited(response);
+    return await response.json();
+}
+
+async function getUser(): Promise<RawWanikaniUser> {
+    return fetchWanikani(APP_URLS.wanikaniApi + '/v2/user')
+}
+
+async function getResets(): Promise<RawWanikaniResetPage> {
+    return fetchWanikani(APP_URLS.wanikaniApi + '/v2/resets')
+}
+
+async function getSummary(): Promise<RawWanikaniSummary> {
+    return fetchWanikani(APP_URLS.wanikaniApi + '/v2/summary')
+}
+
+async function getLevelProgress(): Promise<RawWanikaniLevelProgressionPage> {
+    return fetchWanikani(APP_URLS.wanikaniApi + '/v2/level_progressions')
+}
+
 
 export default {
     saveApiKey: saveApiKey,
@@ -361,13 +186,5 @@ export default {
     getLevelProgress: getLevelProgress,
     getAllAssignments: getAllAssignments,
     getSubjects: getSubjects,
-    getReviews: getReviews,
     getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,
-    /**
-     * @deprecated use getSummary instead.
-     */
-    getPendingLessonsAndReviews: async (): Promise<{ lessons: number, reviews: number }> => {
-        const summary = await getSummary();
-        return getPendingLessonsAndReviews(summary);
-    }
 }

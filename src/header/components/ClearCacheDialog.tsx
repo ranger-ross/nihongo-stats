@@ -11,11 +11,11 @@ import {
     FormGroup,
     FormHelperText,
 } from "@mui/material";
-import BunProApiService from "../../bunpro/service/BunProApiService";
-import WanikaniApiService from "../../wanikani/service/WanikaniApiService";
-import AnkiApiService from "../../anki/service/AnkiApiService";
 import {useWanikaniPreloadStatus} from "../../hooks/useWanikaniPreloadStatus";
 import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus";
+import {invalidWanikaniQueries} from "../../wanikani/service/WanikaniQueries";
+import {invalidBunProQueries} from "../../bunpro/service/BunProQueries";
+import {invalidAnkiQueries} from "../../anki/service/AnkiQueries";
 
 type DialogOptions = {
     anki: boolean,
@@ -34,16 +34,16 @@ function usePurgeLocalData() {
             const jobs = [];
 
             if (options.anki) {
-                jobs.push(AnkiApiService.flushCache());
+                jobs.push(invalidAnkiQueries());
             }
 
             if (options.bunPro) {
-                jobs.push(BunProApiService.flushCache());
+                jobs.push(invalidBunProQueries());
                 setBunProPreloadStatus(false);
             }
 
             if (options.wanikani) {
-                jobs.push(WanikaniApiService.flushCache());
+                jobs.push(invalidWanikaniQueries());
                 setWanikaniPreloadStatus(false);
             }
             return Promise.all(jobs);

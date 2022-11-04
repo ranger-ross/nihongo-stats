@@ -89,28 +89,9 @@ function getCardReviews(deckName: string, startTimestamp = new Date(2000, 0, 1).
     }).then((data: number[][]) => data.map(createCardReviewFromTuple));
 }
 
-function getReviewsCacheKey(deckName: string) {
-    return `${cacheKeys.reviewsPrefix}${deckName}`;
-}
-
 async function getAllReviewsByDeck(deckName: string): Promise<AnkiReview[]> {
-    const cachedValue: any = await localForage.getItem(getReviewsCacheKey(deckName));
-    let reviews;
-    if (!!cachedValue && cachedValue.data.length > 0) {
-        reviews = cachedValue.data;
-        if (cachedValue.lastUpdate > Date.now() - 1000 * 60 * 3) {
-            return reviews;
-        }
-        const timestamp = reviews[reviews.length - 1].reviewTime + 1;
-        reviews.push(...(await getCardReviews(deckName, timestamp)));
-    } else {
-        reviews = await getCardReviews(deckName);
-    }
+    let reviews = await getCardReviews(deckName);
     reviews = reviews.sort((a: any, b: any) => a.reviewTime - b.reviewTime);
-    localForage.setItem(getReviewsCacheKey(deckName), {
-        data: reviews,
-        lastUpdate: Date.now()
-    });
     return reviews;
 }
 
@@ -121,16 +102,7 @@ async function getDeckNamesAndIdsWithoutCache(): Promise<AnkiDeck[]> {
 }
 
 async function getDeckNamesAndIds(): Promise<AnkiDeck[]> {
-    const cachedValue: any = await localForage.getItem(cacheKeys.decks);
-    if (!!cachedValue && cachedValue.lastUpdate > Date.now() - 1000 * 60 * 60 * 5) {
-        return cachedValue.data;
-    }
-    const data = getDeckNamesAndIdsWithoutCache();
-    localForage.setItem(cacheKeys.decks, {
-        data: data,
-        lastUpdate: Date.now()
-    });
-    return data;
+    return getDeckNamesAndIdsWithoutCache();
 }
 
 async function getDeckNames() {
@@ -164,39 +136,12 @@ async function getCardInfo(cardIds: string | string[]): Promise<AnkiCard[]> {
     if (!Array.isArray(cardIds))
         cardIds = [cardIds];
 
-    const results = []
-    let cardsToQuery = [];
-
-    let cachedValue: any = await localForage.getItem(cacheKeys.cardInfo);
-    if (!!cachedValue) {
-        for (const cardId of cardIds) {
-            const cachedEntry = cachedValue[cardId];
-            if (cachedEntry && cachedEntry.lastUpdate > Date.now() - 1000 * 60 * 60 * 3) {
-                results.push(cachedEntry.card)
-            } else {
-                cardsToQuery.push(cardId);
-            }
-        }
-    } else {
-        cachedValue = {};
-        cardsToQuery = cardIds;
-    }
     let data = [];
-    if (cardsToQuery.length > 0) {
-        data = await invoke("cardsInfo", 6, {"cards": cardsToQuery});
+    if (cardIds.length > 0) {
+        data = await invoke("cardsInfo", 6, {"cards": cardIds});
     }
 
-    results.push(...data)
-
-    for (const card of data) {
-        cachedValue[card.cardId] = {
-            card: card,
-            lastUpdate: Date.now()
-        }
-    }
-    await localForage.setItem(cacheKeys.cardInfo, cachedValue);
-
-    return results;
+    return data;
 }
 
 type AnkiRequest = {

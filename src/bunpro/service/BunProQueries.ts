@@ -1,27 +1,57 @@
 import {useQuery} from "@tanstack/react-query";
 import BunProApiService from "./BunProApiService";
+import {RawBunProGrammarPoint} from "../models/raw/RawBunProGrammarPoint";
+import {mapBunProGrammarPoint, mapBunProReviewResponse, mapBunProUser} from "./BunProMappingService";
+import {QUERY_CLIENT_THROTTLE_TIME, queryClient} from "../../App";
+import {sleep} from "../../util/ReactQueryUtils";
 
+const BUNPRO_QUERY_KEY = 'bunpro';
 
 export function useBunProUser(enabled = true) {
-    return useQuery(['bunProUser'], () => BunProApiService.getUser(), {
-        enabled: enabled
+    return useQuery([BUNPRO_QUERY_KEY, 'User'], () => BunProApiService.getUser(), {
+        enabled: enabled,
+        cacheTime: Infinity,
+        staleTime: 1000 * 15,
+        select: data => mapBunProUser(data)
     })
 }
 
 export function useBunProGrammarPoints(enabled = true) {
-    return useQuery(['bunProGrammarPoints'], () => BunProApiService.getGrammarPoints(), {
-        enabled: enabled
+    return useQuery([BUNPRO_QUERY_KEY, 'GrammarPoints'], () => BunProApiService.getGrammarPoints(), {
+        enabled: enabled,
+        cacheTime: Infinity,
+        staleTime: 1000 * 60 * 60 * 24,
+        select: response => response.data.map((gp: RawBunProGrammarPoint) => mapBunProGrammarPoint(gp))
     })
 }
 
 export function useBunProReviews(enabled = true) {
-    return useQuery(['bunProReviews'], () => BunProApiService.getAllReviews(), {
-        enabled: enabled
+    return useQuery([BUNPRO_QUERY_KEY, 'Reviews'], () => BunProApiService.getAllReviews(), {
+        enabled: enabled,
+        cacheTime: Infinity,
+        staleTime: 1000 * 60,
+        select: (data) => mapBunProReviewResponse(data)
     })
 }
 
 export function useBunProPendingReviews(enabled = true) {
-    return useQuery(['bunProPendingReviews'], () => BunProApiService.getPendingReviews(), {
-        enabled: enabled
+    return useQuery([BUNPRO_QUERY_KEY, 'PendingReviews'], () => BunProApiService.getPendingReviews(), {
+        enabled: enabled,
+        cacheTime: Infinity,
+        staleTime: 1000 * 60,
     })
 }
+
+export async function invalidBunProQueries() {
+    queryClient.removeQueries({
+        queryKey: [BUNPRO_QUERY_KEY]
+    })
+    await Promise.all([
+        queryClient.invalidateQueries({
+            queryKey: [BUNPRO_QUERY_KEY]
+        })   // Wait for React Query to flush cache to disk
+            .then(() => sleep(QUERY_CLIENT_THROTTLE_TIME + 1000)),
+        BunProApiService.flushCache()
+    ]);
+}
+

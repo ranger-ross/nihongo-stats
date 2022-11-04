@@ -173,14 +173,14 @@ function OverviewReviewsHistoryChart() {
     const bunProReviews = formatBunProData(grammarPoints, reviewData?.reviews);
 
     // Wanikani
-    const {reviews, subjects, isLoading: isWanikaniLoading} = useWanikaniData({
+    const {reviews, subjects, isLoading: isWanikaniFetching} = useWanikaniData({
         reviews: !!wkApiKey,
         subjects: !!wkApiKey,
     });
     const wanikaniReviews = formatWanikaniData(reviews, subjects);
 
 
-    const isLoading = (isAnkiLoading && isAnkiConnected) || isWanikaniLoading || isBunProLoading;
+    const isLoading = (isAnkiLoading && isAnkiConnected) || isWanikaniFetching || isBunProLoading;
 
     const chartData = useMemo(
         () => aggregateDate(ankiReviews, bunProReviews, wanikaniReviews, daysToLookBack),

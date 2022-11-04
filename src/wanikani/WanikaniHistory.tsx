@@ -47,7 +47,7 @@ function WanikaniHistoryContent() {
         reviews,
         reviewsIsRateLimited,
         reviewsProgress,
-        isFetching,
+        isLoading,
         resets
     } = useWanikaniData({
         user: true,
@@ -57,7 +57,7 @@ function WanikaniHistoryContent() {
         reviews: true
     });
 
-    if (isFetching) {
+    if (isLoading) {
         return (
             <WanikaniLoadingScreen
                 fetch={{

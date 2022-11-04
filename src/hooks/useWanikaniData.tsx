@@ -24,26 +24,26 @@ export function useWanikaniData(config: WanikaniDataConfig) {
     const [reviewsProgress, setReviewsProgress] = useState<number>(-1.0);
     const [reviewsIsRateLimited, setReviewsIsRateLimited] = useState(false);
 
-    const {data: user, isFetching: isUserFetching} = useWanikaniUser(config.user)
-    const {data: subjects, isFetching: isSubjectsFetching} = useWanikaniSubjects(config.subjects)
-    const {data: assignments, isFetching: isAssignmentsFetching} = useWanikaniAssignments(config.assignments)
-    const {data: summary, isFetching: isSummaryFetching} = useWanikaniSummary(config.summary)
-    const {data: levelProgress, isFetching: isLevelProgressFetching} = useWanikaniLevelProgress(config.levelProgress)
-    const {data: resets, isFetching: isResetsFetching} = useWanikaniResets(config.resets)
-    const {data: reviews, isFetching: isReviewsFetching} = useWanikaniReviews(
+    const {data: user, isLoading: isUserLoading} = useWanikaniUser(config.user)
+    const {data: subjects, isLoading: isSubjectsLoading} = useWanikaniSubjects(config.subjects)
+    const {data: assignments, isLoading: isAssignmentsLoading} = useWanikaniAssignments(config.assignments)
+    const {data: summary, isLoading: isSummaryLoading} = useWanikaniSummary(config.summary)
+    const {data: levelProgress, isLoading: isLevelProgressLoading} = useWanikaniLevelProgress(config.levelProgress)
+    const {data: resets, isLoading: isResetsLoading} = useWanikaniResets(config.resets)
+    const {data: reviews, isLoading: isReviewsLoading} = useWanikaniReviews(
         config.reviews,
         setReviewsProgress,
         setReviewsIsRateLimited
     );
 
-    const isFetching =
-        (config.user && !user && isUserFetching) ||
-        (config.summary && !summary && isSummaryFetching) ||
-        (config.resets && !resets && isResetsFetching) ||
-        (config.levelProgress && !levelProgress && isLevelProgressFetching) ||
-        (config.subjects && !subjects && isSubjectsFetching) ||
-        (config.reviews && !reviews && isReviewsFetching) ||
-        (config.assignments && isAssignmentsFetching);
+    const isLoading =
+        (config.user && !user && isUserLoading) ||
+        (config.summary && !summary && isSummaryLoading) ||
+        (config.resets && !resets && isResetsLoading) ||
+        (config.levelProgress && !levelProgress && isLevelProgressLoading) ||
+        (config.subjects && !subjects && isSubjectsLoading) ||
+        (config.reviews && !reviews && isReviewsLoading) ||
+        (config.assignments && isAssignmentsLoading);
 
     return {
         user,
@@ -51,7 +51,7 @@ export function useWanikaniData(config: WanikaniDataConfig) {
         levelProgress: levelProgress ?? [],
         assignments: assignments ?? [],
         reviews: reviews ?? [],
-        isFetching,
+        isLoading,
         summary,
         reviewsProgress,
         reviewsIsRateLimited,

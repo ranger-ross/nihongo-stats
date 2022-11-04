@@ -173,7 +173,7 @@ function OverviewReviewsHistoryChart() {
     const bunProReviews = formatBunProData(grammarPoints, reviewData?.reviews);
 
     // Wanikani
-    const {reviews, subjects, isFetching: isWanikaniFetching} = useWanikaniData({
+    const {reviews, subjects, isLoading: isWanikaniFetching} = useWanikaniData({
         reviews: !!wkApiKey,
         subjects: !!wkApiKey,
     });

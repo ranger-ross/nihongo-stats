@@ -172,14 +172,14 @@ function getWanikaniReviews(assignments: WanikaniAssignment[]): WanikaniDateRevi
 }
 
 function useWanikaniReviews(wanikaniApiKey: string | null) {
-    const {assignments, summary, isFetching} = useWanikaniData({
+    const {assignments, summary, isLoading} = useWanikaniData({
         assignments: !!wanikaniApiKey,
         summary: !!wanikaniApiKey,
     });
 
     const initialReviewCount = summary ? getPendingLessonsAndReviews(summary).reviews : 0;
     const wanikaniReviews = assignments && assignments.length > 0 ? getWanikaniReviews(assignments) : null;
-    return {wanikaniReviews, initialReviewCount, isWanikaniLoading: isFetching};
+    return {wanikaniReviews, initialReviewCount, isWanikaniLoading: isLoading};
 }
 
 function useBunProReviews(bunProApiKey?: string | null) {

@@ -7,6 +7,7 @@ import {WanikaniUser} from "../models/WanikaniUser";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {createSubjectMap} from "../service/WanikaniDataUtil";
+import {useWanikaniSubjectsV2} from "../service/WanikaniQueries";
 
 
 const racialColor = WANIKANI_COLORS.blue;

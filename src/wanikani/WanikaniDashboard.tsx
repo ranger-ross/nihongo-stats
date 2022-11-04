@@ -9,6 +9,7 @@ import RequireOrRedirect from "../shared/RequireOrRedirect";
 import {AppStyles} from "../util/TypeUtils";
 import WanikaniLoadingScreen from "./components/WanikaniLoadingScreen";
 import {useWanikaniData} from "../hooks/useWanikaniData";
+import {useWanikaniSubjectsV2} from "./service/WanikaniQueries";
 
 const styles: AppStyles = {
     container: {
@@ -42,69 +43,72 @@ const styles: AppStyles = {
 
 
 function DashboardContent() {
-    const {user, levelProgress, summary, subjects, assignments, isFetching} = useWanikaniData({
-        user: true,
-        subjects: true,
-        assignments: true,
-        summary: true,
-        levelProgress: true,
-    });
+    const {data, isFetching, isLoading} = useWanikaniSubjectsV2(true);
+    //console.log({data, isFetching, isLoading})
 
-    if (isFetching) {
-        return (
-            <WanikaniLoadingScreen
-                fetch={{
-                    user: true,
-                    assignments: true,
-                    summary: true,
-                    subjects: true,
-                }}
-                isLoaded={{
-                    user: !!user,
-                    assignments: assignments.length > 0,
-                    subjects: subjects.length > 0,
-                    summary: !!summary,
-                }}
-            />
-        );
-    }
+    // const {user, levelProgress, summary, subjects, assignments, isFetching} = useWanikaniData({
+    //     user: true,
+    //     subjects: true,
+    //     assignments: true,
+    //     summary: true,
+    //     levelProgress: true,
+    // });
+    //
+    // if (isFetching) {
+    //     return (
+    //         <WanikaniLoadingScreen
+    //             fetch={{
+    //                 user: true,
+    //                 assignments: true,
+    //                 summary: true,
+    //                 subjects: true,
+    //             }}
+    //             isLoaded={{
+    //                 user: !!user,
+    //                 assignments: assignments.length > 0,
+    //                 subjects: subjects.length > 0,
+    //                 summary: !!summary,
+    //             }}
+    //         />
+    //     );
+    // }
 
     return (
         <>
-            <div style={styles.container}>
-                <div style={styles.topContainer}>
-                    <div style={styles.leftContainer}>
-                        <WanikaniWelcomeTile
-                            user={user}
-                            summary={summary}
-                        />
+            {/*<div style={styles.container}>*/}
+            {/*    <div style={styles.topContainer}>*/}
+            {/*        <div style={styles.leftContainer}>*/}
+            {/*            <WanikaniWelcomeTile*/}
+            {/*                user={user}*/}
+            {/*                summary={summary}*/}
+            {/*            />*/}
 
-                        <WanikaniLevelSummaryChart
-                            levelsProgress={levelProgress}
-                            user={user}
-                            subjects={subjects}
-                            assignments={assignments}
-                        />
+            {/*            <WanikaniLevelSummaryChart*/}
+            {/*                levelsProgress={levelProgress}*/}
+            {/*                user={user}*/}
+            {/*                subjects={subjects}*/}
+            {/*                assignments={assignments}*/}
+            {/*            />*/}
 
-                        <WanikaniItemCountsChart assignments={assignments}/>
-                    </div>
+            {/*            <WanikaniItemCountsChart assignments={assignments}/>*/}
+            {/*        </div>*/}
 
-                    <div style={styles.rightContainer}>
-                        <WanikaniUpcomingReviewsChart
-                            assignments={assignments}
-                            summary={summary}
-                        />
-                    </div>
-                </div>
-            </div>
+            {/*        <div style={styles.rightContainer}>*/}
+            {/*            <WanikaniUpcomingReviewsChart*/}
+            {/*                assignments={assignments}*/}
+            {/*                summary={summary}*/}
+            {/*            />*/}
+            {/*        </div>*/}
+            {/*    </div>*/}
+            {/*</div>*/}
 
-            <div style={styles.bottomContainer}>
-                <WanikaniActiveItemsChart
-                    subjects={subjects}
-                    assignments={assignments}
-                    user={user}
-                />
-            </div>
+            {/*<div style={styles.bottomContainer}>*/}
+            {/*    <WanikaniActiveItemsChart*/}
+            {/*        subjects={subjects}*/}
+            {/*        assignments={assignments}*/}
+            {/*        user={user}*/}
+            {/*    />*/}
+            {/*</div>*/}
         </>
     );
 }

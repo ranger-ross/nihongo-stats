@@ -1,4 +1,4 @@
-import {useQueries, useQuery} from "@tanstack/react-query";
+import {useInfiniteQuery, useQueries, useQuery} from "@tanstack/react-query";
 import WanikaniApiService, {fetchWanikani} from "./WanikaniApiService";
 import {alwaysRetryOnRateLimit, combineResults} from "../../util/ReactQueryUtils";
 import {
@@ -16,6 +16,7 @@ import {RawWanikaniSubjectResponse} from "../models/raw/RawWanikaniSubjectRespon
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {WanikaniReview} from "../models/WanikaniReview";
 import {EVENT_STATUS, MultiPageObservableEvent} from "./WanikaniApiServiceRxJs";
+import {useEffect, useMemo, useState} from "react";
 
 function buildWanikaniSubjectQueries(firstPageData: RawWanikaniSubjectResponse | undefined): string[] {
     if (!firstPageData) {
@@ -69,6 +70,60 @@ export function useWanikaniSubjects(enabled = true) {
         isRefetching: results.some((query) => query.isRefetching),
     };
 }
+
+
+const fetchSubjects = (url: string) => {
+    console.log(url);
+    if (!url) {
+        url = APP_URLS.wanikaniApi + '/v2/subjects';
+    }
+    return fetchWanikani(url);
+}
+
+export function useWanikaniSubjectsV2(enabled = true) {
+    const staleTime = 2 * 7 * 24 * 60 * 60 * 1000; // 2 weeks
+
+    const [previousQuery, setPreviousQuery] = useState<any>();
+
+    const nextPage = () => {
+        if (previousQuery) {
+            previousQuery.fetchNextPage()
+        }
+    }
+
+    const query = useInfiniteQuery(["WanikaniSubject-Inf"], {
+        queryFn: ({pageParam = null}) => fetchSubjects(pageParam),
+        enabled: true,
+        cacheTime: Infinity,
+        staleTime: staleTime,
+        getNextPageParam: (lastPage, _) => lastPage.pages.next_url,
+        keepPreviousData: true,
+        onSuccess: data => {
+            const nextPageUrl = data.pages[data.pages.length - 1].pages.next_url;
+            if (nextPageUrl) {
+                nextPage();
+            }
+        }
+
+    });
+
+    useEffect(() => {
+        if (query.fetchStatus === 'fetching') {
+          return;
+        }
+        if (previousQuery && previousQuery.fetchStatus === query.fetchStatus) {
+            return;
+        }
+        setPreviousQuery(query);
+    }, [query])
+
+
+    console.log(query.data);
+
+    return query;
+
+}
+
 
 export function useWanikaniAssignments(enabled = true) {
     return useQuery(['wanikaniAssignments'], () => WanikaniApiService.getAllAssignments(), {

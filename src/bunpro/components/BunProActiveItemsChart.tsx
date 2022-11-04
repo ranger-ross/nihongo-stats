@@ -198,6 +198,11 @@ function BunProActiveItemsChart({reviews, user, grammarPoints, showBunProHeader 
         (data.data.filter(gp => !!gp.review).length) / (data.data.length)
     );
 
+    const baseColor = BUNPRO_COLORS.blue;
+    const startColor = lightenDarkenColor(baseColor, 30)
+    const endColor = lightenDarkenColor(baseColor, -30)
+    const backgroundColor = lightenDarkenColor(baseColor, -109)
+
     return (
         <Card>
             <CardContent>
@@ -205,9 +210,9 @@ function BunProActiveItemsChart({reviews, user, grammarPoints, showBunProHeader 
                 <div style={{position: 'relative', top: -16, left: -16, width: `calc(100% + 32px)`}}>
                     <GradientLinearProgress variant="determinate"
                                             value={percentage * 100}
-                                            lineStartColor={lightenDarkenColor(BUNPRO_COLORS.blue, 30)}
-                                            lineEndColor={lightenDarkenColor(BUNPRO_COLORS.blue, -30)}
-                                            backgroundLineColor={lightenDarkenColor(BUNPRO_COLORS.blue, -120)}
+                                            lineStartColor={startColor}
+                                            lineEndColor={endColor}
+                                            backgroundLineColor={backgroundColor}
                     />
                 </div>
 

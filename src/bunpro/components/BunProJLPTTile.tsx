@@ -4,6 +4,7 @@ import {createGrammarPointsLookupMap} from "../service/BunProDataUtil";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 import {BunProReview} from "../models/BunProReview";
 import {BunProUser} from "../models/BunProUser";
+import {BUNPRO_COLORS} from "../../Constants";
 
 
 function getCurrentReviewProgress(grammarPoints: BunProGrammarPoint[], reviews: BunProReview[]) {
@@ -122,12 +123,17 @@ function LevelProgress({level, current, total}: LevelProgressProps) {
         setValue(percentage);
     }, [percentage]);
 
-
+    const color = BUNPRO_COLORS.blue;
     return (
         <div style={{display: 'flex', alignItems: 'center'}}>
             <p>{level}</p>
             <div style={{flexGrow: 1, marginLeft: '10px', marginRight: '5px'}}>
-                <LinearProgress variant="determinate" value={value}/>
+                <LinearProgress
+                    variant="determinate"
+                    value={value}
+                    style={{color: color}}
+                    color={"inherit"}
+                />
             </div>
             <p style={{width: '70px', textAlign: 'right'}}>{current} / {total}</p>
         </div>
@@ -147,10 +153,17 @@ function XpProgress({current, total}: XpProgressProps) {
         setValue(percentage);
     }, [percentage]);
 
+    const color = BUNPRO_COLORS.blue;
+
     return (
         <div style={{display: 'flex', alignItems: 'center'}}>
             <div style={{flexGrow: 1, marginLeft: '10px', marginRight: '5px'}}>
-                <LinearProgress variant="determinate" value={value}/>
+                <LinearProgress
+                    variant="determinate"
+                    value={value}
+                    style={{color: color}}
+                    color={"inherit"}
+                />
             </div>
         </div>
     );

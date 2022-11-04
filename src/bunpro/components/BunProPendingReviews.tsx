@@ -1,9 +1,8 @@
-import {useTheme} from "@mui/material";
 import {ColoredButton} from "../../shared/ColoredButton";
+import {BUNPRO_COLORS} from "../../Constants";
 
 export function BunProPendingReviews({count}: {count: number}) {
-    const theme = useTheme();
-    const color = count === 0 ? '#c4c4c4' : theme.palette.primary.main
+    const color = count === 0 ? '#c4c4c4' : BUNPRO_COLORS.blue
 
     return (
         <ColoredButton variant={'contained'}

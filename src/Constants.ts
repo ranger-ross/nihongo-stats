@@ -55,7 +55,8 @@ export const WANIKANI_COLORS_WITH_BLACK_TEXT = new Set([
 
 
 export const BUNPRO_COLORS = {
-    blue: '#5babf2',
+    blue: '#4191e2',
+    red: '#c8534f',
 }
 
 export const ANKI_COLORS = {

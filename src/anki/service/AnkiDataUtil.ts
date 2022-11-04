@@ -97,16 +97,7 @@ function upcomingReviewDataPoint(day: number): UpcomingAnkiReviewDataPoint {
     return data;
 }
 
-export async function fetchAnkiUpcomingReviewData(decks: string[], numberOfDays: number): Promise<UpcomingAnkiReviewDataPoint[]> {
-    const actions = [];
-    for (let i = 0; i < numberOfDays; i++) {
-        for (const deck of decks) {
-            actions.push(createAnkiCardsDueQuery(deck, i));
-        }
-    }
-
-    const listOfListDueCards = await AnkiApiService.sendMultiRequest(actions);
-
+export function mapToUpcomingAnkiReviewDataPoints(decks: string[], listOfListDueCards: any[]): UpcomingAnkiReviewDataPoint[] {
     const data = [upcomingReviewDataPoint(0)];
     for (let i = 0; i < listOfListDueCards.length; i++) {
         if (i % decks.length === 0 && i != 0) {
@@ -119,19 +110,33 @@ export async function fetchAnkiUpcomingReviewData(decks: string[], numberOfDays:
     return data;
 }
 
+export async function fetchAnkiUpcomingReviewData(decks: string[], numberOfDays: number): Promise<any[]> {
+    const actions = [];
+    for (let i = 0; i < numberOfDays; i++) {
+        for (const deck of decks) {
+            actions.push(createAnkiCardsDueQuery(deck, i));
+        }
+    }
+
+    return await AnkiApiService.sendMultiRequest(actions);
+}
+
 export type DeckReviews = {
     deckName: string,
     reviews: AnkiReview[]
 };
 
-export async function fetchAnkiReviewsByDeck(deckNames: string[]): Promise<DeckReviews[]> {
-    const reviewPromises: Promise<AnkiReview[]>[] = [];
-    deckNames.forEach(name => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
-    const data = await Promise.all(reviewPromises);
+export function mapToDeckReviews(deckNames: string[], data: AnkiReview[][]): DeckReviews[] {
     return data.map(((value, index) => ({
         deckName: deckNames[index],
         reviews: value
     })));
+}
+
+export async function fetchAnkiReviewsByDeck(deckNames: string[]): Promise<AnkiReview[][]> {
+    const reviewPromises: Promise<AnkiReview[]>[] = [];
+    deckNames.forEach(name => reviewPromises.push(AnkiApiService.getAllReviewsByDeck(name)));
+    return await Promise.all(reviewPromises);
 }
 
 function createCardTimestampMap(cards: AnkiCard[]) {

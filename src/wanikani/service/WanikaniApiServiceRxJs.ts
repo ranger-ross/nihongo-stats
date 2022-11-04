@@ -3,6 +3,7 @@ import InMemoryCache from "../../util/InMemoryCache";
 import {APP_URLS} from "../../Constants";
 import {Observable, Subject} from "rxjs";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
+import {sleep} from "../../util/ReactQueryUtils";
 
 // @ts-ignore
 const memoryCache = new InMemoryCache<any>();
@@ -21,10 +22,6 @@ const cacheKeys = {
 }
 
 const authHeader = (apiKey: string) => ({'Authorization': `Bearer ${apiKey}`})
-
-function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 export const EVENT_STATUS = {
     RATE_LIMITED: 'rate-limited',

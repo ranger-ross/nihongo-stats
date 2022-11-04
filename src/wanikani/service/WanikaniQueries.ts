@@ -1,6 +1,6 @@
 import {useQueries, useQuery} from "@tanstack/react-query";
 import WanikaniApiService, {fetchWanikani} from "./WanikaniApiService";
-import {alwaysRetryOnRateLimit, combineResults} from "../../util/ReactQueryUtils";
+import {alwaysRetryOnRateLimit, combineResults, sleep} from "../../util/ReactQueryUtils";
 import {
     mapWanikaniAssignment,
     mapWanikaniLevelProgression,
@@ -17,6 +17,9 @@ import {WanikaniReview} from "../models/WanikaniReview";
 import {EVENT_STATUS, MultiPageObservableEvent} from "./WanikaniApiServiceRxJs";
 import {RawWanikaniCollectionResponse} from "../models/raw/RawWanikaniCollectionResponse";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
+import {QUERY_CLIENT_THROTTLE_TIME, queryClient} from "../../App";
+
+const WANIKANI_QUERY_KEY = 'wanikani';
 
 function buildWanikaniSubjectQueries(firstPageData: RawWanikaniCollectionResponse<RawWanikaniSubject> | undefined): string[] {
     if (!firstPageData) {
@@ -41,7 +44,7 @@ export function useWanikaniSubjects(enabled = true) {
     const staleTime = 2 * 7 * 24 * 60 * 60 * 1000; // 2 weeks
 
     const firstPageUrl = APP_URLS.wanikaniApi + '/v2/subjects';
-    const firstPageQuery = useQuery<RawWanikaniCollectionResponse<RawWanikaniSubject>>(["WanikaniSubjectFirstPage"],
+    const firstPageQuery = useQuery<RawWanikaniCollectionResponse<RawWanikaniSubject>>([WANIKANI_QUERY_KEY, "SubjectFirstPage"],
         () => fetchWanikani(firstPageUrl), {
             enabled: enabled,
             cacheTime: Infinity,
@@ -52,7 +55,7 @@ export function useWanikaniSubjects(enabled = true) {
 
     const results = useQueries({
         queries: queries.map(query => ({
-            queryKey: [query],
+            queryKey: [WANIKANI_QUERY_KEY, query],
             queryFn: () => fetchWanikani(query),
             cacheTime: Infinity,
             staleTime: staleTime,
@@ -72,7 +75,7 @@ export function useWanikaniSubjects(enabled = true) {
 }
 
 export function useWanikaniAssignments(enabled = true) {
-    return useQuery(['wanikaniAssignments'], () => WanikaniApiService.getAllAssignments(), {
+    return useQuery([WANIKANI_QUERY_KEY, 'Assignments'], () => WanikaniApiService.getAllAssignments(), {
         enabled: enabled,
         cacheTime: Infinity,
         staleTime: 5 * 60 * 1000,
@@ -81,7 +84,7 @@ export function useWanikaniAssignments(enabled = true) {
 }
 
 export function useWanikaniSummary(enabled = true) {
-    return useQuery(['wanikaniSummary'], () => WanikaniApiService.getSummary(), {
+    return useQuery([WANIKANI_QUERY_KEY, 'Summary'], () => WanikaniApiService.getSummary(), {
         enabled: enabled,
         cacheTime: Infinity,
         staleTime: 1000 * 60,
@@ -90,7 +93,7 @@ export function useWanikaniSummary(enabled = true) {
 }
 
 export function useWanikaniResets(enabled = true) {
-    return useQuery(['wanikaniResets'], () => WanikaniApiService.getResets(), {
+    return useQuery([WANIKANI_QUERY_KEY, 'Resets'], () => WanikaniApiService.getResets(), {
         enabled: enabled,
         cacheTime: Infinity,
         staleTime: 1000 * 60 * 10,
@@ -99,7 +102,7 @@ export function useWanikaniResets(enabled = true) {
 }
 
 export function useWanikaniLevelProgress(enabled = true) {
-    return useQuery(['wanikaniLevelProgress'], () => WanikaniApiService.getLevelProgress(), {
+    return useQuery([WANIKANI_QUERY_KEY, 'LevelProgress'], () => WanikaniApiService.getLevelProgress(), {
         enabled: enabled,
         cacheTime: Infinity,
         staleTime: 60 * 1000,
@@ -108,9 +111,9 @@ export function useWanikaniLevelProgress(enabled = true) {
 }
 
 export function useWanikaniUser(enabled = true) {
-    return useQuery(['wanikaniUser'], () => WanikaniApiService.getUser(), {
+    return useQuery([WANIKANI_QUERY_KEY, 'User'], () => WanikaniApiService.getUser(), {
         enabled: enabled,
-        cacheTime: 24 * 60 * 60 * 1000,
+        cacheTime: Infinity,
         staleTime: 30 * 1000,
         retry: alwaysRetryOnRateLimit(3),
         select: (data) => mapWanikaniUser(data)
@@ -121,7 +124,7 @@ type OnProgressCallback = (progress: number) => void;
 type OnRateLimitedCallback = (isRateLimited: boolean) => void;
 
 export function useWanikaniReviews(enabled = true, onProgress: OnProgressCallback, onRateLimited: OnRateLimitedCallback) {
-    return useQuery<RawWanikaniReview[], unknown, WanikaniReview[]>(['wanikaniReviews'], () => {
+    return useQuery<RawWanikaniReview[], unknown, WanikaniReview[]>([WANIKANI_QUERY_KEY, 'Reviews'], () => {
         return new Promise<RawWanikaniReview[]>((resolve) => {
             WanikaniApiService.getReviewAsObservable()
                 .subscribe((event: MultiPageObservableEvent<RawWanikaniReview>) => {
@@ -141,4 +144,17 @@ export function useWanikaniReviews(enabled = true, onProgress: OnProgressCallbac
         staleTime: 30 * 1000,
         select: (data) => data.map(mapWanikaniReview)
     });
+}
+
+export async function invalidWanikaniQueries() {
+    queryClient.removeQueries({
+        queryKey: [WANIKANI_QUERY_KEY]
+    })
+    await Promise.all([
+        queryClient.invalidateQueries({
+            queryKey: [WANIKANI_QUERY_KEY]
+        })   // Wait for React Query to flush cache to disk
+            .then(() => sleep(QUERY_CLIENT_THROTTLE_TIME + 1000)),
+        WanikaniApiService.flushCache()
+    ]);
 }

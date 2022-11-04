@@ -1,29 +1,21 @@
 import * as localForage from "localforage";
-import InMemoryCache from "../../util/InMemoryCache";
 import {APP_URLS} from "../../Constants";
-import {PromiseCache} from "../../util/PromiseCache";
-import WanikaniApiServiceRxJs, {EVENT_STATUS} from "./WanikaniApiServiceRxJs";
+import WanikaniApiServiceRxJs from "./WanikaniApiServiceRxJs";
 import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelProgress";
 import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
 import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
-import {WanikaniReview} from "../models/WanikaniReview";
-import {throwIfRateLimited} from "../../util/ReactQueryUtils";
+import {sleep, throwIfRateLimited} from "../../util/ReactQueryUtils";
 import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
 
-/**
- * @deprecated use React Query cache
- */
-// @ts-ignore
-const memoryCache = new InMemoryCache<any>();
-/**
- * @deprecated use React Query cache
- */
-// @ts-ignore
-const promiseCache = new PromiseCache();
 
 const wanikaniApiUrl = APP_URLS.wanikaniApi;
+
+/**
+ * TODO: many of these keys are being kept simply for backwards compatibility
+ *       After the new react query data fetching layer is deployed+stable, many of these can be deleted
+ */
 const CACHE_KEYS: { [key: string]: string } = {
     apiKey: 'wanikani-api-key',
     reviews: 'wanikani-reviews',
@@ -44,10 +36,6 @@ const DEFAULT_WANIKANI_HEADERS = Object.freeze({
 });
 
 const authHeader = (apiKey: string) => ({'Authorization': `Bearer ${apiKey}`})
-
-function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 async function fetchWithAutoRetry(input: string, init: RequestInit) {
     let response = await fetch(input, init);
@@ -115,17 +103,8 @@ async function fetchMultiPageRequest(path: string, startingId?: number) {
     return data;
 }
 
-async function getFromMemoryCacheOrFetchMultiPageRequest(path: string) {
-    if (memoryCache.includes(path)) {
-        return memoryCache.get(path);
-    }
-    const data = await fetchMultiPageRequest(path);
-    memoryCache.put(path, data);
-    return data;
-}
-
 export async function getAllAssignments(): Promise<RawWanikaniAssignment[]> {
-    const assignments = await getFromMemoryCacheOrFetchMultiPageRequest('/v2/assignments');
+    const assignments = await fetchMultiPageRequest('/v2/assignments');
     return sortAndDeduplicateAssignments(assignments);
 }
 
@@ -161,32 +140,6 @@ export function getSubjects(): Promise<RawWanikaniSubject[]> {
 
 function attemptLogin(apiKey: string) {
     return fetchWanikaniApi('/v2/user', apiKey);
-}
-
-function getReviews(): Promise<WanikaniReview[]> {
-    const fetchReviews = () => {
-        return new Promise((resolve, reject) => {
-            WanikaniApiServiceRxJs.getReviewAsObservable()
-                .subscribe({
-                    next: event => {
-                        if (event.status === EVENT_STATUS.COMPLETE) {
-                            resolve(event.data);
-                        }
-                    },
-                    error: err => reject(err)
-                });
-        })
-    }
-
-    const name = 'getReviews';
-    let promise = promiseCache.get(name);
-    if (!promise) {
-        promise = fetchReviews()
-        promiseCache.put(name, promise, 60_000)
-    } else {
-        console.debug('joined promise', name)
-    }
-    return promise;
 }
 
 function defaultWanikaniOptions(): RequestInit {
@@ -233,6 +186,5 @@ export default {
     getLevelProgress: getLevelProgress,
     getAllAssignments: getAllAssignments,
     getSubjects: getSubjects,
-    getReviews: getReviews,
     getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,
 }

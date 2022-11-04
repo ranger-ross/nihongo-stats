@@ -25,8 +25,16 @@ function AppContainer({children}: React.PropsWithChildren<any>) {
     );
 }
 
-const queryClient = new QueryClient();
-persistWithIndexedDB(queryClient)
+export const QUERY_CLIENT_THROTTLE_TIME = 500;
+export const QUERY_CLIENT_MAX_AGE = 1000 * 60 * 60 * 24 * 90; // 90 days;
+
+export const queryClient = new QueryClient();
+persistWithIndexedDB(queryClient, {
+    IndexedDBKey: `REACT_QUERY_OFFLINE_CACHE`,
+    throttleTime: QUERY_CLIENT_THROTTLE_TIME,
+    maxAge: QUERY_CLIENT_MAX_AGE,
+    buster: "v1"
+})
 
 
 function App() {

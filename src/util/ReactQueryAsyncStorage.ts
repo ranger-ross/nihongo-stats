@@ -38,41 +38,40 @@ export async function persistWithIndexedDB(
     {
         IndexedDBKey: indexedDBKey = `REACT_QUERY_OFFLINE_CACHE`,
         throttleTime = 1000,
-        maxAge = 1000 * 60 * 60 * 24 * 90, // 90 days
+        maxAge = Infinity,
         buster = "v1"
     }: Options = {}
 ) {
-    if (typeof window !== "undefined") {
-        // Subscribe to changes
-        const saveCache = throttle(() => {
-            const storageCache: IndexedDBCache = {
-                buster,
-                timestamp: Date.now(),
-                cacheState: dehydrate(queryClient)
-            };
-            localForage.setItem(indexedDBKey, storageCache); // set in Indexed DB
-        }, throttleTime);
+    // Subscribe to changes
+    const saveCache = throttle(() => {
+        const storageCache: IndexedDBCache = {
+            buster,
+            timestamp: Date.now(),
+            cacheState: dehydrate(queryClient)
+        };
+        localForage.setItem(indexedDBKey, storageCache); // set in Indexed DB
+    }, throttleTime);
 
-        queryClient.getQueryCache().subscribe(saveCache);
+    queryClient.getQueryCache().subscribe(saveCache);
 
-        // Attempt restore
-        const cache = await localForage.getItem<IndexedDBCache>(indexedDBKey); // get from Indexed DB
+    // Attempt restore
+    const cache = await localForage.getItem<IndexedDBCache>(indexedDBKey); // get from Indexed DB
 
-        if (!cache) {
-            return;
-        }
+    if (!cache) {
+        return;
+    }
 
-        if (cache.timestamp) {
-            const expired = Date.now() - cache.timestamp > maxAge;
-            const busted = cache.buster !== buster;
-            if (expired || busted) {
-                localForage.removeItem(indexedDBKey); // Delete from Indexed DB
-            } else {
-                hydrate(queryClient, cache.cacheState);
-            }
+    if (cache.timestamp) {
+        const expired = Date.now() - cache.timestamp > maxAge;
+        const busted = cache.buster !== buster;
+        if (expired || busted) {
+            await localForage.removeItem(indexedDBKey); // Delete from Indexed DB
         } else {
-            localForage.removeItem(indexedDBKey)
+            console.log(cache.cacheState);
+            hydrate(queryClient, cache.cacheState);
         }
+    } else {
+        await localForage.removeItem(indexedDBKey)
     }
 }
 

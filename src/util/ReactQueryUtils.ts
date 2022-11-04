@@ -38,3 +38,8 @@ export const combineResults = <T extends object>(
         if (!curr.data) return acc;
         return [...acc, ...curr.data];
     }, [] as T[]);
+
+export function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+

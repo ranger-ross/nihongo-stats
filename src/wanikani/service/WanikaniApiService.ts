@@ -30,10 +30,7 @@ const CACHE_KEYS: { [key: string]: string } = {
     srsSystems: 'wanikani-srs-systems',
 }
 
-const DEFAULT_WANIKANI_HEADERS = Object.freeze({
-    'pragma': 'no-cache',
-    'cache-control': 'no-cache',
-});
+const DEFAULT_WANIKANI_HEADERS = Object.freeze({});
 
 const authHeader = (apiKey: string) => ({'Authorization': `Bearer ${apiKey}`})
 
@@ -53,9 +50,8 @@ async function fetchWithAutoRetry(input: string, init: RequestInit) {
 async function fetchWanikaniApi(path: string, apiKey: string, headers?: { [key: string]: any } | null) {
     const options = {
         headers: {
+            ...DEFAULT_WANIKANI_HEADERS,
             ...authHeader(apiKey),
-            'pragma': 'no-cache',
-            'cache-control': 'no-cache',
         }
     };
     if (!!headers) {
@@ -146,8 +142,8 @@ function defaultWanikaniOptions(): RequestInit {
     return {
         headers: {
             ...DEFAULT_WANIKANI_HEADERS,
-            'Authorization': `Bearer ${apiKey()}`
-        }
+            ...authHeader(apiKey())
+        },
     }
 }
 

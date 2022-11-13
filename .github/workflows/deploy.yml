@@ -43,20 +43,20 @@ jobs:
           path: dist
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.6.2
+        uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: nihongo-stats
 
       - name: Authenticate to Google Cloud
         id: auth
-        uses: google-github-actions/auth@v0.8.3
+        uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 
       - run: gcloud auth configure-docker ${{ env.REGISTRY }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@ffe65bfc276d2ef003d5ea483a9947a8f6d408da
+        uses: docker/build-push-action@175d02bffea74695e96b351069ac938b338802f9
         with:
           context: .
           push: true
@@ -74,13 +74,13 @@ jobs:
     steps:
       
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.6.2
+        uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: nihongo-stats
 
       - name: Authenticate to Google Cloud
         id: auth
-        uses: google-github-actions/auth@v0.8.3
+        uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 

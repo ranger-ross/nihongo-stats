@@ -67,7 +67,6 @@ export async function persistWithIndexedDB(
         if (expired || busted) {
             await localForage.removeItem(indexedDBKey); // Delete from Indexed DB
         } else {
-            console.log(cache.cacheState);
             hydrate(queryClient, cache.cacheState);
         }
     } else {

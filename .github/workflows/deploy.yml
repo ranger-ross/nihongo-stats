@@ -43,13 +43,13 @@ jobs:
           path: dist
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1.0.1
+        uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: nihongo-stats
 
       - name: Authenticate to Google Cloud
         id: auth
-        uses: google-github-actions/auth@v1.0.0
+        uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 
@@ -74,13 +74,13 @@ jobs:
     steps:
       
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1.0.1
+        uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: nihongo-stats
 
       - name: Authenticate to Google Cloud
         id: auth
-        uses: google-github-actions/auth@v1.0.0
+        uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 

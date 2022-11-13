@@ -147,9 +147,16 @@ function defaultWanikaniOptions(): RequestInit {
     }
 }
 
+function throwIfNonSuccess(response: Response) {
+    if (!response.ok) {
+        throw new Error("Wanikani Non-Success, status code: " + response.status)
+    }
+}
+
 export async function fetchWanikani(url: string): Promise<any> {
     const response = await fetch(url, defaultWanikaniOptions());
     throwIfRateLimited(response);
+    throwIfNonSuccess(response)
     return await response.json();
 }
 

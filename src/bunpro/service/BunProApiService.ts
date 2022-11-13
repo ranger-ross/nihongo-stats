@@ -50,10 +50,17 @@ function getRawBunProUser(token: string) {
 
 type GrammarPointResponse = { data: RawBunProGrammarPoint[] }
 
+function throwIfNonSuccess(response: Response) {
+    if (!response.ok) {
+        throw new Error("BunPro Non-Success, status code: " + response.status)
+    }
+}
+
 async function getGrammarPoints(): Promise<GrammarPointResponse> {
     const response = await fetch(`${baseBunProUrl}/v5/grammar_points`, {
         headers: bunproHeaders()
     });
+    throwIfNonSuccess(response);
     return await response.json();
 }
 
@@ -61,6 +68,7 @@ async function getUserProgress() {
     const response = await fetch(`${baseBunProUrl}/v3/user/progress`, {
         headers: bunproHeaders()
     });
+    throwIfNonSuccess(response);
     return await response.json();
 }
 
@@ -68,6 +76,7 @@ async function getAllReviews(): Promise<RawBunProReviewsResponse> {
     const response = await fetch(`${baseBunProUrl}/v5/reviews/all_reviews_total`, {
         headers: bunproHeaders()
     });
+    throwIfNonSuccess(response);
     return await response.json();
 }
 
@@ -76,6 +85,7 @@ async function getPendingReviews() {
     const response = await fetch(`${baseBunProUrl}/v4/reviews/current_reviews`, {
         headers: bunproHeaders()
     });
+    throwIfNonSuccess(response);
     return await response.json();
 }
 
@@ -83,6 +93,7 @@ async function getBunProUser(): Promise<RawBunProUser> {
     const response = await fetch(`${baseBunProUrl}/v5/user`, {
         headers: bunproHeaders()
     });
+    throwIfNonSuccess(response);
     return await response.json();
 }
 

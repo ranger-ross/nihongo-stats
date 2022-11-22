@@ -1,4 +1,3 @@
-import {RetryValue} from "@tanstack/query-core/src/retryer";
 import {UseQueryResult} from "@tanstack/react-query";
 
 export const RATE_LIMIT_ERROR = new Error("Rate-Limited")
@@ -16,11 +15,10 @@ export function throwIfRateLimited(response: Response) {
 /**
  * A React Query retry function that will always retry on a RATE_LIMIT_ERROR.
  *
- *
  * @param retries The retry count for other errors
  */
-export function alwaysRetryOnRateLimit(retries = 3): RetryValue<any> {
-    return (failureCount, error) => {
+export function alwaysRetryOnRateLimit(retries = 3) {
+    return (failureCount: number, error: Error) => {
         if (RATE_LIMIT_ERROR === error) {
             return true;
         }

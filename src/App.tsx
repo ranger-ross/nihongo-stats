@@ -7,6 +7,8 @@ import {AppThemeProvider} from './Theme'
 import {useTheme} from "@mui/material";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {persistWithIndexedDB} from "./util/ReactQueryAsyncStorage";
+import {ErrorBoundary} from "react-error-boundary";
+import {GenericErrorMessage} from "./shared/GenericErrorMessage";
 
 function AppContainer({children}: React.PropsWithChildren<any>) {
     const theme = useTheme();
@@ -45,7 +47,9 @@ function App() {
                     <AppContainer>
                         <AppHeader/>
                         <AppNav/>
-                        <AppRoutes/>
+                        <ErrorBoundary FallbackComponent={GenericErrorMessage}>
+                            <AppRoutes/>
+                        </ErrorBoundary>
                     </AppContainer>
                 </QueryClientProvider>
             </BrowserRouter>

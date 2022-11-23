@@ -17,6 +17,8 @@ import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {WanikaniUser} from "../models/WanikaniUser";
 import WanikaniItemTile from "./WanikaniItemTile";
+import {ErrorBoundary} from "react-error-boundary";
+import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
 
 const styles = {
     showPreviousLevelMobile: {
@@ -313,4 +315,13 @@ function WanikaniActiveItemsChart({
     );
 }
 
-export default WanikaniActiveItemsChart;
+// Wrapper to catch any errors
+function WanikaniActiveItemsChartErrorWrapper(props: WanikaniActiveItemsChartProps) {
+    return (
+        <ErrorBoundary FallbackComponent={GenericErrorMessage}>
+            <WanikaniActiveItemsChart {...props} />
+        </ErrorBoundary>
+    );
+}
+
+export default WanikaniActiveItemsChartErrorWrapper;

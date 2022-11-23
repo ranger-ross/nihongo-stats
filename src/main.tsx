@@ -14,7 +14,18 @@ try {
         // of transactions for performance monitoring.
         // We recommend adjusting this value in production
         tracesSampleRate: 1.0,
-        release: useAppVersion()
+        release: useAppVersion(),
+        environment: useAppVersion() == 'local-dev' ? 'local-dev' : 'production',
+        beforeSend: (event, hint) => {
+            // Ignore Anki Connect errors.
+            // Since we are polling, if Anki is not open there are lots of errors in the background
+            if (event.request?.url?.includes('anki') ||
+                event.request?.url?.includes('localhost:8765')) {
+                console.debug('not sending anki error')
+                return null;
+            }
+            return event
+        }
     });
 } catch (error) {
     console.error('failed to setup sentry', error);

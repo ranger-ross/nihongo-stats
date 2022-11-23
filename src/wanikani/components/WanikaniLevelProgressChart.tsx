@@ -1,8 +1,10 @@
 import {ArgumentAxis, BarSeries, Chart, Title, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
-import {CSSProperties, useEffect, useMemo, useState} from "react";
+import React, {CSSProperties, useEffect, useMemo, useState} from "react";
 import {Animation, BarSeries as BarSeriesBase, EventTracker, SeriesRef} from "@devexpress/dx-react-chart";
 import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
 import {WanikaniUser} from "../models/WanikaniUser";
+import {ErrorBoundary} from "react-error-boundary";
+import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
 
 function parseTimestamp(text: string | number) {
     const millis = parseFloat(text as string) * 86400000;
@@ -134,4 +136,14 @@ function WanikaniLevelProgressChart({levelProgress, user}: WanikaniLevelProgress
     );
 }
 
-export default WanikaniLevelProgressChart;
+
+// Wrapper to catch any errors
+function WanikaniLevelProgressChartErrorWrapper(props: WanikaniLevelProgressChartProps) {
+    return (
+        <ErrorBoundary FallbackComponent={GenericErrorMessage}>
+            <WanikaniLevelProgressChart {...props} />
+        </ErrorBoundary>
+    );
+}
+
+export default WanikaniLevelProgressChartErrorWrapper;

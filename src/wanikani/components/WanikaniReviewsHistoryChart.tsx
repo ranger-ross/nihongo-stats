@@ -19,6 +19,8 @@ import ToolTipLabel from "../../shared/ToolTipLabel";
 import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniReview} from "../models/WanikaniReview";
+import {ErrorBoundary} from "react-error-boundary";
+import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
 
 type PeriodUnit = {
     key: string,
@@ -174,12 +176,12 @@ function UnitSelector({options, unit, onChange}: UnitSelectorProps) {
 
 const totalDays = getTotalDays();
 
-type WanikaniReviewsHistoryChart = {
+type WanikaniReviewsHistoryChartProps = {
     subjects: WanikaniSubject[]
     reviews: WanikaniReview[]
 };
 
-function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistoryChart) {
+function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistoryChartProps) {
     const [daysToLookBack, setDaysToLookBack] = useState(30);
     const [tooltipTargetItem, setTooltipTargetItem] = useState<SeriesRef>();
     const [unit, setUnit] = useState(units.days);
@@ -335,4 +337,13 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
     );
 }
 
-export default WanikaniReviewsHistoryChart;
+// Wrapper to catch any errors
+function WanikaniReviewsHistoryChartErrorWrapper(props: WanikaniReviewsHistoryChartProps) {
+    return (
+        <ErrorBoundary FallbackComponent={GenericErrorMessage}>
+            <WanikaniReviewsHistoryChart {...props} />
+        </ErrorBoundary>
+    );
+}
+
+export default WanikaniReviewsHistoryChartErrorWrapper;

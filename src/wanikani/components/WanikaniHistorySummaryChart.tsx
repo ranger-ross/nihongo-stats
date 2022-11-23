@@ -10,6 +10,9 @@ import {WanikaniReview} from "../models/WanikaniReview";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
 import {WanikaniUser} from "../models/WanikaniUser";
+import {ErrorBoundary} from "react-error-boundary";
+import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
+import React from "react";
 
 const styles: AppStyles = {
     loadingContainer: {
@@ -154,14 +157,14 @@ function DaysAndHoursLabel({label, milliseconds}: DaysAndHoursLabelProps) {
 }
 
 
-type WanikaniHistorySummaryChart = {
+type WanikaniHistorySummaryChartProps = {
     reviews: WanikaniReview[]
     subjects: WanikaniSubject[]
     levelProgress: WanikaniLevelProgression[]
     user?: WanikaniUser
 };
 
-function WanikaniHistorySummaryChart({user, subjects, reviews, levelProgress}: WanikaniHistorySummaryChart) {
+function WanikaniHistorySummaryChart({user, subjects, reviews, levelProgress}: WanikaniHistorySummaryChartProps) {
     const totalsData = formatTotalsData(reviews, subjects);
     const levelData = !user ? null : formatLevelData(user, levelProgress);
 
@@ -247,4 +250,13 @@ function WanikaniHistorySummaryChart({user, subjects, reviews, levelProgress}: W
     );
 }
 
-export default WanikaniHistorySummaryChart;
+// Wrapper to catch any errors
+function WanikaniHistorySummaryChartErrorWrapper(props: WanikaniHistorySummaryChartProps) {
+    return (
+        <ErrorBoundary FallbackComponent={GenericErrorMessage}>
+            <WanikaniHistorySummaryChart {...props} />
+        </ErrorBoundary>
+    );
+}
+
+export default WanikaniHistorySummaryChartErrorWrapper;

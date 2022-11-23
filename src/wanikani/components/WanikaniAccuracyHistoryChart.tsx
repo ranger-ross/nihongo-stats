@@ -18,6 +18,8 @@ import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 import {WanikaniReview} from "../models/WanikaniReview";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
+import {ErrorBoundary} from "react-error-boundary";
+import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
 
 const scale = () => scaleLinear();
 const modifyDomain = () => [0, 100];
@@ -211,4 +213,13 @@ function WanikaniAccuracyHistoryChart({subjects, reviews}: WanikaniAccuracyHisto
     );
 }
 
-export default WanikaniAccuracyHistoryChart;
+// Wrapper to catch any errors
+function WanikaniAccuracyHistoryChartErrorWrapper(props: WanikaniAccuracyHistoryChartProps) {
+    return (
+        <ErrorBoundary FallbackComponent={GenericErrorMessage}>
+            <WanikaniAccuracyHistoryChart {...props} />
+        </ErrorBoundary>
+    );
+}
+
+export default WanikaniAccuracyHistoryChartErrorWrapper;

@@ -7,6 +7,8 @@ import PeriodSelector from "../../shared/PeriodSelector";
 import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {WanikaniSubjectType} from "../models/WanikaniSubject";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
+import {ErrorBoundary} from "react-error-boundary";
+import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
 
 function LabelWithDate(props: ValueAxisBase.LabelProps) {
     const {text} = props;
@@ -231,4 +233,13 @@ function WanikaniTotalItemsHistoryChart({assignments}: WanikaniTotalItemsHistory
     );
 }
 
-export default WanikaniTotalItemsHistoryChart;
+// Wrapper to catch any errors
+function WanikaniTotalItemsHistoryChartErrorWrapper(props: WanikaniTotalItemsHistoryChartProps) {
+    return (
+        <ErrorBoundary FallbackComponent={GenericErrorMessage}>
+            <WanikaniTotalItemsHistoryChart {...props} />
+        </ErrorBoundary>
+    );
+}
+
+export default WanikaniTotalItemsHistoryChartErrorWrapper;

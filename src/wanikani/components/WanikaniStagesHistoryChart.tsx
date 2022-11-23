@@ -20,6 +20,8 @@ import Area from "../../shared/Area";
 import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 import {WanikaniReview} from "../models/WanikaniReview";
+import {ErrorBoundary} from "react-error-boundary";
+import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
 
 
 type StageHistoryUnit = {
@@ -397,4 +399,13 @@ function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesH
     );
 }
 
-export default WanikaniStagesHistoryChart;
+// Wrapper to catch any errors
+function WanikaniStagesHistoryChartErrorWrapper(props: WanikaniStagesHistoryChartProps) {
+    return (
+        <ErrorBoundary FallbackComponent={GenericErrorMessage}>
+            <WanikaniStagesHistoryChart {...props} />
+        </ErrorBoundary>
+    );
+}
+
+export default WanikaniStagesHistoryChartErrorWrapper;

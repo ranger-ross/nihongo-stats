@@ -15,11 +15,6 @@ export default defineConfig({
             typescript: true
         })
     ],
-    server: {
-        watch: {
-            usePolling: true
-        }
-    },
     esbuild: {
         legalComments: 'none'
     },

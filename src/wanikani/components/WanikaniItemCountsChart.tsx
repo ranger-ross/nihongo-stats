@@ -2,6 +2,9 @@ import {Card, CardContent, CircularProgress, Tooltip, Typography} from "@mui/mat
 import {WANIKANI_COLORS} from "../../Constants";
 import {AppStyles} from "../../util/TypeUtils";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
+import {ErrorBoundary} from "react-error-boundary";
+import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
+import React from "react";
 
 
 type FormattedDataPoint = {
@@ -173,4 +176,13 @@ function WanikaniItemCountsChart({assignments}: WanikaniItemCountsChartProps) {
     );
 }
 
-export default WanikaniItemCountsChart;
+// Wrapper to catch any errors
+function WanikaniItemCountsChartErrorWrapper(props: WanikaniItemCountsChartProps) {
+    return (
+        <ErrorBoundary FallbackComponent={GenericErrorMessage}>
+            <WanikaniItemCountsChart {...props} />
+        </ErrorBoundary>
+    );
+}
+
+export default WanikaniItemCountsChartErrorWrapper;

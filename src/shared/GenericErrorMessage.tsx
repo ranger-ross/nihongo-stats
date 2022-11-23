@@ -6,7 +6,7 @@ import NewTabLink from "./NewTabLink";
 
 type GenericErrorMessageProps = {
     error: Error
-    resetErrorBoundary?: Function
+    resetErrorBoundary?: () => void
 }
 
 export function GenericErrorMessage({error}: GenericErrorMessageProps) {

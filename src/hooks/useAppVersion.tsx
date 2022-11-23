@@ -1,5 +1,5 @@
-import version from '../../assets/version.txt?raw'
+declare const APP_VERSION: string;
 
 export function useAppVersion() {
-    return version;
+    return APP_VERSION;
 }

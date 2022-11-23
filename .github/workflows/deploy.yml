@@ -12,6 +12,8 @@ jobs:
 
   Build-React-App:
     runs-on: ubuntu-latest
+    env:
+      APP_VERSION: $GITHUB_REF_NAME
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -19,7 +21,7 @@ jobs:
         with:
           node-version: "18"
           cache: "npm"
-      - run: echo $GITHUB_REF_NAME > assets/version.txt
+      - run: echo $APP_VERSION
       - run: npm install
       - run: npm run build
       - uses: actions/upload-artifact@v3

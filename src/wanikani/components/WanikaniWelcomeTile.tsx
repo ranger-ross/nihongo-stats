@@ -3,6 +3,9 @@ import WanikaniPendingLessonsAndReviews from "./WanikaniPendingLessonAndReviews"
 import {WanikaniUser} from "../models/WanikaniUser";
 import {WanikaniSummary} from "../models/WanikaniSummary";
 import {getPendingLessonsAndReviews} from "../service/WanikaniDataUtil";
+import {ErrorBoundary} from "react-error-boundary";
+import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
+import React from "react";
 
 const styles = {
     buttonsContainer: {
@@ -41,4 +44,13 @@ function WanikaniWelcomeTile({user, summary}: WanikaniWelcomeTileProps) {
     );
 }
 
-export default WanikaniWelcomeTile;
+// Wrapper to catch any errors
+function WanikaniWelcomeTileErrorWrapper(props: WanikaniWelcomeTileProps) {
+    return (
+        <ErrorBoundary FallbackComponent={GenericErrorMessage}>
+            <WanikaniWelcomeTile {...props} />
+        </ErrorBoundary>
+    );
+}
+
+export default WanikaniWelcomeTileErrorWrapper;

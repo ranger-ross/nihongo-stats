@@ -29,6 +29,8 @@ import {AppStyles} from "../../util/TypeUtils";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {WanikaniSummary} from "../models/WanikaniSummary";
 import {getPendingLessonsAndReviews} from "../service/WanikaniDataUtil";
+import {ErrorBoundary} from "react-error-boundary";
+import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
 
 const styles: AppStyles = {
     container: {
@@ -283,4 +285,13 @@ function WanikaniUpcomingReviewsChart({assignments, summary}: WanikaniUpcomingRe
     );
 }
 
-export default WanikaniUpcomingReviewsChart;
+// Wrapper to catch any errors
+function WanikaniUpcomingReviewsChartErrorWrapper(props: WanikaniUpcomingReviewsChartProps) {
+    return (
+        <ErrorBoundary FallbackComponent={GenericErrorMessage}>
+            <WanikaniUpcomingReviewsChart {...props} />
+        </ErrorBoundary>
+    );
+}
+
+export default WanikaniUpcomingReviewsChartErrorWrapper;

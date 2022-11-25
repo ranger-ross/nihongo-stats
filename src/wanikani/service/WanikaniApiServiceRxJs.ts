@@ -1,12 +1,8 @@
 import * as localForage from "localforage";
-import InMemoryCache from "../../util/InMemoryCache";
 import {APP_URLS} from "../../Constants";
 import {Observable, Subject} from "rxjs";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {sleep} from "../../util/ReactQueryUtils";
-
-// @ts-ignore
-const memoryCache = new InMemoryCache<any>();
 
 const wanikaniApiUrl = APP_URLS.wanikaniApi;
 const cacheKeys = {
@@ -180,7 +176,7 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReview>> {
     const rateLimited = () => subject.next({status: EVENT_STATUS.RATE_LIMITED});
 
     function handleEvent(event: MultiPageObservableEvent<RawWanikaniReview>, reviews: RawWanikaniReview[] = []) {
-        function save(partialData: RawWanikaniReview[], saveToMemCache = false) {
+        function save(partialData: RawWanikaniReview[]) {
             const reviewsToSave = sortAndDeduplicateReviews([...reviews, ...partialData]);
 
             const cacheObject = {
@@ -188,9 +184,6 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReview>> {
                 lastUpdated: new Date().getTime(),
             };
             localForage.setItem(cacheKeys.reviews, cacheObject);
-            if (saveToMemCache) {
-                memoryCache.put(cacheKeys.reviews, cacheObject);
-            }
             return cacheObject.data;
         }
 

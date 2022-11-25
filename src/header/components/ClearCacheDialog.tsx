@@ -16,6 +16,7 @@ import {useBunProPreloadStatus} from "../../hooks/useBunProPreloadStatus";
 import {invalidWanikaniQueries} from "../../wanikani/service/WanikaniQueries";
 import {invalidBunProQueries} from "../../bunpro/service/BunProQueries";
 import {invalidAnkiQueries} from "../../anki/service/AnkiQueries";
+import * as Sentry from "@sentry/react";
 
 type DialogOptions = {
     anki: boolean,
@@ -34,15 +35,36 @@ function usePurgeLocalData() {
             const jobs = [];
 
             if (options.anki) {
+                Sentry.addBreadcrumb({
+                    level: 'info',
+                    type: 'clear-cache',
+                    data: {
+                        app: 'anki'
+                    }
+                });
                 jobs.push(invalidAnkiQueries());
             }
 
             if (options.bunPro) {
+                Sentry.addBreadcrumb({
+                    level: 'info',
+                    type: 'clear-cache',
+                    data: {
+                        app: 'bunpro'
+                    }
+                });
                 jobs.push(invalidBunProQueries());
                 setBunProPreloadStatus(false);
             }
 
             if (options.wanikani) {
+                Sentry.addBreadcrumb({
+                    level: 'info',
+                    type: 'clear-cache',
+                    data: {
+                        app: 'wanikani'
+                    }
+                });
                 jobs.push(invalidWanikaniQueries());
                 setWanikaniPreloadStatus(false);
             }

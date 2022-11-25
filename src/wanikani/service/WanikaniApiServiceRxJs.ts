@@ -1,12 +1,9 @@
 import * as localForage from "localforage";
-import InMemoryCache from "../../util/InMemoryCache";
 import {APP_URLS} from "../../Constants";
 import {Observable, Subject} from "rxjs";
 import {RawWanikaniReview} from "../models/raw/RawWanikaniReview";
 import {sleep} from "../../util/ReactQueryUtils";
-
-// @ts-ignore
-const memoryCache = new InMemoryCache<any>();
+import * as Sentry from "@sentry/react";
 
 const wanikaniApiUrl = APP_URLS.wanikaniApi;
 const cacheKeys = {
@@ -35,7 +32,7 @@ function fetchWithAutoRetry(input: string, init: RequestInit) {
     async function tryRequest(attempts: number) {
         const response = await fetch(input, init);
 
-        if (response.status == 429 && attempts < 10) {
+        if ([429, 401].includes(response.status) && attempts < 10) {
             subject.next({
                 status: EVENT_STATUS.RATE_LIMITED,
             });
@@ -106,10 +103,17 @@ function fetchMultiPageRequestObservable(path: string, startingId?: number) {
 
             const firstPageResponse = event.response as Response;
 
-            const firstPage = await firstPageResponse.json();
-
-            let data = firstPage.data;
-            let nextPage = firstPage.pages['next_url']
+            let firstPage: any;
+            let nextPage: string;
+            let data: any;
+            try {
+                firstPage = await firstPageResponse.json();
+                data = firstPage.data;
+                nextPage = firstPage.pages['next_url']
+            } catch (err) {
+                Sentry.captureMessage(`Reviews page (first) exception, status ${firstPageResponse.status}`)
+                throw err;
+            }
 
             function tryNextPage() {
                 fetchWithAutoRetry(nextPage, options)
@@ -123,9 +127,15 @@ function fetchMultiPageRequestObservable(path: string, startingId?: number) {
 
                         const pageResponse = event.response as Response;
 
-                        const page = await pageResponse.json();
-                        data = data.concat(page.data);
-                        nextPage = page.pages['next_url'];
+                        try {
+                            const page = await pageResponse.json();
+                            data = data.concat(page.data);
+                            nextPage = page.pages['next_url'];
+                        } catch (err) {
+                            Sentry.captureMessage(`Reviews page exception, status ${pageResponse.status}`)
+                            throw err;
+                        }
+
                         if (!!nextPage) {
                             subject.next({
                                 status: EVENT_STATUS.IN_PROGRESS,
@@ -180,7 +190,7 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReview>> {
     const rateLimited = () => subject.next({status: EVENT_STATUS.RATE_LIMITED});
 
     function handleEvent(event: MultiPageObservableEvent<RawWanikaniReview>, reviews: RawWanikaniReview[] = []) {
-        function save(partialData: RawWanikaniReview[], saveToMemCache = false) {
+        function save(partialData: RawWanikaniReview[]) {
             const reviewsToSave = sortAndDeduplicateReviews([...reviews, ...partialData]);
 
             const cacheObject = {
@@ -188,9 +198,6 @@ function getReviews(): Observable<MultiPageObservableEvent<RawWanikaniReview>> {
                 lastUpdated: new Date().getTime(),
             };
             localForage.setItem(cacheKeys.reviews, cacheObject);
-            if (saveToMemCache) {
-                memoryCache.put(cacheKeys.reviews, cacheObject);
-            }
             return cacheObject.data;
         }
 

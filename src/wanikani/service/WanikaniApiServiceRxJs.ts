@@ -26,24 +26,36 @@ export const EVENT_STATUS = {
     IN_PROGRESS: 'in-progress',
 };
 
-function fetchWithAutoRetry(input: string, init: RequestInit) {
+function fetchWithAutoRetry(input: string) {
     const subject = new Subject<{ status: string, response?: Response }>();
 
     async function tryRequest(attempts: number) {
-        const response = await fetch(input, init);
-
-        if ([429, 401].includes(response.status) && attempts < 10) {
-            subject.next({
-                status: EVENT_STATUS.RATE_LIMITED,
+        try {
+            const response = await fetch(input, {
+                headers: {
+                    ...authHeader(apiKey()),
+                },
             });
-            await sleep(10_000);
-            tryRequest(attempts + 1);
-            return;
+
+            if ([429, 401].includes(response.status) && attempts < 10) {
+                subject.next({
+                    status: EVENT_STATUS.RATE_LIMITED,
+                });
+                await sleep(10_000);
+                tryRequest(attempts + 1);
+                return;
+            }
+            subject.next({
+                status: EVENT_STATUS.COMPLETE,
+                response: response
+            });
+        } catch (error) {
+            console.error(error);
+            subject.error({
+                error: error
+            });
         }
-        subject.next({
-            status: EVENT_STATUS.COMPLETE,
-            response: response
-        })
+
     }
 
     tryRequest(0);
@@ -85,14 +97,8 @@ export type MultiPageObservableEvent<T> = {
 function fetchMultiPageRequestObservable(path: string, startingId?: number) {
     const subject = new Subject<MultiPageObservableEvent<RawWanikaniReview>>();
 
-    const options = {
-        headers: {
-            ...authHeader(apiKey()),
-        },
-    };
-
     const startingPageParam = !!startingId ? `?page_after_id=${startingId}` : '';
-    fetchWithAutoRetry(`${wanikaniApiUrl}${path}${startingPageParam}`, options)
+    fetchWithAutoRetry(`${wanikaniApiUrl}${path}${startingPageParam}`)
         .subscribe(async (event) => {
             if (event.status === EVENT_STATUS.RATE_LIMITED) {
                 subject.next({
@@ -116,7 +122,7 @@ function fetchMultiPageRequestObservable(path: string, startingId?: number) {
             }
 
             function tryNextPage() {
-                fetchWithAutoRetry(nextPage, options)
+                fetchWithAutoRetry(nextPage)
                     .subscribe(async (event) => {
                         if (event.status === EVENT_STATUS.RATE_LIMITED) {
                             subject.next({

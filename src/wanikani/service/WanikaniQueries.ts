@@ -125,17 +125,20 @@ type OnRateLimitedCallback = (isRateLimited: boolean) => void;
 
 export function useWanikaniReviews(enabled = true, onProgress: OnProgressCallback, onRateLimited: OnRateLimitedCallback) {
     return useQuery<RawWanikaniReview[], unknown, WanikaniReview[]>([WANIKANI_QUERY_KEY, 'Reviews'], () => {
-        return new Promise<RawWanikaniReview[]>((resolve) => {
+        return new Promise<RawWanikaniReview[]>((resolve, reject) => {
             WanikaniApiService.getReviewAsObservable()
-                .subscribe((event: MultiPageObservableEvent<RawWanikaniReview>) => {
-                    if (event.status === EVENT_STATUS.IN_PROGRESS) {
-                        onProgress((event.progress as number) / (event.size as number));
-                    }
-                    if (event.status === EVENT_STATUS.COMPLETE) {
-                        onProgress(1.0);
-                        resolve(event.data ?? []);
-                    }
-                    onRateLimited(event.status === EVENT_STATUS.RATE_LIMITED);
+                .subscribe({
+                    next: (event: MultiPageObservableEvent<RawWanikaniReview>) => {
+                        if (event.status === EVENT_STATUS.IN_PROGRESS) {
+                            onProgress((event.progress as number) / (event.size as number));
+                        }
+                        if (event.status === EVENT_STATUS.COMPLETE) {
+                            onProgress(1.0);
+                            resolve(event.data ?? []);
+                        }
+                        onRateLimited(event.status === EVENT_STATUS.RATE_LIMITED);
+                    },
+                    error: err => reject(err)
                 });
         });
     }, {

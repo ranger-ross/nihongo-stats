@@ -62,7 +62,7 @@ function getAssignmentsForCurrentLevel(
 
     return assignments.filter(assignment => {
         const s = sub[assignment.subjectId];
-        return s.level === level;
+        return s?.level === level;
     });
 }
 

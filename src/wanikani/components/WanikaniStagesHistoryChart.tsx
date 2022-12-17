@@ -192,6 +192,10 @@ class DataPoint {
             return; // Do nothing, the stage didn't change
         }
 
+        if (!data.subject) {
+            return; // Could not find subject (most likely a new subject and the cache is stale)
+        }
+
         this.#decrement(startingStage, data.subject);
         this.#increment(endingStage, data.subject);
     }

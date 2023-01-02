@@ -5,10 +5,10 @@ import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSerie
 import {daysSinceDate, daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import useWindowDimensions from "../../hooks/useWindowDimensions";
 import {BunProGrammarPointLookupMap, createGrammarPointsLookupMap} from "../service/BunProDataUtil";
 import {BunProReview} from "../models/BunProReview";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 
 type JLPTLevel = 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
 
@@ -102,8 +102,7 @@ function BunProTotalGrammarPointsChart({reviews, grammarPoints}: BunProTotalGram
     const rawData = useMemo(() => useData(reviews, grammarPoints), [reviews, grammarPoints]);
     const isLoading = !grammarPoints || !reviews;
     const [daysToLookBack, setDaysToLookBack] = useState(60);
-    const {width} = useWindowDimensions();
-    const isMobile = width < 400;
+    const {isMobile} = useDeviceInfo();
     const options = useOptions(rawData);
 
     useEffect(() => {

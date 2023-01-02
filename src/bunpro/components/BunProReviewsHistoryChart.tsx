@@ -12,10 +12,10 @@ import {daysToMillis, getMonthName, millisToDays, truncDate, truncMonth, truncWe
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {BunProFlattenedReviewWithLevel, flattenBunProReviews} from "../service/BunProDataUtil";
-import useWindowDimensions from "../../hooks/useWindowDimensions";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {BunProReview} from "../models/BunProReview";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -139,8 +139,7 @@ function BunProReviewsHistoryChart({reviews, grammarPoints}: BunProReviewsHistor
     const isLoading = !grammarPoints || !reviews;
     const [unit, setUnit] = useState(units.days);
     const [daysToLookBack, setDaysToLookBack] = useState(60);
-    const {width} = useWindowDimensions();
-    const isMobile = width < 400;
+    const {isMobile} = useDeviceInfo();
     const options = useOptions(rawData);
 
 

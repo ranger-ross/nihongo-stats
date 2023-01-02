@@ -13,6 +13,9 @@ console.log(`Using ${appVersion} as the app version`)
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    server: {
+        port: 3000
+    },
     plugins: [
         react({
             fastRefresh: process.env.NODE_ENV !== 'test'

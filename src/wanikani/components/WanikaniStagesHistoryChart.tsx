@@ -22,6 +22,7 @@ import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
 import {WanikaniReview} from "../models/WanikaniReview";
 import {ErrorBoundary} from "react-error-boundary";
 import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 
 
 type StageHistoryUnit = {
@@ -280,13 +281,15 @@ type WanikaniStagesHistoryChartProps = {
 function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesHistoryChartProps) {
     const data = useData(subjects, reviews, resets);
     const [tooltipTargetItem, setTooltipTargetItem] = useState<SeriesRef>();
+    const {isMobile} = useDeviceInfo();
 
-    const visibleLabelIndices = useMemo(() => getVisibleLabelIndices(data ?? [], 6), [data]);
+    const visibleLabelIndices = useMemo(() => getVisibleLabelIndices(data ?? [], isMobile ? 3 : 6), [data]);
 
     const StageToolTip = useMemo(() => (
         function StageToolTip(props: TooltipBase.ContentProps) {
             if (!data)
-                return <></>
+                return null;
+
             const dp = data[props.targetItem.point];
             return (
                 <>
@@ -305,7 +308,7 @@ function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesH
         function LabelWithDate(props: ArgumentAxisBase.LabelProps) {
             const date = new Date(props.text);
             if (!date || !data) {
-                return (<></>)
+                return null;
             }
 
             const index = data.findIndex(dp => dp.date.getTime() === date.getTime());

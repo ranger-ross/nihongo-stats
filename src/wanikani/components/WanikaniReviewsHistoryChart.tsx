@@ -227,13 +227,13 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
         return function LabelWithDate(props: ValueAxisBase.LabelProps) {
             const date = props.text;
             if (!date) {
-                return (<></>);
+                return null;
             }
 
             const index = chartData.findIndex(d => new Date(d.date).getTime() === new Date(date).getTime());
 
             if (!visibleLabelIndices.includes(index)) {
-                return (<></>);
+                return null;
             }
 
             return (

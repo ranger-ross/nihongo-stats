@@ -73,6 +73,7 @@ function EnterBunProApiKeyPage() {
                                variant={'outlined'}
                                value={textfieldValue}
                                onChange={e => setTextfieldValue(e.target.value)}
+                               onKeyUp={e => e.key === 'Enter' && textfieldValue !== '' ? verifyAndSetApiKey(textfieldValue) : null}
                     />
                 </Grid>
                 <Grid item>

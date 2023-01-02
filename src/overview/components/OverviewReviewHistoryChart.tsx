@@ -28,6 +28,7 @@ import {useWanikaniData} from "../../hooks/useWanikaniData";
 import {useBunProData} from "../../hooks/useBunProData";
 import {BunProReview} from "../../bunpro/models/BunProReview";
 import {BunProGrammarPoint} from "../../bunpro/models/BunProGrammarPoint";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 
 class DataPoint {
 
@@ -157,6 +158,7 @@ function OverviewReviewsHistoryChart() {
     const {apiKey: wkApiKey} = useWanikaniApiKey();
     const {apiKey: bpApiKey} = useBunProApiKey();
 
+    const {isMobile} = useDeviceInfo();
     const [toolTipTargetItem, setToolTipTargetItem] = useState<SeriesRef>();
     const [daysToLookBack, setDaysToLookBack] = useState(30);
     const {decks: ankiDecks} = useAnkiDecks();
@@ -324,7 +326,7 @@ function OverviewReviewsHistoryChart() {
                                     stacks={[{series: ['Anki', "BunPro", 'Wanikani']}]}
                                 />
 
-                                <Legend/>
+                                <Legend position={isMobile ? 'bottom' : 'right'}/>
                                 <EventTracker/>
                                 <Tooltip
                                     targetItem={toolTipTargetItem}

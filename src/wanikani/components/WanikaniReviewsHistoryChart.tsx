@@ -21,6 +21,7 @@ import {WanikaniSubject} from "../models/WanikaniSubject";
 import {WanikaniReview} from "../models/WanikaniReview";
 import {ErrorBoundary} from "react-error-boundary";
 import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 
 type PeriodUnit = {
     key: string,
@@ -144,8 +145,9 @@ function getTotalDays() {
     return millisToDays(difference);
 }
 
-function calculateLabelPositions(data: DataPoint[]) {
-    const numberOfLabels = data.length == 7 ? 7 : 6
+function calculateLabelPositions(data: DataPoint[], isMobile: boolean = false) {
+    const labelsForDesktop = data.length == 7 ? 7 : 6;
+    const numberOfLabels = isMobile ? 3 : (labelsForDesktop);
     return getVisibleLabelIndices(data, numberOfLabels);
 }
 
@@ -187,6 +189,7 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
     const [unit, setUnit] = useState(units.days);
     const isLoading = reviews.length === 0 || subjects.length === 0;
     const rawData: WanikaniSubjectReview[] = useMemo(() => isLoading ? [] : formatData(reviews, subjects), [reviews, subjects]);
+    const {isMobile} = useDeviceInfo();
 
     const chartData: DataPoint[] = useMemo(() => rawData.length == 0 ? [] :
         aggregateDate(rawData, daysToLookBack, unit), [rawData, daysToLookBack, unit])
@@ -219,18 +222,18 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
 
 
     const LabelWithDate = useMemo(() => {
-        const visibleLabelIndices = calculateLabelPositions(chartData);
+        const visibleLabelIndices = calculateLabelPositions(chartData, isMobile);
 
         return function LabelWithDate(props: ValueAxisBase.LabelProps) {
             const date = props.text;
             if (!date) {
-                return (<></>);
+                return null;
             }
 
             const index = chartData.findIndex(d => new Date(d.date).getTime() === new Date(date).getTime());
 
             if (!visibleLabelIndices.includes(index)) {
-                return (<></>);
+                return null;
             }
 
             return (

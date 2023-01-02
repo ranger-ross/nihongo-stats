@@ -12,10 +12,10 @@ import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} f
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {createGrammarPointsLookupMap} from "../service/BunProDataUtil";
-import useWindowDimensions from "../../hooks/useWindowDimensions";
 import ToolTipLabel from "../../shared/ToolTipLabel";
 import {BunProReview} from "../models/BunProReview";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -197,8 +197,7 @@ function BunProLessonHistoryChart({reviews, grammarPoints}: BunProLessonHistoryC
     const isLoading = !grammarPoints || !reviews;
     const [unit, setUnit] = useState(units.months);
     const [daysToLookBack, setDaysToLookBack] = useState(365);
-    const {width} = useWindowDimensions();
-    const isMobile = width < 400;
+    const {isMobile} = useDeviceInfo();
     const options = useOptions(reviews);
 
     const chartData = useMemo(

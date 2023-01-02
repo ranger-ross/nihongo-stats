@@ -6,9 +6,9 @@ import {daysSinceDate, daysToMillis, millisToDays, truncDate} from "../../util/D
 import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
 import {BunProFlattenedReviewWithLevel, flattenBunProReviews} from "../service/BunProDataUtil";
-import useWindowDimensions from "../../hooks/useWindowDimensions";
 import {BunProReview} from "../models/BunProReview";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
+import {useDeviceInfo} from "../../hooks/useDeviceInfo";
 
 type JLPTLevel = 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
 
@@ -96,8 +96,7 @@ function BunProTotalReviewsChart({reviews, grammarPoints}: BunProTotalReviewsCha
     const rawData = useMemo(() => useData(reviews, grammarPoints), [reviews, grammarPoints]);
     const isLoading = !grammarPoints || !reviews;
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
-    const {width} = useWindowDimensions();
-    const isMobile = width < 400;
+    const {isMobile} = useDeviceInfo();
     const options = useOptions(rawData)
 
     useEffect(() => {

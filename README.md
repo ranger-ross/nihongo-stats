@@ -58,7 +58,7 @@ Run `npm install` to install NPM dependencies
 
 #### Starting the Application
 
-Run `npm run dev` to start application in Docker and serve it on `localhost:5173`
+Run `npm run dev` to start application in Docker and serve it on `localhost:3000`
 
 #### Running Tests
 

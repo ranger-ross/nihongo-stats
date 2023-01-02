@@ -12,7 +12,7 @@ const {apiProxy, bunproApi} = APP_URLS;
 
 const baseBunProUrl = `${apiProxy}/${bunproApi}`;
 
-const cacheKeys = {
+const cacheKeys: {[name: string]: string} = {
     apiKey: 'bunpro-api-key',
     grammarPoints: 'bunpro-grammar-points',
     userProgress: 'bunpro-user-progress',
@@ -45,7 +45,7 @@ function bunproHeaders(token?: string): { [key: string]: string } {
 
 function getRawBunProUser(token: string) {
     const _apiKey = !token ? apiKey() : token;
-    return fetch(`${baseBunProUrl}/v4/user`, {headers: bunproHeaders(_apiKey)});
+    return fetch(`${baseBunProUrl}/v5/user`, {headers: bunproHeaders(_apiKey)});
 }
 
 type GrammarPointResponse = { data: RawBunProGrammarPoint[] }
@@ -112,7 +112,6 @@ async function login(apiKey: string) {
 
 async function flushCache() {
     for (const key of Object.keys(cacheKeys)) {
-        // @ts-ignore
         await localForage.removeItem(cacheKeys[key]);
     }
 }

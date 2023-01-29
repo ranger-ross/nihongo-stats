@@ -1,11 +1,7 @@
-import {ArgumentAxis, Chart, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
+import {ArgumentAxis} from '@devexpress/dx-react-chart-material-ui';
 import React, {useMemo, useState} from "react";
 import {
-    ArgumentScale,
-    BarSeries,
-    EventTracker,
     SeriesRef,
-    Stack,
     Tooltip as TooltipBase,
     ValueAxis as ValueAxisBase,
 } from "@devexpress/dx-react-chart";
@@ -22,6 +18,7 @@ import {WanikaniReview} from "../models/WanikaniReview";
 import {ErrorBoundary} from "react-error-boundary";
 import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
 import {useDeviceInfo} from "../../hooks/useDeviceInfo";
+import { AxisOptions, Chart, UserSerie } from "react-charts";
 
 type PeriodUnit = {
     key: string,
@@ -245,9 +242,38 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
         }
     }, [chartData]);
 
+    const primaryAxis = useMemo(
+      (): AxisOptions<DataPoint> => ({
+          getValue: datum => datum.date,
+      }),
+      [chartData]
+    )
+
+
+    const secondaryAxes = useMemo(
+      (): AxisOptions<DataPoint>[] => [
+          {
+              getValue: datum => {
+                  return datum.total
+              }
+          },
+      ],
+      [chartData]
+    )
+
+
+    const u: UserSerie<DataPoint>[] = useMemo(() => [
+          {
+              data: chartData,
+              label: 'hello'
+          }
+      ],[chartData]);
+
+    console.log(u);
+
     return (
         <Card style={{height: '100%'}}>
-            <CardContent style={{height: '100%'}}>
+            <CardContent style={{height: '400px'}}>
                 <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
                     <Grid container>
                         <Grid item xs={12} md={4}>
@@ -292,46 +318,53 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
 
                     {!isLoading ? (
                         <div style={{flexGrow: '1'}}>
-                            <Chart data={chartData}>
-                                <ArgumentScale factory={scaleBand}/>
-                                <ArgumentAxis labelComponent={LabelWithDate}/>
-                                <ValueAxis/>
+                            <Chart options={{
+                                data: u,
+                                primaryAxis,
+                                secondaryAxes,
+                                dark: true
+                            }}/>
 
-                                <BarSeries
-                                    name="radicals"
-                                    valueField="radicals"
-                                    argumentField="date"
-                                    color={WANIKANI_COLORS.blue}
-                                />
+                            {/*<Chart data={chartData}>*/}
+                            {/*    <ArgumentScale factory={scaleBand}/>*/}
+                            {/*    <ArgumentAxis labelComponent={LabelWithDate}/>*/}
+                            {/*    <ValueAxis/>*/}
 
-                                <BarSeries
-                                    name="kanji"
-                                    valueField="kanji"
-                                    argumentField="date"
-                                    color={WANIKANI_COLORS.pink}
-                                />
+                            {/*    <BarSeries*/}
+                            {/*        name="radicals"*/}
+                            {/*        valueField="radicals"*/}
+                            {/*        argumentField="date"*/}
+                            {/*        color={WANIKANI_COLORS.blue}*/}
+                            {/*    />*/}
 
-                                <BarSeries
-                                    name="vocabulary"
-                                    valueField="vocabulary"
-                                    argumentField="date"
-                                    color={WANIKANI_COLORS.purple}
-                                />
+                            {/*    <BarSeries*/}
+                            {/*        name="kanji"*/}
+                            {/*        valueField="kanji"*/}
+                            {/*        argumentField="date"*/}
+                            {/*        color={WANIKANI_COLORS.pink}*/}
+                            {/*    />*/}
 
-                                <Stack
-                                    stacks={[{series: ['radicals', 'kanji', 'vocabulary']}]}
-                                />
+                            {/*    <BarSeries*/}
+                            {/*        name="vocabulary"*/}
+                            {/*        valueField="vocabulary"*/}
+                            {/*        argumentField="date"*/}
+                            {/*        color={WANIKANI_COLORS.purple}*/}
+                            {/*    />*/}
 
-                                <EventTracker/>
-                                <Tooltip
-                                    targetItem={tooltipTargetItem ? {
-                                        ...tooltipTargetItem,
-                                        series: 'vocabulary'
-                                    } : undefined}
-                                    onTargetItemChange={setTooltipTargetItem}
-                                    contentComponent={ReviewsToolTip}
-                                />
-                            </Chart>
+                            {/*    <Stack*/}
+                            {/*        stacks={[{series: ['radicals', 'kanji', 'vocabulary']}]}*/}
+                            {/*    />*/}
+
+                            {/*    <EventTracker/>*/}
+                            {/*    <Tooltip*/}
+                            {/*        targetItem={tooltipTargetItem ? {*/}
+                            {/*            ...tooltipTargetItem,*/}
+                            {/*            series: 'vocabulary'*/}
+                            {/*        } : undefined}*/}
+                            {/*        onTargetItemChange={setTooltipTargetItem}*/}
+                            {/*        contentComponent={ReviewsToolTip}*/}
+                            {/*    />*/}
+                            {/*</Chart>*/}
                         </div>
                     ) : null}
                 </div>

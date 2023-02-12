@@ -13,6 +13,7 @@ import RequireOrRedirect from "../shared/RequireOrRedirect";
 import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart";
 import WanikaniLessonHistoryChart from "./components/WanikaniLessonHistoryChart";
 import {useWanikaniData} from "../hooks/useWanikaniData";
+import WanikaniTestChart from "./components/WanikaniTestChart";
 
 type LoadableChartProps = {
     placeholderTitle: string
@@ -93,6 +94,11 @@ function WanikaniHistoryContent() {
                     reviews={reviews}
                 />
             </Card>
+
+            <Card variant={'outlined'} style={{margin: '15px'}}>
+                <WanikaniTestChart />
+            </Card>
+
 
             <Card variant={'outlined'} style={{margin: '15px'}}>
                 <WanikaniReviewsHistoryChart reviews={reviews} subjects={subjects}/>

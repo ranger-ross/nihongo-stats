@@ -57,7 +57,7 @@ jobs:
       - run: gcloud auth configure-docker ${{ env.REGISTRY }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@35434f557ad77672899d67f7992fb5560bda1071
+        uses: docker/build-push-action@v4.0.0
         with:
           context: .
           push: true

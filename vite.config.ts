@@ -17,9 +17,7 @@ export default defineConfig({
         port: 3000
     },
     plugins: [
-        react({
-            fastRefresh: process.env.NODE_ENV !== 'test'
-        }),
+        react({}),
         checker({
             typescript: true
         })

@@ -8,8 +8,8 @@ const styles: AppStyles = {
     loadingItem: {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'left',
-        gap: '10px'
+        justifyContent: 'center', // revert to left after removing notice
+        gap: '10px',
     },
     loadingItemsContainer: {
         display: 'flex',
@@ -51,7 +51,7 @@ export function BunProLoadingScreen({config, grammarPoints, reviews}: BunProLoad
         <>
             <div style={styles.loadingItemsContainer}>
                 <div style={styles.loadingItemsColumn}>
-                    <strong>Loading BunPro Data...</strong>
+                    <strong style={{textAlign: 'center'}}>Loading BunPro Data...</strong>
                     <br/>
                     {config.grammarPoints ? (
                         <LoadingItem text={'Grammar Points'} isLoading={!grammarPoints}/>
@@ -59,6 +59,10 @@ export function BunProLoadingScreen({config, grammarPoints, reviews}: BunProLoad
                     {config.reviews ? (
                         <LoadingItem text={'Reviews'} isLoading={!reviews}/>
                     ) : null}
+
+
+                    <div style={{marginTop: '30px'}}><span style={{color: 'red'}}>Notice</span>: The BunPro API was recently changed. I am investigating possible fixes</div>
+
                 </div>
             </div>
 

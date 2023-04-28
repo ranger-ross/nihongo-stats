@@ -1,7 +1,7 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
 import {RoutePaths} from "../Routes";
 import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart";
-import {Card, CircularProgress, Typography} from "@mui/material";
+import {Card, CardContent, CircularProgress, Grid, Link, Typography} from "@mui/material";
 import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart";
 import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart";
 import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart";
@@ -13,6 +13,7 @@ import RequireOrRedirect from "../shared/RequireOrRedirect";
 import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart";
 import WanikaniLessonHistoryChart from "./components/WanikaniLessonHistoryChart";
 import {useWanikaniData} from "../hooks/useWanikaniData";
+import { WANIKANI_COLORS } from "../Constants";
 
 type LoadableChartProps = {
     placeholderTitle: string
@@ -85,6 +86,22 @@ function WanikaniHistoryContent() {
 
     return (
         <>
+            <Card style={{ margin: '15px' }}>
+                <CardContent style={{ height: '100%' }}>
+                    <Typography variant={'h5'} align={'center'}>
+                        Notice
+                    </Typography>
+
+                    <Typography variant={'body1'} align={'center'}>
+                        Due to performance issues, the Wanikani team has decided to partially disable the WK API. <br />
+                        Some functionality may not work properly 😔 <br />
+                        For more information, see the post <Link href="https://community.wanikani.com/t/api-changes-get-all-reviews/61617" target="_blank" >here</Link>
+                    </Typography>
+
+                </CardContent>
+            </Card>
+
+
             <Card variant={'outlined'} style={{margin: '15px'}}>
                 <WanikaniHistorySummaryChart
                     levelProgress={levelProgress}

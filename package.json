@@ -19,7 +19,7 @@
     "@emotion/react": "11.11.0",
     "@emotion/styled": "11.11.0",
     "@mui/icons-material": "5.11.16",
-    "@mui/material": "5.12.2",
+    "@mui/material": "5.13.0",
     "@reactivex/rxjs": "6.6.7",
     "@sentry/react": "7.51.2",
     "@sentry/tracing": "7.51.2",

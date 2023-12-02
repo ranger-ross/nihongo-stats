@@ -5,6 +5,7 @@ import {RoutePaths} from "../Routes";
 import BunProApiService from "./service/BunProApiService";
 import {useBunProApiKey} from "../hooks/useBunProApiKey";
 import {AppStyles} from "../util/TypeUtils";
+import { BunProAPINotice } from "./components/BunProAPINotice";
 
 
 const styles: AppStyles = {
@@ -71,6 +72,8 @@ function EnterBunProApiKeyPage() {
                 <Grid item>
                     <TextField label="Api Key"
                                variant={'outlined'}
+                               // Disabled input 
+                               disabled={true}
                                value={textfieldValue}
                                onChange={e => setTextfieldValue(e.target.value)}
                                onKeyUp={e => e.key === 'Enter' && textfieldValue !== '' ? verifyAndSetApiKey(textfieldValue) : null}
@@ -87,6 +90,9 @@ function EnterBunProApiKeyPage() {
                 </Grid>
 
             </Grid>
+            
+            <BunProAPINotice />
+
         </Grid>
     );
 }

@@ -3,6 +3,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import {AppStyles} from "../../util/TypeUtils";
 import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
 import {BunProReviewsResponse} from "../models/BunProReviewsResponse";
+import { BunProAPINotice } from "./BunProAPINotice";
 
 const styles: AppStyles = {
     loadingItem: {
@@ -61,7 +62,7 @@ export function BunProLoadingScreen({config, grammarPoints, reviews}: BunProLoad
                     ) : null}
 
 
-                    <div style={{marginTop: '30px'}}><span style={{color: 'red'}}>Notice</span>: The BunPro API was recently changed. I am investigating possible fixes</div>
+                    <BunProAPINotice />
 
                 </div>
             </div>

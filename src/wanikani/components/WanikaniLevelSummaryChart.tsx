@@ -102,8 +102,15 @@ function getCurrentLevelProgressData(
     let start;
     if (currentLevel > 1) {
         const previousLevelProgress = getLevelProgress(levelsProgress, currentLevel - 1);
-        start = previousLevelProgress.passedAt;
+        if (previousLevelProgress) {
+            start = previousLevelProgress.passedAt;
+        } else {
+            // For people that started thier current level before the WK v2 API was released, level progress data is missing.
+            // As a fallback, just use the current level unlockedAt timestamp
+            start = currentLevelProgress.unlockedAt;
+        }
     } else {
+        // for the first level
         start = currentLevelProgress.startedAt;
     }
 

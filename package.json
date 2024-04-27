@@ -21,8 +21,8 @@
     "@mui/icons-material": "5.14.15",
     "@mui/material": "5.14.15",
     "@reactivex/rxjs": "6.6.7",
-    "@sentry/react": "7.76.0",
-    "@sentry/tracing": "7.76.0",
+    "@sentry/react": "7.112.2",
+    "@sentry/tracing": "7.112.2",
     "@tanstack/query-sync-storage-persister": "4.36.1",
     "@tanstack/react-query": "4.36.1",
     "@tanstack/react-query-persist-client": "4.36.1",
@@ -37,7 +37,7 @@
     "react-visibility-sensor": "5.1.1",
     "rxjs": "7.8.1",
     "styled-components": "6.1.8",
-    "zustand": "4.4.4"
+    "zustand": "4.5.2"
   },
   "devDependencies": {
     "@testing-library/react": "14.0.0",

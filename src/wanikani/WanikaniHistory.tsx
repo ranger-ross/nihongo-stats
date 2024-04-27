@@ -1,7 +1,7 @@
 import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
 import {RoutePaths} from "../Routes";
 import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart";
-import {Card, CardContent, CircularProgress, Grid, Link, Typography} from "@mui/material";
+import {Card, CardContent, CircularProgress, Link, Typography} from "@mui/material";
 import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart";
 import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart";
 import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart";
@@ -13,7 +13,6 @@ import RequireOrRedirect from "../shared/RequireOrRedirect";
 import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart";
 import WanikaniLessonHistoryChart from "./components/WanikaniLessonHistoryChart";
 import {useWanikaniData} from "../hooks/useWanikaniData";
-import { WANIKANI_COLORS } from "../Constants";
 
 type LoadableChartProps = {
     placeholderTitle: string

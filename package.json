@@ -13,9 +13,9 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@devexpress/dx-react-chart": "4.0.5",
-    "@devexpress/dx-react-chart-material-ui": "4.0.5",
-    "@devexpress/dx-react-core": "4.0.5",
+    "@devexpress/dx-react-chart": "4.0.8",
+    "@devexpress/dx-react-chart-material-ui": "4.0.8",
+    "@devexpress/dx-react-core": "4.0.8",
     "@emotion/react": "11.11.1",
     "@emotion/styled": "11.11.0",
     "@mui/icons-material": "5.14.15",
@@ -42,9 +42,9 @@
   "devDependencies": {
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.5.2",
-    "@types/d3-array": "3.0.9",
-    "@types/d3-scale": "4.0.6",
-    "@types/d3-shape": "3.1.4",
+    "@types/d3-array": "3.2.1",
+    "@types/d3-scale": "4.0.8",
+    "@types/d3-shape": "3.1.6",
     "@types/lodash": "4.17.0",
     "@types/node": "20.12.7",
     "@types/react": "18.3.1",

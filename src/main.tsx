@@ -17,7 +17,7 @@ try {
             tracesSampleRate: 1.0,
             release: useAppVersion(),
             environment: 'production',
-            beforeSend: (event, hint) => {
+            beforeSend: (event) => {
                 // Ignore Anki Connect errors.
                 // Since we are polling, if Anki is not open there are lots of errors in the background
                 if (event.request?.url?.includes('anki') ||

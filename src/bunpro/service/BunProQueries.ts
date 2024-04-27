@@ -8,36 +8,44 @@ import {sleep} from "../../util/ReactQueryUtils";
 const BUNPRO_QUERY_KEY = 'bunpro';
 
 export function useBunProUser(enabled = true) {
-    return useQuery([BUNPRO_QUERY_KEY, 'User'], () => BunProApiService.getUser(), {
+    return useQuery({
+        queryKey: [BUNPRO_QUERY_KEY, 'User'], 
+        queryFn:  () => BunProApiService.getUser(), 
         enabled: enabled,
-        cacheTime: Infinity,
+        gcTime: Infinity,
         staleTime: 1000 * 15,
         select: data => mapBunProUser(data)
     })
 }
 
 export function useBunProGrammarPoints(enabled = true) {
-    return useQuery([BUNPRO_QUERY_KEY, 'GrammarPoints'], () => BunProApiService.getGrammarPoints(), {
+    return useQuery({
+        queryKey: [BUNPRO_QUERY_KEY, 'GrammarPoints'],
+        queryFn:  () => BunProApiService.getGrammarPoints(), 
         enabled: enabled,
-        cacheTime: Infinity,
+        gcTime: Infinity,
         staleTime: 1000 * 60 * 60 * 24,
         select: response => response.data.map((gp: RawBunProGrammarPoint) => mapBunProGrammarPoint(gp))
     })
 }
 
 export function useBunProReviews(enabled = true) {
-    return useQuery([BUNPRO_QUERY_KEY, 'Reviews'], () => BunProApiService.getAllReviews(), {
+    return useQuery( {
+        queryKey: [BUNPRO_QUERY_KEY, 'Reviews'],
+        queryFn: () => BunProApiService.getAllReviews(),
         enabled: enabled,
-        cacheTime: Infinity,
+        gcTime: Infinity,
         staleTime: 1000 * 60,
         select: (data) => mapBunProReviewResponse(data)
     })
 }
 
 export function useBunProPendingReviews(enabled = true) {
-    return useQuery([BUNPRO_QUERY_KEY, 'PendingReviews'], () => BunProApiService.getPendingReviews(), {
+    return useQuery({
+        queryKey: [BUNPRO_QUERY_KEY, 'PendingReviews'], 
+        queryFn: () => BunProApiService.getPendingReviews(), 
         enabled: enabled,
-        cacheTime: Infinity,
+        gcTime: Infinity,
         staleTime: 1000 * 60,
     })
 }

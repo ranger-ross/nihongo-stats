@@ -197,7 +197,9 @@ function useAnkiReviews(isAnkiConnected: boolean) {
     const {selectedDecks: ankiSelectedDecks} = useSelectedAnkiDecks();
 
     const {data: ankiReviews, error: error1, isLoading: isReviewsLoading} =
-        useQuery(['overviewAnkiUpcomingReviews'], () => getAnkiReviews(ankiSelectedDecks), {
+        useQuery({
+            queryKey: ['overviewAnkiUpcomingReviews'], 
+            queryFn: () => getAnkiReviews(ankiSelectedDecks), 
             enabled: isAnkiConnected
         })
     error1 && console.error(error1);

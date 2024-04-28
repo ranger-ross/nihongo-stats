@@ -23,7 +23,7 @@ jobs:
       - run: echo $APP_VERSION
       - run: npm install
       - run: npm run build
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: react-app
           path: dist
@@ -38,7 +38,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: react-app
           path: dist

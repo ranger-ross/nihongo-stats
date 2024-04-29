@@ -50,7 +50,7 @@ jobs:
 
       - name: Authenticate to Google Cloud
         id: auth
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 
@@ -81,7 +81,7 @@ jobs:
 
       - name: Authenticate to Google Cloud
         id: auth
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.DEPLOY_SERVICE_ACCOUNT_KEY }}
 

@@ -1,4 +1,4 @@
-import { describe, beforeEach, it, expect } from "vitest";
+import { describe, it, expect } from "vitest";
 import {sortAndGetMedian} from "../MathUtils";
 
 describe('MathUtils', function () {

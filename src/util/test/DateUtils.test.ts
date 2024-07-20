@@ -44,14 +44,14 @@ describe('DateUtils', function () {
     describe('areDatesSameDay()', function () {
 
         it('should return true when dates are the same', function () {
-            let date1 = new Date(1640014747830);
-            let date2 = new Date(1640014847830);
+            const date1 = new Date(1640014747830);
+            const date2 = new Date(1640014847830);
             expect(areDatesSameDay(date1, date2)).toBe(true);
         });
 
         it('should return false when dates are different', function () {
-            let date1 = new Date(1640014747830);
-            let date2 = new Date(1630014847830);
+            const date1 = new Date(1640014747830);
+            const date2 = new Date(1630014847830);
             expect(areDatesSameDay(date1, date2)).toBe(false);
         });
 
@@ -60,26 +60,26 @@ describe('DateUtils', function () {
     describe('areDatesSameDayAndHour()', function () {
 
         it('should return true when dates are the same', function () {
-            let date1 = new Date(1640014747830);
-            let date2 = new Date(1640014847830);
+            const date1 = new Date(1640014747830);
+            const date2 = new Date(1640014847830);
             expect(areDatesSameDayAndHour(date1, date2)).toBe(true);
         });
 
         it('should return false when dates are different', function () {
-            let date1 = new Date(1640014747830);
-            let date2 = new Date(1630014847830);
+            const date1 = new Date(1640014747830);
+            const date2 = new Date(1630014847830);
             expect(areDatesSameDayAndHour(date1, date2)).toBe(false);
         });
 
         it('should return false when dates are same, hours are different', function () {
-            let date1 = new Date(1643747722244);
-            let date2 = new Date(1643744100044);
+            const date1 = new Date(1643747722244);
+            const date2 = new Date(1643744100044);
             expect(areDatesSameDayAndHour(date1, date2)).toBe(false);
         });
 
         it('should return false when dates are different, hours are same', function () {
-            let date1 = new Date(1643747722244);
-            let date2 = new Date(1643661322244);
+            const date1 = new Date(1643747722244);
+            const date2 = new Date(1643661322244);
             expect(areDatesSameDayAndHour(date1, date2)).toBe(false);
         });
 

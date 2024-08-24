@@ -16,7 +16,7 @@
     "@devexpress/dx-react-chart": "4.0.8",
     "@devexpress/dx-react-chart-material-ui": "4.0.8",
     "@devexpress/dx-react-core": "4.0.8",
-    "@emotion/react": "11.13.0",
+    "@emotion/react": "11.13.3",
     "@emotion/styled": "11.13.0",
     "@mui/icons-material": "5.16.7",
     "@mui/material": "5.16.7",

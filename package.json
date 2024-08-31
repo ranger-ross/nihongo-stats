@@ -35,7 +35,7 @@
     "react-router-dom": "6.26.1",
     "react-visibility-sensor": "5.1.1",
     "rxjs": "7.8.1",
-    "styled-components": "6.1.12",
+    "styled-components": "6.1.13",
     "zustand": "4.5.5"
   },
   "devDependencies": {

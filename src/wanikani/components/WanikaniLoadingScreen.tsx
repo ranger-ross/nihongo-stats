@@ -1,4 +1,4 @@
-import {CSSProperties} from "react";
+import {CSSProperties, ReactNode} from "react";
 import {CircularProgress, Typography} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
 import QuestionToolTip from "../../shared/QuestionToolTip";
@@ -30,7 +30,7 @@ const styles: { [key: string]: CSSProperties } = {
 
 
 type LoadingItemProps = {
-    text: string | Element,
+    text: ReactNode,
     isLoading: boolean,
 }
 

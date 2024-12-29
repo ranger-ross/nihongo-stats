@@ -8,7 +8,7 @@ function FilterableLegend(props: Props) {
     const filterItems = props.filterItems ?? [];
     const RawItemComponent = props.itemComponent ?? ((props) => (<Legend.Item {...props}/>))
 
-    function FilteredItemComponent(props: JSX.IntrinsicAttributes & Legend.ItemProps) {
+    function FilteredItemComponent(props: any & Legend.ItemProps) {
         // @ts-ignore
         const isVisible = !filterItems.includes(props.children[1]?.props.text);
         return (

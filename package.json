@@ -43,7 +43,7 @@
     "@types/d3-array": "3.2.1",
     "@types/d3-scale": "4.0.9",
     "@types/d3-shape": "3.1.7",
-    "@types/lodash": "4.17.15",
+    "@types/lodash": "4.17.16",
     "@types/node": "22.13.5",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",

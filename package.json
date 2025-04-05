@@ -51,6 +51,6 @@
     "typescript": "5.8.3",
     "vite": "6.2.3",
     "vite-plugin-checker": "0.9.1",
-    "vitest": "3.0.9"
+    "vitest": "3.1.1"
   }
 }

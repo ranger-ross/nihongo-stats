@@ -12,9 +12,9 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@devexpress/dx-react-chart": "4.0.10",
-    "@devexpress/dx-react-chart-material-ui": "4.0.10",
-    "@devexpress/dx-react-core": "4.0.10",
+    "@devexpress/dx-react-chart": "4.0.11",
+    "@devexpress/dx-react-chart-material-ui": "4.0.11",
+    "@devexpress/dx-react-core": "4.0.11",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.0",
     "@mui/icons-material": "6.4.11",

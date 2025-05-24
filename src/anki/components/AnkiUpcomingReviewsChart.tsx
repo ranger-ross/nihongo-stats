@@ -1,6 +1,6 @@
-import {useState} from 'react';
-import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
-import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
+import { useState } from 'react';
+import { ArgumentAxis, Chart, Legend, Tooltip, ValueAxis, } from '@devexpress/dx-react-chart-material-ui';
+import { Card, CardContent, CircularProgress, GridLegacy, Typography } from "@mui/material";
 import {
     Animation,
     ArgumentAxis as ArgumentAxisBase,
@@ -9,19 +9,19 @@ import {
     EventTracker,
     Stack
 } from "@devexpress/dx-react-chart";
-import {useSelectedAnkiDecks} from "../../hooks/useSelectedAnkiDecks";
-import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
+import { useSelectedAnkiDecks } from "../../hooks/useSelectedAnkiDecks";
+import { getVisibleLabelIndices, scaleBand } from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {UpcomingAnkiReviewDataPoint} from "../service/AnkiDataUtil";
-import {useAnkiUpcomingReviews} from "../service/AnkiQueries";
+import { UpcomingAnkiReviewDataPoint } from "../service/AnkiDataUtil";
+import { useAnkiUpcomingReviews } from "../service/AnkiQueries";
 
 type ChartData = { data: UpcomingAnkiReviewDataPoint[], decks: string[] }
 
 function AnkiUpcomingReviewsChart() {
-    const {selectedDecks} = useSelectedAnkiDecks();
+    const { selectedDecks } = useSelectedAnkiDecks();
     const [days, setDays] = useState(14);
 
-    const {data, isLoading, error} = useAnkiUpcomingReviews(selectedDecks, days);
+    const { data, isLoading, error } = useAnkiUpcomingReviews(selectedDecks, days);
 
     error && console.error(error);
 
@@ -57,7 +57,7 @@ function AnkiUpcomingReviewsChart() {
         );
     }
 
-    function ReviewsToolTip({targetItem}: Tooltip.ContentProps) {
+    function ReviewsToolTip({ targetItem }: Tooltip.ContentProps) {
         const data = (chartData as ChartData).data[targetItem.point];
         return (
             <>
@@ -72,40 +72,40 @@ function AnkiUpcomingReviewsChart() {
     return (
         <Card>
             <CardContent>
-                <Grid container>
-                    <Grid item xs={12} md={4}/>
-                    <Grid item xs={12} md={4}>
-                        <Typography variant={'h5'} style={{textAlign: 'center', paddingBottom: '5px'}}>
+                <GridLegacy container>
+                    <GridLegacy item xs={12} md={4} />
+                    <GridLegacy item xs={12} md={4}>
+                        <Typography variant={'h5'} style={{ textAlign: 'center', paddingBottom: '5px' }}>
                             Upcoming Reviews
                         </Typography>
-                    </Grid>
+                    </GridLegacy>
 
-                    <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
+                    <GridLegacy item xs={12} md={4} style={{ textAlign: 'end' }}>
                         <PeriodSelector
                             period={days}
                             setPeriod={setDays}
                             options={[
-                                {value: 7, text: '7'},
-                                {value: 14, text: '14'},
-                                {value: 30, text: '30'},
-                                {value: 60, text: '60'},
-                                {value: 90, text: '90'},
+                                { value: 7, text: '7' },
+                                { value: 14, text: '14' },
+                                { value: 30, text: '30' },
+                                { value: 60, text: '60' },
+                                { value: 90, text: '90' },
                             ]}
                         />
-                    </Grid>
+                    </GridLegacy>
 
-                </Grid>
+                </GridLegacy>
 
 
                 {isLoading ? (
-                    <div style={{height: '300px', textAlign: 'center'}}>
-                        <CircularProgress style={{margin: '100px'}}/>
+                    <div style={{ height: '300px', textAlign: 'center' }}>
+                        <CircularProgress style={{ margin: '100px' }} />
                     </div>
                 ) : (
                     <Chart key={key} data={chartData.data} height={800}>
-                        <ArgumentScale factory={scaleBand}/>
-                        <ArgumentAxis labelComponent={LabelWithDate}/>
-                        <ValueAxis/>
+                        <ArgumentScale factory={scaleBand} />
+                        <ArgumentAxis labelComponent={LabelWithDate} />
+                        <ValueAxis />
 
                         {chartData.decks.map(deck => (
                             <BarSeries
@@ -117,13 +117,13 @@ function AnkiUpcomingReviewsChart() {
                         ))}
 
                         <Stack
-                            stacks={[{series: chartData.decks}]}
+                            stacks={[{ series: chartData.decks }]}
                         />
 
-                        <Animation/>
-                        <Legend position="bottom"/>
-                        <EventTracker/>
-                        <Tooltip contentComponent={ReviewsToolTip}/>
+                        <Animation />
+                        <Legend position="bottom" />
+                        <EventTracker />
+                        <Tooltip contentComponent={ReviewsToolTip} />
                     </Chart>
                 )}
 

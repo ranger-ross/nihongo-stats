@@ -1,21 +1,21 @@
-import {Box, Grid} from "@mui/material";
-import React, {useEffect, useState} from "react";
-import {useLocation, useNavigate} from "react-router";
-import {AllRoutes, convertAppNameToDashboardRoute} from '../Routes';
-import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
-import AppSelector, {AppOption} from "./components/AppSelector";
+import { Box, GridLegacy } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { AllRoutes, convertAppNameToDashboardRoute } from '../Routes';
+import { useWanikaniApiKey } from "../hooks/useWanikaniApiKey";
+import AppSelector, { AppOption } from "./components/AppSelector";
 import WanikaniNav from "./navbars/WanikaniNav";
 import AnkiNav from "./navbars/AnkiNav";
 import BunProNav from "./navbars/BunProNav";
-import {useBunProApiKey} from "../hooks/useBunProApiKey";
+import { useBunProApiKey } from "../hooks/useBunProApiKey";
 import OverviewNav from "./navbars/OverviewNav";
-import {APP_NAMES} from "../Constants";
-import {useSelectedApp} from "../hooks/useSelectedApp";
+import { APP_NAMES } from "../Constants";
+import { useSelectedApp } from "../hooks/useSelectedApp";
 import ankiIcon from '../../assets/icons/anki-icon.png';
 import bunProIcon from '../../assets/icons/bunpro-icon.png';
 import wanikaniIcon from '../../assets/icons/wanikani-icon.png';
-import {BarChart} from "@mui/icons-material";
-import {AppStyles} from "../util/TypeUtils";
+import { BarChart } from "@mui/icons-material";
+import { AppStyles } from "../util/TypeUtils";
 
 const styles: AppStyles = {
     container: {
@@ -29,18 +29,18 @@ const styles: AppStyles = {
 };
 
 const appOptions: AppOption[] = [
-    {appName: APP_NAMES.overview, displayName: 'Overview', icon: BarChart, iconStyle: {color: '#21bcff'}},
-    {appName: APP_NAMES.anki, displayName: 'Anki', icon: ankiIcon},
-    {appName: APP_NAMES.bunpro, displayName: 'BunPro', icon: bunProIcon, iconStyle: {marginLeft: '-4px'}},
-    {appName: APP_NAMES.wanikani, displayName: 'Wanikani', icon: wanikaniIcon},
+    { appName: APP_NAMES.overview, displayName: 'Overview', icon: BarChart, iconStyle: { color: '#21bcff' } },
+    { appName: APP_NAMES.anki, displayName: 'Anki', icon: ankiIcon },
+    { appName: APP_NAMES.bunpro, displayName: 'BunPro', icon: bunProIcon, iconStyle: { marginLeft: '-4px' } },
+    { appName: APP_NAMES.wanikani, displayName: 'Wanikani', icon: wanikaniIcon },
 ]
 
 function AppNav() {
-    const {selectedApp, setSelectedApp} = useSelectedApp();
+    const { selectedApp, setSelectedApp } = useSelectedApp();
     const navigate = useNavigate();
     const location = useLocation();
-    const {apiKey: wanikaniApiKey} = useWanikaniApiKey();
-    const {apiKey: bunProApiKey} = useBunProApiKey();
+    const { apiKey: wanikaniApiKey } = useWanikaniApiKey();
+    const { apiKey: bunProApiKey } = useBunProApiKey();
     const [isFirstLoad, setIsFirstLoad] = useState(true);
 
     const route = AllRoutes.find((route: any) => route.path === location.pathname);
@@ -72,20 +72,20 @@ function AppNav() {
 
     return (
         hideNav ? null : (
-            <Grid container style={styles.container} alignItems={'flex-end'}>
-                <Grid item xs={12} sm={3} md={2} lg={1}>
+            <GridLegacy container style={styles.container} alignItems={'flex-end'}>
+                <GridLegacy item xs={12} sm={3} md={2} lg={1}>
                     <AppSelector options={appOptions}
-                                 selectedApp={selectedApp}
-                                 setSelectedApp={setSelectedApp}/>
-                </Grid>
+                        selectedApp={selectedApp}
+                        setSelectedApp={setSelectedApp} />
+                </GridLegacy>
 
-                <Box sx={{flexGrow: 1}}>
-                    {selectedApp === APP_NAMES.overview ? (<OverviewNav/>) : null}
-                    {selectedApp === APP_NAMES.anki ? (<AnkiNav/>) : null}
-                    {selectedApp === APP_NAMES.bunpro && !!bunProApiKey ? (<BunProNav/>) : null}
-                    {selectedApp === APP_NAMES.wanikani && !!wanikaniApiKey ? (<WanikaniNav/>) : null}
+                <Box sx={{ flexGrow: 1 }}>
+                    {selectedApp === APP_NAMES.overview ? (<OverviewNav />) : null}
+                    {selectedApp === APP_NAMES.anki ? (<AnkiNav />) : null}
+                    {selectedApp === APP_NAMES.bunpro && !!bunProApiKey ? (<BunProNav />) : null}
+                    {selectedApp === APP_NAMES.wanikani && !!wanikaniApiKey ? (<WanikaniNav />) : null}
                 </Box>
-            </Grid>
+            </GridLegacy>
         )
     );
 }

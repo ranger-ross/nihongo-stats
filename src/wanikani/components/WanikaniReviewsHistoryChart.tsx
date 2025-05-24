@@ -1,5 +1,5 @@
-import {ArgumentAxis, Chart, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
-import React, {useMemo, useState} from "react";
+import { ArgumentAxis, Chart, Tooltip, ValueAxis } from '@devexpress/dx-react-chart-material-ui';
+import React, { useMemo, useState } from "react";
 import {
     ArgumentScale,
     BarSeries,
@@ -9,19 +9,19 @@ import {
     Tooltip as TooltipBase,
     ValueAxis as ValueAxisBase,
 } from "@devexpress/dx-react-chart";
-import {WANIKANI_COLORS} from '../../Constants';
-import {Card, CardContent, CircularProgress, Grid, MenuItem, Select, Typography} from "@mui/material";
-import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
+import { WANIKANI_COLORS } from '../../Constants';
+import { Card, CardContent, CircularProgress, GridLegacy, MenuItem, Select, Typography } from "@mui/material";
+import { getVisibleLabelIndices, scaleBand } from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
-import {createSubjectMap} from "../service/WanikaniDataUtil";
+import { addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek } from "../../util/DateUtils";
+import { createSubjectMap } from "../service/WanikaniDataUtil";
 import ToolTipLabel from "../../shared/ToolTipLabel";
-import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
-import {WanikaniSubject} from "../models/WanikaniSubject";
-import {WanikaniReview} from "../models/WanikaniReview";
-import {ErrorBoundary} from "react-error-boundary";
-import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
-import {useDeviceInfo} from "../../hooks/useDeviceInfo";
+import { WanikaniSubjectReview } from "../models/WanikaniSubjectReview";
+import { WanikaniSubject } from "../models/WanikaniSubject";
+import { WanikaniReview } from "../models/WanikaniReview";
+import { ErrorBoundary } from "react-error-boundary";
+import { GenericErrorMessage } from "../../shared/GenericErrorMessage";
+import { useDeviceInfo } from "../../hooks/useDeviceInfo";
 
 type PeriodUnit = {
     key: string,
@@ -157,17 +157,17 @@ type UnitSelectorProps = {
     onChange: (unit: PeriodUnit) => void,
 };
 
-function UnitSelector({options, unit, onChange}: UnitSelectorProps) {
+function UnitSelector({ options, unit, onChange }: UnitSelectorProps) {
     return (
         <Select
-            style={{minWidth: '130px'}}
+            style={{ minWidth: '130px' }}
             size={'small'}
             value={unit.key}
             onChange={e => onChange(options.find(o => o.key === e.target.value) as PeriodUnit)}
         >
             {options.map((option) => (
                 <MenuItem key={option.key}
-                          value={option.key}
+                    value={option.key}
                 >
                     {option.text}
                 </MenuItem>
@@ -183,13 +183,13 @@ type WanikaniReviewsHistoryChartProps = {
     reviews: WanikaniReview[]
 };
 
-function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistoryChartProps) {
+function WanikaniReviewsHistoryChart({ reviews, subjects }: WanikaniReviewsHistoryChartProps) {
     const [daysToLookBack, setDaysToLookBack] = useState(30);
     const [tooltipTargetItem, setTooltipTargetItem] = useState<SeriesRef>();
     const [unit, setUnit] = useState(units.days);
     const isLoading = reviews.length === 0 || subjects.length === 0;
     const rawData: WanikaniSubjectReview[] = useMemo(() => isLoading ? [] : formatData(reviews, subjects), [reviews, subjects]);
-    const {isMobile} = useDeviceInfo();
+    const { isMobile } = useDeviceInfo();
 
     const chartData: DataPoint[] = useMemo(() => rawData.length == 0 ? [] :
         aggregateDate(rawData, daysToLookBack, unit), [rawData, daysToLookBack, unit])
@@ -205,16 +205,16 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
             return '';
         }
 
-        return function ReviewsToolTip({targetItem}: TooltipBase.ContentProps) {
+        return function ReviewsToolTip({ targetItem }: TooltipBase.ContentProps) {
             const data = chartData[targetItem.point];
             return (
                 <>
-                    <ToolTipLabel title="Date" value={getDateLabelText(data.date)}/>
-                    <br/>
-                    <ToolTipLabel title="Total" value={data.total}/>
-                    <ToolTipLabel title="Radicals" value={data.radicals}/>
-                    <ToolTipLabel title="Kanji" value={data.kanji}/>
-                    <ToolTipLabel title="Vocabulary" value={data.vocabulary}/>
+                    <ToolTipLabel title="Date" value={getDateLabelText(data.date)} />
+                    <br />
+                    <ToolTipLabel title="Total" value={data.total} />
+                    <ToolTipLabel title="Radicals" value={data.radicals} />
+                    <ToolTipLabel title="Kanji" value={data.kanji} />
+                    <ToolTipLabel title="Vocabulary" value={data.vocabulary} />
                 </>
             );
         }
@@ -246,11 +246,11 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
     }, [chartData]);
 
     return (
-        <Card style={{height: '100%'}}>
-            <CardContent style={{height: '100%'}}>
-                <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <Grid container>
-                        <Grid item xs={12} md={4}>
+        <Card style={{ height: '100%' }}>
+            <CardContent style={{ height: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <GridLegacy container>
+                        <GridLegacy item xs={12} md={4}>
                             <UnitSelector
                                 options={[
                                     units.days,
@@ -260,42 +260,42 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
                                 unit={unit}
                                 onChange={setUnit}
                             />
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                            <Typography variant={'h5'} style={{textAlign: 'center', paddingBottom: '5px'}}>
+                        </GridLegacy>
+                        <GridLegacy item xs={12} md={4}>
+                            <Typography variant={'h5'} style={{ textAlign: 'center', paddingBottom: '5px' }}>
                                 Review History
                             </Typography>
-                        </Grid>
+                        </GridLegacy>
 
 
                         {isLoading ? (
-                            <Grid item container xs={12} justifyContent={'center'} style={{padding: '10px'}}>
-                                <CircularProgress/>
-                            </Grid>
+                            <GridLegacy item container xs={12} justifyContent={'center'} style={{ padding: '10px' }}>
+                                <CircularProgress />
+                            </GridLegacy>
                         ) : (
-                            <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
+                            <GridLegacy item xs={12} md={4} style={{ textAlign: 'end' }}>
                                 <PeriodSelector period={daysToLookBack}
-                                                setPeriod={setDaysToLookBack}
-                                                options={[
-                                                    {value: 7, text: '7'},
-                                                    {value: 14, text: '14'},
-                                                    {value: 30, text: '30'},
-                                                    {value: 90, text: '3 Mon'},
-                                                    {value: 180, text: '6 Mon'},
-                                                    {value: 365, text: '1 Yr'},
-                                                    {value: totalDays, text: 'All'},
-                                                ]}
+                                    setPeriod={setDaysToLookBack}
+                                    options={[
+                                        { value: 7, text: '7' },
+                                        { value: 14, text: '14' },
+                                        { value: 30, text: '30' },
+                                        { value: 90, text: '3 Mon' },
+                                        { value: 180, text: '6 Mon' },
+                                        { value: 365, text: '1 Yr' },
+                                        { value: totalDays, text: 'All' },
+                                    ]}
                                 />
-                            </Grid>
+                            </GridLegacy>
                         )}
-                    </Grid>
+                    </GridLegacy>
 
                     {!isLoading ? (
-                        <div style={{flexGrow: '1'}}>
+                        <div style={{ flexGrow: '1' }}>
                             <Chart data={chartData}>
-                                <ArgumentScale factory={scaleBand}/>
-                                <ArgumentAxis labelComponent={LabelWithDate}/>
-                                <ValueAxis/>
+                                <ArgumentScale factory={scaleBand} />
+                                <ArgumentAxis labelComponent={LabelWithDate} />
+                                <ValueAxis />
 
                                 <BarSeries
                                     name="radicals"
@@ -319,10 +319,10 @@ function WanikaniReviewsHistoryChart({reviews, subjects}: WanikaniReviewsHistory
                                 />
 
                                 <Stack
-                                    stacks={[{series: ['radicals', 'kanji', 'vocabulary']}]}
+                                    stacks={[{ series: ['radicals', 'kanji', 'vocabulary'] }]}
                                 />
 
-                                <EventTracker/>
+                                <EventTracker />
                                 <Tooltip
                                     targetItem={tooltipTargetItem ? {
                                         ...tooltipTargetItem,

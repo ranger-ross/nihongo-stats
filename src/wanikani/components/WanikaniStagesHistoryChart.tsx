@@ -1,8 +1,8 @@
-import {Card, CardContent, Grid, Typography} from "@mui/material";
-import React, {useMemo, useState} from "react";
-import {createSubjectMap} from "../service/WanikaniDataUtil";
-import {addDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
-import {ArgumentAxis, Chart, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
+import { Card, CardContent, GridLegacy, Typography } from "@mui/material";
+import React, { useMemo, useState } from "react";
+import { createSubjectMap } from "../service/WanikaniDataUtil";
+import { addDays, truncDate, truncMonth, truncWeek } from "../../util/DateUtils";
+import { ArgumentAxis, Chart, Tooltip, ValueAxis } from "@devexpress/dx-react-chart-material-ui";
 import {
     AreaSeries,
     ArgumentAxis as ArgumentAxisBase,
@@ -12,17 +12,17 @@ import {
     Stack,
     Tooltip as TooltipBase
 } from "@devexpress/dx-react-chart";
-import {WANIKANI_COLORS} from "../../Constants";
+import { WANIKANI_COLORS } from "../../Constants";
 import ToolTipLabel from "../../shared/ToolTipLabel";
-import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
-import {WanikaniReset} from "../models/WanikaniReset";
+import { getVisibleLabelIndices, scaleBand } from "../../util/ChartUtils";
+import { WanikaniReset } from "../models/WanikaniReset";
 import Area from "../../shared/Area";
-import {WanikaniSubject} from "../models/WanikaniSubject";
-import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
-import {WanikaniReview} from "../models/WanikaniReview";
-import {ErrorBoundary} from "react-error-boundary";
-import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
-import {useDeviceInfo} from "../../hooks/useDeviceInfo";
+import { WanikaniSubject } from "../models/WanikaniSubject";
+import { WanikaniSubjectReview } from "../models/WanikaniSubjectReview";
+import { WanikaniReview } from "../models/WanikaniReview";
+import { ErrorBoundary } from "react-error-boundary";
+import { GenericErrorMessage } from "../../shared/GenericErrorMessage";
+import { useDeviceInfo } from "../../hooks/useDeviceInfo";
 
 
 type StageHistoryUnit = {
@@ -278,10 +278,10 @@ type WanikaniStagesHistoryChartProps = {
     subjects: WanikaniSubject[]
 };
 
-function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesHistoryChartProps) {
+function WanikaniStagesHistoryChart({ subjects, reviews, resets }: WanikaniStagesHistoryChartProps) {
     const data = useData(subjects, reviews, resets);
     const [tooltipTargetItem, setTooltipTargetItem] = useState<SeriesRef>();
-    const {isMobile} = useDeviceInfo();
+    const { isMobile } = useDeviceInfo();
 
     const visibleLabelIndices = useMemo(() => getVisibleLabelIndices(data ?? [], isMobile ? 3 : 6), [data]);
 
@@ -294,11 +294,11 @@ function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesH
             return (
                 <>
                     {dp.date.toLocaleDateString()}
-                    <ToolTipLabel title="Apprentice" value={dp.apprentice}/>
-                    <ToolTipLabel title="Guru" value={dp.guru}/>
-                    <ToolTipLabel title="Master" value={dp.master}/>
-                    <ToolTipLabel title="Enlightened" value={dp.enlightened}/>
-                    <ToolTipLabel title="Burned" value={dp.burned}/>
+                    <ToolTipLabel title="Apprentice" value={dp.apprentice} />
+                    <ToolTipLabel title="Guru" value={dp.guru} />
+                    <ToolTipLabel title="Master" value={dp.master} />
+                    <ToolTipLabel title="Enlightened" value={dp.enlightened} />
+                    <ToolTipLabel title="Burned" value={dp.burned} />
                 </>
             );
         }
@@ -331,20 +331,20 @@ function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesH
         <Card>
             <CardContent>
 
-                <Grid container>
-                    <Grid item xs={12} md={4}/>
-                    <Grid item xs={12} md={4}>
-                        <Typography variant={'h5'} style={{textAlign: 'center'}}>
+                <GridLegacy container>
+                    <GridLegacy item xs={12} md={4} />
+                    <GridLegacy item xs={12} md={4}>
+                        <Typography variant={'h5'} style={{ textAlign: 'center' }}>
                             Stage History
                         </Typography>
-                    </Grid>
-                </Grid>
+                    </GridLegacy>
+                </GridLegacy>
 
-                <div style={{flexGrow: '1'}}>
+                <div style={{ flexGrow: '1' }}>
                     <Chart data={data}>
-                        <ArgumentScale factory={scaleBand}/>
-                        <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
-                        <ValueAxis/>
+                        <ArgumentScale factory={scaleBand} />
+                        <ArgumentAxis labelComponent={LabelWithDate} showTicks={false} />
+                        <ValueAxis />
 
                         <AreaSeries
                             name="Apprentice"
@@ -393,7 +393,7 @@ function WanikaniStagesHistoryChart({subjects, reviews, resets}: WanikaniStagesH
                             }]}
                         />
 
-                        <EventTracker/>
+                        <EventTracker />
                         <Tooltip
                             targetItem={tooltipTargetItem}
                             onTargetItemChange={setTooltipTargetItem}

@@ -1,13 +1,13 @@
-import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
+import { Card, CardContent, CircularProgress, GridLegacy, Typography } from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
-import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from "@devexpress/dx-react-chart-material-ui";
-import {ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries} from "@devexpress/dx-react-chart";
-import {useEffect, useMemo, useRef, useState} from "react";
-import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
-import {DeckReviews} from "../service/AnkiDataUtil";
-import {useAnkiReviewsByDeck} from "../service/AnkiQueries";
-import {AnkiReview} from "../models/AnkiReview";
+import { daysToMillis, millisToDays, truncDate } from "../../util/DateUtils";
+import { ArgumentAxis, Chart, Legend, Tooltip, ValueAxis } from "@devexpress/dx-react-chart-material-ui";
+import { ArgumentAxis as ArgumentAxisBase, ArgumentScale, EventTracker, LineSeries } from "@devexpress/dx-react-chart";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getVisibleLabelIndices, scaleBand } from "../../util/ChartUtils";
+import { DeckReviews } from "../service/AnkiDataUtil";
+import { useAnkiReviewsByDeck } from "../service/AnkiQueries";
+import { AnkiReview } from "../models/AnkiReview";
 
 class DataPoint {
     date: Date
@@ -85,11 +85,11 @@ function formatMultiDeckReviewData(decks: DeckReviews[]): DataPoint[] {
 
 function useOptions(cardData?: DataPoint[]) {
     const options = [
-        {value: 30, text: '1 Mon'},
-        {value: 60, text: '2 Mon'},
-        {value: 90, text: '3 Mon'},
-        {value: 180, text: '6 Mon'},
-        {value: 365, text: '1 Yr'},
+        { value: 30, text: '1 Mon' },
+        { value: 60, text: '2 Mon' },
+        { value: 90, text: '3 Mon' },
+        { value: 180, text: '6 Mon' },
+        { value: 365, text: '1 Yr' },
     ];
 
     if (!!cardData) {
@@ -106,10 +106,10 @@ type AnkiTotalCardsHistoryChartProps = {
     deckNames: string[]
 };
 
-function AnkiTotalCardsHistoryChart({deckNames}: AnkiTotalCardsHistoryChartProps) {
+function AnkiTotalCardsHistoryChart({ deckNames }: AnkiTotalCardsHistoryChartProps) {
     const [daysToLookBack, setDaysToLookBack] = useState(10_000);
     const isFirstLoad = useRef(true);
-    const {data, error, isLoading} = useAnkiReviewsByDeck(deckNames);
+    const { data, error, isLoading } = useAnkiReviewsByDeck(deckNames);
     const cardData = data ? formatMultiDeckReviewData(data) : undefined;
 
     const options = useOptions(cardData);
@@ -124,11 +124,11 @@ function AnkiTotalCardsHistoryChart({deckNames}: AnkiTotalCardsHistoryChartProps
     }, [data]);
 
     const chartData = useMemo(() => (cardData ?? [])
-            .filter(dp => dp.date.getTime() >= Date.now() - daysToMillis(daysToLookBack)),
+        .filter(dp => dp.date.getTime() >= Date.now() - daysToMillis(daysToLookBack)),
         [cardData, daysToLookBack]);
     const visibleLabelIndices = getVisibleLabelIndices(chartData ?? [], 6);
 
-    function CardToolTip({text, targetItem}: Tooltip.ContentProps) {
+    function CardToolTip({ text, targetItem }: Tooltip.ContentProps) {
         return (
             <>
                 <p>{targetItem.series !== 'Total' ? 'Deck:' : null} {targetItem.series}</p>
@@ -162,24 +162,24 @@ function AnkiTotalCardsHistoryChart({deckNames}: AnkiTotalCardsHistoryChartProps
         <Card>
             <CardContent>
 
-                <Grid container>
-                    <Grid item xs={12} md={4}/>
-                    <Grid item xs={12} md={4}>
-                        <Typography variant={'h5'} style={{textAlign: 'center'}}>
+                <GridLegacy container>
+                    <GridLegacy item xs={12} md={4} />
+                    <GridLegacy item xs={12} md={4}>
+                        <Typography variant={'h5'} style={{ textAlign: 'center' }}>
                             Total Cards
                         </Typography>
-                    </Grid>
-                    <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
+                    </GridLegacy>
+                    <GridLegacy item xs={12} md={4} style={{ textAlign: 'end' }}>
                         <PeriodSelector period={daysToLookBack}
-                                        setPeriod={setDaysToLookBack}
-                                        options={options}
+                            setPeriod={setDaysToLookBack}
+                            options={options}
                         />
-                    </Grid>
-                </Grid>
+                    </GridLegacy>
+                </GridLegacy>
 
                 {isLoading ? (
-                    <div style={{height: '300px', textAlign: 'center'}}>
-                        <CircularProgress style={{margin: '100px'}}/>
+                    <div style={{ height: '300px', textAlign: 'center' }}>
+                        <CircularProgress style={{ margin: '100px' }} />
                     </div>
                 ) : (
                     chartData ? (
@@ -187,26 +187,26 @@ function AnkiTotalCardsHistoryChart({deckNames}: AnkiTotalCardsHistoryChartProps
                             ...d,
                             ...d.chartData
                         }))}>
-                            <ArgumentScale factory={scaleBand}/>
-                            <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
-                            <ValueAxis/>
+                            <ArgumentScale factory={scaleBand} />
+                            <ArgumentAxis labelComponent={LabelWithDate} showTicks={false} />
+                            <ValueAxis />
 
                             <LineSeries name="Total"
-                                        valueField="totalCount"
-                                        argumentField="date"
+                                valueField="totalCount"
+                                argumentField="date"
                             />
 
                             {deckNames.map((name, idx) => (
                                 <LineSeries key={idx}
-                                            name={name}
-                                            valueField={`total_${name}`}
-                                            argumentField="date"
+                                    name={name}
+                                    valueField={`total_${name}`}
+                                    argumentField="date"
                                 />
                             ))}
 
-                            <Legend/>
-                            <EventTracker/>
-                            <Tooltip contentComponent={CardToolTip}/>
+                            <Legend />
+                            <EventTracker />
+                            <Tooltip contentComponent={CardToolTip} />
                         </Chart>
                     ) : null
                 )}

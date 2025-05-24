@@ -1,17 +1,17 @@
-import {WANIKANI_COLORS} from '../../Constants';
-import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import {sortAndGetMedian} from "../../util/MathUtils";
-import {createSubjectMap} from "../service/WanikaniDataUtil";
-import {millisToDays, millisToHours} from "../../util/DateUtils";
-import {distinct} from "../../util/ArrayUtils";
-import {AppStyles} from "../../util/TypeUtils";
-import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
-import {WanikaniReview} from "../models/WanikaniReview";
-import {WanikaniSubject} from "../models/WanikaniSubject";
-import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
-import {WanikaniUser} from "../models/WanikaniUser";
-import {ErrorBoundary} from "react-error-boundary";
-import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
+import { WANIKANI_COLORS } from '../../Constants';
+import { Card, CardContent, CircularProgress, GridLegacy, Typography } from "@mui/material";
+import { sortAndGetMedian } from "../../util/MathUtils";
+import { createSubjectMap } from "../service/WanikaniDataUtil";
+import { millisToDays, millisToHours } from "../../util/DateUtils";
+import { distinct } from "../../util/ArrayUtils";
+import { AppStyles } from "../../util/TypeUtils";
+import { WanikaniSubjectReview } from "../models/WanikaniSubjectReview";
+import { WanikaniReview } from "../models/WanikaniReview";
+import { WanikaniSubject } from "../models/WanikaniSubject";
+import { WanikaniLevelProgression } from "../models/WanikaniLevelProgress";
+import { WanikaniUser } from "../models/WanikaniUser";
+import { ErrorBoundary } from "react-error-boundary";
+import { GenericErrorMessage } from "../../shared/GenericErrorMessage";
 import React from "react";
 
 const styles: AppStyles = {
@@ -123,15 +123,15 @@ type TotalLabelProps = {
     color?: string,
 };
 
-function TotalLabel({label, count, color}: TotalLabelProps) {
+function TotalLabel({ label, count, color }: TotalLabelProps) {
     return (
         <>
-            <Grid item xs={6}>{label}: </Grid>
-            <Grid item xs={6}>
-                <strong style={{color: color, textShadow: '1px 1px 3px #000000aa'}}>
+            <GridLegacy item xs={6}>{label}: </GridLegacy>
+            <GridLegacy item xs={6}>
+                <strong style={{ color: color, textShadow: '1px 1px 3px #000000aa' }}>
                     {numberWithCommas(count)}
                 </strong>
-            </Grid>
+            </GridLegacy>
         </>
     );
 }
@@ -141,17 +141,17 @@ type DaysAndHoursLabelProps = {
     milliseconds: number,
 };
 
-function DaysAndHoursLabel({label, milliseconds}: DaysAndHoursLabelProps) {
+function DaysAndHoursLabel({ label, milliseconds }: DaysAndHoursLabelProps) {
     const days = millisToDays(milliseconds);
     const hours = millisToHours(milliseconds - (days * 1000 * 3600 * 24));
     return (
         <>
-            <Grid item xs={6}>{label}: </Grid>
-            <Grid item xs={6}>
-                <strong style={{textShadow: '1px 1px 3px #000000aa'}}>
+            <GridLegacy item xs={6}>{label}: </GridLegacy>
+            <GridLegacy item xs={6}>
+                <strong style={{ textShadow: '1px 1px 3px #000000aa' }}>
                     {days} Days {hours} Hours
                 </strong>
-            </Grid>
+            </GridLegacy>
         </>
     );
 }
@@ -164,82 +164,82 @@ type WanikaniHistorySummaryChartProps = {
     user?: WanikaniUser
 };
 
-function WanikaniHistorySummaryChart({user, subjects, reviews, levelProgress}: WanikaniHistorySummaryChartProps) {
+function WanikaniHistorySummaryChart({ user, subjects, reviews, levelProgress }: WanikaniHistorySummaryChartProps) {
     const totalsData = formatTotalsData(reviews, subjects);
     const levelData = !user ? null : formatLevelData(user, levelProgress);
 
     const isLoading = !totalsData || !levelData;
 
     return (
-        <Card style={{height: '100%'}}>
-            <CardContent style={{height: '100%'}}>
+        <Card style={{ height: '100%' }}>
+            <CardContent style={{ height: '100%' }}>
                 <Typography variant={'h5'} align={'center'}>
                     History Summary
                 </Typography>
 
                 {isLoading ? (
                     <div style={styles.loadingContainer}>
-                        <CircularProgress/>
+                        <CircularProgress />
                     </div>
                 ) : (
                     <div style={styles.container}>
-                        <Grid container style={{maxWidth: '310px', marginTop: '10px'}}>
+                        <GridLegacy container style={{ maxWidth: '310px', marginTop: '10px' }}>
                             <TotalLabel label={'Total Reviews'}
-                                        count={totalsData.total}
+                                count={totalsData.total}
                             />
                             <TotalLabel label={'Radicals Reviews'}
-                                        count={totalsData.radicals}
-                                        color={WANIKANI_COLORS.blue}
+                                count={totalsData.radicals}
+                                color={WANIKANI_COLORS.blue}
                             />
                             <TotalLabel label={'Kanji Reviews'}
-                                        count={totalsData.kanji}
-                                        color={WANIKANI_COLORS.pink}
+                                count={totalsData.kanji}
+                                color={WANIKANI_COLORS.pink}
                             />
                             <TotalLabel label={'Vocabulary Reviews'}
-                                        count={totalsData.vocabulary}
-                                        color={WANIKANI_COLORS.purple}
+                                count={totalsData.vocabulary}
+                                color={WANIKANI_COLORS.purple}
                             />
-                        </Grid>
+                        </GridLegacy>
 
-                        <Grid container style={{maxWidth: '275px', marginTop: '10px'}}>
-                            <Grid item xs={6} style={{fontWeight: 'bold'}}>Total Lessons</Grid>
-                            <Grid item xs={6}/>
+                        <GridLegacy container style={{ maxWidth: '275px', marginTop: '10px' }}>
+                            <GridLegacy item xs={6} style={{ fontWeight: 'bold' }}>Total Lessons</GridLegacy>
+                            <GridLegacy item xs={6} />
                             <TotalLabel label={'Radicals'}
-                                        count={totalsData.radicalsDistinct}
-                                        color={WANIKANI_COLORS.blue}
+                                count={totalsData.radicalsDistinct}
+                                color={WANIKANI_COLORS.blue}
                             />
                             <TotalLabel label={'Kanji'}
-                                        count={totalsData.kanjiDistinct}
-                                        color={WANIKANI_COLORS.pink}
+                                count={totalsData.kanjiDistinct}
+                                color={WANIKANI_COLORS.pink}
                             />
                             <TotalLabel label={'Vocabulary'}
-                                        count={totalsData.vocabularyDistinct}
-                                        color={WANIKANI_COLORS.purple}
+                                count={totalsData.vocabularyDistinct}
+                                color={WANIKANI_COLORS.purple}
                             />
-                        </Grid>
+                        </GridLegacy>
 
-                        <Grid container style={{maxWidth: '275px', marginTop: '10px'}}>
-                            <Grid item xs={6} style={{fontWeight: 'bold'}}>Burned Items</Grid>
-                            <Grid item xs={6}/>
+                        <GridLegacy container style={{ maxWidth: '275px', marginTop: '10px' }}>
+                            <GridLegacy item xs={6} style={{ fontWeight: 'bold' }}>Burned Items</GridLegacy>
+                            <GridLegacy item xs={6} />
                             <TotalLabel label={'Radicals'}
-                                        count={totalsData.radicalsBurned}
-                                        color={WANIKANI_COLORS.blue}
+                                count={totalsData.radicalsBurned}
+                                color={WANIKANI_COLORS.blue}
                             />
                             <TotalLabel label={'Kanji'}
-                                        count={totalsData.kanjiBurned}
-                                        color={WANIKANI_COLORS.pink}
+                                count={totalsData.kanjiBurned}
+                                color={WANIKANI_COLORS.pink}
                             />
                             <TotalLabel label={'Vocabulary'}
-                                        count={totalsData.vocabularyBurned}
-                                        color={WANIKANI_COLORS.purple}
+                                count={totalsData.vocabularyBurned}
+                                color={WANIKANI_COLORS.purple}
                             />
-                        </Grid>
+                        </GridLegacy>
 
-                        <Grid container style={{maxWidth: '350px', marginTop: '10px'}}>
-                            <DaysAndHoursLabel label={'Time since start'} milliseconds={levelData.timeSinceStart}/>
-                            <DaysAndHoursLabel label={'Average Time per level'} milliseconds={levelData.average}/>
-                            <DaysAndHoursLabel label={'Median Time per level'} milliseconds={levelData.median}/>
-                        </Grid>
+                        <GridLegacy container style={{ maxWidth: '350px', marginTop: '10px' }}>
+                            <DaysAndHoursLabel label={'Time since start'} milliseconds={levelData.timeSinceStart} />
+                            <DaysAndHoursLabel label={'Average Time per level'} milliseconds={levelData.average} />
+                            <DaysAndHoursLabel label={'Median Time per level'} milliseconds={levelData.median} />
+                        </GridLegacy>
 
                     </div>
                 )}

@@ -1,17 +1,17 @@
-import {ArgumentAxis, Chart, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
-import React, {useEffect, useMemo, useState} from "react";
-import {EventTracker, LineSeries, Tooltip as TooltipBase, ValueAxis as ValueAxisBase} from "@devexpress/dx-react-chart";
-import {WANIKANI_COLORS} from '../../Constants';
-import {Card, CardContent, Checkbox, FormControlLabel, Grid, Typography} from "@mui/material";
+import { ArgumentAxis, Chart, Tooltip, ValueAxis } from '@devexpress/dx-react-chart-material-ui';
+import React, { useEffect, useMemo, useState } from "react";
+import { EventTracker, LineSeries, Tooltip as TooltipBase, ValueAxis as ValueAxisBase } from "@devexpress/dx-react-chart";
+import { WANIKANI_COLORS } from '../../Constants';
+import { Card, CardContent, Checkbox, FormControlLabel, GridLegacy, Typography } from "@mui/material";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {daysToMillis, millisToDays, truncDate} from "../../util/DateUtils";
-import {WanikaniSubjectType} from "../models/WanikaniSubject";
-import {WanikaniAssignment} from "../models/WanikaniAssignment";
-import {ErrorBoundary} from "react-error-boundary";
-import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
+import { daysToMillis, millisToDays, truncDate } from "../../util/DateUtils";
+import { WanikaniSubjectType } from "../models/WanikaniSubject";
+import { WanikaniAssignment } from "../models/WanikaniAssignment";
+import { ErrorBoundary } from "react-error-boundary";
+import { GenericErrorMessage } from "../../shared/GenericErrorMessage";
 
 function LabelWithDate(props: ValueAxisBase.LabelProps) {
-    const {text} = props;
+    const { text } = props;
     const rawTimestamp = parseInt((text as string).split(',').join(''));
     return (
         <ValueAxis.Label
@@ -88,10 +88,10 @@ function formatData(assignments: WanikaniAssignment[]) {
 
 function useOptions(rawData: DataPoint[]) {
     const options = [
-        {value: 30, text: '1 Mon'},
-        {value: 60, text: '2 Mon'},
-        {value: 90, text: '3 Mon'},
-        {value: 180, text: '6 Mon'},
+        { value: 30, text: '1 Mon' },
+        { value: 60, text: '2 Mon' },
+        { value: 90, text: '3 Mon' },
+        { value: 180, text: '6 Mon' },
 
     ];
 
@@ -108,7 +108,7 @@ type WanikaniTotalItemsHistoryChartProps = {
     assignments: WanikaniAssignment[]
 };
 
-function WanikaniTotalItemsHistoryChart({assignments}: WanikaniTotalItemsHistoryChartProps) {
+function WanikaniTotalItemsHistoryChart({ assignments }: WanikaniTotalItemsHistoryChartProps) {
     const rawData: DataPoint[] = useMemo(() => assignments.length > 0 ? formatData(assignments) : [], [assignments])
     const [daysToLookBack, setDaysToLookBack] = useState(10000);
     const [showRadicals, setShowRadicals] = useState(true);
@@ -144,61 +144,61 @@ function WanikaniTotalItemsHistoryChart({assignments}: WanikaniTotalItemsHistory
     }
 
     return (
-        <Card style={{height: '100%'}}>
-            <CardContent style={{height: '100%'}}>
-                <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <Grid container>
-                        <Grid item xs={12} md={4} style={{textAlign: 'start'}}>
+        <Card style={{ height: '100%' }}>
+            <CardContent style={{ height: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <GridLegacy container>
+                        <GridLegacy item xs={12} md={4} style={{ textAlign: 'start' }}>
                             <FormControlLabel label="Radicals"
-                                              control={
-                                                  <Checkbox checked={showRadicals}
-                                                            color={'primary'}
-                                                            disabled={!showKanji && !showVocabulary}
-                                                            onChange={e => setShowRadicals(e.target.checked)}
-                                                  />
-                                              }
+                                control={
+                                    <Checkbox checked={showRadicals}
+                                        color={'primary'}
+                                        disabled={!showKanji && !showVocabulary}
+                                        onChange={e => setShowRadicals(e.target.checked)}
+                                    />
+                                }
                             />
 
                             <FormControlLabel label="Kanji"
-                                              control={
-                                                  <Checkbox checked={showKanji}
-                                                            color={'primary'}
-                                                            disabled={!showRadicals && !showVocabulary}
-                                                            onChange={e => setShowKanji(e.target.checked)}
-                                                  />
-                                              }
+                                control={
+                                    <Checkbox checked={showKanji}
+                                        color={'primary'}
+                                        disabled={!showRadicals && !showVocabulary}
+                                        onChange={e => setShowKanji(e.target.checked)}
+                                    />
+                                }
                             />
 
                             <FormControlLabel label="Vocabulary"
-                                              control={
-                                                  <Checkbox checked={showVocabulary}
-                                                            color={'primary'}
-                                                            disabled={!showRadicals && !showKanji}
-                                                            onChange={e => setShowVocabulary(e.target.checked)}
-                                                  />
-                                              }
+                                control={
+                                    <Checkbox checked={showVocabulary}
+                                        color={'primary'}
+                                        disabled={!showRadicals && !showKanji}
+                                        onChange={e => setShowVocabulary(e.target.checked)}
+                                    />
+                                }
                             />
-                        </Grid>
+                        </GridLegacy>
 
-                        <Grid item xs={12} md={4}>
-                            <Typography variant={'h5'} style={{textAlign: 'center'}}>
+                        <GridLegacy item xs={12} md={4}>
+                            <Typography variant={'h5'} style={{ textAlign: 'center' }}>
                                 Total Items
                             </Typography>
-                        </Grid>
+                        </GridLegacy>
 
 
-                        <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
+                        <GridLegacy item xs={12} md={4} style={{ textAlign: 'end' }}>
                             <PeriodSelector period={daysToLookBack}
-                                            setPeriod={setDaysToLookBack}
-                                            options={options}
+                                setPeriod={setDaysToLookBack}
+                                options={options}
                             />
-                        </Grid>
+                        </GridLegacy>
 
-                    </Grid>
+                    </GridLegacy>
 
-                    <div style={{flexGrow: '1'}}>
+                    <div style={{ flexGrow: '1' }}>
                         <Chart data={chartData}>
-                            <ValueAxis/>
+                            <ValueAxis />
                             <ArgumentAxis
                                 labelComponent={LabelWithDate}
                             />
@@ -223,8 +223,8 @@ function WanikaniTotalItemsHistoryChart({assignments}: WanikaniTotalItemsHistory
                                 color={WANIKANI_COLORS.purple}
                             />
 
-                            <EventTracker/>
-                            <Tooltip contentComponent={ItemToolTip}/>
+                            <EventTracker />
+                            <Tooltip contentComponent={ItemToolTip} />
                         </Chart>
                     </div>
                 </div>

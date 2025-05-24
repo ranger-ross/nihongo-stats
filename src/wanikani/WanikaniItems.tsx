@@ -1,8 +1,8 @@
-import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
-import {RoutePaths} from "../Routes";
-import {useMemo, useState} from "react";
+import { useWanikaniApiKey } from "../hooks/useWanikaniApiKey";
+import { RoutePaths } from "../Routes";
+import { useMemo, useState } from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
-import {Card, CardContent, Typography} from "@mui/material";
+import { Card, CardContent, Typography } from "@mui/material";
 import WanikaniItemTile from "./components/WanikaniItemTile";
 import {
     combineAssignmentAndSubject,
@@ -13,12 +13,11 @@ import {
     WKGroupByOption,
     WKSortByOption
 } from "./service/WanikaniDataUtil";
-import WanikaniItemsControlPanel, {useWanikaniItemControls} from "./components/WanikaniItemsControlPanel";
-import VisibilitySensor from "react-visibility-sensor";
-import {AppStyles} from "../util/TypeUtils";
-import {WanikaniSubject} from "./models/WanikaniSubject";
-import {WanikaniAssignment} from "./models/WanikaniAssignment";
-import {useWanikaniData} from "../hooks/useWanikaniData";
+import WanikaniItemsControlPanel, { useWanikaniItemControls } from "./components/WanikaniItemsControlPanel";
+import { AppStyles } from "../util/TypeUtils";
+import { WanikaniSubject } from "./models/WanikaniSubject";
+import { WanikaniAssignment } from "./models/WanikaniAssignment";
+import { useWanikaniData } from "../hooks/useWanikaniData";
 
 const styles: AppStyles = {
     container: {
@@ -37,7 +36,7 @@ type SubjectTileProps = {
     colorBy: WKColorByOption
 };
 
-function SubjectTile({subject, colorBy}: SubjectTileProps) {
+function SubjectTile({ subject, colorBy }: SubjectTileProps) {
     return useMemo(() => (
         <WanikaniItemTile
             text={subject.characters}
@@ -63,7 +62,7 @@ type ItemGroupingDataProps = {
     sortReverse: boolean
 };
 
-function ItemGroupingData({subjects, secondaryGroupBy, sortBy, colorBy, sortReverse}: ItemGroupingDataProps) {
+function ItemGroupingData({ subjects, secondaryGroupBy, sortBy, colorBy, sortReverse }: ItemGroupingDataProps) {
     const subGroups = useMemo(() => secondaryGroupBy.group(subjects), [subjects, secondaryGroupBy.key]);
 
     const sortedSubGroups = useMemo(() => subGroups.map(sg => ({
@@ -78,11 +77,11 @@ function ItemGroupingData({subjects, secondaryGroupBy, sortBy, colorBy, sortReve
                     <div style={styles.subGroupTitle}>
                         {group.title === 'All Items' ? null : group.title}
                     </div>
-                    <div style={{display: 'flex', gap: '5px', flexWrap: 'wrap'}}>
+                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
                         {group.subjects?.map(subject => (
                             <SubjectTile key={subject.subjectId + '-subject'}
-                                         subject={subject}
-                                         colorBy={colorBy}
+                                subject={subject}
+                                colorBy={colorBy}
                             />
                         ))}
                     </div>
@@ -94,7 +93,7 @@ function ItemGroupingData({subjects, secondaryGroupBy, sortBy, colorBy, sortReve
 
 function UnloadedGrouping() {
     return (
-        <div style={{height: '100px'}}>Loading...</div>
+        <div style={{ height: '100px' }}>Loading...</div>
     );
 }
 
@@ -108,35 +107,35 @@ type ItemGroupingProps = {
     sortReverse: boolean
 };
 
-function ItemGrouping({title, subjects, secondaryGroupBy, sortBy, colorBy, sortReverse}: ItemGroupingProps) {
+function ItemGrouping({ title, subjects, secondaryGroupBy, sortBy, colorBy, sortReverse }: ItemGroupingProps) {
     const [isLoaded, setIsLoaded] = useState(false);
     return (
-        <Card style={{margin: '5px'}}>
+        <Card style={{ margin: '5px' }}>
             <CardContent>
 
-                <div style={{display: 'flex', gap: '5px', flexWrap: 'wrap'}}>
+                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
                     <Typography variant={'h6'}
-                                color={'textPrimary'}
-                                style={styles.groupTitle}
+                        color={'textPrimary'}
+                        style={styles.groupTitle}
                     >
                         {title}
                     </Typography>
                 </div>
-                <VisibilitySensor partialVisibility={true}
-                                  offset={{bottom: -300}}
-                                  onChange={(isVisible: boolean) => isVisible ? setIsLoaded(true) : null}>
-                    {isLoaded ? (
-                        <ItemGroupingData subjects={subjects}
-                                          secondaryGroupBy={secondaryGroupBy}
-                                          sortBy={sortBy}
-                                          colorBy={colorBy}
-                                          sortReverse={sortReverse}
-                        />
-                    ) : <UnloadedGrouping/>}
+                {/* <VisibilitySensor partialVisibility={true} */}
+                {/*                   offset={{bottom: -300}} */}
+                {/*                   onChange={(isVisible: boolean) => isVisible ? setIsLoaded(true) : null}> */}
+                {/*     {isLoaded ? ( */}
+                <ItemGroupingData subjects={subjects}
+                    secondaryGroupBy={secondaryGroupBy}
+                    sortBy={sortBy}
+                    colorBy={colorBy}
+                    sortReverse={sortReverse}
+                />
+                {/* ) : <UnloadedGrouping/>} */}
 
-                </VisibilitySensor>
+                {/* </VisibilitySensor> */}
             </CardContent>
-        </Card>
+        </Card >
     );
 }
 
@@ -158,15 +157,15 @@ function filterSubjectsByType(subjects: JoinedRawWKAssignmentAndSubject[], types
 }
 
 function WanikaniItems() {
-    const {apiKey} = useWanikaniApiKey();
+    const { apiKey } = useWanikaniApiKey();
 
-    const {subjects, assignments} = useWanikaniData({
+    const { subjects, assignments } = useWanikaniData({
         subjects: true,
         assignments: true,
     });
 
     const formattedSubjects = useMemo(() => formatItems(subjects, assignments) ?? [], [subjects, assignments])
-    const {control, set} = useWanikaniItemControls();
+    const { control, set } = useWanikaniItemControls();
 
     const subjectsToShow = useMemo(() => filterSubjectsByType(formattedSubjects, control.typesToShow), [formattedSubjects, control.typesToShow]);
 
@@ -176,21 +175,21 @@ function WanikaniItems() {
 
     return (
         <RequireOrRedirect resource={apiKey}
-                           redirectPath={RoutePaths.wanikaniLogin.path}
+            redirectPath={RoutePaths.wanikaniLogin.path}
         >
             <div style={styles.container}>
                 <WanikaniItemsControlPanel control={control}
-                                           set={set}
+                    set={set}
                 />
 
                 {groups.map(group => (
                     <ItemGrouping key={group.title}
-                                  title={group.title}
-                                  subjects={group.subjects}
-                                  secondaryGroupBy={control.secondaryGroupBy}
-                                  sortBy={control.sortBy}
-                                  colorBy={control.colorBy}
-                                  sortReverse={control.sortReverse}
+                        title={group.title}
+                        subjects={group.subjects}
+                        secondaryGroupBy={control.secondaryGroupBy}
+                        sortBy={control.sortBy}
+                        colorBy={control.colorBy}
+                        sortReverse={control.sortReverse}
                     />
                 ))}
             </div>

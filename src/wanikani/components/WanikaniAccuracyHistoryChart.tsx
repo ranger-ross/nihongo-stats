@@ -1,5 +1,5 @@
-import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
-import React, {useMemo, useState} from "react";
+import { ArgumentAxis, Chart, Legend, Tooltip, ValueAxis } from '@devexpress/dx-react-chart-material-ui';
+import React, { useMemo, useState } from "react";
 import {
     ArgumentAxis as ArgumentAxisBase,
     EventTracker,
@@ -7,25 +7,25 @@ import {
     SplineSeries,
     ValueScale
 } from "@devexpress/dx-react-chart";
-import {WANIKANI_COLORS} from '../../Constants';
-import {Card, CardContent, Grid, Typography} from "@mui/material";
+import { WANIKANI_COLORS } from '../../Constants';
+import { Card, CardContent, GridLegacy, Typography } from "@mui/material";
 import _ from 'lodash';
-import {scaleLinear} from 'd3-scale';
+import { scaleLinear } from 'd3-scale';
 import PeriodSelector from "../../shared/PeriodSelector";
-import {createSubjectMap} from "../service/WanikaniDataUtil";
-import {millisToDays, truncDate} from "../../util/DateUtils";
-import {WanikaniSubjectReview} from "../models/WanikaniSubjectReview";
-import {WanikaniReview} from "../models/WanikaniReview";
-import {WanikaniSubject} from "../models/WanikaniSubject";
-import {useDeviceInfo} from "../../hooks/useDeviceInfo";
-import {ErrorBoundary} from "react-error-boundary";
-import {GenericErrorMessage} from "../../shared/GenericErrorMessage";
+import { createSubjectMap } from "../service/WanikaniDataUtil";
+import { millisToDays, truncDate } from "../../util/DateUtils";
+import { WanikaniSubjectReview } from "../models/WanikaniSubjectReview";
+import { WanikaniReview } from "../models/WanikaniReview";
+import { WanikaniSubject } from "../models/WanikaniSubject";
+import { useDeviceInfo } from "../../hooks/useDeviceInfo";
+import { ErrorBoundary } from "react-error-boundary";
+import { GenericErrorMessage } from "../../shared/GenericErrorMessage";
 
 const scale = () => scaleLinear();
 const modifyDomain = () => [0, 100];
 
 function LabelWithDate(props: ArgumentAxisBase.LabelProps) {
-    const {text} = props;
+    const { text } = props;
     const rawTimestamp = parseInt((text as string).split(',').join(''));
     return (
         <ArgumentAxis.Label
@@ -38,7 +38,7 @@ function LabelWithDate(props: ArgumentAxisBase.LabelProps) {
 type PercentageLabelProps = ValueAxis.LabelProps
 
 function PercentageLabel(props: PercentageLabelProps) {
-    const {text} = props;
+    const { text } = props;
     return (
         <ValueAxis.Label
             {...props}
@@ -81,7 +81,7 @@ function fetchData(reviews: WanikaniReview[], subjects: WanikaniSubject[]) {
     const result: DayDataPoint[] = Array.from(groupedDataAsMap, ([date, data]: any) => {
         const total = data.length;
         let incorrectCount = 0;
-        for (const {review} of data) {
+        for (const { review } of data) {
             const isIncorrect = review.incorrectMeaningAnswers > 0 || review.incorrectReadingAnswers > 0;
             if (isIncorrect)
                 incorrectCount += 1;
@@ -132,12 +132,12 @@ type WanikaniAccuracyHistoryChartProps = {
     subjects: WanikaniSubject[]
 };
 
-function WanikaniAccuracyHistoryChart({subjects, reviews}: WanikaniAccuracyHistoryChartProps) {
+function WanikaniAccuracyHistoryChart({ subjects, reviews }: WanikaniAccuracyHistoryChartProps) {
     const [daysToLookBack, setDaysToLookBack] = useState(90);
     const data = useData(subjects, reviews, daysToLookBack);
-    const {isMobile} = useDeviceInfo();
+    const { isMobile } = useDeviceInfo();
 
-    function AccuracyToolTip({targetItem}: Tooltip.ContentProps) {
+    function AccuracyToolTip({ targetItem }: Tooltip.ContentProps) {
         const isAverageSeries = targetItem.series.toLowerCase().includes('average');
         const dataPoint = data[targetItem.point];
         return (
@@ -153,39 +153,39 @@ function WanikaniAccuracyHistoryChart({subjects, reviews}: WanikaniAccuracyHisto
     }
 
     return (
-        <Card style={{height: '100%'}}>
-            <CardContent style={{height: '100%'}}>
-                <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <Grid container>
-                        <Grid item xs={12} md={4}/>
-                        <Grid item xs={12} md={4}>
-                            <Typography variant={'h5'} style={{textAlign: 'center'}}>
+        <Card style={{ height: '100%' }}>
+            <CardContent style={{ height: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <GridLegacy container>
+                        <GridLegacy item xs={12} md={4} />
+                        <GridLegacy item xs={12} md={4}>
+                            <Typography variant={'h5'} style={{ textAlign: 'center' }}>
                                 Review Accuracy
                             </Typography>
-                        </Grid>
+                        </GridLegacy>
 
-                        <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
+                        <GridLegacy item xs={12} md={4} style={{ textAlign: 'end' }}>
                             <PeriodSelector period={daysToLookBack}
-                                            setPeriod={setDaysToLookBack}
-                                            options={[
-                                                {value: 7, text: '7'},
-                                                {value: 14, text: '14'},
-                                                {value: 30, text: '30'},
-                                                {value: 90, text: '3 Mon'},
-                                                {value: 180, text: '6 Mon'},
-                                                {value: 365, text: '1 Yr'},
-                                                {value: totalDays, text: 'All'},
-                                            ]}
+                                setPeriod={setDaysToLookBack}
+                                options={[
+                                    { value: 7, text: '7' },
+                                    { value: 14, text: '14' },
+                                    { value: 30, text: '30' },
+                                    { value: 90, text: '3 Mon' },
+                                    { value: 180, text: '6 Mon' },
+                                    { value: 365, text: '1 Yr' },
+                                    { value: totalDays, text: 'All' },
+                                ]}
                             />
-                        </Grid>
+                        </GridLegacy>
 
-                    </Grid>
+                    </GridLegacy>
 
-                    <div style={{flexGrow: '1'}}>
+                    <div style={{ flexGrow: '1' }}>
                         <Chart data={data}>
-                            <ValueScale factory={scale} modifyDomain={modifyDomain}/>
-                            <ValueAxis labelComponent={PercentageLabel}/>
-                            <ArgumentAxis labelComponent={LabelWithDate}/>
+                            <ValueScale factory={scale} modifyDomain={modifyDomain} />
+                            <ValueAxis labelComponent={PercentageLabel} />
+                            <ArgumentAxis labelComponent={LabelWithDate} />
                             <ScatterSeries
                                 name="Daily Accuracy"
                                 valueField="ratio"
@@ -200,10 +200,10 @@ function WanikaniAccuracyHistoryChart({subjects, reviews}: WanikaniAccuracyHisto
                                 color={ROLLING_AVERAGE_LINE_COLOR}
                             />
 
-                            <Legend position={isMobile ? 'bottom' : 'right'}/>
+                            <Legend position={isMobile ? 'bottom' : 'right'} />
 
-                            <EventTracker/>
-                            <Tooltip contentComponent={AccuracyToolTip}/>
+                            <EventTracker />
+                            <Tooltip contentComponent={AccuracyToolTip} />
                         </Chart>
 
                     </div>

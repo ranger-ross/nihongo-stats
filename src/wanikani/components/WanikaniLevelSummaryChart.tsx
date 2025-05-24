@@ -1,12 +1,12 @@
-import {Box, Card, CardContent, CircularProgress, Grid, Stack, Tooltip, Typography} from "@mui/material";
-import {millisToDays, millisToHours} from '../../util/DateUtils';
-import {WANIKANI_COLORS} from "../../Constants";
-import {AppStyles} from "../../util/TypeUtils";
-import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
-import {WanikaniUser} from "../models/WanikaniUser";
-import {WanikaniSubject} from "../models/WanikaniSubject";
-import {WanikaniAssignment} from "../models/WanikaniAssignment";
-import {createSubjectMap} from "../service/WanikaniDataUtil";
+import { Box, Card, CardContent, CircularProgress, GridLegacy, Stack, Tooltip, Typography } from "@mui/material";
+import { millisToDays, millisToHours } from '../../util/DateUtils';
+import { WANIKANI_COLORS } from "../../Constants";
+import { AppStyles } from "../../util/TypeUtils";
+import { WanikaniLevelProgression } from "../models/WanikaniLevelProgress";
+import { WanikaniUser } from "../models/WanikaniUser";
+import { WanikaniSubject } from "../models/WanikaniSubject";
+import { WanikaniAssignment } from "../models/WanikaniAssignment";
+import { createSubjectMap } from "../service/WanikaniDataUtil";
 
 
 const racialColor = WANIKANI_COLORS.blue;
@@ -73,7 +73,7 @@ const defaultData: ProgressData = {
     },
 };
 
-function FractionText({top, bottom}: { top: string | number, bottom: string | number }) {
+function FractionText({ top, bottom }: { top: string | number, bottom: string | number }) {
     return (
         <>
             <sup>{top}</sup>&frasl;<sub>{bottom}</sub>
@@ -159,7 +159,7 @@ type SubjectProgressLabelProps = {
     color: string,
 };
 
-function SubjectProgressLabel({started, passed, total, name, color}: SubjectProgressLabelProps) {
+function SubjectProgressLabel({ started, passed, total, name, color }: SubjectProgressLabelProps) {
     return (
         <Tooltip title={
             <span>
@@ -170,7 +170,7 @@ function SubjectProgressLabel({started, passed, total, name, color}: SubjectProg
             <Box style={styles.subjectsLabel}>
                 <Typography variant={'body1'}>
                     <FractionText top={passed}
-                                  bottom={total}
+                        bottom={total}
                     />
                 </Typography>
                 <Typography variant={'caption'} style={{
@@ -208,38 +208,38 @@ type WanikaniLevelSummaryChartProps = {
     assignments: WanikaniAssignment[]
 };
 
-function WanikaniLevelSummaryChart({levelsProgress, user, subjects, assignments}: WanikaniLevelSummaryChartProps) {
+function WanikaniLevelSummaryChart({ levelsProgress, user, subjects, assignments }: WanikaniLevelSummaryChartProps) {
     const assignmentsForCurrentLevel = getAssignmentsForCurrentLevel(subjects, assignments, user);
     const progressData = getCurrentLevelProgressData(levelsProgress, subjects, assignmentsForCurrentLevel, user);
     return (
         <Card style={styles.container}>
-            <CardContent style={{height: '100%'}}>
+            <CardContent style={{ height: '100%' }}>
 
                 <Stack height={'100%'}>
                     {progressData.isLoading ? (
-                        <Box sx={{flexGrow: 1}} style={styles.spinnerContainer}>
-                            <CircularProgress/>
+                        <Box sx={{ flexGrow: 1 }} style={styles.spinnerContainer}>
+                            <CircularProgress />
                         </Box>
                     ) : (
                         <>
-                            <Box sx={{flexGrow: 1}} style={styles.levelLabelContainer}>
-                                <Typography variant={'h2'} style={{textAlign: 'center'}}>
+                            <Box sx={{ flexGrow: 1 }} style={styles.levelLabelContainer}>
+                                <Typography variant={'h2'} style={{ textAlign: 'center' }}>
                                     {progressData.level}
                                 </Typography>
-                                <Typography variant={'caption'} style={{textAlign: 'center'}}>
+                                <Typography variant={'caption'} style={{ textAlign: 'center' }}>
                                     Level
                                 </Typography>
                             </Box>
 
-                            <Grid item container alignItems={'center'}>
-                                <Box style={{textAlign: 'center'}}>
+                            <GridLegacy item container alignItems={'center'}>
+                                <Box style={{ textAlign: 'center' }}>
                                     <Tooltip title={
                                         <span>
                                             <p>Days: {millisToDays(progressData.timeOnLevel)}</p>
                                             <p>Hours: {millisToHours(progressData.timeOnLevel) % 24}</p>
                                         </span>
                                     } placement={'top'}>
-                                        <Typography variant={'body1'} style={{fontWeight: 'bold'}}>
+                                        <Typography variant={'body1'} style={{ fontWeight: 'bold' }}>
                                             {millisToDays(progressData.timeOnLevel)}
                                         </Typography>
                                     </Tooltip>
@@ -248,30 +248,30 @@ function WanikaniLevelSummaryChart({levelsProgress, user, subjects, assignments}
                                     </Typography>
                                 </Box>
 
-                                <Box sx={{flexGrow: 1}}/>
+                                <Box sx={{ flexGrow: 1 }} />
 
                                 <SubjectProgressLabel name={'Radicals'}
-                                                      total={progressData.radicals.total}
-                                                      started={progressData.radicals.started}
-                                                      passed={progressData.radicals.passed}
-                                                      color={racialColor}
+                                    total={progressData.radicals.total}
+                                    started={progressData.radicals.started}
+                                    passed={progressData.radicals.passed}
+                                    color={racialColor}
                                 />
 
                                 <SubjectProgressLabel name={'Kanji'}
-                                                      total={progressData.kanji.total}
-                                                      started={progressData.kanji.started}
-                                                      passed={progressData.kanji.passed}
-                                                      color={kanjiColor}
+                                    total={progressData.kanji.total}
+                                    started={progressData.kanji.started}
+                                    passed={progressData.kanji.passed}
+                                    color={kanjiColor}
                                 />
 
                                 <SubjectProgressLabel name={'Vocabulary'}
-                                                      total={progressData.vocabulary.total}
-                                                      started={progressData.vocabulary.started}
-                                                      passed={progressData.vocabulary.passed}
-                                                      color={vocabularyColor}
+                                    total={progressData.vocabulary.total}
+                                    started={progressData.vocabulary.started}
+                                    passed={progressData.vocabulary.passed}
+                                    color={vocabularyColor}
                                 />
 
-                            </Grid>
+                            </GridLegacy>
                         </>
                     )}
                 </Stack>

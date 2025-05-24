@@ -32,7 +32,6 @@
     "react-dom": "19.1.0",
     "react-error-boundary": "6.0.0",
     "react-router-dom": "7.6.0",
-    "react-visibility-sensor": "5.1.1",
     "rxjs": "7.8.2",
     "styled-components": "6.1.18",
     "zustand": "4.5.7"

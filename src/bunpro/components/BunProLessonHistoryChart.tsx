@@ -1,6 +1,6 @@
-import {useMemo, useState} from 'react';
-import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
-import {Card, CardContent, CircularProgress, Grid, MenuItem, Select, Typography} from "@mui/material";
+import { useMemo, useState } from 'react';
+import { ArgumentAxis, Chart, Legend, Tooltip, ValueAxis, } from '@devexpress/dx-react-chart-material-ui';
+import { Card, CardContent, CircularProgress, GridLegacy, MenuItem, Select, Typography } from "@mui/material";
 import {
     ArgumentAxis as ArgumentAxisBase,
     ArgumentScale,
@@ -8,14 +8,14 @@ import {
     EventTracker,
     Stack
 } from "@devexpress/dx-react-chart";
-import {addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek} from "../../util/DateUtils";
-import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
+import { addDays, getMonthName, millisToDays, truncDate, truncMonth, truncWeek } from "../../util/DateUtils";
+import { getVisibleLabelIndices, scaleBand } from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {createGrammarPointsLookupMap} from "../service/BunProDataUtil";
+import { createGrammarPointsLookupMap } from "../service/BunProDataUtil";
 import ToolTipLabel from "../../shared/ToolTipLabel";
-import {BunProReview} from "../models/BunProReview";
-import {BunProGrammarPoint} from "../models/BunProGrammarPoint";
-import {useDeviceInfo} from "../../hooks/useDeviceInfo";
+import { BunProReview } from "../models/BunProReview";
+import { BunProGrammarPoint } from "../models/BunProGrammarPoint";
+import { useDeviceInfo } from "../../hooks/useDeviceInfo";
 
 const JLPTLevels = ['N5', 'N4', 'N3', 'N2', 'N1'];
 
@@ -93,17 +93,17 @@ type UnitSelectorProps = {
     onChange: (unit: ReviewUnit) => void
 };
 
-function UnitSelector({options, unit, onChange}: UnitSelectorProps) {
+function UnitSelector({ options, unit, onChange }: UnitSelectorProps) {
     return (
         <Select
-            style={{minWidth: '130px'}}
+            style={{ minWidth: '130px' }}
             size={'small'}
             value={unit.key}
             onChange={e => onChange(options.find(o => o.key === e.target.value) as ReviewUnit)}
         >
             {options.map((option) => (
                 <MenuItem key={option.key}
-                          value={option.key}
+                    value={option.key}
                 >
                     {option.text}
                 </MenuItem>
@@ -115,11 +115,11 @@ function UnitSelector({options, unit, onChange}: UnitSelectorProps) {
 
 function useOptions(rawData?: BunProReview[]) {
     const options = [
-        {value: 30, text: '1 Mon'},
-        {value: 60, text: '2 Mon'},
-        {value: 90, text: '3 Mon'},
-        {value: 180, text: '6 Mon'},
-        {value: 365, text: '1 Yr'},
+        { value: 30, text: '1 Mon' },
+        { value: 60, text: '2 Mon' },
+        { value: 90, text: '3 Mon' },
+        { value: 180, text: '6 Mon' },
+        { value: 365, text: '1 Yr' },
     ];
 
     if (!!rawData && rawData.length > 0) {
@@ -193,11 +193,11 @@ type BunProLessonHistoryChartProps = {
     grammarPoints?: BunProGrammarPoint[]
 };
 
-function BunProLessonHistoryChart({reviews, grammarPoints}: BunProLessonHistoryChartProps) {
+function BunProLessonHistoryChart({ reviews, grammarPoints }: BunProLessonHistoryChartProps) {
     const isLoading = !grammarPoints || !reviews;
     const [unit, setUnit] = useState(units.months);
     const [daysToLookBack, setDaysToLookBack] = useState(365);
-    const {isMobile} = useDeviceInfo();
+    const { isMobile } = useDeviceInfo();
     const options = useOptions(reviews);
 
     const chartData = useMemo(
@@ -215,16 +215,16 @@ function BunProLessonHistoryChart({reviews, grammarPoints}: BunProLessonHistoryC
                 return `${getMonthName(date, true)} ${date.getFullYear()}`
         }
 
-        return function ReviewToolTip({targetItem}: Tooltip.ContentProps) {
+        return function ReviewToolTip({ targetItem }: Tooltip.ContentProps) {
             const dp = chartData[targetItem.point];
             return (
                 <>
-                    <ToolTipLabel title="Date" value={getDateLabelText(dp.date)}/>
-                    <br/>
-                    <ToolTipLabel title="Total" value={(dp.total).toLocaleString()}/>
+                    <ToolTipLabel title="Date" value={getDateLabelText(dp.date)} />
+                    <br />
+                    <ToolTipLabel title="Total" value={(dp.total).toLocaleString()} />
                     {JLPTLevels.map(level => (
                         dp[level as JlptLevelType] ?
-                            <ToolTipLabel key={level} title={level} value={dp[level as JlptLevelType]}/> : null
+                            <ToolTipLabel key={level} title={level} value={dp[level as JlptLevelType]} /> : null
                     ))}
                 </>
             );
@@ -256,11 +256,11 @@ function BunProLessonHistoryChart({reviews, grammarPoints}: BunProLessonHistoryC
     }, [chartData]);
 
     return (
-        <Card style={{margin: '15px'}}>
+        <Card style={{ margin: '15px' }}>
             <CardContent>
 
-                <Grid container>
-                    <Grid item xs={12} md={4}>
+                <GridLegacy container>
+                    <GridLegacy item xs={12} md={4}>
                         <UnitSelector
                             options={[
                                 units.days,
@@ -270,46 +270,46 @@ function BunProLessonHistoryChart({reviews, grammarPoints}: BunProLessonHistoryC
                             unit={unit}
                             onChange={setUnit}
                         />
-                    </Grid>
-                    <Grid item xs={12} md={4}>
-                        <Typography variant={'h5'} style={{textAlign: 'center'}}>
+                    </GridLegacy>
+                    <GridLegacy item xs={12} md={4}>
+                        <Typography variant={'h5'} style={{ textAlign: 'center' }}>
                             Lessons
                         </Typography>
-                    </Grid>
-                    <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
+                    </GridLegacy>
+                    <GridLegacy item xs={12} md={4} style={{ textAlign: 'end' }}>
                         <PeriodSelector period={daysToLookBack}
-                                        setPeriod={setDaysToLookBack}
-                                        options={options}
+                            setPeriod={setDaysToLookBack}
+                            options={options}
                         />
-                    </Grid>
-                </Grid>
+                    </GridLegacy>
+                </GridLegacy>
 
                 {isLoading ? (
-                    <div style={{height: '300px', textAlign: 'center'}}>
-                        <CircularProgress style={{margin: '100px'}}/>
+                    <div style={{ height: '300px', textAlign: 'center' }}>
+                        <CircularProgress style={{ margin: '100px' }} />
                     </div>
                 ) : (
                     !!chartData ? (
                         <Chart data={chartData}>
-                            <ArgumentScale factory={scaleBand}/>
-                            <ArgumentAxis labelComponent={LabelWithDate} showTicks={false}/>
-                            <ValueAxis/>
+                            <ArgumentScale factory={scaleBand} />
+                            <ArgumentAxis labelComponent={LabelWithDate} showTicks={false} />
+                            <ValueAxis />
 
                             {JLPTLevels.map(level => (
                                 <BarSeries
                                     key={level}
                                     name={level}
                                     valueField={level}
-                                    argumentField="date"/>
+                                    argumentField="date" />
                             ))}
 
                             <Stack
-                                stacks={[{series: JLPTLevels}]}
+                                stacks={[{ series: JLPTLevels }]}
                             />
 
-                            <Legend position={isMobile ? 'bottom' : 'right'}/>
-                            <EventTracker/>
-                            <Tooltip contentComponent={ReviewToolTip}/>
+                            <Legend position={isMobile ? 'bottom' : 'right'} />
+                            <EventTracker />
+                            <Tooltip contentComponent={ReviewToolTip} />
                         </Chart>
                     ) : null
                 )}

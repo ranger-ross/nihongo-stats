@@ -1,10 +1,10 @@
-import {Alert, Button, Grid, Link, Snackbar, TextField, Typography} from "@mui/material";
-import {useState} from "react";
-import {useWanikaniApiKey} from "../hooks/useWanikaniApiKey";
+import { Alert, Button, GridLegacy, Link, Snackbar, TextField, Typography } from "@mui/material";
+import { useState } from "react";
+import { useWanikaniApiKey } from "../hooks/useWanikaniApiKey";
 import WanikaniApiService from "./service/WanikaniApiService";
-import {useNavigate} from "react-router";
-import {RoutePaths} from "../Routes";
-import {AppStyles} from "../util/TypeUtils";
+import { useNavigate } from "react-router";
+import { RoutePaths } from "../Routes";
+import { AppStyles } from "../util/TypeUtils";
 
 
 const styles: AppStyles = {
@@ -22,7 +22,7 @@ const styles: AppStyles = {
 
 function EnterWanikaniApiKeyPage() {
     const navigate = useNavigate();
-    const {setApiKey} = useWanikaniApiKey();
+    const { setApiKey } = useWanikaniApiKey();
     const [textfieldValue, setTextfieldValue] = useState('');
     const [isFailure, setIsFailure] = useState(false);
 
@@ -46,54 +46,54 @@ function EnterWanikaniApiKeyPage() {
     };
 
     return (
-        <Grid container style={styles.container}
-              direction="column"
-              alignItems="center"
-              justifyContent="center"
-              spacing={0}
+        <GridLegacy container style={styles.container}
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            spacing={0}
         >
             <Snackbar
                 open={isFailure}
-                anchorOrigin={{vertical: 'top', horizontal: 'right'}}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                 autoHideDuration={6000}
                 onClose={() => setIsFailure(false)}
             >
                 <Alert
                     severity="error"
-                    sx={{width: '100%'}}
+                    sx={{ width: '100%' }}
                 >
                     Failed to login
                 </Alert>
             </Snackbar>
 
-            <Grid item xs={12}>
+            <GridLegacy item xs={12}>
                 <Typography style={styles.text}>
                     Please enter your <Link href="https://www.wanikani.com/settings/personal_access_tokens"
-                                            target="_blank">Wanikani Api Key</Link>
+                        target="_blank">Wanikani Api Key</Link>
                 </Typography>
-            </Grid>
+            </GridLegacy>
 
-            <Grid item xs={12} container alignItems="center" justifyContent="center" spacing={2}>
-                <Grid item>
+            <GridLegacy item xs={12} container alignItems="center" justifyContent="center" spacing={2}>
+                <GridLegacy item>
                     <TextField label="Api Key"
-                               variant={'outlined'}
-                               value={textfieldValue}
-                               onChange={e => setTextfieldValue(e.target.value)}
-                               onKeyUp={e => e.key === 'Enter' && textfieldValue !== '' ? verifyAndSetApiKey(textfieldValue) : null}
+                        variant={'outlined'}
+                        value={textfieldValue}
+                        onChange={e => setTextfieldValue(e.target.value)}
+                        onKeyUp={e => e.key === 'Enter' && textfieldValue !== '' ? verifyAndSetApiKey(textfieldValue) : null}
                     />
-                </Grid>
-                <Grid item>
+                </GridLegacy>
+                <GridLegacy item>
                     <Button variant={'contained'}
-                            color={'primary'}
-                            disabled={textfieldValue.length == 0}
-                            onClick={() => verifyAndSetApiKey(textfieldValue)}
+                        color={'primary'}
+                        disabled={textfieldValue.length == 0}
+                        onClick={() => verifyAndSetApiKey(textfieldValue)}
                     >
                         Go
                     </Button>
-                </Grid>
+                </GridLegacy>
 
-            </Grid>
-        </Grid>
+            </GridLegacy>
+        </GridLegacy>
     );
 }
 

@@ -1,5 +1,5 @@
-import {ArgumentAxis, Chart, Legend, Tooltip, ValueAxis} from '@devexpress/dx-react-chart-material-ui';
-import React, {useMemo, useState} from "react";
+import { ArgumentAxis, Chart, Legend, Tooltip, ValueAxis } from '@devexpress/dx-react-chart-material-ui';
+import React, { useMemo, useState } from "react";
 import {
     ArgumentAxis as ArgumentAxisBase,
     ArgumentScale,
@@ -8,27 +8,27 @@ import {
     SeriesRef,
     Stack
 } from "@devexpress/dx-react-chart";
-import {ANKI_COLORS, APP_NAMES, BUNPRO_COLORS, WANIKANI_COLORS} from '../../Constants';
-import {Card, CardContent, CircularProgress, Grid, Typography} from "@mui/material";
-import {getVisibleLabelIndices, scaleBand} from "../../util/ChartUtils";
+import { ANKI_COLORS, APP_NAMES, BUNPRO_COLORS, WANIKANI_COLORS } from '../../Constants';
+import { Card, CardContent, CircularProgress, GridLegacy, Typography } from "@mui/material";
+import { getVisibleLabelIndices, scaleBand } from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
-import {daysToMillis, truncDate} from "../../util/DateUtils";
-import {useAnkiDecks} from "../../hooks/useAnkiDecks";
-import {BunProFlattenedReviewWithLevel, flattenBunProReviews} from "../../bunpro/service/BunProDataUtil";
-import {useAnkiConnection} from "../../hooks/useAnkiConnection";
-import {createSubjectMap} from "../../wanikani/service/WanikaniDataUtil";
-import {AnkiReview} from "../../anki/models/AnkiReview";
-import {WanikaniSubject} from "../../wanikani/models/WanikaniSubject";
-import {WanikaniReview} from "../../wanikani/models/WanikaniReview";
-import {useWanikaniApiKey} from "../../hooks/useWanikaniApiKey";
-import {useBunProApiKey} from "../../hooks/useBunProApiKey";
-import {useAnkiReviewsByDeck} from "../../anki/service/AnkiQueries";
-import {DeckReviews} from "../../anki/service/AnkiDataUtil";
-import {useWanikaniData} from "../../hooks/useWanikaniData";
-import {useBunProData} from "../../hooks/useBunProData";
-import {BunProReview} from "../../bunpro/models/BunProReview";
-import {BunProGrammarPoint} from "../../bunpro/models/BunProGrammarPoint";
-import {useDeviceInfo} from "../../hooks/useDeviceInfo";
+import { daysToMillis, truncDate } from "../../util/DateUtils";
+import { useAnkiDecks } from "../../hooks/useAnkiDecks";
+import { BunProFlattenedReviewWithLevel, flattenBunProReviews } from "../../bunpro/service/BunProDataUtil";
+import { useAnkiConnection } from "../../hooks/useAnkiConnection";
+import { createSubjectMap } from "../../wanikani/service/WanikaniDataUtil";
+import { AnkiReview } from "../../anki/models/AnkiReview";
+import { WanikaniSubject } from "../../wanikani/models/WanikaniSubject";
+import { WanikaniReview } from "../../wanikani/models/WanikaniReview";
+import { useWanikaniApiKey } from "../../hooks/useWanikaniApiKey";
+import { useBunProApiKey } from "../../hooks/useBunProApiKey";
+import { useAnkiReviewsByDeck } from "../../anki/service/AnkiQueries";
+import { DeckReviews } from "../../anki/service/AnkiDataUtil";
+import { useWanikaniData } from "../../hooks/useWanikaniData";
+import { useBunProData } from "../../hooks/useBunProData";
+import { BunProReview } from "../../bunpro/models/BunProReview";
+import { BunProGrammarPoint } from "../../bunpro/models/BunProGrammarPoint";
+import { useDeviceInfo } from "../../hooks/useDeviceInfo";
 
 class DataPoint {
 
@@ -79,7 +79,7 @@ function formatWanikaniData(reviews: WanikaniReview[], subjects: WanikaniSubject
 }
 
 function addAppNameToReviewData(data: any[], appName: string) {
-    return data.map(review => ({...review, appName}));
+    return data.map(review => ({ ...review, appName }));
 }
 
 function aggregateDate(ankiReviews: any[], bunProReviews: any[], wanikaniReviews: any[], daysToLookBack: number) {
@@ -139,7 +139,7 @@ type BPData = BunProFlattenedReviewWithLevel & {
 function formatBunProData(grammarPoints?: BunProGrammarPoint[], reviews?: BunProReview[]): BPData[] {
     const data = flattenBunProReviews(grammarPoints, reviews) ?? [];
     return data
-        .map(review => ({...review, date: new Date(review.current.time)}))
+        .map(review => ({ ...review, date: new Date(review.current.time) }))
         .sort((a, b,) => a.date.getTime() - b.date.getTime());
 }
 
@@ -155,27 +155,27 @@ function OverviewReviewsHistoryChart() {
 
     const isAnkiConnected = useAnkiConnection();
 
-    const {apiKey: wkApiKey} = useWanikaniApiKey();
-    const {apiKey: bpApiKey} = useBunProApiKey();
+    const { apiKey: wkApiKey } = useWanikaniApiKey();
+    const { apiKey: bpApiKey } = useBunProApiKey();
 
-    const {isMobile} = useDeviceInfo();
+    const { isMobile } = useDeviceInfo();
     const [toolTipTargetItem, setToolTipTargetItem] = useState<SeriesRef>();
     const [daysToLookBack, setDaysToLookBack] = useState(30);
-    const {decks: ankiDecks} = useAnkiDecks();
+    const { decks: ankiDecks } = useAnkiDecks();
 
     // Anki
-    const {data: ankiRawData, isLoading: isAnkiLoading, error: ankiError} = useAnkiReviewsByDeck(ankiDecks);
+    const { data: ankiRawData, isLoading: isAnkiLoading, error: ankiError } = useAnkiReviewsByDeck(ankiDecks);
     ankiError && console.error(ankiError);
     const ankiReviews = ankiRawData ? formatAnkiData(ankiRawData) : [];
 
-    const {grammarPoints, reviewData, isLoading: isBunProLoading} = useBunProData({
+    const { grammarPoints, reviewData, isLoading: isBunProLoading } = useBunProData({
         grammarPoints: !!bpApiKey,
         reviews: !!bpApiKey,
     })
     const bunProReviews = formatBunProData(grammarPoints, reviewData?.reviews);
 
     // Wanikani
-    const {reviews, subjects, isLoading: isWanikaniFetching} = useWanikaniData({
+    const { reviews, subjects, isLoading: isWanikaniFetching } = useWanikaniData({
         reviews: !!wkApiKey,
         subjects: !!wkApiKey,
     });
@@ -216,7 +216,7 @@ function OverviewReviewsHistoryChart() {
         setToolTipTargetItem(newTarget);
     }
 
-    function ReviewsToolTip({targetItem}: Tooltip.ContentProps) {
+    function ReviewsToolTip({ targetItem }: Tooltip.ContentProps) {
         const dp = chartData[targetItem.point];
         return (
             <>
@@ -254,46 +254,46 @@ function OverviewReviewsHistoryChart() {
     }
 
     return (
-        <Card style={{height: '100%'}}>
-            <CardContent style={{height: '100%'}}>
-                <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                    <Grid container>
-                        <Grid item xs={12} md={4}/>
-                        <Grid item xs={12} md={4}>
-                            <Typography variant={'h5'} style={{textAlign: 'center', paddingBottom: '5px'}}>
+        <Card style={{ height: '100%' }}>
+            <CardContent style={{ height: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <GridLegacy container>
+                        <GridLegacy item xs={12} md={4} />
+                        <GridLegacy item xs={12} md={4}>
+                            <Typography variant={'h5'} style={{ textAlign: 'center', paddingBottom: '5px' }}>
                                 Review History
                             </Typography>
-                        </Grid>
+                        </GridLegacy>
 
 
                         {isLoading ? (
-                            <Grid item container xs={12} justifyContent={'center'} style={{padding: '10px'}}>
-                                <CircularProgress/>
-                            </Grid>
+                            <GridLegacy item container xs={12} justifyContent={'center'} style={{ padding: '10px' }}>
+                                <CircularProgress />
+                            </GridLegacy>
                         ) : (
-                            <Grid item xs={12} md={4} style={{textAlign: 'end'}}>
+                            <GridLegacy item xs={12} md={4} style={{ textAlign: 'end' }}>
                                 <PeriodSelector period={daysToLookBack}
-                                                setPeriod={setDaysToLookBack}
-                                                options={[
-                                                    {value: 7, text: '7'},
-                                                    {value: 14, text: '14'},
-                                                    {value: 30, text: '30'},
-                                                    {value: 90, text: '3 Mon'},
-                                                    {value: 180, text: '6 Mon'},
-                                                    {value: 365, text: '1 Yr'},
-                                                    {value: 10_000, text: 'All'},
-                                                ]}
+                                    setPeriod={setDaysToLookBack}
+                                    options={[
+                                        { value: 7, text: '7' },
+                                        { value: 14, text: '14' },
+                                        { value: 30, text: '30' },
+                                        { value: 90, text: '3 Mon' },
+                                        { value: 180, text: '6 Mon' },
+                                        { value: 365, text: '1 Yr' },
+                                        { value: 10_000, text: 'All' },
+                                    ]}
                                 />
-                            </Grid>
+                            </GridLegacy>
                         )}
-                    </Grid>
+                    </GridLegacy>
 
                     {!isLoading && !!chartData ? (
-                        <div style={{flexGrow: '1'}}>
+                        <div style={{ flexGrow: '1' }}>
                             <Chart data={chartData}>
-                                <ArgumentScale factory={scaleBand}/>
-                                <ArgumentAxis labelComponent={LabelWithDate}/>
-                                <ValueAxis/>
+                                <ArgumentScale factory={scaleBand} />
+                                <ArgumentAxis labelComponent={LabelWithDate} />
+                                <ValueAxis />
 
                                 {showAnkiSeries ? (
                                     <BarSeries
@@ -323,11 +323,11 @@ function OverviewReviewsHistoryChart() {
                                 ) : null}
 
                                 <Stack
-                                    stacks={[{series: ['Anki', "BunPro", 'Wanikani']}]}
+                                    stacks={[{ series: ['Anki', "BunPro", 'Wanikani'] }]}
                                 />
 
-                                <Legend position={isMobile ? 'bottom' : 'right'}/>
-                                <EventTracker/>
+                                <Legend position={isMobile ? 'bottom' : 'right'} />
+                                <EventTracker />
                                 <Tooltip
                                     targetItem={toolTipTargetItem}
                                     onTargetItemChange={onTooltipChange}

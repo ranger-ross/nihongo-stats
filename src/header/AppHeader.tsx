@@ -1,4 +1,4 @@
-import {Grid, Typography, useTheme} from "@mui/material";
+import { GridLegacy, Typography, useTheme } from "@mui/material";
 import HeaderOptionMenu from './components/HeaderOptionMenu'
 
 const useStyles = (theme: any) => ({
@@ -23,14 +23,14 @@ function AppHeader() {
     const theme = useTheme();
     const styles = useStyles(theme);
     return (
-        <Grid container style={styles.container}>
-            <Grid item>
+        <GridLegacy container style={styles.container}>
+            <GridLegacy item>
                 <Typography variant={'h4'} color={'textPrimary'} style={styles.title}>
                     Nihongo Stats <span style={styles.alpha}>Alpha</span>
                 </Typography>
-            </Grid>
-            <HeaderOptionMenu/>
-        </Grid>
+            </GridLegacy>
+            <HeaderOptionMenu />
+        </GridLegacy>
     );
 }
 

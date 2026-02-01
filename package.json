@@ -41,7 +41,7 @@
     "@testing-library/user-event": "14.6.1",
     "@types/d3-array": "3.2.2",
     "@types/d3-scale": "4.0.9",
-    "@types/d3-shape": "3.1.7",
+    "@types/d3-shape": "3.1.8",
     "@types/lodash": "4.17.21",
     "@types/node": "22.19.1",
     "@types/react": "19.1.11",

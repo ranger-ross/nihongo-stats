@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
   "schedule": [
     "before 4am on the first day of the month"
@@ -11,11 +11,11 @@
       "matchDepTypes": [
         "devDependencies"
       ],
-      "matchPackagePatterns": [
-        "lint",
-        "prettier"
-      ],
-      "automerge": true
+      "automerge": true,
+      "matchPackageNames": [
+        "/lint/",
+        "/prettier/"
+      ]
     },
     {
       "matchUpdateTypes": [
@@ -25,10 +25,10 @@
       "matchDepTypes": [
         "devDependencies"
       ],
-      "matchPackagePatterns": [
-        "vite"
-      ],
-      "automerge": true
+      "automerge": true,
+      "matchPackageNames": [
+        "/vite/"
+      ]
     }
   ]
 }

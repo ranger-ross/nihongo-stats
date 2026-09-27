@@ -64,6 +64,11 @@ Run `npm run dev` to start application in Docker and serve it on `localhost:3000
 
 Run `npm test` to run the Vitest tests
 
+#### Error Boundaries
+
+Error fallbacks accept any thrown value. Errors retain their message and expandable stack trace.
+Strings and objects with a message display that message. Other values display "Unknown error".
+
 #### Help
 
 For a full list of useful commands, run `make help`

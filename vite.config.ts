@@ -25,8 +25,13 @@ export default defineConfig({
     define: {
         APP_VERSION: JSON.stringify(appVersion),
     },
-    esbuild: {
-        legalComments: 'none'
+    build: {
+        target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+        rolldownOptions: {
+            output: {
+                comments: {legal: false}
+            }
+        }
     },
     test: {
         include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts}"],

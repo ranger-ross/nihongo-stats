@@ -58,11 +58,17 @@ Run `npm install` to install NPM dependencies. The test environment uses the exp
 
 #### Starting the Application
 
-Run `npm run dev` to start application in Docker and serve it on `localhost:3000`
+Run `npm run dev` to start Vite and serve the application on `localhost:3000`.
 
 #### Running Tests
 
 Run `npm test` to run the Vitest tests
+
+#### Production Build
+
+Run `npm run build` to build the application and `npm run serve` to preview it.
+Vite 8 and React plugin 6 must be upgraded together. The build keeps the previous ES2020,
+Chrome 87, Edge 88, Firefox 78, and Safari 14 targets explicitly configured.
 
 #### Error Boundaries
 

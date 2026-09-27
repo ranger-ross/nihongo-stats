@@ -49,12 +49,12 @@ no longer needed in the pull request description.
 #### Prerequisites
 
 - Docker + Docker Compose
-- NodeJS
+- Node.js 24
 - (Optional) GNU Make
 
 #### Installing Dependencies
 
-Run `npm install` to install NPM dependencies
+Run `npm install` to install NPM dependencies. The test environment uses the explicit `jsdom` development dependency.
 
 #### Starting the Application
 

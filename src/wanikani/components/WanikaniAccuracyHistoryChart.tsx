@@ -9,7 +9,7 @@ import {
 } from "@devexpress/dx-react-chart";
 import { WANIKANI_COLORS } from '../../Constants';
 import { Card, CardContent, GridLegacy, Typography } from "@mui/material";
-import _ from 'lodash';
+import { groupBy } from 'lodash-es';
 import { scaleLinear } from 'd3-scale';
 import PeriodSelector from "../../shared/PeriodSelector";
 import { createSubjectMap } from "../service/WanikaniDataUtil";
@@ -76,7 +76,7 @@ function fetchData(reviews: WanikaniReview[], subjects: WanikaniSubject[]) {
             subject: subjectMap[review.subjectId]
         });
     }
-    const groupedData = _.groupBy(data, (v: WanikaniSubjectReview) => truncDate(v.review.createdAt));
+    const groupedData = groupBy(data, (v: WanikaniSubjectReview) => truncDate(v.review.createdAt));
     const groupedDataAsMap = new Map(Object.entries(groupedData));
     const result: DayDataPoint[] = Array.from(groupedDataAsMap, ([date, data]: any) => {
         const total = data.length;

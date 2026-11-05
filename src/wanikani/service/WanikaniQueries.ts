@@ -5,7 +5,6 @@ import {
     mapWanikaniAssignment,
     mapWanikaniLevelProgression,
     mapWanikaniReset,
-    mapWanikaniReview,
     mapWanikaniReviewStatistic,
     mapWanikaniSubject,
     mapWanikaniSummary,
@@ -13,9 +12,6 @@ import {
 } from "./WanikaniMappingService";
 import { APP_URLS } from "../../Constants";
 import { WanikaniSubject } from "../models/WanikaniSubject";
-import { RawWanikaniReview } from "../models/raw/RawWanikaniReview";
-import { WanikaniReview } from "../models/WanikaniReview";
-import { EVENT_STATUS, MultiPageObservableEvent } from "./WanikaniApiServiceRxJs";
 import { RawWanikaniCollectionResponse } from "../models/raw/RawWanikaniCollectionResponse";
 import { RawWanikaniSubject } from "../models/raw/RawWanikaniSubject";
 import { QUERY_CLIENT_THROTTLE_TIME, queryClient } from "../../App";
@@ -30,7 +26,6 @@ const selectSubjects = (data: RawWanikaniCollectionResponse<RawWanikaniSubject>)
 const selectAssignments = (data: RawWanikaniAssignment[]) => data.map(mapWanikaniAssignment);
 const selectResets = (data: RawWanikaniResetPage) => data.data.map(mapWanikaniReset);
 const selectLevelProgress = (data: RawWanikaniLevelProgressionPage) => data.data.map(mapWanikaniLevelProgression);
-const selectReviews = (data: RawWanikaniReview[]) => data.map(mapWanikaniReview);
 const selectReviewStatistics = (data: RawWanikaniReviewStatistic[]) => data.map(mapWanikaniReviewStatistic);
 
 function buildWanikaniSubjectQueries(firstPageData: RawWanikaniCollectionResponse<RawWanikaniSubject> | undefined): string[] {
@@ -151,37 +146,6 @@ export function useWanikaniUser(enabled = true) {
         staleTime: 30 * 1000,
         retry: alwaysRetryOnRateLimit(3),
         select: mapWanikaniUser
-    });
-}
-
-type OnProgressCallback = (progress: number) => void;
-type OnRateLimitedCallback = (isRateLimited: boolean) => void;
-
-export function useWanikaniReviews(enabled = true, onProgress: OnProgressCallback, onRateLimited: OnRateLimitedCallback) {
-    return useQuery<RawWanikaniReview[], unknown, WanikaniReview[]>({
-        queryKey: [WANIKANI_QUERY_KEY, 'Reviews'],
-        queryFn: () => {
-            return new Promise<RawWanikaniReview[]>((resolve, reject) => {
-                WanikaniApiService.getReviewAsObservable()
-                    .subscribe({
-                        next: (event: MultiPageObservableEvent<RawWanikaniReview>) => {
-                            if (event.status === EVENT_STATUS.IN_PROGRESS) {
-                                onProgress((event.progress as number) / (event.size as number));
-                            }
-                            if (event.status === EVENT_STATUS.COMPLETE) {
-                                onProgress(1.0);
-                                resolve(event.data ?? []);
-                            }
-                            onRateLimited(event.status === EVENT_STATUS.RATE_LIMITED);
-                        },
-                        error: err => reject(err)
-                    });
-            });
-        },
-        enabled: enabled,
-        gcTime: 7 * 24 * 60 * 60 * 1000,
-        staleTime: 30 * 1000,
-        select: selectReviews
     });
 }
 

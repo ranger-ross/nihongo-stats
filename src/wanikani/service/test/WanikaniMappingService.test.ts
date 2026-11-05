@@ -4,13 +4,9 @@ import {RawWanikaniReset} from "../../models/raw/RawWanikaniReset";
 import {
     mapWanikaniReset,
     mapWanikaniSubject,
-    mapWanikaniPage,
-    mapWanikaniReview,
     mapWanikaniAssignment, mapWanikaniUser, mapWanikaniLevelProgression
 } from "../WanikaniMappingService";
 import {RawWanikaniSubject} from "../../models/raw/RawWanikaniSubject";
-import {RawWanikaniPage} from "../../models/raw/RawWanikaniPage";
-import {RawWanikaniReview} from "../../models/raw/RawWanikaniReview";
 import {RawWanikaniAssignment} from "../../models/raw/RawWanikaniAssignment";
 import {RawWanikaniUser} from "../../models/raw/RawWanikaniUser";
 import {RawWanikaniLevelProgression} from "../../models/raw/RawWanikaniLevelProgress";
@@ -309,44 +305,6 @@ describe('WanikaniMappingService', () => {
 
     });
 
-    describe('mapWanikaniReview', () => {
-
-        it('should map review properly', () => {
-
-            const input: RawWanikaniReview = {
-                "id": 1494081833,
-                "object": "review",
-                "url": "https://api.wanikani.com/v2/reviews/1494081833",
-                "data_updated_at": "2020-11-18T01:06:27.630745Z",
-                "data": {
-                    "created_at": "2020-11-18T01:06:27.598506Z",
-                    "assignment_id": 207210428,
-                    "subject_id": 2494,
-                    "spaced_repetition_system_id": 2,
-                    "starting_srs_stage": 4,
-                    "ending_srs_stage": 3,
-                    "incorrect_meaning_answers": 1,
-                    "incorrect_reading_answers": 0
-                }
-            }
-
-            const result = mapWanikaniReview(input);
-
-            expect(result.id).toBe(1494081833);
-            expect(result.url).toBe("https://api.wanikani.com/v2/reviews/1494081833");
-            expect(result.dataUpdatedAt.getTime()).toBe(1605661587630);
-            expect(result.createdAt.getTime()).toBe(1605661587598);
-            expect(result.assignmentId).toBe(207210428);
-            expect(result.subjectId).toBe(2494);
-            expect(result.spacedRepetitionSystemId).toBe(2);
-            expect(result.startingSrsStage).toBe(4);
-            expect(result.endingSrsStage).toBe(3);
-            expect(result.incorrectMeaningAnswers).toBe(1);
-            expect(result.incorrectReadingAnswers).toBe(0);
-        });
-
-    });
-
     describe('mapWanikaniAssignment', () => {
 
         it('should map assignment properly', () => {
@@ -418,26 +376,6 @@ describe('WanikaniMappingService', () => {
             expect(result.burnedAt?.getTime()).toBe(1649585255242);
             expect(result.resurrectedAt?.getTime()).toBe(1691662055242);
             expect(result.hidden).toBe(true);
-        });
-
-    });
-
-    describe('mapWanikaniPage', () => {
-
-        it('should map page properly', () => {
-
-            const input: RawWanikaniPage = {
-                per_page: 20,
-                previous_url: 'hello',
-                next_url: 'next',
-            }
-
-            const result = mapWanikaniPage(input);
-
-            expect(result.perPage).toBe(20);
-            expect(result.previousUrl).toBe('hello');
-            expect(result.nextUrl).toBe('next');
-
         });
 
     });

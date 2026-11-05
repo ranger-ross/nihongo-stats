@@ -1,8 +1,7 @@
 import {CSSProperties, ReactNode} from "react";
-import {CircularProgress, Typography} from "@mui/material";
+import {CircularProgress} from "@mui/material";
 import CheckIcon from '@mui/icons-material/Check';
 import QuestionToolTip from "../../shared/QuestionToolTip";
-import LinearProgressWithLabel from "../../shared/LinearProgressWithLabel";
 
 const styles: { [key: string]: CSSProperties } = {
     loadingItem: {
@@ -50,7 +49,6 @@ type WanikaniLoadingScreenFetchConfig = {
     user?: boolean
     summary?: boolean
     subjects?: boolean
-    reviews?: boolean
 };
 
 type WanikaniLoadingScreenState = {
@@ -60,21 +58,12 @@ type WanikaniLoadingScreenState = {
     subjects?: boolean
 };
 
-type Progress = {
-    isRateLimited: boolean
-    progress: number
-    isComplete: boolean
-};
-
 type WanikaniLoadingScreenProps = {
     fetch: WanikaniLoadingScreenFetchConfig
     isLoaded: WanikaniLoadingScreenState
-    progress?: {
-        reviews?: Progress
-    }
 };
 
-function WanikaniLoadingScreen({fetch, isLoaded, progress}: WanikaniLoadingScreenProps) {
+function WanikaniLoadingScreen({fetch, isLoaded}: WanikaniLoadingScreenProps) {
     return (
         <>
             <div style={styles.loadingItemsContainer}>
@@ -93,23 +82,6 @@ function WanikaniLoadingScreen({fetch, isLoaded, progress}: WanikaniLoadingScree
                     {fetch.assignments ? (
                         <LoadingItem text={'User Assignments'} isLoading={!isLoaded.assignments}/>
                     ) : null}
-                    <br/>
-                    {fetch.reviews ? (
-                        <>
-                            <LoadingItem text={'User Reviews'} isLoading={!progress?.reviews?.isComplete}/>
-                            {progress?.reviews?.progress != -1 ? (
-                                <LinearProgressWithLabel value={(progress?.reviews?.progress ?? 0) * 100}/>
-                            ) : null}
-
-                            {progress?.reviews?.isRateLimited && (
-                                <Typography variant="body2" color="text.secondary">
-                                    Rate Limited. Continuing in a minute
-                                </Typography>
-                            )}
-                        </>
-                    ) : null}
-
-
                 </div>
             </div>
 

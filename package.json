@@ -19,7 +19,6 @@
     "@emotion/styled": "11.14.1",
     "@mui/icons-material": "7.3.11",
     "@mui/material": "7.3.11",
-    "@reactivex/rxjs": "6.6.7",
     "@sentry/react": "^9.0.0",
     "@tanstack/query-sync-storage-persister": "5.104.0",
     "@tanstack/react-query": "5.104.0",
@@ -32,7 +31,6 @@
     "react-dom": "19.3.0",
     "react-error-boundary": "6.1.6",
     "react-router-dom": "7.18.4",
-    "rxjs": "7.8.2",
     "styled-components": "6.5.3",
     "zustand": "4.5.7"
   },

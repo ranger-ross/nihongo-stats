@@ -13,10 +13,6 @@ import {
     WanikaniSubjectMeaning,
     WanikaniSubjectMetadata, WanikaniSubjectReading, WanikaniSubjectType
 } from "../models/WanikaniSubject";
-import {RawWanikaniPage} from "../models/raw/RawWanikaniPage";
-import {WanikaniPage} from "../models/WanikaniPage";
-import {RawWanikaniReview, RawWanikaniReviewPage} from "../models/raw/RawWanikaniReview";
-import {WanikaniReview, WanikaniReviewPage} from "../models/WanikaniReview";
 import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
 import {WanikaniAssignment} from "../models/WanikaniAssignment";
 import {RawWanikaniLevelProgression} from "../models/raw/RawWanikaniLevelProgress";
@@ -80,16 +76,6 @@ export function mapWanikaniSummary(summary: RawWanikaniSummary): WanikaniSummary
     };
 }
 
-export function mapWanikaniReviewPage(page: RawWanikaniReviewPage): WanikaniReviewPage {
-    return {
-        url: page.url,
-        dataUpdatedAt: new Date(page.data_updated_at),
-        pages: mapWanikaniPage(page.pages),
-        totalCount: page.total_count,
-        data: page.data.map(mapWanikaniReview)
-    };
-}
-
 export function mapWanikaniLevelProgression(lp: RawWanikaniLevelProgression): WanikaniLevelProgression {
     return {
         id: lp.id,
@@ -135,22 +121,6 @@ export function mapWanikaniSubject(rawSubject: RawWanikaniSubject): WanikaniSubj
     };
 }
 
-export function mapWanikaniReview(review: RawWanikaniReview): WanikaniReview {
-    return {
-        id: review.id,
-        url: review.url,
-        dataUpdatedAt: new Date(review.data_updated_at),
-        createdAt: new Date(review.data.created_at),
-        assignmentId: review.data.assignment_id,
-        spacedRepetitionSystemId: review.data.spaced_repetition_system_id,
-        subjectId: review.data.subject_id,
-        startingSrsStage: review.data.starting_srs_stage,
-        endingSrsStage: review.data.ending_srs_stage,
-        incorrectMeaningAnswers: review.data.incorrect_meaning_answers,
-        incorrectReadingAnswers: review.data.incorrect_reading_answers,
-    };
-}
-
 export function mapWanikaniAssignment(assignment: RawWanikaniAssignment): WanikaniAssignment {
     return {
         id: assignment.id,
@@ -178,14 +148,6 @@ export function mapWanikaniReviewStatistic(statistic: RawWanikaniReviewStatistic
         meaningIncorrect: statistic.data.meaning_incorrect,
         readingCorrect: statistic.data.reading_correct,
         readingIncorrect: statistic.data.reading_incorrect,
-    };
-}
-
-export function mapWanikaniPage(page: RawWanikaniPage): WanikaniPage {
-    return {
-        perPage: page.per_page,
-        nextUrl: page.next_url,
-        previousUrl: page.previous_url,
     };
 }
 

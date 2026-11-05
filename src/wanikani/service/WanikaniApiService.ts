@@ -1,6 +1,5 @@
 import * as localForage from "localforage";
 import {APP_URLS} from "../../Constants";
-import WanikaniApiServiceRxJs from "./WanikaniApiServiceRxJs";
 import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
 import {RawWanikaniSubject} from "../models/raw/RawWanikaniSubject";
 import {RawWanikaniLevelProgressionPage} from "../models/raw/RawWanikaniLevelProgress";
@@ -195,5 +194,4 @@ export default {
     getAllAssignments: getAllAssignments,
     getAllReviewStatistics: getAllReviewStatistics,
     getSubjects: getSubjects,
-    getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,
 }

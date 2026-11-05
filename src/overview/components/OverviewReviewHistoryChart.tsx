@@ -8,7 +8,7 @@ import {
     SeriesRef,
     Stack
 } from "@devexpress/dx-react-chart";
-import { ANKI_COLORS, APP_NAMES, BUNPRO_COLORS, WANIKANI_COLORS } from '../../Constants';
+import { ANKI_COLORS, APP_NAMES, BUNPRO_COLORS } from '../../Constants';
 import { Card, CardContent, CircularProgress, GridLegacy, Typography } from "@mui/material";
 import { getVisibleLabelIndices, scaleBand } from "../../util/ChartUtils";
 import PeriodSelector from "../../shared/PeriodSelector";
@@ -16,15 +16,10 @@ import { daysToMillis, truncDate } from "../../util/DateUtils";
 import { useAnkiDecks } from "../../hooks/useAnkiDecks";
 import { BunProFlattenedReviewWithLevel, flattenBunProReviews } from "../../bunpro/service/BunProDataUtil";
 import { useAnkiConnection } from "../../hooks/useAnkiConnection";
-import { createSubjectMap } from "../../wanikani/service/WanikaniDataUtil";
 import { AnkiReview } from "../../anki/models/AnkiReview";
-import { WanikaniSubject } from "../../wanikani/models/WanikaniSubject";
-import { WanikaniReview } from "../../wanikani/models/WanikaniReview";
-import { useWanikaniApiKey } from "../../hooks/useWanikaniApiKey";
 import { useBunProApiKey } from "../../hooks/useBunProApiKey";
 import { useAnkiReviewsByDeck } from "../../anki/service/AnkiQueries";
 import { DeckReviews } from "../../anki/service/AnkiDataUtil";
-import { useWanikaniData } from "../../hooks/useWanikaniData";
 import { useBunProData } from "../../hooks/useBunProData";
 import { BunProReview } from "../../bunpro/models/BunProReview";
 import { BunProGrammarPoint } from "../../bunpro/models/BunProGrammarPoint";
@@ -36,8 +31,6 @@ class DataPoint {
     anki: number = 0;
     bunProData: any[] = [];
     bunPro: number = 0;
-    wanikaniData: any[] = [];
-    wanikani: number = 0;
 
     constructor(public date: Date) {
     }
@@ -51,42 +44,16 @@ class DataPoint {
         this.bunProData.push(d);
         this.bunPro = this.bunProData.length;
     }
-
-    addWanikani(d: any) {
-        this.wanikaniData.push(d);
-        this.wanikani = this.wanikaniData.length;
-    }
-}
-
-type WKData = {
-    date: Date,
-    review: WanikaniReview,
-    subject: WanikaniSubject
-};
-
-function formatWanikaniData(reviews: WanikaniReview[], subjects: WanikaniSubject[]): WKData[] {
-    const subjectsMap = createSubjectMap(subjects);
-    const data: WKData[] = [];
-    for (const review of reviews) {
-        data.push({
-            date: review.dataUpdatedAt,
-            review: review,
-            subject: subjectsMap[review.subjectId]
-        });
-    }
-
-    return data;
 }
 
 function addAppNameToReviewData(data: any[], appName: string) {
     return data.map(review => ({ ...review, appName }));
 }
 
-function aggregateDate(ankiReviews: any[], bunProReviews: any[], wanikaniReviews: any[], daysToLookBack: number) {
+function aggregateDate(ankiReviews: any[], bunProReviews: any[], daysToLookBack: number) {
     const reviews = [
         ...(bunProReviews ? addAppNameToReviewData(bunProReviews, APP_NAMES.bunpro) : []),
         ...(ankiReviews ? addAppNameToReviewData(ankiReviews, APP_NAMES.anki) : []),
-        ...(wanikaniReviews ? addAppNameToReviewData(wanikaniReviews, APP_NAMES.wanikani) : []),
     ]
         .filter(review => review.date > truncDate(Date.now() - daysToMillis(daysToLookBack)))
         .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -104,9 +71,7 @@ function aggregateDate(ankiReviews: any[], bunProReviews: any[], wanikaniReviews
 
         const lastDay = aggregatedDate[aggregatedDate.length - 1];
 
-        if (data.appName === APP_NAMES.wanikani) {
-            lastDay.addWanikani(data);
-        } else if (data.appName === APP_NAMES.anki) {
+        if (data.appName === APP_NAMES.anki) {
             lastDay.addAnki(data);
         } else if (data.appName === APP_NAMES.bunpro) {
             lastDay.addBunPro(data);
@@ -151,11 +116,9 @@ function calculateLabelPositions(data: any[]) {
 function OverviewReviewsHistoryChart() {
     const ankiSeriesName = 'Anki';
     const bunProSeriesName = 'BunPro';
-    const wanikaniSeriesName = 'Wanikani';
 
     const isAnkiConnected = useAnkiConnection();
 
-    const { apiKey: wkApiKey } = useWanikaniApiKey();
     const { apiKey: bpApiKey } = useBunProApiKey();
 
     const { isMobile } = useDeviceInfo();
@@ -174,34 +137,20 @@ function OverviewReviewsHistoryChart() {
     })
     const bunProReviews = formatBunProData(grammarPoints, reviewData?.reviews);
 
-    // Wanikani
-    const { reviews, subjects, isLoading: isWanikaniFetching } = useWanikaniData({
-        reviews: !!wkApiKey,
-        subjects: !!wkApiKey,
-    });
-    const wanikaniReviews = formatWanikaniData(reviews, subjects);
-
-
-    const isLoading = (isAnkiLoading && isAnkiConnected) || isWanikaniFetching || isBunProLoading;
+    const isLoading = (isAnkiLoading && isAnkiConnected) || isBunProLoading;
 
     const chartData = useMemo(
-        () => aggregateDate(ankiReviews, bunProReviews, wanikaniReviews, daysToLookBack),
-        [wanikaniReviews, bunProReviews, ankiReviews, daysToLookBack]
+        () => aggregateDate(ankiReviews, bunProReviews, daysToLookBack),
+        [bunProReviews, ankiReviews, daysToLookBack]
     );
 
     const showAnkiSeries = isAnkiConnected && !!ankiReviews && ankiReviews.length > 0;
     const showBunProSeries = !!bunProReviews && bunProReviews.length > 0;
-    const showWanikaniSeries = !!wanikaniReviews && wanikaniReviews.length > 0;
 
     function onTooltipChange(target: SeriesRef) {
         let newTarget = target;
         if (target?.point) {
-            if (showWanikaniSeries && chartData[target.point].wanikani > 0) {
-                newTarget = {
-                    ...target,
-                    series: wanikaniSeriesName
-                }
-            } else if (showBunProSeries && chartData[target.point].bunPro > 0) {
+            if (showBunProSeries && chartData[target.point].bunPro > 0) {
                 newTarget = {
                     ...target,
                     series: bunProSeriesName
@@ -223,7 +172,6 @@ function OverviewReviewsHistoryChart() {
                 <p>Date: {dp.date.toLocaleDateString()}</p>
                 {dp.anki > 0 ? (<p>Anki: {dp.anki}</p>) : null}
                 {dp.bunPro > 0 ? (<p>BunPro: {dp.bunPro}</p>) : null}
-                {dp.wanikani > 0 ? (<p>Wanikani: {dp.wanikani}</p>) : null}
 
             </>
         );
@@ -313,17 +261,8 @@ function OverviewReviewsHistoryChart() {
                                     />
                                 ) : null}
 
-                                {showWanikaniSeries ? (
-                                    <BarSeries
-                                        name="Wanikani"
-                                        valueField="wanikani"
-                                        argumentField="date"
-                                        color={WANIKANI_COLORS.pink}
-                                    />
-                                ) : null}
-
                                 <Stack
-                                    stacks={[{ series: ['Anki', "BunPro", 'Wanikani'] }]}
+                                    stacks={[{ series: ['Anki', "BunPro"] }]}
                                 />
 
                                 <Legend position={isMobile ? 'bottom' : 'right'} />

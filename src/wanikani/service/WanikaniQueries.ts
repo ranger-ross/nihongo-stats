@@ -18,8 +18,17 @@ import { EVENT_STATUS, MultiPageObservableEvent } from "./WanikaniApiServiceRxJs
 import { RawWanikaniCollectionResponse } from "../models/raw/RawWanikaniCollectionResponse";
 import { RawWanikaniSubject } from "../models/raw/RawWanikaniSubject";
 import { QUERY_CLIENT_THROTTLE_TIME, queryClient } from "../../App";
+import { RawWanikaniAssignment } from "../models/raw/RawWanikaniAssignment";
+import { RawWanikaniResetPage } from "../models/raw/RawWanikaniReset";
+import { RawWanikaniLevelProgressionPage } from "../models/raw/RawWanikaniLevelProgress";
 
 const WANIKANI_QUERY_KEY = 'wanikani';
+
+const selectSubjects = (data: RawWanikaniCollectionResponse<RawWanikaniSubject>) => data.data.map(mapWanikaniSubject);
+const selectAssignments = (data: RawWanikaniAssignment[]) => data.map(mapWanikaniAssignment);
+const selectResets = (data: RawWanikaniResetPage) => data.data.map(mapWanikaniReset);
+const selectLevelProgress = (data: RawWanikaniLevelProgressionPage) => data.data.map(mapWanikaniLevelProgression);
+const selectReviews = (data: RawWanikaniReview[]) => data.map(mapWanikaniReview);
 
 function buildWanikaniSubjectQueries(firstPageData: RawWanikaniCollectionResponse<RawWanikaniSubject> | undefined): string[] {
     if (!firstPageData) {
@@ -60,7 +69,7 @@ export function useWanikaniSubjects(enabled = true) {
             queryFn: () => fetchWanikani(query),
             gcTime: Infinity,
             staleTime: staleTime,
-            select: (data: any) => data.data.map(mapWanikaniSubject),
+            select: selectSubjects,
         }))
     });
 
@@ -77,57 +86,57 @@ export function useWanikaniSubjects(enabled = true) {
 
 export function useWanikaniAssignments(enabled = true) {
     return useQuery({
-        queryKey: [WANIKANI_QUERY_KEY, 'Assignments'], 
+        queryKey: [WANIKANI_QUERY_KEY, 'Assignments'],
         queryFn: () => WanikaniApiService.getAllAssignments(),
         enabled: enabled,
         gcTime: Infinity,
         staleTime: 5 * 60 * 1000,
-        select: (data) => data.map(mapWanikaniAssignment)
+        select: selectAssignments
     });
 }
 
 export function useWanikaniSummary(enabled = true) {
     return useQuery({
-        queryKey: [WANIKANI_QUERY_KEY, 'Summary'], 
+        queryKey: [WANIKANI_QUERY_KEY, 'Summary'],
         queryFn: () => WanikaniApiService.getSummary(),
         enabled: enabled,
         gcTime: Infinity,
         staleTime: 1000 * 60,
-        select: (data) => mapWanikaniSummary(data)
+        select: mapWanikaniSummary
     });
 }
 
 export function useWanikaniResets(enabled = true) {
     return useQuery({
-        queryKey: [WANIKANI_QUERY_KEY, 'Resets'], 
-        queryFn: () => WanikaniApiService.getResets(), 
+        queryKey: [WANIKANI_QUERY_KEY, 'Resets'],
+        queryFn: () => WanikaniApiService.getResets(),
         enabled: enabled,
         gcTime: Infinity,
         staleTime: 1000 * 60 * 10,
-        select: (data) => data.data.map(mapWanikaniReset)
+        select: selectResets
     });
 }
 
 export function useWanikaniLevelProgress(enabled = true) {
-    return useQuery( {
-        queryKey: [WANIKANI_QUERY_KEY, 'LevelProgress'], 
+    return useQuery({
+        queryKey: [WANIKANI_QUERY_KEY, 'LevelProgress'],
         queryFn: () => WanikaniApiService.getLevelProgress(),
         enabled: enabled,
         gcTime: Infinity,
         staleTime: 60 * 1000,
-        select: (data) => data.data.map(mapWanikaniLevelProgression)
+        select: selectLevelProgress
     });
 }
 
 export function useWanikaniUser(enabled = true) {
     return useQuery({
         queryKey: [WANIKANI_QUERY_KEY, 'User'],
-        queryFn: () => WanikaniApiService.getUser(), 
+        queryFn: () => WanikaniApiService.getUser(),
         enabled: enabled,
         gcTime: Infinity,
         staleTime: 30 * 1000,
         retry: alwaysRetryOnRateLimit(3),
-        select: (data) => mapWanikaniUser(data)
+        select: mapWanikaniUser
     });
 }
 
@@ -158,7 +167,7 @@ export function useWanikaniReviews(enabled = true, onProgress: OnProgressCallbac
         enabled: enabled,
         gcTime: 7 * 24 * 60 * 60 * 1000,
         staleTime: 30 * 1000,
-        select: (data) => data.map(mapWanikaniReview)
+        select: selectReviews
     });
 }
 

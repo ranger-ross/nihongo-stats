@@ -7,7 +7,7 @@ import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChar
 import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart";
 import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart";
 import WanikaniLoadingScreen from "./components/WanikaniLoadingScreen";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import RequireOrRedirect from "../shared/RequireOrRedirect";
 import WanikaniStagesHistoryChart from "./components/WanikaniStagesHistoryChart";
 import WanikaniLessonHistoryChart from "./components/WanikaniLessonHistoryChart";
@@ -18,20 +18,32 @@ type LoadableChartProps = {
     children: ReactNode
 };
 
+// Defers rendering a chart until it scrolls into view
 function LoadableChart({ placeholderTitle, children }: LoadableChartProps) {
-    const [isLoaded, setIsLoaded] = useState(false)
+    const [isLoaded, setIsLoaded] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (isLoaded || !ref.current) return;
+        const observer = new IntersectionObserver(entries => {
+            if (entries.some(entry => entry.isIntersecting)) {
+                setIsLoaded(true);
+                observer.disconnect();
+            }
+        });
+        observer.observe(ref.current);
+        return () => observer.disconnect();
+    }, [isLoaded]);
+
     return (
-        // <ReactVisibilitySensor partialVisibility={true}
-        //                        onChange={(isVisible: boolean) => isVisible ? setIsLoaded(true) : null}>
-        <Card style={{ margin: '15px' }}>
-            {/* {isLoaded ? children : ( */}
-            <div style={{ height: '500px', textAlign: 'center' }}>
-                <Typography variant={'h5'}>{placeholderTitle}</Typography>
-                <CircularProgress style={{ margin: '100px' }} />
-            </div>
-            {/* )} */}
+        <Card ref={ref} style={{ margin: '15px' }}>
+            {isLoaded ? children : (
+                <div style={{ height: '500px', textAlign: 'center' }}>
+                    <Typography variant={'h5'}>{placeholderTitle}</Typography>
+                    <CircularProgress style={{ margin: '100px' }} />
+                </div>
+            )}
         </Card>
-        // </ReactVisibilitySensor>
     );
 }
 

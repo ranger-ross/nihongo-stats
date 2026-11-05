@@ -26,7 +26,7 @@ function AppHeader() {
         <GridLegacy container style={styles.container}>
             <GridLegacy item>
                 <Typography variant={'h4'} color={'textPrimary'} style={styles.title}>
-                    Nihongo Stats <span style={styles.alpha}>Alpha</span>
+                    Nihongo Stats
                 </Typography>
             </GridLegacy>
             <HeaderOptionMenu />

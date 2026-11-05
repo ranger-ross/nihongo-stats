@@ -1,7 +1,7 @@
 import { useWanikaniApiKey } from "../hooks/useWanikaniApiKey";
 import { RoutePaths } from "../Routes";
 import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart";
-import { Card, CardContent, CircularProgress, Link, Typography } from "@mui/material";
+import { Card, CircularProgress, Typography } from "@mui/material";
 import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart";
 import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart";
 import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart";
@@ -84,22 +84,6 @@ function WanikaniHistoryContent() {
 
     return (
         <>
-            <Card style={{ margin: '15px' }}>
-                <CardContent style={{ height: '100%' }}>
-                    <Typography variant={'h5'} align={'center'}>
-                        Notice
-                    </Typography>
-
-                    <Typography variant={'body1'} align={'center'}>
-                        Due to performance issues, the Wanikani team has decided to partially disable the WK API. <br />
-                        Some functionality may not work properly 😔 <br />
-                        For more information, see the post <Link href="https://community.wanikani.com/t/api-changes-get-all-reviews/61617" target="_blank" >here</Link>
-                    </Typography>
-
-                </CardContent>
-            </Card>
-
-
             <Card variant={'outlined'} style={{ margin: '15px' }}>
                 <WanikaniHistorySummaryChart
                     levelProgress={levelProgress}

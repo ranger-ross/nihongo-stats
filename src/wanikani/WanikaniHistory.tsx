@@ -55,6 +55,7 @@ function WanikaniHistoryContent() {
         subjects,
         assignments,
         reviews,
+        reviewStatistics,
         reviewsIsRateLimited,
         reviewsProgress,
         isLoading,
@@ -64,7 +65,8 @@ function WanikaniHistoryContent() {
         subjects: true,
         assignments: true,
         levelProgress: true,
-        reviews: true
+        reviews: true,
+        reviewStatistics: true
     });
 
     if (isLoading) {
@@ -115,8 +117,8 @@ function WanikaniHistoryContent() {
                 <WanikaniHistorySummaryChart
                     levelProgress={levelProgress}
                     user={user}
-                    subjects={subjects}
-                    reviews={reviews}
+                    assignments={assignments}
+                    reviewStatistics={reviewStatistics}
                 />
             </Card>
 

@@ -54,10 +54,7 @@ function WanikaniHistoryContent() {
         levelProgress,
         subjects,
         assignments,
-        reviews,
         reviewStatistics,
-        reviewsIsRateLimited,
-        reviewsProgress,
         isLoading,
         resets
     } = useWanikaniData({
@@ -65,7 +62,6 @@ function WanikaniHistoryContent() {
         subjects: true,
         assignments: true,
         levelProgress: true,
-        reviews: true,
         reviewStatistics: true
     });
 
@@ -75,7 +71,6 @@ function WanikaniHistoryContent() {
                 fetch={{
                     user: true,
                     assignments: true,
-                    reviews: true,
                     subjects: true,
                 }}
                 isLoaded={{
@@ -83,14 +78,6 @@ function WanikaniHistoryContent() {
                     assignments: assignments.length > 0,
                     subjects: subjects.length > 0,
                 }}
-                progress={{
-                    reviews: {
-                        isRateLimited: reviewsIsRateLimited,
-                        progress: reviewsProgress,
-                        isComplete: reviewsProgress === 1.0
-                    }
-                }}
-
             />
         );
     }
@@ -146,8 +133,9 @@ function WanikaniHistoryContent() {
 
             <LoadableChart placeholderTitle="Review Accuracy">
                 <WanikaniAccuracyHistoryChart
-                    reviews={reviews}
+                    reviewStatistics={reviewStatistics}
                     subjects={subjects}
+                    levelProgress={levelProgress}
                 />
             </LoadableChart>
 

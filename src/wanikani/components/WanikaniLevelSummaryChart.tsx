@@ -92,7 +92,7 @@ function getCurrentLevelProgressData(
     assignments: WanikaniAssignment[],
     user?: WanikaniUser
 ): ProgressData {
-    if (!user || levelsProgress.length === 0 || allSubjects.length === 0 || assignments.length === 0)
+    if (!user || levelsProgress.length === 0 || allSubjects.length === 0)
         return defaultData;
 
     const currentLevel = user.level;

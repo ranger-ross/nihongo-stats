@@ -3,7 +3,6 @@ import { RoutePaths } from "../Routes";
 import WanikaniLevelProgressChart from "./components/WanikaniLevelProgressChart";
 import { Card, CardContent, CircularProgress, Link, Typography } from "@mui/material";
 import WanikaniTotalItemsHistoryChart from "./components/WanikaniTotalItemsHistoryChart";
-import WanikaniReviewsHistoryChart from "./components/WanikaniReviewsHistoryChart";
 import WanikaniAccuracyHistoryChart from "./components/WanikaniAccuracyHistoryChart";
 import WanikaniHistorySummaryChart from "./components/WanikaniHistorySummaryChart";
 import WanikaniLoadingScreen from "./components/WanikaniLoadingScreen";
@@ -119,10 +118,6 @@ function WanikaniHistoryContent() {
                     subjects={subjects}
                     reviews={reviews}
                 />
-            </Card>
-
-            <Card variant={'outlined'} style={{ margin: '15px' }}>
-                <WanikaniReviewsHistoryChart reviews={reviews} subjects={subjects} />
             </Card>
 
             <Card variant={'outlined'} style={{ margin: '15px' }}>

@@ -1,13 +1,11 @@
 import { WANIKANI_COLORS } from '../../Constants';
 import { Card, CardContent, CircularProgress, GridLegacy, Typography } from "@mui/material";
 import { sortAndGetMedian } from "../../util/MathUtils";
-import { createSubjectMap } from "../service/WanikaniDataUtil";
 import { millisToDays, millisToHours } from "../../util/DateUtils";
-import { distinct } from "../../util/ArrayUtils";
 import { AppStyles } from "../../util/TypeUtils";
-import { WanikaniSubjectReview } from "../models/WanikaniSubjectReview";
-import { WanikaniReview } from "../models/WanikaniReview";
-import { WanikaniSubject } from "../models/WanikaniSubject";
+import { WanikaniAssignment } from "../models/WanikaniAssignment";
+import { WanikaniReviewStatistic } from "../models/WanikaniReviewStatistic";
+import { WanikaniSubjectType } from "../models/WanikaniSubject";
 import { WanikaniLevelProgression } from "../models/WanikaniLevelProgress";
 import { WanikaniUser } from "../models/WanikaniUser";
 import { ErrorBoundary } from "react-error-boundary";
@@ -28,11 +26,6 @@ const styles: AppStyles = {
     },
 };
 
-function getBurnedItems(allReviewsByType: WanikaniSubjectReview[]) {
-    const burned = allReviewsByType.filter(review => review.review.endingSrsStage == 9);
-    return distinct(burned, review => review.subject.id);
-}
-
 type FormattedData = {
     total: number,
     radicals: number,
@@ -46,39 +39,33 @@ type FormattedData = {
     vocabularyBurned: number,
 };
 
-function formatTotalsData(reviews: WanikaniReview[], subjects: WanikaniSubject[]): FormattedData {
-    const subjectsMap = createSubjectMap(subjects);
-    const data: WanikaniSubjectReview[] = [];
-    for (const review of reviews) {
-        data.push({
-            review: review,
-            subject: subjectsMap[review.subjectId]
-        });
-    }
+// Each completed review adds one correct answer per part (meaning and reading).
+function reviewCount(statistic: WanikaniReviewStatistic) {
+    return Math.max(statistic.meaningCorrect, statistic.readingCorrect);
+}
 
-    const radicalsTotal = data.filter(r => r.subject?.object == 'radical');
-    const radicalsDistinct = distinct(radicalsTotal, review => review.subject.id);
-    const radicalsBurned = getBurnedItems(radicalsTotal);
-
-    const kanjiTotal = data.filter(r => r.subject?.object == 'kanji');
-    const kanjiDistinct = distinct(kanjiTotal, review => review.subject.id);
-    const kanjiBurned = getBurnedItems(kanjiTotal);
-
-    const vocabularyTotal = data.filter(r => r.subject?.object == 'vocabulary');
-    const vocabularyDistinct = distinct(vocabularyTotal, review => review.subject.id);
-    const vocabularyBurned = getBurnedItems(vocabularyTotal);
+function formatTotalsData(assignments: WanikaniAssignment[], reviewStatistics: WanikaniReviewStatistic[]): FormattedData {
+    const reviewsOfType = (type: WanikaniSubjectType) => reviewStatistics
+        .filter(statistic => statistic.subjectType === type)
+        .reduce((sum, statistic) => sum + reviewCount(statistic), 0);
+    const lessonsOfType = (type: WanikaniSubjectType) => assignments
+        .filter(assignment => assignment.subjectType === type && !!assignment.startedAt)
+        .length;
+    const burnedOfType = (type: WanikaniSubjectType) => assignments
+        .filter(assignment => assignment.subjectType === type && assignment.srsStage === 9)
+        .length;
 
     return {
-        total: data.length,
-        radicals: radicalsTotal.length,
-        radicalsDistinct: radicalsDistinct.length,
-        radicalsBurned: radicalsBurned.length,
-        kanji: kanjiTotal.length,
-        kanjiDistinct: kanjiDistinct.length,
-        kanjiBurned: kanjiBurned.length,
-        vocabulary: vocabularyTotal.length,
-        vocabularyDistinct: vocabularyDistinct.length,
-        vocabularyBurned: vocabularyBurned.length,
+        total: reviewStatistics.reduce((sum, statistic) => sum + reviewCount(statistic), 0),
+        radicals: reviewsOfType('radical'),
+        radicalsDistinct: lessonsOfType('radical'),
+        radicalsBurned: burnedOfType('radical'),
+        kanji: reviewsOfType('kanji'),
+        kanjiDistinct: lessonsOfType('kanji'),
+        kanjiBurned: burnedOfType('kanji'),
+        vocabulary: reviewsOfType('vocabulary'),
+        vocabularyDistinct: lessonsOfType('vocabulary'),
+        vocabularyBurned: burnedOfType('vocabulary'),
     };
 }
 
@@ -158,14 +145,14 @@ function DaysAndHoursLabel({ label, milliseconds }: DaysAndHoursLabelProps) {
 
 
 type WanikaniHistorySummaryChartProps = {
-    reviews: WanikaniReview[]
-    subjects: WanikaniSubject[]
+    assignments: WanikaniAssignment[]
+    reviewStatistics: WanikaniReviewStatistic[]
     levelProgress: WanikaniLevelProgression[]
     user?: WanikaniUser
 };
 
-function WanikaniHistorySummaryChart({ user, subjects, reviews, levelProgress }: WanikaniHistorySummaryChartProps) {
-    const totalsData = formatTotalsData(reviews, subjects);
+function WanikaniHistorySummaryChart({ user, assignments, reviewStatistics, levelProgress }: WanikaniHistorySummaryChartProps) {
+    const totalsData = formatTotalsData(assignments, reviewStatistics);
     const levelData = !user ? null : formatLevelData(user, levelProgress);
 
     const isLoading = !totalsData || !levelData;

@@ -8,6 +8,7 @@ import {RawWanikaniResetPage} from "../models/raw/RawWanikaniReset";
 import {RawWanikaniAssignment} from "../models/raw/RawWanikaniAssignment";
 import {sleep, throwIfRateLimited} from "../../util/ReactQueryUtils";
 import {RawWanikaniUser} from "../models/raw/RawWanikaniUser";
+import {RawWanikaniReviewStatistic} from "../models/raw/RawWanikaniReviewStatistic";
 
 
 const wanikaniApiUrl = APP_URLS.wanikaniApi;
@@ -120,6 +121,10 @@ function sortAndDeduplicateAssignments(assignments: RawWanikaniAssignment[]) {
     return result.sort((a, b) => a.id - b.id);
 }
 
+function getAllReviewStatistics(): Promise<RawWanikaniReviewStatistic[]> {
+    return fetchMultiPageRequest('/v2/review_statistics');
+}
+
 async function flushCache() {
     for (const key of Object.keys(CACHE_KEYS)) {
         await localForage.removeItem(CACHE_KEYS[key]);
@@ -188,6 +193,7 @@ export default {
     getResets: getResets,
     getLevelProgress: getLevelProgress,
     getAllAssignments: getAllAssignments,
+    getAllReviewStatistics: getAllReviewStatistics,
     getSubjects: getSubjects,
     getReviewAsObservable: WanikaniApiServiceRxJs.getReviewAsObservable,
 }

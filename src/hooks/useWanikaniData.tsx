@@ -4,6 +4,7 @@ import {
     useWanikaniLevelProgress,
     useWanikaniResets,
     useWanikaniReviews,
+    useWanikaniReviewStatistics,
     useWanikaniSubjects,
     useWanikaniSummary,
     useWanikaniUser
@@ -16,6 +17,7 @@ export type WanikaniDataConfig = {
     levelProgress?: boolean
     assignments?: boolean
     reviews?: boolean
+    reviewStatistics?: boolean
     resets?: boolean
 };
 
@@ -30,6 +32,7 @@ export function useWanikaniData(config: WanikaniDataConfig) {
     const {data: summary, isLoading: isSummaryLoading} = useWanikaniSummary(config.summary)
     const {data: levelProgress, isLoading: isLevelProgressLoading} = useWanikaniLevelProgress(config.levelProgress)
     const {data: resets, isLoading: isResetsLoading} = useWanikaniResets(config.resets)
+    const {data: reviewStatistics, isLoading: isReviewStatisticsLoading} = useWanikaniReviewStatistics(config.reviewStatistics)
     const {data: reviews, isLoading: isReviewsLoading} = useWanikaniReviews(
         config.reviews,
         setReviewsProgress,
@@ -43,6 +46,7 @@ export function useWanikaniData(config: WanikaniDataConfig) {
         (config.levelProgress && !levelProgress && isLevelProgressLoading) ||
         (config.subjects && !subjects && isSubjectsLoading) ||
         (config.reviews && !reviews && isReviewsLoading) ||
+        (config.reviewStatistics && !reviewStatistics && isReviewStatisticsLoading) ||
         (config.assignments && isAssignmentsLoading);
 
     return {
@@ -51,6 +55,7 @@ export function useWanikaniData(config: WanikaniDataConfig) {
         levelProgress: levelProgress ?? [],
         assignments: assignments ?? [],
         reviews: reviews ?? [],
+        reviewStatistics: reviewStatistics ?? [],
         isLoading,
         summary,
         reviewsProgress,

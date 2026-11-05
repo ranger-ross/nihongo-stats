@@ -6,6 +6,7 @@ import {
     mapWanikaniLevelProgression,
     mapWanikaniReset,
     mapWanikaniReview,
+    mapWanikaniReviewStatistic,
     mapWanikaniSubject,
     mapWanikaniSummary,
     mapWanikaniUser
@@ -21,6 +22,7 @@ import { QUERY_CLIENT_THROTTLE_TIME, queryClient } from "../../App";
 import { RawWanikaniAssignment } from "../models/raw/RawWanikaniAssignment";
 import { RawWanikaniResetPage } from "../models/raw/RawWanikaniReset";
 import { RawWanikaniLevelProgressionPage } from "../models/raw/RawWanikaniLevelProgress";
+import { RawWanikaniReviewStatistic } from "../models/raw/RawWanikaniReviewStatistic";
 
 const WANIKANI_QUERY_KEY = 'wanikani';
 
@@ -29,6 +31,7 @@ const selectAssignments = (data: RawWanikaniAssignment[]) => data.map(mapWanikan
 const selectResets = (data: RawWanikaniResetPage) => data.data.map(mapWanikaniReset);
 const selectLevelProgress = (data: RawWanikaniLevelProgressionPage) => data.data.map(mapWanikaniLevelProgression);
 const selectReviews = (data: RawWanikaniReview[]) => data.map(mapWanikaniReview);
+const selectReviewStatistics = (data: RawWanikaniReviewStatistic[]) => data.map(mapWanikaniReviewStatistic);
 
 function buildWanikaniSubjectQueries(firstPageData: RawWanikaniCollectionResponse<RawWanikaniSubject> | undefined): string[] {
     if (!firstPageData) {
@@ -92,6 +95,17 @@ export function useWanikaniAssignments(enabled = true) {
         gcTime: Infinity,
         staleTime: 5 * 60 * 1000,
         select: selectAssignments
+    });
+}
+
+export function useWanikaniReviewStatistics(enabled = true) {
+    return useQuery({
+        queryKey: [WANIKANI_QUERY_KEY, 'ReviewStatistics'],
+        queryFn: () => WanikaniApiService.getAllReviewStatistics(),
+        enabled: enabled,
+        gcTime: Infinity,
+        staleTime: 5 * 60 * 1000,
+        select: selectReviewStatistics
     });
 }
 

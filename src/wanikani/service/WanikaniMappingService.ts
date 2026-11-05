@@ -23,6 +23,8 @@ import {RawWanikaniLevelProgression} from "../models/raw/RawWanikaniLevelProgres
 import {WanikaniLevelProgression} from "../models/WanikaniLevelProgress";
 import {RawWanikaniSummary} from "../models/raw/RawWanikaniSummary";
 import {WanikaniSummary} from "../models/WanikaniSummary";
+import {RawWanikaniReviewStatistic} from "../models/raw/RawWanikaniReviewStatistic";
+import {WanikaniReviewStatistic} from "../models/WanikaniReviewStatistic";
 
 export function mapWanikaniUser(rawUser: RawWanikaniUser): WanikaniUser {
     return {
@@ -165,6 +167,14 @@ export function mapWanikaniAssignment(assignment: RawWanikaniAssignment): Wanika
         availableAt: assignment.data.available_at != null ? new Date(assignment.data.available_at) : null,
         resurrectedAt: assignment.data.resurrected_at != null ? new Date(assignment.data.resurrected_at) : null,
         hidden: assignment.data.hidden,
+    };
+}
+
+export function mapWanikaniReviewStatistic(statistic: RawWanikaniReviewStatistic): WanikaniReviewStatistic {
+    return {
+        subjectType: statistic.data.subject_type as WanikaniSubjectType,
+        meaningCorrect: statistic.data.meaning_correct,
+        readingCorrect: statistic.data.reading_correct,
     };
 }
 

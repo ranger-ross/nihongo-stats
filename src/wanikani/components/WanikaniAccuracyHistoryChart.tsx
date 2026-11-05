@@ -1,23 +1,22 @@
-import { ArgumentAxis, Chart, Legend, Tooltip, ValueAxis } from '@devexpress/dx-react-chart-material-ui';
+import { ArgumentAxis, Chart, Tooltip, ValueAxis } from '@devexpress/dx-react-chart-material-ui';
 import React, { useMemo, useState } from "react";
 import {
     ArgumentAxis as ArgumentAxisBase,
     EventTracker,
+    LineSeries,
     ScatterSeries,
-    SplineSeries,
     ValueScale
 } from "@devexpress/dx-react-chart";
 import { WANIKANI_COLORS } from '../../Constants';
-import { Card, CardContent, GridLegacy, Typography } from "@mui/material";
-import { groupBy } from 'lodash-es';
+import { Card, CardContent, GridLegacy, Tooltip as MuiTooltip, Typography } from "@mui/material";
+import { InfoOutlined } from "@mui/icons-material";
 import { scaleLinear } from 'd3-scale';
 import PeriodSelector from "../../shared/PeriodSelector";
 import { createSubjectMap } from "../service/WanikaniDataUtil";
 import { millisToDays, truncDate } from "../../util/DateUtils";
-import { WanikaniSubjectReview } from "../models/WanikaniSubjectReview";
-import { WanikaniReview } from "../models/WanikaniReview";
 import { WanikaniSubject } from "../models/WanikaniSubject";
-import { useDeviceInfo } from "../../hooks/useDeviceInfo";
+import { WanikaniReviewStatistic } from "../models/WanikaniReviewStatistic";
+import { WanikaniLevelProgression } from "../models/WanikaniLevelProgress";
 import { ErrorBoundary } from "react-error-boundary";
 import { GenericErrorMessage } from "../../shared/GenericErrorMessage";
 
@@ -47,69 +46,47 @@ function PercentageLabel(props: PercentageLabelProps) {
     );
 }
 
-function calculateRollingAverageOfDaysInQueue(queue: DayDataPoint[]) {
-    let total = 0;
-    let incorrectCount = 0;
-
-    for (const day of queue) {
-        total += day.total;
-        incorrectCount += day.incorrectCount;
-    }
-
-    return Number((((total - incorrectCount) / total) * 100).toFixed(2));
-}
-
-type DayDataPoint = {
+type LevelDataPoint = {
     date: Date,
+    level: number,
     ratio: number,
-    total: number,
-    incorrectCount: number,
-    movingAverage?: number,
 };
 
-function fetchData(reviews: WanikaniReview[], subjects: WanikaniSubject[]) {
+// Reviews are no longer available, so each level's lifetime answer accuracy
+// is plotted on the date that level was unlocked.
+function fetchData(reviewStatistics: WanikaniReviewStatistic[], subjects: WanikaniSubject[], levelProgress: WanikaniLevelProgression[]): LevelDataPoint[] {
     const subjectMap = createSubjectMap(subjects);
-    const data: WanikaniSubjectReview[] = [];
-    for (const review of reviews) {
-        data.push({
-            review: review,
-            subject: subjectMap[review.subjectId]
-        });
-    }
-    const groupedData = groupBy(data, (v: WanikaniSubjectReview) => truncDate(v.review.createdAt));
-    const groupedDataAsMap = new Map(Object.entries(groupedData));
-    const result: DayDataPoint[] = Array.from(groupedDataAsMap, ([date, data]: any) => {
-        const total = data.length;
-        let incorrectCount = 0;
-        for (const { review } of data) {
-            const isIncorrect = review.incorrectMeaningAnswers > 0 || review.incorrectReadingAnswers > 0;
-            if (isIncorrect)
-                incorrectCount += 1;
+    const answers: { [level: number]: { correct: number, total: number } } = {};
+    for (const statistic of reviewStatistics) {
+        const level = subjectMap[statistic.subjectId]?.level;
+        if (!level) {
+            continue;
         }
-
-        return {
-            date: new Date(date),
-            ratio: Number((((total - incorrectCount) / total) * 100).toFixed(2)),
-            total: total,
-            incorrectCount: incorrectCount,
-        };
-    });
-
-    // Calculate 7 day rolling average
-    const queue: DayDataPoint[] = [];
-    for (const day of result) {
-        queue.push(day);
-
-        if (queue.length > 6)
-            queue.shift();
-
-        day.movingAverage = calculateRollingAverageOfDaysInQueue(queue);
+        const correct = statistic.meaningCorrect + statistic.readingCorrect;
+        const incorrect = statistic.meaningIncorrect + statistic.readingIncorrect;
+        answers[level] ??= { correct: 0, total: 0 };
+        answers[level].correct += correct;
+        answers[level].total += correct + incorrect;
     }
 
-    return result;
-}
+    // A later progression for the same level (after a reset) replaces the earlier one
+    const unlockDates: { [level: number]: Date } = {};
+    for (const progression of levelProgress) {
+        if (!progression.abandonedAt) {
+            unlockDates[progression.level] = progression.unlockedAt ?? progression.createdAt;
+        }
+    }
 
-const ROLLING_AVERAGE_LINE_COLOR = '#ffd500';
+    return Object.entries(unlockDates)
+        .map(([level, date]) => ({ level: Number(level), date }))
+        .filter(({ level }) => answers[level]?.total > 0)
+        .map(({ level, date }) => ({
+            date,
+            level,
+            ratio: Number(((answers[level].correct / answers[level].total) * 100).toFixed(2)),
+        }))
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
+}
 
 function getTotalDays() {
     const firstDate = truncDate(new Date(2000, 0, 1));
@@ -120,34 +97,30 @@ function getTotalDays() {
 
 const totalDays = getTotalDays();
 
-function useData(subjects: WanikaniSubject[], reviews: WanikaniReview[], daysToLookBack: number) {
-    const rawData = fetchData(reviews, subjects);
+function useData(reviewStatistics: WanikaniReviewStatistic[], subjects: WanikaniSubject[], levelProgress: WanikaniLevelProgression[], daysToLookBack: number) {
+    const rawData = useMemo(() => fetchData(reviewStatistics, subjects, levelProgress), [reviewStatistics, subjects, levelProgress]);
 
     return useMemo(() => rawData.filter(dp => dp.date.getTime() > (Date.now() - (1000 * 3600 * 24 * daysToLookBack))),
         [rawData, daysToLookBack]);
 }
 
 type WanikaniAccuracyHistoryChartProps = {
-    reviews: WanikaniReview[]
+    reviewStatistics: WanikaniReviewStatistic[]
     subjects: WanikaniSubject[]
+    levelProgress: WanikaniLevelProgression[]
 };
 
-function WanikaniAccuracyHistoryChart({ subjects, reviews }: WanikaniAccuracyHistoryChartProps) {
-    const [daysToLookBack, setDaysToLookBack] = useState(90);
-    const data = useData(subjects, reviews, daysToLookBack);
-    const { isMobile } = useDeviceInfo();
+function WanikaniAccuracyHistoryChart({ reviewStatistics, subjects, levelProgress }: WanikaniAccuracyHistoryChartProps) {
+    const [daysToLookBack, setDaysToLookBack] = useState(totalDays);
+    const data = useData(reviewStatistics, subjects, levelProgress, daysToLookBack);
 
     function AccuracyToolTip({ targetItem }: Tooltip.ContentProps) {
-        const isAverageSeries = targetItem.series.toLowerCase().includes('average');
         const dataPoint = data[targetItem.point];
         return (
             <>
-                <p>{new Date(dataPoint.date).toLocaleDateString()}</p>
-                {isAverageSeries ? (
-                    <p>7 Day Rolling Average: {dataPoint.movingAverage}%</p>
-                ) : (
-                    <p>Accuracy: {dataPoint.ratio}%</p>
-                )}
+                <p>Level {dataPoint.level}</p>
+                <p>Unlocked: {dataPoint.date.toLocaleDateString()}</p>
+                <p>Accuracy: {dataPoint.ratio}%</p>
             </>
         );
     }
@@ -164,7 +137,7 @@ function WanikaniAccuracyHistoryChart({ subjects, reviews }: WanikaniAccuracyHis
                             </Typography>
                         </GridLegacy>
 
-                        <GridLegacy item xs={12} md={4} style={{ textAlign: 'end' }}>
+                        <GridLegacy item xs={12} md={4} style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px' }}>
                             <PeriodSelector period={daysToLookBack}
                                 setPeriod={setDaysToLookBack}
                                 options={[
@@ -177,6 +150,9 @@ function WanikaniAccuracyHistoryChart({ subjects, reviews }: WanikaniAccuracyHis
                                     { value: totalDays, text: 'All' },
                                 ]}
                             />
+                            <MuiTooltip title={'Lifetime accuracy of each level\'s items, shown on the date the level was unlocked'}>
+                                <InfoOutlined fontSize={'small'} />
+                            </MuiTooltip>
                         </GridLegacy>
 
                     </GridLegacy>
@@ -186,21 +162,18 @@ function WanikaniAccuracyHistoryChart({ subjects, reviews }: WanikaniAccuracyHis
                             <ValueScale factory={scale} modifyDomain={modifyDomain} />
                             <ValueAxis labelComponent={PercentageLabel} />
                             <ArgumentAxis labelComponent={LabelWithDate} />
-                            <ScatterSeries
-                                name="Daily Accuracy"
+                            <LineSeries
+                                name="Level Accuracy Line"
                                 valueField="ratio"
                                 argumentField="date"
                                 color={WANIKANI_COLORS.blue}
                             />
-
-                            <SplineSeries
-                                name="7 Day Rolling Average"
-                                valueField="movingAverage"
+                            <ScatterSeries
+                                name="Level Accuracy"
+                                valueField="ratio"
                                 argumentField="date"
-                                color={ROLLING_AVERAGE_LINE_COLOR}
+                                color={WANIKANI_COLORS.blue}
                             />
-
-                            <Legend position={isMobile ? 'bottom' : 'right'} />
 
                             <EventTracker />
                             <Tooltip contentComponent={AccuracyToolTip} />

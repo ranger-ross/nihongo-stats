@@ -172,9 +172,12 @@ export function mapWanikaniAssignment(assignment: RawWanikaniAssignment): Wanika
 
 export function mapWanikaniReviewStatistic(statistic: RawWanikaniReviewStatistic): WanikaniReviewStatistic {
     return {
+        subjectId: statistic.data.subject_id,
         subjectType: statistic.data.subject_type as WanikaniSubjectType,
         meaningCorrect: statistic.data.meaning_correct,
+        meaningIncorrect: statistic.data.meaning_incorrect,
         readingCorrect: statistic.data.reading_correct,
+        readingIncorrect: statistic.data.reading_incorrect,
     };
 }
 

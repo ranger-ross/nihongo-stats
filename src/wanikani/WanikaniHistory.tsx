@@ -138,7 +138,7 @@ function WanikaniHistoryContent() {
 
             <LoadableChart placeholderTitle="Stages">
                 <WanikaniStagesHistoryChart
-                    reviews={reviews}
+                    assignments={assignments}
                     subjects={subjects}
                     resets={resets}
                 />

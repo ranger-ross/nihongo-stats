@@ -1,5 +1,6 @@
-import { Card, CardContent, GridLegacy, Typography } from "@mui/material";
-import React, { useMemo, useState } from "react";
+import { Card, CardContent, GridLegacy, Tooltip as MuiTooltip, Typography } from "@mui/material";
+import { InfoOutlined } from "@mui/icons-material";
+import React, { useMemo } from "react";
 import { createSubjectMap } from "../service/WanikaniDataUtil";
 import { addDays, truncDate, truncMonth, truncWeek } from "../../util/DateUtils";
 import { ArgumentAxis, Chart, Tooltip, ValueAxis } from "@devexpress/dx-react-chart-material-ui";
@@ -8,7 +9,6 @@ import {
     ArgumentAxis as ArgumentAxisBase,
     ArgumentScale,
     EventTracker,
-    SeriesRef,
     Stack,
     Tooltip as TooltipBase
 } from "@devexpress/dx-react-chart";
@@ -18,8 +18,7 @@ import { getVisibleLabelIndices, scaleBand } from "../../util/ChartUtils";
 import { WanikaniReset } from "../models/WanikaniReset";
 import Area from "../../shared/Area";
 import { WanikaniSubject } from "../models/WanikaniSubject";
-import { WanikaniSubjectReview } from "../models/WanikaniSubjectReview";
-import { WanikaniReview } from "../models/WanikaniReview";
+import { WanikaniAssignment } from "../models/WanikaniAssignment";
 import { ErrorBoundary } from "react-error-boundary";
 import { GenericErrorMessage } from "../../shared/GenericErrorMessage";
 import { useDeviceInfo } from "../../hooks/useDeviceInfo";
@@ -54,6 +53,19 @@ type SubjectMap = { [id: string]: WanikaniSubject };
 type StageName = 'apprentice' | 'guru' | 'master' | 'enlightened' | 'burned';
 type StageItemKey = 'apprenticeItems' | 'guruItems' | 'masterItems' | 'enlightenedItems' | 'burnedItems'
 
+type StageChange = {
+    date: Date
+    startingSrsStage: number
+    endingSrsStage: number
+    subject: WanikaniSubject
+};
+
+// Seconds until the next review after reaching each stage (default SRS system).
+// The accelerated system only differs on apprentice stages, by a few hours.
+const SRS_INTERVALS: { [stage: number]: number } = {
+    1: 14400, 2: 28800, 3: 82800, 4: 169200, 5: 601200, 6: 1206000, 7: 2588400, 8: 10364400,
+};
+
 class DataPoint {
     apprentice: number = 0
     guru: number = 0
@@ -85,7 +97,7 @@ class DataPoint {
     }
 
     #isApprentice(stage: number) {
-        return [2, 3, 4].includes(stage);
+        return [1, 2, 3, 4].includes(stage);
     }
 
     #isGuru(stage: number) {
@@ -185,9 +197,9 @@ class DataPoint {
         this[stageKey] = Object.keys(this[stageItemsKey]).length;
     }
 
-    push(data: WanikaniSubjectReview) {
-        const startingStage = data.review.startingSrsStage;
-        const endingStage = data.review.endingSrsStage;
+    push(data: StageChange) {
+        const startingStage = data.startingSrsStage;
+        const endingStage = data.endingSrsStage;
 
         if (this.#areSameStage(startingStage, endingStage)) {
             return; // Do nothing, the stage didn't change
@@ -210,21 +222,65 @@ class DataPoint {
     }
 }
 
-function formatData(subjects: WanikaniSubject[], reviews: WanikaniReview[]) {
-    const subjectMap = createSubjectMap(subjects);
-    const data: WanikaniSubjectReview[] = [];
-    for (const review of reviews) {
-        data.push({
-            review: review,
-            subject: subjectMap[review.subjectId]
-        });
+// Reviews are no longer available, so stage changes are rebuilt from assignment timestamps.
+// Start, pass, burn and the current stage are exact. Master and enlightened are estimated.
+function getStageChanges(assignment: WanikaniAssignment, subject: WanikaniSubject): StageChange[] {
+    const changes: StageChange[] = [];
+    if (!assignment.startedAt) {
+        return changes;
     }
 
-    return data;
+    let stage = 0;
+    let lastTime = 0;
+    const moveTo = (endingSrsStage: number, time: number) => {
+        lastTime = Math.max(time, lastTime);
+        changes.push({ date: new Date(lastTime), startingSrsStage: stage, endingSrsStage, subject });
+        stage = endingSrsStage;
+    };
+
+    moveTo(1, assignment.startedAt.getTime());
+    const passedAt = assignment.passedAt?.getTime();
+    if (passedAt) {
+        moveTo(5, passedAt);
+    }
+
+    if (assignment.burnedAt) {
+        // The final climb to burned has no mistakes, so count back from the burn
+        const enlightenedAt = assignment.burnedAt.getTime() - SRS_INTERVALS[8] * 1000;
+        const masterAt = enlightenedAt - SRS_INTERVALS[7] * 1000;
+        if (passedAt && masterAt > passedAt) {
+            moveTo(7, masterAt);
+        }
+        if (passedAt && enlightenedAt > passedAt) {
+            moveTo(8, enlightenedAt);
+        }
+        moveTo(9, assignment.burnedAt.getTime());
+        if (assignment.resurrectedAt && assignment.srsStage !== 9) {
+            moveTo(assignment.srsStage, assignment.resurrectedAt.getTime());
+        }
+    } else if (assignment.availableAt && SRS_INTERVALS[assignment.srsStage]) {
+        // The next review is scheduled from the last one, which dates the current stage
+        const enteredAt = assignment.availableAt.getTime() - SRS_INTERVALS[assignment.srsStage] * 1000;
+        const masterAt = enteredAt - SRS_INTERVALS[7] * 1000;
+        if (assignment.srsStage === 8 && passedAt && masterAt > passedAt) {
+            moveTo(7, masterAt);
+        }
+        moveTo(assignment.srsStage, enteredAt);
+    }
+
+    return changes;
 }
 
-function aggregateDate(rawData: WanikaniSubjectReview[] | null, resets: WanikaniReset[], unit: StageHistoryUnit) {
-    if (!rawData)
+function formatData(subjects: WanikaniSubject[], assignments: WanikaniAssignment[]) {
+    const subjectMap = createSubjectMap(subjects);
+    return assignments
+        .filter(assignment => !!subjectMap[assignment.subjectId])
+        .flatMap(assignment => getStageChanges(assignment, subjectMap[assignment.subjectId]))
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+function aggregateDate(rawData: StageChange[] | null, resets: WanikaniReset[], unit: StageHistoryUnit) {
+    if (!rawData || rawData.length === 0)
         return [];
     const areDatesDifferent = (date1: Date | number, date2: Date | number) => unit.trunc(date1).getTime() != unit.trunc(date2).getTime();
 
@@ -238,12 +294,12 @@ function aggregateDate(rawData: WanikaniSubjectReview[] | null, resets: Wanikani
         }
     }
 
-    const aggregatedData: DataPoint[] = [new DataPoint(truncDate(rawData[0].review.createdAt))];
+    const aggregatedData: DataPoint[] = [new DataPoint(truncDate(rawData[0].date))];
     let nextReset = resets[0];
     for (const data of rawData) {
 
         // Handle Resets by remove items and reset counts for levels higher than the reset target level
-        if (nextReset && nextReset.confirmedAt.getTime() < data.review.createdAt.getTime()) {
+        if (nextReset && nextReset.confirmedAt.getTime() < data.date.getTime()) {
             if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, nextReset.confirmedAt.getTime())) {
                 fillInEmptyDaysIfNeeded(aggregatedData, nextReset.confirmedAt);
                 aggregatedData.push(new DataPoint(unit.trunc(nextReset.confirmedAt), aggregatedData[aggregatedData.length - 1]));
@@ -256,9 +312,9 @@ function aggregateDate(rawData: WanikaniSubjectReview[] | null, resets: Wanikani
         }
 
         // Add new DataPoints for each day
-        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.review.createdAt)) {
-            fillInEmptyDaysIfNeeded(aggregatedData, data.review.createdAt);
-            aggregatedData.push(new DataPoint(unit.trunc(data.review.createdAt), aggregatedData[aggregatedData.length - 1]));
+        if (areDatesDifferent(aggregatedData[aggregatedData.length - 1].date, data.date)) {
+            fillInEmptyDaysIfNeeded(aggregatedData, data.date);
+            aggregatedData.push(new DataPoint(unit.trunc(data.date), aggregatedData[aggregatedData.length - 1]));
         }
 
         // Add the data to the current day/DataPoint
@@ -268,19 +324,18 @@ function aggregateDate(rawData: WanikaniSubjectReview[] | null, resets: Wanikani
     return aggregatedData;
 }
 
-function useData(subjects: WanikaniSubject[], reviews: WanikaniReview[], resets: WanikaniReset[]) {
-    return useMemo(() => aggregateDate(formatData(subjects, reviews), resets, units.days), [subjects, reviews, resets]);
+function useData(subjects: WanikaniSubject[], assignments: WanikaniAssignment[], resets: WanikaniReset[]) {
+    return useMemo(() => aggregateDate(formatData(subjects, assignments), resets, units.days), [subjects, assignments, resets]);
 }
 
 type WanikaniStagesHistoryChartProps = {
-    reviews: WanikaniReview[]
+    assignments: WanikaniAssignment[]
     resets: WanikaniReset[]
     subjects: WanikaniSubject[]
 };
 
-function WanikaniStagesHistoryChart({ subjects, reviews, resets }: WanikaniStagesHistoryChartProps) {
-    const data = useData(subjects, reviews, resets);
-    const [tooltipTargetItem, setTooltipTargetItem] = useState<SeriesRef>();
+function WanikaniStagesHistoryChart({ subjects, assignments, resets }: WanikaniStagesHistoryChartProps) {
+    const data = useData(subjects, assignments, resets);
     const { isMobile } = useDeviceInfo();
 
     const visibleLabelIndices = useMemo(() => getVisibleLabelIndices(data ?? [], isMobile ? 3 : 6), [data]);
@@ -338,6 +393,11 @@ function WanikaniStagesHistoryChart({ subjects, reviews, resets }: WanikaniStage
                             Stage History
                         </Typography>
                     </GridLegacy>
+                    <GridLegacy item xs={12} md={4} style={{ textAlign: 'right' }}>
+                        <MuiTooltip title={'Master and Enlightened dates are estimated'}>
+                            <InfoOutlined fontSize={'small'} />
+                        </MuiTooltip>
+                    </GridLegacy>
                 </GridLegacy>
 
                 <div style={{ flexGrow: '1' }}>
@@ -394,11 +454,7 @@ function WanikaniStagesHistoryChart({ subjects, reviews, resets }: WanikaniStage
                         />
 
                         <EventTracker />
-                        <Tooltip
-                            targetItem={tooltipTargetItem}
-                            onTargetItemChange={setTooltipTargetItem}
-                            contentComponent={StageToolTip}
-                        />
+                        <Tooltip contentComponent={StageToolTip} />
                     </Chart>
                 </div>
             </CardContent>
